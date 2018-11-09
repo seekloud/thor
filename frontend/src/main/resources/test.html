@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" style="margin:0;height:100%">
+
+
+<head>
+    <style>
+        body
+        {
+            margin:0;
+            padding:0;
+            height:100%;
+        }
+
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=0">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">-->
+
+    <!--<link rel="stylesheet" href="/wifitrail/static/css/weui.min.css">-->
+
+    <!--<link rel="stylesheet" href="/wifitrail/static/css/user/user.css">-->
+
+    <!--<link rel="stylesheet" href="/wifitrail/static/css/pure-min.css">-->
+    <!--<link rel="stylesheet" href="css/pure-min.css"></head>-->
+
+    <!--[if lte IE 8]>
+    <!--<link rel="stylesheet" href="/wifitrail/static/css/grids-responsive-old-ie-min.css">-->
+    <![endif]-->
+    <!--[if gt IE 8]><!-->
+    <!--<link rel="stylesheet" href="/wifitrail/static/css/grids-responsive-min.css">-->
+    <!--<![endif]-->
+
+    <!--<script src="http://cdn.bootcss.com/fetch/2.0.1/fetch.js"></script>-->
+    <!--<script src="http://cdn.bootcss.com/fetch/2.0.1/fetch.min.js"></script>-->
+    <!--<script src="/wifitrail/static/js/fetch.min.js"></script>-->
+    <!--<script src="/hw201701a/static/js/Chart.bundle.min.js"></script>-->
+    <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <!--<link rel="stylesheet" href="/feeleriii/static/pc/css/modal.css">-->
+    <!--<link href="../css/login_register.css" rel="stylesheet">-->
+    <!--<link href="../css/business.css" rel="stylesheet">-->
+    <title>test</title>
+
+    <script>
+        (function(designWidth, maxWidth) {
+            var doc = document,
+                win = window;
+            var docEl = doc.documentElement;
+            var tid;
+            var rootItem,rootStyle;
+
+            function refreshRem() {
+                var width = docEl.getBoundingClientRect().width;
+                if (!maxWidth) {
+                    maxWidth = 540;
+                };
+                if (width > maxWidth) {
+                    width = maxWidth;
+                }
+                //与淘宝做法不同，直接采用简单的rem换算方法1rem=100px
+                var rem = width * 20 / designWidth;
+                //兼容UC开始
+                rootStyle="html{font-size:"+rem+'px !important}';
+                rootItem = document.getElementById('rootsize') || document.createElement("style");
+                if(!document.getElementById('rootsize')){
+                    document.getElementsByTagName("head")[0].appendChild(rootItem);
+                    rootItem.id='rootsize';
+                }
+                if(rootItem.styleSheet){
+                    rootItem.styleSheet.disabled||(rootItem.styleSheet.cssText=rootStyle)
+                }else{
+                    try{rootItem.innerHTML=rootStyle}catch(f){rootItem.innerText=rootStyle}
+                }
+                //兼容UC结束
+                docEl.style.fontSize = rem + "px";
+            };
+            refreshRem();
+
+            win.addEventListener("resize", function() {
+                clearTimeout(tid); //防止执行两次
+                tid = setTimeout(refreshRem, 300);
+            }, false);
+
+            win.addEventListener("pageshow", function(e) {
+                if (e.persisted) { // 浏览器后退的时候重新计算
+                    clearTimeout(tid);
+                    tid = setTimeout(refreshRem, 300);
+                }
+            }, false);
+
+            if (doc.readyState === "complete") {
+                doc.body.style.fontSize = "16px";
+            } else {
+                doc.addEventListener("DOMContentLoaded", function(e) {
+                    doc.body.style.fontSize = "16px";
+                }, false);
+            }
+        })(640, 640);
+    </script>
+
+
+</head>
+
+
+<body>
+
+<!--<script type="text/javascript" src="/superpay/static/js/vconsole.min.js"></script>-->
+<script type="text/javascript" src="../target/scala-2.12/sjsout/frontend-jsdeps.js"></script>
+<script type="text/javascript" src="../target/scala-2.12/sjsout/frontend-fastopt.js"></script>
+<!--<script type="text/javascript" src="/superpay/static/sjsout/frontend-opt.js"></script>-->
+<!--<script type="text/javascript" src="/target/scala-2.11/pc/sjsout/frontend-launcher.js"></script>-->
+<!--<script src="https://res.wx.qq.com/mmbizwap/zh_CN/htmledition/js/vconsole/2.5.1/vconsole.min.js"></script>-->
+<!--<canvas id ="GameView" tabindex="1"></canvas>-->
+<script type="text/javascript">
+    front.Main.run();
+</script>
+
+
+
+
+
+</body>
+</html>
