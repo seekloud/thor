@@ -5,15 +5,15 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 
 import com.neo.sk.thor.shared.ptcl.`object`.{Adventurer, AdventurerState, Food, FoodState}
 import com.neo.sk.thor.shared.ptcl.model._
+import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent, UserEnterRoom}
 
 import scala.collection.mutable
-
 /**
-  * Created by Jingyi on 2018/11/9
+  * User: TangYaruo
+  * Date: 2018/11/12
+  * Time: 16:30
   */
-
-
 case class ThorSchemaState(
   f: Long,
   adventurer: List[AdventurerState],
@@ -23,12 +23,15 @@ case class ThorSchemaState(
 
 trait ThorSchema {
 
-
-  val boundary: Point
+  import scala.language.implicitConversions
 
   def debug(msg: String): Unit
 
   def info(msg: String): Unit
+
+  implicit val config: ThorGameConfig
+
+  val boundary: Point = config.boundary
 
   var systemFrame: Long = 0L //系统帧数
 
