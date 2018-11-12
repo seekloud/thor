@@ -29,9 +29,9 @@ trait ThorSchema {
 
   def info(msg: String): Unit
 
-  implicit val config: ThorGameConfig
+//  implicit val config: ThorGameConfig
 
-  val boundary: Point = config.boundary
+  val boundary: Point
 
   var systemFrame: Long = 0L //系统帧数
 

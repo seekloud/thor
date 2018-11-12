@@ -1,6 +1,8 @@
 package com.neo.sk.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
+
+import com.neo.sk.thor.front.thor.GridOnClient
 import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
@@ -37,7 +39,7 @@ class GameHolder(canvasName: String) {
   private[this] val canvasUnit = 10
   private[this] val canvasBoundary = ptcl.model.Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
   private[this] val canvasBounds = canvasBoundary / canvasUnit
-  private[this] val grid = new GridOnServer(bounds)
+  private[this] val grid = new GridOnClient(bounds)
 
   private[this] var myId = -1L
   private[this] var myName = ""
