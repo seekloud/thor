@@ -16,7 +16,7 @@ import scala.xml.Elem
   */
 object ThorRender extends Page{
 
-  private val cannvas = <canvas id ="GameView" tabindex="1"></canvas>
+  private val canvas = <canvas id ="GameView" tabindex="1"></canvas>
 
 
   private val modal = Var(emptyHTML)
@@ -33,7 +33,7 @@ object ThorRender extends Page{
     Shortcut.scheduleOnce(() =>init(),0)
     <div>
       <div >{modal}</div>
-      {cannvas}
+      {canvas}
     </div>
   }
 
