@@ -4,8 +4,8 @@ import java.awt.event.KeyEvent
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 
 import com.neo.sk.thor.shared.ptcl.model._
-import com.neo.sk.thor.shared.ptcl.protocol.{WsFrontProtocol, WsProtocol}
-import com.neo.sk.thor.shared.ptcl.protocol.WsFrontProtocol.AdventurerAction
+import com.neo.sk.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent, UserEnterRoom}
+
 
 import scala.collection.mutable
 
@@ -17,7 +17,7 @@ import scala.collection.mutable
 case class GridState(
                                    f:Long,
                                    adventurer:List[AdventurerState],
-                                   bullet:List[FoodState],
+                                   food:List[FoodState],
                                    moveAction:List[(Int,List[Int])]
                                  )
 
@@ -30,62 +30,76 @@ trait Grid {
 
   def info(msg: String): Unit
 
-  var currentRank = List.empty[Score]
-
-  var historyRankMap =Map.empty[Int,Score]
-  var historyRank = historyRankMap.values.toList.sortBy(_.d).reverse
-  var historyRankThreshold =if (historyRank.isEmpty)-1 else historyRank.map(_.d).min
-  val historyRankLength =5
-
   var systemFrame:Long = 0L //系统帧数
 
-  val adventurerMap = mutable.HashMap[Int,Adventurer]()
-  val foodMap = mutable.HashMap[Int,Food]() //bulletId -> Bullet
+  val adventurerMap = mutable.HashMap[Long,Adventurer]() // userId -> adventurer
+  val foodMap = mutable.HashMap[Long,Food]()  // foodId -> food
+
+  protected val gameEventMap = mutable.HashMap[Long,List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
+  protected val actionEventMap = mutable.HashMap[Long,List[UserActionEvent]]() //frame -> List[UserActionEvent]
 
 
+  //处理本帧加入的用户
+  def handleUserJoin() = {
+    gameEventMap.get(systemFrame).foreach{
+      events =>
+        events.filter(_.isInstanceOf[UserEnterRoom]).map(_.asInstanceOf[UserEnterRoom]).reverse.foreach{
+          e =>
+            adventurerMap.put(e.userId, e.adventurer.asInstanceOf[Adventurer])
+        }
+    }
+  }
 
-
-
-  def addAction(id:Int,adventurerAction:AdventurerAction) = {
+  //处理本帧离开的用户
+  def handleUserLeft() = {
 
   }
 
-  def addActionWithFrame(id: Int, adventurerAction: AdventurerAction, frame: Long) = {
+  //处理本帧的动作信息
+  def handleAction():Unit = {
 
   }
 
-  def removeActionWithFrame(id: Int, adventurerAction: AdventurerAction, frame: Long) = {
+  def addAction(id:Long,adventurerAction:UserActionEvent) = {
+
+  }
+
+  def addActionWithFrame(id: Long, adventurerAction: UserActionEvent, frame: Long) = {
+
+  }
+
+  def removeActionWithFrame(id: Long, adventurerAction: UserActionEvent, frame: Long) = {
 
   }
 
 
-
-   def updateAdventurer():Unit = {
+   def handleAdventurerMove():Unit = {
 
   }
 
-  def updateFood():Unit = {
+  def handleAdventurerAttacked() = {
+
+  }
+
+  def handleAdventurerEatFood() = {
+
+  }
+
+  def handleGenerateFood() = {
 
   }
 
   def update():Unit ={
     handleAction()
-    updateAdventurer() //更新坦克的移动
-    updateFood() //更新坦克的子弹
+    handleAdventurerMove()
+    handleAdventurerAttacked()
+    handleAdventurerEatFood()
+    handleGenerateFood()
     systemFrame += 1
   }
 
-  def handleAction():Unit = {
 
 
-  }
-
-
-
-
-  def leftGame(myId:Int):Unit = {
-
-  }
 
 
   def getGridState():GridState = {
