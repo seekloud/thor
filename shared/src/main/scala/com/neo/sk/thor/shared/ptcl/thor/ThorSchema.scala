@@ -3,9 +3,9 @@ package com.neo.sk.thor.shared.ptcl.thor
 import java.awt.event.KeyEvent
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 
+import com.neo.sk.thor.shared.ptcl.`object`.{Adventurer, AdventurerState, Food, FoodState}
 import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent, UserEnterRoom}
-
 
 import scala.collection.mutable
 
@@ -14,36 +14,36 @@ import scala.collection.mutable
   */
 
 
-case class GridState(
-                                   f:Long,
-                                   adventurer:List[AdventurerState],
-                                   food:List[FoodState],
-                                   moveAction:List[(Int,List[Int])]
-                                 )
+case class ThorSchemaState(
+  f: Long,
+  adventurer: List[AdventurerState],
+  food: List[FoodState],
+  moveAction: List[(Int, List[Int])]
+)
 
-trait Grid {
+trait ThorSchema {
 
 
-  val boundary : Point
+  val boundary: Point
 
   def debug(msg: String): Unit
 
   def info(msg: String): Unit
 
-  var systemFrame:Long = 0L //系统帧数
+  var systemFrame: Long = 0L //系统帧数
 
-  val adventurerMap = mutable.HashMap[Long,Adventurer]() // userId -> adventurer
-  val foodMap = mutable.HashMap[Long,Food]()  // foodId -> food
+  val adventurerMap = mutable.HashMap[Long, Adventurer]() // userId -> adventurer
+  val foodMap = mutable.HashMap[Long, Food]() // foodId -> food
 
-  protected val gameEventMap = mutable.HashMap[Long,List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
-  protected val actionEventMap = mutable.HashMap[Long,List[UserActionEvent]]() //frame -> List[UserActionEvent]
+  protected val gameEventMap = mutable.HashMap[Long, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
+  protected val actionEventMap = mutable.HashMap[Long, List[UserActionEvent]]() //frame -> List[UserActionEvent]
 
 
   //处理本帧加入的用户
   def handleUserJoin() = {
-    gameEventMap.get(systemFrame).foreach{
+    gameEventMap.get(systemFrame).foreach {
       events =>
-        events.filter(_.isInstanceOf[UserEnterRoom]).map(_.asInstanceOf[UserEnterRoom]).reverse.foreach{
+        events.filter(_.isInstanceOf[UserEnterRoom]).map(_.asInstanceOf[UserEnterRoom]).reverse.foreach {
           e =>
             adventurerMap.put(e.userId, e.adventurer.asInstanceOf[Adventurer])
         }
@@ -56,11 +56,11 @@ trait Grid {
   }
 
   //处理本帧的动作信息
-  def handleAction():Unit = {
+  def handleAction(): Unit = {
 
   }
 
-  def addAction(id:Long,adventurerAction:UserActionEvent) = {
+  def addAction(id: Long, adventurerAction: UserActionEvent) = {
 
   }
 
@@ -73,7 +73,7 @@ trait Grid {
   }
 
 
-   def handleAdventurerMove():Unit = {
+  def handleAdventurerMove(): Unit = {
 
   }
 
@@ -89,7 +89,7 @@ trait Grid {
 
   }
 
-  def update():Unit ={
+  def update(): Unit = {
     handleAction()
     handleAdventurerMove()
     handleAdventurerAttacked()
@@ -99,11 +99,13 @@ trait Grid {
   }
 
 
-
-
-
-  def getGridState():GridState = {
-
+  def getThorSchemaState(): ThorSchemaState = {
+    ThorSchemaState(
+      0L,
+      Nil,
+      Nil,
+      Nil
+    )
   }
 
 }

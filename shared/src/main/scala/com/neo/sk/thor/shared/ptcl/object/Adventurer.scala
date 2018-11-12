@@ -1,6 +1,4 @@
-package com.neo.sk.thor.shared.ptcl.thor
-import com.neo.sk.thor.shared.ptcl.model
-import com.neo.sk.thor.shared.ptcl.model.{Point}
+package com.neo.sk.thor.shared.ptcl.`object`
 
 /**
   * Created by Jingyi on 2018/11/9

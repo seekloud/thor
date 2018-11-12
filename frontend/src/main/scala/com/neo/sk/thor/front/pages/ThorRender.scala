@@ -1,7 +1,7 @@
 package com.neo.sk.thor.front.pages
 
 import com.neo.sk.thor.front.common.Page
-import com.neo.sk.thor.front.thor.GameHolder
+import com.neo.sk.thor.front.thorClient.GameHolder
 import com.neo.sk.thor.front.utils.Shortcut
 import com.neo.sk.thor.shared.ptcl.model.Point
 import mhtml.Var

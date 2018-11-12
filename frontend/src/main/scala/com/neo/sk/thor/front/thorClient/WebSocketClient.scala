@@ -1,4 +1,4 @@
-package com.neo.sk.thor.front.thor
+package com.neo.sk.thor.front.thorClient
 
 import com.neo.sk.thor.front.common.Routes
 import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs

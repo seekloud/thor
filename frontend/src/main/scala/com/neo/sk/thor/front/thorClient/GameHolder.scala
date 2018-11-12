@@ -1,4 +1,4 @@
-package com.neo.sk.thor.front.thor
+package com.neo.sk.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
