@@ -50,6 +50,10 @@ object ThorGame {
 
   final case class Ranks(currentRank: List[Score], historyRank: List[Score]) extends WsMsgServer
 
+  final case class MouseMoveServer(userId: Long, frame: Long, action: MouseMove) extends WsMsgServer
+
+  final case class MouseClickServer(userId: Long, frame: Long, action: MouseClick) extends WsMsgServer
+
   final case class GridSyncState(d:GridState) extends WsMsgServer
 
 
