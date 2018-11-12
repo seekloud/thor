@@ -28,7 +28,7 @@ object AdventurerClient{
 
   }
 
-  def drawTankByOffsetTime(): Unit ={
+  def drawAdventurerByOffsetTime(): Unit ={
 
   }
 

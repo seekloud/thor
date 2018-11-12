@@ -63,8 +63,6 @@ package object model {
 
     val millsAServerFrame = 120
 
-    val clientFrameAServerFrame = 1
-
   }
 
 

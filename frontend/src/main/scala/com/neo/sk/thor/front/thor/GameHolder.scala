@@ -2,8 +2,6 @@ package com.neo.sk.thor.front.thor
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.neo.sk.thor.front.common.Constants
-import com.neo.sk.thor.front.components.StartGameModal
 import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
@@ -44,8 +42,6 @@ class GameHolder(canvasName:String) {
   private[this] var myId = -1L
   private[this] var myName = ""
   private[this] var firstCome = true
-
-  private[this] val grid = new GridClient(bounds,canvasUnit,canvasBounds)
 
   private[this] val websocketClient = new WebSocketClient(wsConnectSuccess,wsConnectError,wsMessageHandler,wsConnectClose)
 
@@ -97,25 +93,25 @@ class GameHolder(canvasName:String) {
 
 
 
-  //todo
+
   private def wsConnectSuccess(e:Event) = {
     println(s"连接服务器成功")
     e
   }
 
-  //todo
+
   private def wsConnectError(e:Event) = {
     JsFunc.alert("网络连接失败，请重新刷新")
     e
   }
 
-  //todo
+
   private def wsConnectClose(e:Event) = {
     JsFunc.alert("网络连接失败，请重新刷新")
     e
   }
 
-  //todo
+
   private def wsMessageHandler(e:MessageEvent) = {
     import com.neo.sk.thor.front.utils.byteObject.ByteObject._
     e.data match {
@@ -135,13 +131,11 @@ class GameHolder(canvasName:String) {
 
 
                 case WsProtocol.Ranks(currentRank,historyRank) =>
-                  grid.currentRank = currentRank
-                  grid.historyRank = historyRank
+
 
                 case WsProtocol.GridSyncState(d) =>
 
 
-                //
                 case  _ => println(s"接收到无效消息")
               }
             case Left(error) =>
@@ -181,20 +175,16 @@ class GameHolder(canvasName:String) {
       websocketClient.setup(name)
       gameLoop()
 
-      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame / ptcl.model.Frame.clientFrameAServerFrame)
+      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
     } else if(websocketClient.getWsState){
       websocketClient.sendMsg(WsFrontProtocol.RestartGame(name))
 
-      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame / ptcl.model.Frame.clientFrameAServerFrame)
+      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
     }else{
       JsFunc.alert("网络连接失败，请重新刷新")
     }
   }
 
-//  var tickCount = 0L
-//  var testStartTime = System.currentTimeMillis()
-//  var testEndTime = System.currentTimeMillis()
-//  var startTime = System.currentTimeMillis()
 
   def gameLoop():Unit = {
 
@@ -209,7 +199,6 @@ class GameHolder(canvasName:String) {
     ctx.textBaseline = "top"
     ctx.font = "36px Helvetica"
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
-    println()
   }
 
   def drawGame(curFrame:Int,maxClientFrame:Int): Unit ={
@@ -233,18 +222,6 @@ class GameHolder(canvasName:String) {
     ctx.fillText(s"您已经死亡,被玩家=${}所杀", 150, 180)
     println()
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
