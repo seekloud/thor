@@ -1,7 +1,7 @@
 package com.neo.sk.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
-
+import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
@@ -36,12 +36,14 @@ class GameHolder(canvasName: String) {
 
   private[this] val canvasUnit = 10
   private[this] val canvasBoundary = ptcl.model.Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
-
   private[this] val canvasBounds = canvasBoundary / canvasUnit
+  private[this] val grid = new GridOnServer(bounds)
 
   private[this] var myId = -1L
   private[this] var myName = ""
   private[this] var firstCome = true
+  private[this] var currentRank = List.empty[Score]
+  private[this] var historyRank = List.empty[Score]
 
   private[this] val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
 
@@ -85,9 +87,7 @@ class GameHolder(canvasName: String) {
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
     drawGameByTime(offsetTime)
-
     nextFrame = dom.window.requestAnimationFrame(gameRender())
-
   }
 
 
@@ -121,18 +121,19 @@ class GameHolder(canvasName: String) {
           bytesDecode[WsMsgServer](middleDataInJs) match {
             case Right(data) =>
               data match {
-
+                case UserInfo(id) =>
+                  myId = id
 
                 case UserEnterRoom(userId, name, adventurer, frame) =>
+                  println(s"${name}加入了游戏")
 
-
-                case Ranks(currentRank, historyRank) =>
-
+                case Ranks(current, history) =>
+                  currentRank = current
+                  historyRank = history
 
                 case GridSyncState(d) =>
 
-
-                case _ => println(s"接收到无效消息")
+                case  _ => println(s"接收到无效消息")
               }
             case Left(error) =>
               println(s"decode msg failed,error:${error.message}")
@@ -150,11 +151,15 @@ class GameHolder(canvasName: String) {
     canvas.onmousemove = { (e: dom.MouseEvent) =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBoundary / 2).toFloat
-
+      val currentTime = System.currentTimeMillis()
+      val data = MouseMove(myId,theta,grid.systemFrame,currentTime)
+      websocketClient.sendMsg(data)
       e.preventDefault()
     }
     canvas.onclick = { (e: MouseEvent) =>
-
+      val currentTime = System.currentTimeMillis()
+      val data = MouseClick(myId,grid.systemFrame,currentTime)
+      websocketClient.sendMsg(data)
       e.preventDefault()
     }
 
@@ -169,20 +174,22 @@ class GameHolder(canvasName: String) {
       addActionListenEvent()
       websocketClient.setup(name)
       gameLoop()
-
-      timer = Shortcut.schedule(gameLoop, ptcl.model.Frame.millsAServerFrame)
-    } else if (websocketClient.getWsState) {
+      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
+      nextFrame = dom.window.requestAnimationFrame(gameRender())
+    }
+    else if(websocketClient.getWsState){
       websocketClient.sendMsg(RestartGame(name))
-
-      timer = Shortcut.schedule(gameLoop, ptcl.model.Frame.millsAServerFrame)
-    } else {
+      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
+      nextFrame = dom.window.requestAnimationFrame(gameRender())
+    }else{
       JsFunc.alert("网络连接失败，请重新刷新")
     }
   }
 
 
   def gameLoop(): Unit = {
-
+    logicFrameTime = System.currentTimeMillis()
+    grid.update()
   }
 
 
@@ -196,11 +203,9 @@ class GameHolder(canvasName: String) {
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
-  def drawGame(curFrame: Int, maxClientFrame: Int): Unit = {
-    //
+  def drawGame(curFrame:Int,maxClientFrame:Int): Unit ={
+//
     // rintln("111111111111111111111")
-
-
   }
 
   def drawGameByTime(offsetTime: Long): Unit = {
