@@ -46,7 +46,7 @@ object ThorGame {
 
   final case class MouseClick(userId:Long, frame:Long, timestamp:Long) extends UserActionEvent with WsMsgFront with WsMsgServer
 
-  final case class RestartGame(name:String) extends WsMsgServer
+  final case class RestartGame(name:String) extends WsMsgFront
 
   final case class Ranks(currentRank: List[Score], historyRank: List[Score]) extends WsMsgServer
 
