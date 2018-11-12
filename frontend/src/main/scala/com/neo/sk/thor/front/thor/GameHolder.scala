@@ -6,9 +6,9 @@ import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
 import com.neo.sk.thor.shared.ptcl.model.{Boundary, Point}
-import com.neo.sk.thor.shared.ptcl.protocol.WsFrontProtocol.AdventurerAction
+import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
 import com.neo.sk.thor.shared.ptcl.protocol._
-import com.neo.sk.thor.shared.ptcl.thor.{GridState}
+import com.neo.sk.thor.shared.ptcl.thor.GridState
 import mhtml.Var
 import org.scalajs.dom
 import org.scalajs.dom.Blob
@@ -57,20 +57,20 @@ class GameHolder(canvasName:String) {
   private var logicFrameTime = System.currentTimeMillis()
 
   private[this] final val maxRollBackFrames = 5
-  private[this] val gameEventMap = new mutable.HashMap[Long,List[WsProtocol.WsMsgServer]]()
+  private[this] val gameEventMap = new mutable.HashMap[Long,List[WsMsgServer]]()
   private[this] val gameSnapshotMap = new mutable.HashMap[Long,GridState]()
-  private[this] val historyAction = new mutable.HashMap[Long,(Long, Long, AdventurerAction)]()
+  private[this] val historyAction = new mutable.HashMap[Long,(Long, Long, UserActionEvent)]()
 
 
-  def addGameEvent(f:Long,event:WsProtocol.WsMsgServer) = {
+  def addGameEvent(f:Long,event:WsMsgServer) = {
 
   }
 
 
-  def addActionWithFrame(id: Int, adventurerAction: AdventurerAction, frame: Long) = {
+  def addActionWithFrame(id: Int, adventurerAction: UserActionEvent, frame: Long) = {
   }
 
-  def addActionWithFrameFromServer(id: Int, adventurerAction: AdventurerAction, frame: Long) = {
+  def addActionWithFrameFromServer(id: Int, adventurerAction: UserActionEvent, frame: Long) = {
 
   }
 
@@ -121,19 +121,19 @@ class GameHolder(canvasName:String) {
         fr.onloadend = { _: Event =>
           val buf = fr.result.asInstanceOf[ArrayBuffer]
           val middleDataInJs = new MiddleBufferInJs(buf)
-          bytesDecode[WsProtocol.WsMsgServer](middleDataInJs) match {
+          bytesDecode[WsMsgServer](middleDataInJs) match {
             case Right(data) =>
               data match {
 
 
-                case WsProtocol.UserEnterRoom(userId,name,adventurer) =>
+                case UserEnterRoom(userId,name,adventurer,frame) =>
 
 
 
-                case WsProtocol.Ranks(currentRank,historyRank) =>
+                case Ranks(currentRank,historyRank) =>
 
 
-                case WsProtocol.GridSyncState(d) =>
+                case GridSyncState(d) =>
 
 
                 case  _ => println(s"接收到无效消息")
@@ -177,7 +177,7 @@ class GameHolder(canvasName:String) {
 
       timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
     } else if(websocketClient.getWsState){
-      websocketClient.sendMsg(WsFrontProtocol.RestartGame(name))
+      websocketClient.sendMsg(RestartGame(name))
 
       timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
     }else{
