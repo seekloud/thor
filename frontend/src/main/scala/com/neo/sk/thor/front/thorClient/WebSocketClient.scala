@@ -3,7 +3,6 @@ package com.neo.sk.thor.front.thorClient
 import com.neo.sk.thor.front.common.Routes
 import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame.WsMsgFront
-import com.neo.sk.thor.shared.ptcl.protocol.{WsFrontProtocol, WsProtocol}
 import org.scalajs.dom
 import org.scalajs.dom.raw._
 
@@ -14,9 +13,6 @@ class WebSocketClient(
                        messageHandler:MessageEvent => Unit,
                        closeCallback:Event => Unit
                      ) {
-
-  import io.circe.generic.auto._
-  import io.circe.syntax._
 
   private var wsSetup = false
 

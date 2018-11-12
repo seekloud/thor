@@ -18,8 +18,6 @@ import io.circe.{Decoder, Error}
 import io.circe.parser.decode
 import org.slf4j.LoggerFactory
 import com.neo.sk.thor.Boot.executor
-import com.neo.sk.thor.common.Constants
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 

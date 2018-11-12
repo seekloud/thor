@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
 import com.github.nscala_time.time.Imports.{DateTime, DateTimeFormat}
-import com.neo.sk.thor.common.Constants
 import org.joda.time.format.DateTimeFormatter
 
 
