@@ -33,6 +33,7 @@ object AppSettings {
   val appConfig = config.getConfig("app")
   val dependence = config.getConfig("dependence")
 
+  val personLimit = appConfig.getInt("RoomManager.personLimit")
 
 //  val wxConfig = appConfig.getConfig("wx.config")
 //  val mpAppId = wxConfig.getString("mpAppId")

@@ -28,11 +28,12 @@ object ThorGame {
   sealed trait WsMsgSource
   case object CompleteMsgServer extends WsMsgSource
   case class FailMsgServer(ex: Exception) extends WsMsgSource
+  final case class Wrap(ws:Array[Byte],isKillMsg:Boolean = false) extends WsMsgSource
 
   sealed trait WsMsgServer extends WsMsgSource
 
 
-  final case class UserInfo(uId:Long) extends WsMsgServer
+  final case class UserInfo(uId: Long, name: String) extends WsMsgServer
 
   final case class UserEnterRoom(userId:Long, name:String, adventurer: AdventurerState, override val frame: Long = 0l) extends UserEvent with WsMsgServer
 

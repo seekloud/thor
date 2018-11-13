@@ -24,9 +24,10 @@ object RoomActor {
 
   final case class ChildDead[U](name:String,childRef:ActorRef[U]) extends Command
 
-  case class JoinRoom(uid: Long, name: String,userActor: ActorRef[UserActor.Command]) extends Command
-  case class LeftRoom(uid: Long, name: String) extends Command
-  case class WsMessage(uid: Long, msg: UserActionEvent) extends Command
+  case class JoinRoom(roomId: Long, userId: Long, name: String,userActor: ActorRef[UserActor.Command]) extends Command
+  case class LeftRoom(roomId: Long, userId: Long, name: String, userList: List[(Long, String)]) extends Command
+  case class GetKilled(userId: Long, name: String) extends Command with RoomManager.Command
+  case class WsMessage(userId: Long, msg: UserActionEvent) extends Command
   case object GameLoop extends Command
 
   final case class SwitchBehavior(
@@ -50,8 +51,8 @@ object RoomActor {
   }
 
   private final case object GameLoopKey
-  def create(): Behavior[Command] = {
-    log.debug("RoomActor starting...")
+  def create(roomId: Long): Behavior[Command] = {
+    log.debug(s"RoomActor-$roomId starting...")
     Behaviors.setup[Command]{
       ctx =>
         Behaviors.withTimers[Command]{
@@ -59,12 +60,13 @@ object RoomActor {
             val subscribersMap = mutable.HashMap[Long, ActorRef[UserActor.Command]]()
             val grid = new GridServer(ctx, log, dispatch(subscribersMap), dispatchTo(subscribersMap),Boundary.getBoundary)
             timer.startPeriodicTimer(GameLoopKey,GameLoop,Frame.millsAServerFrame.millis)
-            idle(Nil,subscribersMap,grid,0L)
+            idle(roomId, Nil, subscribersMap, grid, 0L)
         }
     }
   }
 
   def idle(
+          roomId: Long,
           newPlayer: List[(Long, ActorRef[UserActor.Command])],
           subscribersMap: mutable.HashMap[Long, ActorRef[UserActor.Command]],
           grid: GridServer,
@@ -75,17 +77,23 @@ object RoomActor {
     Behaviors.receive{
       (ctx, msg) =>
         msg match {
-          case JoinRoom(uid, name, userActor) =>
+          case JoinRoom(roomId, userId, name, userActor) =>
             //TODO grid处理用户加入
-            idle((uid, userActor) :: newPlayer, subscribersMap, grid, tickCount)
+            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, grid, tickCount)
 
-          case LeftRoom(uid, name) =>
+          case LeftRoom(roomId, userId, name, userList) =>
             //TODO grid处理用户离开
-            subscribersMap.remove(uid)
-            dispatch(subscribersMap)(UserLeftRoom(uid, name))
-            idle(newPlayer.filter(_._1 != uid), subscribersMap, grid, tickCount)
+            subscribersMap.remove(userId)
+            dispatch(subscribersMap)(UserLeftRoom(userId, name))
 
-          case WsMessage(uid, msg) =>
+            if(userList.isEmpty && roomId > 1l) Behavior.stopped
+            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, grid, tickCount)
+
+          case GetKilled(userId, name) =>
+            subscribersMap.remove(userId)
+            idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, grid, tickCount)
+
+          case WsMessage(userId, msg) =>
             //TODO grid处理用户操作
             msg match {
               case a: MouseMove =>
@@ -109,7 +117,7 @@ object RoomActor {
             newPlayer.foreach{
               player => dispatchTo(subscribersMap)(player._1, GridSyncState(gridData))
             }
-            idle(Nil,subscribersMap,grid,tickCount+1)
+            idle(roomId, Nil, subscribersMap, grid, tickCount+1)
 
           case ChildDead(_, childRef) =>
             ctx.unwatch(childRef)
