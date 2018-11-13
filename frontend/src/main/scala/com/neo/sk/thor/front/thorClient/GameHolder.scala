@@ -123,7 +123,7 @@ class GameHolder(canvasName: String) {
               data match {
 
 
-                case UserEnterRoom(userId, name, adventurer, frame) =>
+                case UserEnterRoom(playerId, name, adventurer, frame) =>
 
 
                 case Ranks(currentRank, historyRank) =>
