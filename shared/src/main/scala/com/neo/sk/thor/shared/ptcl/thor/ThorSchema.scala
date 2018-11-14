@@ -19,9 +19,7 @@ import scala.collection.mutable
 case class ThorSchemaState(
   f: Long,
   adventurer: List[AdventurerState],
-  food: List[FoodState],
-  moveAction: List[(Int, List[Int])]
-)
+  food: List[FoodState])
 
 trait ThorSchema {
 
@@ -69,15 +67,11 @@ trait ThorSchema {
     gameEventMap.get(systemFrame).foreach {
       events =>
         handleUserEnterRoomEvent(events.filter(_.isInstanceOf[UserEnterRoom]).map(_.asInstanceOf[UserEnterRoom]).reverse)
-      //        events.filter(_.isInstanceOf[UserEnterRoom]).map(_.asInstanceOf[UserEnterRoom]).reverse.foreach {
-      //          e =>
-      //            adventurerMap.put(e.playerId, e.adventurer.asInstanceOf[Adventurer])
-      //        }
     }
   }
 
   //处理本帧离开的用户
-  final protected def handleUserLeftRoom(e: UserLeftRoom): Unit = {
+  protected final def handleUserLeftRoom(e: UserLeftRoom): Unit = {
     adventurerMap.get(e.playerId).foreach(quadTree.remove)
     adventurerMap.remove(e.playerId)
   }
@@ -94,7 +88,7 @@ trait ThorSchema {
 
 
   //处理本帧的动作信息
-  def handleUserActionEvent(actions: List[UserActionEvent]) = {
+  protected final def handleUserActionEvent(actions: List[UserActionEvent]) = {
     /**
       * 用户行为事件
       **/
@@ -102,10 +96,8 @@ trait ThorSchema {
       adventurerMap.get(action.playerId) match {
         case Some(adventurer) =>
           action match {
-            case a: MouseMove =>
-            //TODO
-            case a: MouseClick =>
-            //TODO
+            case a: MouseMove => adventurer.setAdventurerDirection(a.direction)
+            case a: MouseClick => //TODO 击杀
           }
         case None =>
           info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
@@ -176,11 +168,11 @@ trait ThorSchema {
     }
   }
 
-  def handleAdventurerEatFood(e: EatFood): Unit = {
+  protected def handleAdventurerEatFood(e: EatFood): Unit = {
     foodMap.get(e.foodId).foreach { food =>
       quadTree.remove(food)
-      //TODO
-
+      adventurerMap.get(e.playerId).foreach(_.eatFood(food))
+      foodMap.remove(e.foodId)
     }
   }
 
@@ -194,9 +186,23 @@ trait ThorSchema {
     }
   }
 
-  def handleGenerateFood(): Unit = {
+  protected def handleGenerateFood(e: GenerateFood): Unit = {
+//    val food = new Food ()
+    //TODO
 
   }
+
+  protected final def handleGenerateFood(es: List[GenerateFood]): Unit = {
+    es foreach handleGenerateFood
+  }
+
+  final protected def handleGenerateFoodNow(): Unit = {
+    gameEventMap.get(systemFrame).foreach { events =>
+      handleGenerateFood(events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).reverse)
+    }
+  }
+
+
 
   protected def clearEventWhenUpdate(): Unit = {
     gameEventMap -= systemFrame
@@ -204,13 +210,11 @@ trait ThorSchema {
     systemFrame += 1
   }
 
-  //TODO
   def getThorSchemaState(): ThorSchemaState = {
     ThorSchemaState(
-      0L,
-      Nil,
-      Nil,
-      Nil
+      systemFrame,
+      adventurerMap.values.map(_.getAdventurerState).toList,
+      foodMap.values.map(_.getFoodState).toList,
     )
   }
 
@@ -221,7 +225,7 @@ trait ThorSchema {
 //    handleAdventurerMove()
     handleAdventurerAttackedNow()
     handleAdventurerEatFoodNow()
-    handleGenerateFood()
+    handleGenerateFoodNow()
     handleUserEnterRoomNow()
 
 
