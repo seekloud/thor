@@ -37,6 +37,21 @@ trait Adventurer extends CircleObjectOfGame {
       obtainPropCallback(p)
     }
   }
+  def getAdventurerState: AdventurerState = {
+    AdventurerState(playerId, level, energy, position, direction, weaponLevel, weaponLength, speed, killNum)
+  }
+
+  def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
+    //TODO
+  }
+
+  def setAdventurerDirection(d: Float) = {
+    direction = d
+  }
+
+
+
+
 
 }
 
@@ -59,7 +74,6 @@ case class AdventurerImpl(
   }
 
   override val radius: Float = config.thorRadius
-
 
 
 

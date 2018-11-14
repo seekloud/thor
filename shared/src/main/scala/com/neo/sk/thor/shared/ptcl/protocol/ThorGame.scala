@@ -20,6 +20,8 @@ object ThorGame {
     val serialNum:Int
   }
 
+  trait EnvironmentEvent extends GameEvent
+
   //前端
   sealed trait WsMsgFrontSource
 
@@ -52,6 +54,10 @@ object ThorGame {
   final case class MouseMove(playerId: String, direction: Float, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
   final case class MouseClick(playerId: String, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+
+  /*生成环境元素*/
+  final case class GenerateFood(override val frame: Long, food: FoodState) extends EnvironmentEvent with WsMsgServer
+
 
   final case class RestartGame(name: String) extends WsMsgFront
 

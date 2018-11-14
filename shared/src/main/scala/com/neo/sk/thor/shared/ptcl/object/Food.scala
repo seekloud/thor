@@ -1,33 +1,38 @@
 package com.neo.sk.thor.shared.ptcl.`object`
 
+import com.neo.sk.thor.shared.ptcl.model.Point
+
 import com.neo.sk.thor.shared.ptcl.model
 
 /**
   * Created by Jingyi on 2018/11/9
   */
-case class FoodState(id: Long, level:Int, position: model.Point, radius: Float)
+case class FoodState(fId: Int, level:Int, position: Point, radius: Float)
 
 trait Food extends CircleObjectOfGame {
 
-  val foodId: Long
-  val foodLevel: Int
-  override var position: model.Point
+  val fId: Int
+
+  protected var level: Int
+
+  override protected var position: Point
+
   override val radius: Float
 
-  /*具体实现方法方法继承，可以重写
-  * isIntersects(o: ObjectOfGame)
-  * getRadius
-  * getPosition()*/
+  def getFoodState: FoodState = {
+    FoodState(fId, level, position, radius)
+  }
+
 }
 
 object Food {
   def apply(foodState: FoodState): Food =
-    AddNormalFood(foodState.id, foodState.level, foodState.position, foodState.radius)
+    AddNormalFood(foodState.fId, foodState.level, foodState.position, foodState.radius)
 }
 
 case class AddNormalFood(
-                        foodId: Long,
-                        foodLevel: Int,
+                        fId: Int,
+                        level: Int,
                         var position: model.Point,
                         radius: Float
                         ) extends Food
