@@ -43,7 +43,7 @@ object ThorGame {
 
   final case class UserLeftRoom(playerId: String, name: String, override val frame: Long = 0l) extends UserEvent with WsMsgServer
 
-  final case class BeAttacked(playerId: String, name: String, override val frame: Long = 0l) extends UserEvent with WsMsgServer
+  final case class BeAttacked(playerId: String, name: String, killerId: String, killerName: String, override val frame: Long = 0l) extends UserEvent with WsMsgServer
 
   final case class EatFood(playerId: String, foodId: Long, foodLevel: Int, override val frame: Long = 0l) extends UserEvent with WsMsgServer
 

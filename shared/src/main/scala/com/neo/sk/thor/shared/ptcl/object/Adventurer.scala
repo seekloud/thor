@@ -15,7 +15,9 @@ case class AdventurerState(
   direction: Float,
   weaponLevel: Int,
   weaponLength: Int,
-  speed: Float)
+  speed: Float,
+  killNum: Int
+)
 
 trait Adventurer extends CircleObjectOfGame {
   val playerId: String
@@ -27,6 +29,7 @@ trait Adventurer extends CircleObjectOfGame {
   var weaponLevel: Int
   var weaponLength: Int
   var speed: Float
+  var killNum: Int
 
 
 }
@@ -41,11 +44,12 @@ case class AdventurerImpl(
   protected var direction: Float,
   protected var weaponLevel: Int,
   protected var weaponLength: Int,
-  protected var speed: Float
+  protected var speed: Float,
+  protected var killNum: Int
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
     this(config, adventurerState.playerId, adventurerState.level, adventurerState.energy, adventurerState.position,
-      adventurerState.direction, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speed)
+      adventurerState.direction, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speed, adventurerState.killNum)
   }
 
   override val radius: Float = config.thorRadius

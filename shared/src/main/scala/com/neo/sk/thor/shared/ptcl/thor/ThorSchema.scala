@@ -104,7 +104,7 @@ trait ThorSchema {
           action match {
             case a: MouseMove =>
             //TODO
-            case a: MouseMove =>
+            case a: MouseClick =>
             //TODO
           }
         case None =>
@@ -149,16 +149,49 @@ trait ThorSchema {
   }
 
 
-  def handleAdventurerMove(): Unit = {
+//  def handleAdventurerMove(): Unit = {
+//
+//
+//
+//  }
 
+  protected final def handleAdventurerAttacked(e: BeAttacked): Unit = {
+    val killerOpt = adventurerMap.get(e.killerId)
+    adventurerMap.get(e.playerId).foreach { adventurer =>
+      killerOpt.foreach(_.killNum += 1)
+      quadTree.remove(adventurer)
+      adventurerMap.remove(adventurer.playerId)
+      //TODO 击杀信息
+    }
   }
 
-  def handleAdventurerAttacked(): Unit = {
 
+  protected final def handleAdventurerAttacked(es: List[BeAttacked]): Unit = {
+    es foreach handleAdventurerAttacked
   }
 
-  def handleAdventurerEatFood(): Unit = {
+  final protected def handleAdventurerAttackedNow(): Unit = {
+    gameEventMap.get(systemFrame).foreach { events =>
+      handleAdventurerAttacked(events.filter(_.isInstanceOf[BeAttacked]).map(_.asInstanceOf[BeAttacked]).reverse)
+    }
+  }
 
+  def handleAdventurerEatFood(e: EatFood): Unit = {
+    foodMap.get(e.foodId).foreach { food =>
+      quadTree.remove(food)
+      //TODO
+
+    }
+  }
+
+  protected def handleAdventurerEatFood(es: List[EatFood]): Unit = {
+    es foreach handleAdventurerEatFood
+  }
+
+  final protected def handleAdventurerEatFoodNow(): Unit = {
+    gameEventMap.get(systemFrame).foreach { events =>
+      handleAdventurerEatFood(events.filter(_.isInstanceOf[EatFood]).map(_.asInstanceOf[EatFood]).reverse)
+    }
   }
 
   def handleGenerateFood(): Unit = {
@@ -185,9 +218,9 @@ trait ThorSchema {
     handleUserLeftRoomNow()
     handleUserActionEventNow()
 
-    handleAdventurerMove()
-    handleAdventurerAttacked()
-    handleAdventurerEatFood()
+//    handleAdventurerMove()
+    handleAdventurerAttackedNow()
+    handleAdventurerEatFoodNow()
     handleGenerateFood()
     handleUserEnterRoomNow()
 
