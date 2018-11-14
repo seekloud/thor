@@ -192,12 +192,9 @@ trait ThorSchema {
     }
   }
 
-  protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food):Unit = {
-    //在这里添加gameEventMap;区别于tank后台重写添加，客户端不执行操作.
-    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
-    addGameEvent(event)
-    //TODO dispatch ?
-  }
+  //后台单独重写
+  protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food):Unit = {}
+
   protected def handleGenerateFood(e: GenerateFood): Unit = {
     val food = Food(e.food)
     foodMap.put(food.fId, food)
@@ -213,16 +210,6 @@ trait ThorSchema {
       handleGenerateFood(events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).reverse)
     }
   }
-
-
-  def generateFood(id: Long, level: Int = 1, position: Point, radius: Float = 2) ={
-    //生成食物事件，被后台定时事件调用，食物的属性暂且全部作为参数
-    val foodState = FoodState(id, level, position, radius)
-    val event = GenerateFood(systemFrame, foodState)
-    addGameEvent(event)
-    //TODO dispatch ?
-  }
-
 
   protected def clearEventWhenUpdate(): Unit = {
     gameEventMap -= systemFrame
