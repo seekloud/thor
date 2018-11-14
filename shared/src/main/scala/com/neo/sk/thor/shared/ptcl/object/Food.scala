@@ -5,6 +5,6 @@ package com.neo.sk.thor.shared.ptcl.`object`
   */
 case class FoodState(level:Int)
 
-trait Food{
+trait Food extends CircleObjectOfGame{
 
 }

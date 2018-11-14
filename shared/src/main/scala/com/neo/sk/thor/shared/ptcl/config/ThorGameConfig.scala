@@ -9,6 +9,11 @@ import com.neo.sk.thor.shared.ptcl.model.Point
   */
 trait ThorGameConfig {
 
+  def frameDuration:Long
+
   def boundary: Point
 
+  def thorRadius:Float
+
 }
+
