@@ -177,10 +177,14 @@ trait ThorSchema {
   }
 
   def handleAdventurerEatFood(e: EatFood): Unit = {
+    //吃到食物后移除食物，人物提升能量，判断升级？
     foodMap.get(e.foodId).foreach { food =>
       quadTree.remove(food)
-      //TODO
-
+      adventurerMap.get(e.playerId).foreach{ adventurer =>
+        adventurer.energy += food.foodLevel//根据食物获取能量，数值未定义,未来可能调用adventurer方法
+        //TODO 升级操作
+      }
+      foodMap.remove(e.foodId)
     }
   }
 
@@ -189,18 +193,41 @@ trait ThorSchema {
   }
 
   final protected def handleAdventurerEatFoodNow(): Unit = {
+    //判断是否吃到食物，吃到事件添加到当前systemFrame的gameEventMap之中
+    adventurerMap.values.foreach{ adventurer =>
+      val adventurerMaybeEatFood = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Food]).map(_.asInstanceOf[Food])
+      adventurerMaybeEatFood.foreach(adventurer.checkEatFood(_,adventurerEatFoodCallback(adventurer)))
+    }
+    //以上判断判断可以放在adventurer移动中以提前1帧处理
     gameEventMap.get(systemFrame).foreach { events =>
       handleAdventurerEatFood(events.filter(_.isInstanceOf[EatFood]).map(_.asInstanceOf[EatFood]).reverse)
     }
   }
 
+  protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food):Unit = {
+    //在这里添加gameEventMap;区别于tank后台重写添加，客户端不执行操作.
+    val event = EatFood(adventurer.playerId, food.foodId, food.foodLevel, systemFrame)
+    addGameEvent(event)
+    //TODO dispatch ?
+  }
+
   def handleGenerateFood() = {
+    //地图生成食物
     gameEventMap.get(systemFrame).foreach{events =>
-      events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).map{ event =>
+      events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).foreach{ event =>
         val food = Food(event.foodState)
         foodMap.put(food.foodId, food)
+        quadTree.insert(food)
       }
     }
+  }
+
+  def generateFood(id: Long, level: Int = 1, position: Point, radius: Float = 2) ={
+    //生成食物事件，被后台定时事件调用，食物的属性暂且全部作为参数
+    val foodState = FoodState(id, level, position, radius)
+    val event = GenerateFood(systemFrame, foodState)
+    addGameEvent(event)
+    //TODO dispatch ?
   }
 
   protected def clearEventWhenUpdate(): Unit = {

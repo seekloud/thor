@@ -31,6 +31,12 @@ trait Adventurer extends CircleObjectOfGame {
   var speed: Float
   var killNum: Int
 
+  //判断adventurer是否吃到食物
+  def checkEatFood(p:Food,obtainPropCallback:Food => Unit):Unit = {
+    if(this.isIntersects(p)){
+      obtainPropCallback(p)
+    }
+  }
 
 }
 
