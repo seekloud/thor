@@ -46,17 +46,18 @@ class GameHolder(canvasName: String) {
   private[this] var firstCome = true
   private[this] var currentRank = List.empty[Score]
   private[this] var historyRank = List.empty[Score]
+  private[this] var barrage = ""  //弹幕
 
   private[this] val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
 
+  var SynData = scala.Option[ThorSchemaState] = None
+  var justSynced = false
 
   canvas.width = canvasBoundary.x.toInt
   canvas.height = canvasBoundary.y.toInt
 
 
   private var timer: Int = 0
-
-
   private var nextFrame = 0
   private var logicFrameTime = System.currentTimeMillis()
 
@@ -126,14 +127,22 @@ class GameHolder(canvasName: String) {
                 case UserInfo(id) =>
                   myId = id
 
-                case UserEnterRoom(userId, name, adventurer, frame) =>
-                  println(s"${name}加入了游戏")
+                case UserEnterRoom(userId, name, _, _) =>
+                  barrage = s"${name}加入了游戏"
+
+                case UserLeftRoom(userId, name, _) =>
+                  barrage = s"${name}离开了游戏"
+
+                case BeAttacked(userId, name, _) =>
+                  barrage = s"${name}阵亡了"
 
                 case Ranks(current, history) =>
                   currentRank = current
                   historyRank = history
 
                 case GridSyncState(d) =>
+                  SynData = Some(d)
+                  justSynced = true
 
                 case  _ => println(s"接收到无效消息")
               }
