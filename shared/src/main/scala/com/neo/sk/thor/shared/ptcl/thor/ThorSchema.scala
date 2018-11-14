@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import com.neo.sk.thor.shared.ptcl.`object`.{Adventurer, AdventurerState, Food, FoodState}
 import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
-import com.neo.sk.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent, UserEnterRoom}
+import com.neo.sk.thor.shared.ptcl.protocol.ThorGame.{GameEvent, GenerateFood, UserActionEvent, UserEnterRoom}
 
 import scala.collection.mutable
 /**
@@ -89,7 +89,12 @@ trait ThorSchema {
   }
 
   def handleGenerateFood() = {
-
+    gameEventMap.get(systemFrame).foreach{events =>
+      events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).map{ event =>
+        val food = Food(event.foodState)
+        foodMap.put(food.foodId, food)
+      }
+    }
   }
 
   def update(): Unit = {

@@ -1,6 +1,6 @@
 package com.neo.sk.thor.shared.ptcl.protocol
 
-import com.neo.sk.thor.shared.ptcl.`object`.AdventurerState
+import com.neo.sk.thor.shared.ptcl.`object`.{AdventurerState, FoodState}
 import com.neo.sk.thor.shared.ptcl.model.Score
 import com.neo.sk.thor.shared.ptcl.thor.ThorSchemaState
 
@@ -12,6 +12,8 @@ object ThorGame {
   }
 
   trait UserEvent extends GameEvent
+
+  trait EnvironmentEvent extends GameEvent
 
   trait UserActionEvent extends UserEvent {
     val userId: Long
@@ -58,7 +60,7 @@ object ThorGame {
   final case class GridSyncState(d: ThorSchemaState) extends WsMsgServer
 
   //Food 事件
-  final case class GenerateFood()
+  final case class GenerateFood(override val frame: Long, foodState: FoodState) extends EnvironmentEvent with WsMsgServer
 
 
   sealed trait GameSnapshot
