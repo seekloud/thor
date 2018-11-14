@@ -171,7 +171,7 @@ trait ThorSchema {
   protected def handleAdventurerEatFood(e: EatFood): Unit = {
     foodMap.get(e.foodId).foreach { food =>
       quadTree.remove(food)
-      adventurerMap.get(e.playerId).foreach(_.eatFood(food))
+//      adventurerMap.get(e.playerId).foreach(_.eatFood(food))
       foodMap.remove(e.foodId)
     }
   }
@@ -194,30 +194,26 @@ trait ThorSchema {
 
   protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food):Unit = {
     //在这里添加gameEventMap;区别于tank后台重写添加，客户端不执行操作.
-    val event = EatFood(adventurer.playerId, food.foodId, food.foodLevel, systemFrame)
+    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
     addGameEvent(event)
     //TODO dispatch ?
   }
   protected def handleGenerateFood(e: GenerateFood): Unit = {
-//    val food = new Food ()
-    //TODO
-
+    val food = Food(e.food)
+    foodMap.put(food.fId, food)
+    quadTree.insert(food)
   }
 
   protected final def handleGenerateFood(es: List[GenerateFood]): Unit = {
     es foreach handleGenerateFood
   }
 
-  def handleGenerateFood() = {
-    //地图生成食物
-    gameEventMap.get(systemFrame).foreach{events =>
-      events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).foreach{ event =>
-        val food = Food(event.foodState)
-        foodMap.put(food.foodId, food)
-        quadTree.insert(food)
-      }
+  final protected def handleGenerateFoodNow(): Unit = {
+    gameEventMap.get(systemFrame).foreach { events =>
+      handleGenerateFood(events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).reverse)
     }
   }
+
 
   def generateFood(id: Long, level: Int = 1, position: Point, radius: Float = 2) ={
     //生成食物事件，被后台定时事件调用，食物的属性暂且全部作为参数
@@ -225,11 +221,6 @@ trait ThorSchema {
     val event = GenerateFood(systemFrame, foodState)
     addGameEvent(event)
     //TODO dispatch ?
-    }
-
-final protected def handleGenerateFoodNow(): Unit = {
-  gameEventMap.get(systemFrame).foreach { events =>
-    handleGenerateFood(events.filter(_.isInstanceOf[GenerateFood]).map(_.asInstanceOf[GenerateFood]).reverse)
   }
 
 

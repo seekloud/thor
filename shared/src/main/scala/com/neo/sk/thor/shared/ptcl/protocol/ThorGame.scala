@@ -20,8 +20,6 @@ object ThorGame {
     val serialNum:Int
   }
 
-  trait EnvironmentEvent extends GameEvent
-
   //前端
   sealed trait WsMsgFrontSource
 
@@ -64,9 +62,6 @@ object ThorGame {
   final case class Ranks(currentRank: List[Score], historyRank: List[Score]) extends WsMsgServer
 
   final case class GridSyncState(d: ThorSchemaState) extends WsMsgServer
-
-  //Food 事件
-  final case class GenerateFood(override val frame: Long, foodState: FoodState) extends EnvironmentEvent with WsMsgServer
 
 
   sealed trait GameSnapshot

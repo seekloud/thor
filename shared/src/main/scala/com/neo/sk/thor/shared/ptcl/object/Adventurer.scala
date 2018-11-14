@@ -37,6 +37,7 @@ trait Adventurer extends CircleObjectOfGame {
       obtainPropCallback(p)
     }
   }
+
   def getAdventurerState: AdventurerState = {
     AdventurerState(playerId, level, energy, position, direction, weaponLevel, weaponLength, speed, killNum)
   }
