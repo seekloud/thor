@@ -5,12 +5,12 @@ import com.neo.sk.thor.shared.ptcl.model
 /**
   * Created by Jingyi on 2018/11/9
   */
-case class FoodState(id: Int, level:Byte, position: model.Point, radius: Float)
+case class FoodState(id: Long, level:Int, position: model.Point, radius: Float)
 
 trait Food extends CircleObjectOfGame {
 
-  val foodId: Int
-  val foodLevel: Byte
+  val foodId: Long
+  val foodLevel: Int
   override var position: model.Point
   override val radius: Float
 
@@ -26,8 +26,8 @@ object Food {
 }
 
 case class AddNormalFood(
-                        foodId: Int,
-                        foodLevel: Byte,
+                        foodId: Long,
+                        foodLevel: Int,
                         var position: model.Point,
                         radius: Float
                         ) extends Food
