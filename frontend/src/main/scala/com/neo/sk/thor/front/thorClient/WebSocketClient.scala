@@ -36,6 +36,7 @@ class WebSocketClient(
 
 
   def setup(name:String):Unit = {
+    println("set up")
     if(wsSetup){
       println(s"websocket已经启动")
     }else{

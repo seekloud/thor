@@ -14,7 +14,7 @@ object MainPage extends PageSwitcher {
   private val currentPage: Rx[Elem] = currentHashVar.map {
     case "home" :: Nil => ThorRender.render
     case "entry" :: Nil => EntryPage.render
-    case _ => <div>Error Page</div>
+    case _ => EntryPage.render
   }
 
 

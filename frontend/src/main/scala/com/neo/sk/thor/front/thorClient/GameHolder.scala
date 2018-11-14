@@ -100,13 +100,13 @@ class GameHolder(canvasName: String) {
 
 
   private def wsConnectError(e: Event) = {
-    JsFunc.alert("网络连接失败，请重新刷新")
+    JsFunc.alert("网络连接错误，请重新刷新")
     e
   }
 
 
   private def wsConnectClose(e: Event) = {
-    JsFunc.alert("网络连接失败，请重新刷新")
+    JsFunc.alert("网络连接关闭，请重新刷新")
     e
   }
 
@@ -172,6 +172,7 @@ class GameHolder(canvasName: String) {
     myName = name
     canvas.focus()
     if (firstCome) {
+      println("firstCome")
       firstCome = false
       addActionListenEvent()
       websocketClient.setup(name)
@@ -190,6 +191,7 @@ class GameHolder(canvasName: String) {
 
 
   def gameLoop(): Unit = {
+    println("gameLoop")
     logicFrameTime = System.currentTimeMillis()
     grid.update()
   }
