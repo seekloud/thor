@@ -29,9 +29,9 @@ trait ThorSchema extends KillInformation{
 
   def info(msg: String): Unit
 
-//  implicit val config: ThorGameConfig
+  implicit val config: ThorGameConfig
 
-  val boundary: Point
+  val boundary: Point = config.boundary
 
   var playerId = ""
 
