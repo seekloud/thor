@@ -16,6 +16,28 @@ object Constants {
     val replayLoading = 6
   }
 
+  object AdventurerLevel {
+    val step = 1
+
+    val levelOne = 1
+    val levelTwo = 2
+    val levelThree = 3
+    val levelFour = 4
+    val levelFive = 5
+  }
+
+  object SpeedLevel {
+    val step = 10
+    val speedUpRatio = 2
+
+    val levelOne: Float = 50
+    val levelTwo: Float = 40
+    val levelThree: Float = 30
+    val levelFour: Float = 20
+    val levelFive: Float = 10
+  }
+
+
   object FoodLevel {
     val levelOne = 1
     val levelTwo = 2
@@ -23,6 +45,16 @@ object Constants {
     val levelFour = 4
     val levelFive = 5
   }
+
+  object WeaponConf {
+    val sweepScope: Float = 120
+    val sweepStep: Float = 2
+  }
+
+  object Energy {
+    val speedUpStep = 1
+  }
+
 
   val preExecuteFrameOffset = 2 //预执行2帧
 
