@@ -46,7 +46,7 @@ class ThorSchemaServerImpl (
   //↓↓↓只有后台执行的函数↓↓↓
 
   private final def gengerateFood(level: Int = 1, position: Point, radius: Float = 2): Unit ={
-    //生成食物事件，被后台定时事件调用，前端不产生，食物的属性暂且全部作为参数
+    //生成食物事件，被后台定时事件调用，前端不产生此事件，食物的属性暂且全部作为参数
     val foodState = FoodState(propIdGenerator.getAndIncrement(), level, position, radius)
     val event = GenerateFood(systemFrame, foodState)
     addGameEvent(event)

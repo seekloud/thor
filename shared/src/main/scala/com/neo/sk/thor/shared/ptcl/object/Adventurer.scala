@@ -45,7 +45,12 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
-    //TODO
+    this.energy += config.getEnergyByFoodLevel(food.level)
+    if(energy > config.getMaxEnergyByLevel(this.level)){
+      this.level += 1
+      this.weaponLength = config.getWeaponLengthByLevel(this.level)
+      this.weaponLevel = config.getWeaponLevelByLevel(this.level)
+    }
   }
 
   def setAdventurerDirection(d: Float) = {
