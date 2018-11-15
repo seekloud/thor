@@ -21,7 +21,7 @@ case class ThorSchemaState(
   adventurer: List[AdventurerState],
   food: List[FoodState])
 
-trait ThorSchema {
+trait ThorSchema extends KillInformation{
 
   import scala.language.implicitConversions
 
@@ -42,6 +42,8 @@ trait ThorSchema {
 
   protected val gameEventMap = mutable.HashMap[Long, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
   protected val actionEventMap = mutable.HashMap[Long, List[UserActionEvent]]() //frame -> List[UserActionEvent]
+  protected val myAdventurerAction = mutable.HashMap[Long,List[UserActionEvent]]()
+
 
   protected val quadTree: QuadTree = new QuadTree(Rectangle(Point(0, 0), boundary))
 
@@ -114,6 +116,15 @@ trait ThorSchema {
     }
   }
 
+  protected final def handleMyAction(actions: List[UserActionEvent]) = { //TODO 处理出现错误的帧
+
+  }
+
+  final protected def handleMyActionNow() = {
+    handleMyAction(myAdventurerAction.getOrElse(systemFrame, Nil).reverse)
+    myAdventurerAction.remove(systemFrame - 10)
+  }
+
 
   protected final def addUserAction(action: UserActionEvent): Unit = {
     actionEventMap.get(action.frame) match {
@@ -154,6 +165,7 @@ trait ThorSchema {
       quadTree.remove(adventurer)
       adventurerMap.remove(adventurer.playerId)
       //TODO 击杀信息
+      addKillInfo(e.killerName, adventurer.name)
     }
   }
 
@@ -237,6 +249,7 @@ trait ThorSchema {
 
 
     quadTree.refresh(quadTree)
+    updateKillInformation()
     clearEventWhenUpdate()
   }
 

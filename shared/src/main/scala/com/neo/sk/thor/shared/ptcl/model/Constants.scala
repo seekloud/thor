@@ -24,6 +24,8 @@ object Constants {
     val levelFive = 5
   }
 
+  val preExecuteFrameOffset = 2 //预执行2帧
+
 
 
 }

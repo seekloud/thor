@@ -8,6 +8,7 @@ import com.neo.sk.thor.shared.ptcl.model.Point
   */
 case class AdventurerState(
   playerId: String,
+  name: String,
   level: Int,
   energy: Int,
 //  radius: Int,
@@ -21,6 +22,7 @@ case class AdventurerState(
 
 trait Adventurer extends CircleObjectOfGame {
   val playerId: String
+  val name: String
   var level: Int
   var energy: Int
 //  var radius: Int
@@ -39,7 +41,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, level, energy, position, direction, weaponLevel, weaponLength, speed, killNum)
+    AdventurerState(playerId, name, level, energy, position, direction, weaponLevel, weaponLength, speed, killNum)
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
@@ -59,18 +61,19 @@ trait Adventurer extends CircleObjectOfGame {
 case class AdventurerImpl(
   config: ThorGameConfig,
   playerId: String,
-  protected var level: Int,
-  protected var energy: Int,
+  name: String,
+  var level: Int,
+  var energy: Int,
 //  radius: Int,
-  protected var position: Point,
-  protected var direction: Float,
-  protected var weaponLevel: Int,
-  protected var weaponLength: Int,
-  protected var speed: Float,
-  protected var killNum: Int
+  var position: Point,
+  var direction: Float,
+  var weaponLevel: Int,
+  var weaponLength: Int,
+  var speed: Float,
+  var killNum: Int
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
-    this(config, adventurerState.playerId, adventurerState.level, adventurerState.energy, adventurerState.position,
+    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.position,
       adventurerState.direction, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speed, adventurerState.killNum)
   }
 
