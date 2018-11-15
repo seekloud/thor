@@ -28,18 +28,8 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   def drawAdventurerByOffsetTime(offset:Point,offsetTime:Long): Unit ={
 
 
-
   }
 
-  def drawBackground():Unit = {
-    val pat = ctx.createPattern(mapImg,"repeat")
-    ctx.fillStyle = pat
-    ctx.fillRect(0,0,boundary.x,boundary.y)
-
-
-
-
-  }
 }
 
 

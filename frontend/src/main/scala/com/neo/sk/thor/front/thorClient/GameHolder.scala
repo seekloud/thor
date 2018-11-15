@@ -38,12 +38,12 @@ class GameHolder(canvasName: String) {
   private[this] val bounds = Point(Boundary.w,Boundary.h)
 
   private[this] val canvasUnit = 10
-  private[this] val canvasBoundary = ptcl.model.Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+  private[this] val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
 
   private[this] val canvasBounds = canvasBoundary / canvasUnit
 
   var gridOpt : Option[ThorSchemaClientImpl] = null
-  var grid = gridOpt.get
+  var thorSchema = gridOpt.get
   private[this] var myId = ""
   private[this] var myName = ""
   private[this] var firstCome = true
@@ -132,7 +132,7 @@ class GameHolder(canvasName: String) {
             case Right(data) =>
               data match {
                 case YourInfo(config, id, name) =>
-                  grid = new ThorSchemaClientImpl(ctx,config,id,name)
+                  thorSchema = new ThorSchemaClientImpl(ctx,config,id,name)
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
 
@@ -169,14 +169,16 @@ class GameHolder(canvasName: String) {
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBoundary / 2).toFloat
       val currentTime = System.currentTimeMillis()
-      val data = MouseMove(myId,theta,grid.systemFrame,getActionSerialNum)
+      val data = MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum)
       websocketClient.sendMsg(data)
+      thorSchema.addMyAction(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
       e.preventDefault()
     }
     canvas.onclick = { (e: MouseEvent) =>
       val currentTime = System.currentTimeMillis()
-      val data = MouseClick(myId,grid.systemFrame,getActionSerialNum)
+      val data = MouseClick(myId,thorSchema.systemFrame,getActionSerialNum)
       websocketClient.sendMsg(data)
+      thorSchema.addMyAction(MouseClick(myId,thorSchema.systemFrame,getActionSerialNum))
       e.preventDefault()
     }
 
@@ -210,7 +212,7 @@ class GameHolder(canvasName: String) {
 
   def gameLoop(): Unit = {
     logicFrameTime = System.currentTimeMillis()
-    grid.update()
+    thorSchema.update()
   }
 
 
@@ -224,25 +226,13 @@ class GameHolder(canvasName: String) {
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
-  def drawGame(curFrame: Int, maxClientFrame: Int): Unit = {
-    //
-    // rintln("111111111111111111111")
-  }
+//  def drawGame(curFrame: Int, maxClientFrame: Int): Unit = {
+//    //
+//    // rintln("111111111111111111111")
+//  }
 
   def drawGameByTime(offsetTime: Long): Unit = {
 
+    thorSchema.drawGame(offsetTime)
   }
-
-  def drawGameStop(): Unit = {
-    ctx.fillStyle = Color.Black.toString()
-    ctx.fillRect(0, 0, canvasBounds.x * canvasUnit, canvasBounds.y * canvasUnit)
-    ctx.fillStyle = "rgb(250, 250, 250)"
-    ctx.textAlign = "left"
-    ctx.textBaseline = "top"
-    ctx.font = "36px Helvetica"
-    ctx.fillText(s"您已经死亡,被玩家=${}所杀", 150, 180)
-    println()
-  }
-
-
 }

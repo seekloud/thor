@@ -24,13 +24,13 @@ with FoodClient{
 
 //  protected val adventurerAttackAnimationMap: mutable.HashMap[Int, Int] = mutable.HashMap[Int, Int]() //可能存在的挥刀动画 id->动画id
 
-  def drawGame(): Unit ={
+  def drawGame(offSetTime:Long): Unit ={
     if(!waitSyncData){
       adventurerMap.get(myId) match{
         case Some(adventurer) =>
           //TODO 各种环境绘画
           drawAdventurer()
-          drawFood()
+          drawFoodByOffsetTime(offSetTime)
           drawBackground()
         case None =>()
       }
