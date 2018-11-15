@@ -2,8 +2,6 @@ package com.neo.sk.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.neo.sk.thor.front.thor.GridOnClient
-import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
@@ -38,8 +36,8 @@ class GameHolder(canvasName: String) {
 
   private[this] val canvasUnit = 10
   private[this] val canvasBoundary = ptcl.model.Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+
   private[this] val canvasBounds = canvasBoundary / canvasUnit
-  private[this] val grid = new GridOnClient(bounds)
 
   private[this] var myId = -1L
   private[this] var myName = ""
@@ -91,6 +89,7 @@ class GameHolder(canvasName: String) {
     val offsetTime = curTime - logicFrameTime
     drawGameByTime(offsetTime)
     nextFrame = dom.window.requestAnimationFrame(gameRender())
+
   }
 
 
@@ -107,7 +106,7 @@ class GameHolder(canvasName: String) {
 
 
   private def wsConnectClose(e: Event) = {
-    JsFunc.alert("网络连接关闭，请重新刷新")
+    JsFunc.alert("网络连接失败，请重新刷新")
     e
   }
 
@@ -181,7 +180,6 @@ class GameHolder(canvasName: String) {
     myName = name
     canvas.focus()
     if (firstCome) {
-      println("firstCome")
       firstCome = false
       addActionListenEvent()
       websocketClient.setup(name)
@@ -200,7 +198,6 @@ class GameHolder(canvasName: String) {
 
 
   def gameLoop(): Unit = {
-    println("gameLoop")
     logicFrameTime = System.currentTimeMillis()
     grid.update()
   }
@@ -216,8 +213,8 @@ class GameHolder(canvasName: String) {
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
-  def drawGame(curFrame:Int,maxClientFrame:Int): Unit ={
-//
+  def drawGame(curFrame: Int, maxClientFrame: Int): Unit = {
+    //
     // rintln("111111111111111111111")
   }
 
