@@ -213,7 +213,7 @@ trait ThorSchema extends KillInformation{
     quadTree.insert(food)
   }
 
-  protected final def handleGenerateFood(es: List[GenerateFood]): Unit = {
+  final protected def handleGenerateFood(es: List[GenerateFood]): Unit = {
     es foreach handleGenerateFood
   }
 
