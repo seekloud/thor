@@ -15,5 +15,10 @@ trait ThorGameConfig {
 
   def thorRadius:Float
 
+  def getEnergyByFoodLevel(foodLevel: Int): Int
+  def getMaxEnergyByLevel(adventurerLevel: Int): Int
+  def getWeaponLevelByLevel(adventurerLevel: Int): Int
+  def getWeaponLengthByLevel(adventurerLevel: Int): Int
+
 }
 

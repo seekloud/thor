@@ -66,32 +66,38 @@ object Dependencies {
   val postgresql = "org.postgresql" % "postgresql" % "9.4.1208"
   val asynchttpclient = "org.asynchttpclient" % "async-http-client" % "2.0.32"
   val ehcache = "net.sf.ehcache" % "ehcache" % "2.10.4"
-  val essf = "org.seekloud" %% "essf" % "0.0.1-beta1"
+  val essf = "org.seekloud" %% "essf" % "0.0.1-beta2"
+  val byteobject = "org.seekloud" %% "byteobject" % "0.1.1"
+  //  val scalaFx = "org.scalafx" %% "scalafx" % "10.0.2-R15"
 
 
 
   val backendDependencies =
     Dependencies.akkaSeq ++
-    Dependencies.akkaHttpSeq ++
-    Dependencies.circeSeq ++
-    Dependencies.slickLess ++
-    Dependencies.slickPg ++
-    Seq(
-      Dependencies.scalaXml,
-      Dependencies.slick,
-      Dependencies.slickCodeGen,
-      Dependencies.scalikejdbc,
-      Dependencies.scalikejdbcConfig,
-      Dependencies.scalatags,
-      Dependencies.nscalaTime,
-      Dependencies.hikariCP,
-      Dependencies.logback,
-      Dependencies.codec,
-      Dependencies.postgresql,
-      Dependencies.asynchttpclient,
-      Dependencies.ehcache,
-      Dependencies.essf
-    )
+      Dependencies.akkaHttpSeq ++
+      Dependencies.circeSeq ++
+      Dependencies.slickLess ++
+      Dependencies.slickPg ++
+      Seq(
+        Dependencies.scalaXml,
+        Dependencies.slick,
+        Dependencies.slickCodeGen,
+        Dependencies.scalikejdbc,
+        Dependencies.scalikejdbcConfig,
+        Dependencies.scalatags,
+        Dependencies.nscalaTime,
+        Dependencies.hikariCP,
+        Dependencies.logback,
+        Dependencies.codec,
+        Dependencies.postgresql,
+        Dependencies.asynchttpclient,
+        Dependencies.ehcache,
+        Dependencies.essf,
+        Dependencies.byteobject
+        //      ,
+        //      Dependencies.scalaFx
+      )
+
 
 
 

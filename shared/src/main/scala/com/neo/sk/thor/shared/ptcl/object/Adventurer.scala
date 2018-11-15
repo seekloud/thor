@@ -38,9 +38,9 @@ trait Adventurer extends CircleObjectOfGame {
   var killNum: Int
 
   //判断adventurer是否吃到食物
-  def checkEatFood(p:Food,obtainPropCallback:Food => Unit):Unit = {
+  def checkEatFood(p:Food,eatFoodCallback:Food => Unit):Unit = {
     if(this.isIntersects(p)){
-      obtainPropCallback(p)
+      eatFoodCallback(p)
     }
   }
 
@@ -49,7 +49,12 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
-    //TODO
+    this.energy += config.getEnergyByFoodLevel(food.level)
+    if(energy > config.getMaxEnergyByLevel(this.level)){
+      this.level += 1
+      this.weaponLength = config.getWeaponLengthByLevel(this.level)
+      this.weaponLevel = config.getWeaponLevelByLevel(this.level)
+    }
   }
 
   def setAdventurerDirection(d: Float) = {
