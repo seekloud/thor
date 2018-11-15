@@ -10,7 +10,7 @@ import org.scalajs.dom
   * Date: 2018/11/12
   * Time: 16:17
   */
-class ThorSchemaClientImpl (
+case class ThorSchemaClientImpl (
                              ctx:dom.CanvasRenderingContext2D,
                              override implicit val config: ThorGameConfig,
                              myId: String,

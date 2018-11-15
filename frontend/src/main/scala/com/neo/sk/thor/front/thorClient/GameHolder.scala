@@ -5,7 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
-import com.neo.sk.thor.shared.ptcl.model.{Boundary, Point}
+import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
+import com.neo.sk.thor.shared.ptcl.model.{Boundary, Point, Score}
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
 import com.neo.sk.thor.shared.ptcl.protocol._
 import com.neo.sk.thor.shared.ptcl.thor.ThorSchemaState
@@ -18,6 +19,8 @@ import org.scalajs.dom.raw.{Event, FileReader, MessageEvent, MouseEvent}
 
 import scala.collection.mutable
 import scala.scalajs.js.typedarray.ArrayBuffer
+import org.seekloud.byteobject.ByteObject.bytesDecode
+import org.seekloud.byteobject.MiddleBufferInJs
 import scala.xml.Elem
 import org.scalajs.dom
 
@@ -32,23 +35,26 @@ class GameHolder(canvasName: String) {
   private[this] val canvas = dom.document.getElementById(canvasName).asInstanceOf[Canvas]
   private[this] val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-  private[this] val bounds = Point(ptcl.model.Boundary.w, ptcl.model.Boundary.h)
+  private[this] val bounds = Point(Boundary.w,Boundary.h)
 
   private[this] val canvasUnit = 10
   private[this] val canvasBoundary = ptcl.model.Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
 
   private[this] val canvasBounds = canvasBoundary / canvasUnit
 
-  private[this] var myId = -1L
+  var gridOpt : Option[ThorSchemaClientImpl] = null
+  var grid = gridOpt.get
+  private[this] var myId = ""
   private[this] var myName = ""
   private[this] var firstCome = true
   private[this] var currentRank = List.empty[Score]
   private[this] var historyRank = List.empty[Score]
   private[this] var barrage = ""  //弹幕
 
+  private[this] val actionSerialNumGenerator = new AtomicInteger(0)
   private[this] val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
 
-  var SynData = scala.Option[ThorSchemaState] = None
+  var SynData : scala.Option[ThorSchemaState] = None
   var justSynced = false
 
   canvas.width = canvasBoundary.x.toInt
@@ -64,6 +70,8 @@ class GameHolder(canvasName: String) {
   private[this] val gameSnapshotMap = new mutable.HashMap[Long, ThorSchemaState]()
   private[this] val historyAction = new mutable.HashMap[Long, (Long, Long, UserActionEvent)]()
 
+
+  def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
 
   def addGameEvent(f: Long, event: WsMsgServer) = {
 
@@ -123,17 +131,16 @@ class GameHolder(canvasName: String) {
           bytesDecode[WsMsgServer](middleDataInJs) match {
             case Right(data) =>
               data match {
-                case UserInfo(id) =>
-                  myId = id
-
+                case YourInfo(config, id, name) =>
+                  grid = new ThorSchemaClientImpl(ctx,config,id,name)
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
 
                 case UserLeftRoom(userId, name, _) =>
                   barrage = s"${name}离开了游戏"
 
-                case BeAttacked(userId, name, _) =>
-                  barrage = s"${name}阵亡了"
+                case BeAttacked(userId, name, killerId, killerName, _) =>
+                  barrage = s"${killerName}杀死了${name}"
 
                 case Ranks(current, history) =>
                   currentRank = current
@@ -162,13 +169,13 @@ class GameHolder(canvasName: String) {
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBoundary / 2).toFloat
       val currentTime = System.currentTimeMillis()
-      val data = MouseMove(myId,theta,grid.systemFrame,currentTime)
+      val data = MouseMove(myId,theta,grid.systemFrame,getActionSerialNum)
       websocketClient.sendMsg(data)
       e.preventDefault()
     }
     canvas.onclick = { (e: MouseEvent) =>
       val currentTime = System.currentTimeMillis()
-      val data = MouseClick(myId,grid.systemFrame,currentTime)
+      val data = MouseClick(myId,grid.systemFrame,getActionSerialNum)
       websocketClient.sendMsg(data)
       e.preventDefault()
     }
@@ -196,6 +203,10 @@ class GameHolder(canvasName: String) {
     }
   }
 
+//  var tickCount = 0L
+//  var testStartTime = System.currentTimeMillis()
+//  var testEndTime = System.currentTimeMillis()
+//  var startTime = System.currentTimeMillis()
 
   def gameLoop(): Unit = {
     logicFrameTime = System.currentTimeMillis()

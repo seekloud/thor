@@ -16,6 +16,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
   def drawAdventurerByOffsetTime(): Unit ={
 
+
   }
 }
 
