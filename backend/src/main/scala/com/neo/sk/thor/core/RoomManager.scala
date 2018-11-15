@@ -7,7 +7,6 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import com.neo.sk.thor.core.UserActor.JoinRoom
 import org.slf4j.LoggerFactory
 import com.neo.sk.thor.common.AppSettings.personLimit
-import com.neo.sk.thor.core.RoomActor.GetKilled
 
 import scala.collection.mutable
 

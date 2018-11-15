@@ -25,8 +25,8 @@ object RoomActor {
   final case class ChildDead[U](name:String,childRef:ActorRef[U]) extends Command
 
   case class JoinRoom(roomId: Long, userId: Long, name: String,userActor: ActorRef[UserActor.Command]) extends Command
-  case class LeftRoom(roomId: Long, userId: Long, name: String, userList: List[(Long, String)]) extends Command
-  case class GetKilled(userId: Long, name: String) extends Command with RoomManager.Command
+  case class LeftRoom(userId: Long, name: String, userList: List[(Long, String)]) extends Command
+//  case class GetKilled(userId: Long, name: String) extends Command with RoomManager.Command
   case class WsMessage(userId: Long, msg: UserActionEvent) extends Command
   case object GameLoop extends Command
 
@@ -65,7 +65,7 @@ object RoomActor {
             //TODO grid处理用户加入
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, grid, tickCount)
 
-          case LeftRoom(roomId, userId, name, userList) =>
+          case LeftRoom(userId, name, userList) =>
             //TODO grid处理用户离开
             subscribersMap.remove(userId)
             dispatch(subscribersMap)(UserLeftRoom(userId, name))

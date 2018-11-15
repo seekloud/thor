@@ -9,7 +9,9 @@ import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
 import com.neo.sk.utils.byteObject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
 import com.neo.sk.thor.Boot.roomManager
+import com.neo.sk.thor.core.thor.GridServer
 import com.neo.sk.thor.shared.ptcl.thor.Adventurer
+import org.seekloud.byteobject.ByteObject._
 
 import scala.concurrent.duration._
 
@@ -32,7 +34,7 @@ object UserActor {
   case class StartGame(roomId: Option[Long]) extends Command
   case class JoinRoom(userId: Long, name: String, userActor:ActorRef[UserActor.Command], roomIdOpt:Option[Long] = None) extends Command with RoomManager.Command
   case class LeftRoom[U](actorRef:ActorRef[U]) extends Command
-  case class JoinRoomSuccess() extends Command
+  case class JoinRoomSuccess(grid: GridServer, userId: Long, roomActor: ActorRef[RoomActor.Command]) extends Command
 
   case class UserFrontActor(actor:ActorRef[WsMsgSource]) extends Command
 
@@ -121,13 +123,11 @@ object UserActor {
             roomManager ! JoinRoom(userId, userInfo.name, ctx.self, roomIdOpt)
             Behaviors.same
 
-          case JoinRoomSuccess() =>
-            //todo
+          case JoinRoomSuccess(grid, userId, roomActor) =>
+            frontActor ! Wrap(UserInfo(userId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            switchBehavior(ctx,"play",play(userId, userInfo, grid, startTime, frontActor, roomActor))
             Behaviors.same
 
-          case WsMessage(reqOpt) =>
-            //todo
-            Behaviors.same
 
           case LeftRoom(actor) =>
             ctx.unwatch(actor)
@@ -142,7 +142,7 @@ object UserActor {
   private def play(
                     userId: Long,
                     userInfo: UserInfo,
-                    adventurer: Adventurer,
+                    grid: GridServer,
                     startTime: Long,
                     frontActor: ActorRef[WsMsgSource],
                     roomActor: ActorRef[RoomActor.Command])(
@@ -162,10 +162,10 @@ object UserActor {
             Behaviors.same
 
           case DispatchMsg(m) =>
-            if(m.asInstanceOf[Wrap].isKillMsg) {
+            if(m.asInstanceOf[Wrap].isKillMsg) { //玩家死亡
               frontActor ! m
-              roomManager ! RoomActor.GetKilled(userId, userInfo.name)
-              switchBehavior(ctx,"idle",idle(userId,userInfo,startTime,frontActor))
+              roomManager ! RoomManager.LeftRoom(userId, userInfo.name)
+              Behaviors.stopped
             }else{
               frontActor ! m
               Behaviors.same
