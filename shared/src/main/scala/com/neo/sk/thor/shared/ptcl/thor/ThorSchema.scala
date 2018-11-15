@@ -183,7 +183,7 @@ trait ThorSchema extends KillInformation{
   protected def handleAdventurerEatFood(e: EatFood): Unit = {
     foodMap.get(e.foodId).foreach { food =>
       quadTree.remove(food)
-//      adventurerMap.get(e.playerId).foreach(_.eatFood(food))
+      adventurerMap.get(e.playerId).foreach(_.eatFood(food))
       foodMap.remove(e.foodId)
     }
   }
