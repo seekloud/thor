@@ -40,7 +40,7 @@ object ThorGame {
   sealed trait WsMsgServer extends WsMsgSource
 
 
-  final case class UserInfo(uId: String) extends WsMsgServer
+  final case class UserInfo(playerId: String, name: String) extends WsMsgServer
 
   final case class UserEnterRoom(playerId: String, name: String, adventurer: AdventurerState, override val frame: Long = 0l) extends UserEvent with WsMsgServer
 

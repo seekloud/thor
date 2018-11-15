@@ -23,7 +23,7 @@ object RoomManager {
   private case class TimeOut(msg:String) extends Command
   private case class ChildDead[U](name:String,childRef:ActorRef[U]) extends Command
 
-  case class LeftRoom(uid: Long, name:String) extends Command
+  case class LeftRoom(playerId: String, name:String) extends Command
 
   def create():Behavior[Command] = {
     log.debug(s"RoomManager start...")
@@ -33,14 +33,14 @@ object RoomManager {
         Behaviors.withTimers[Command]{
           implicit timer =>
             val roomIdGenerator = new AtomicLong(1L)
-            val roomInUse = mutable.HashMap((1l,List.empty[(Long, String)]))
+            val roomInUse = mutable.HashMap((1l,List.empty[(String, String)]))
             idle(roomIdGenerator,roomInUse)
         }
     }
   }
 
   def idle(roomIdGenerator:AtomicLong,
-           roomInUse:mutable.HashMap[Long,List[(Long, String)]]) // roomId => List[userId, userName]
+           roomInUse:mutable.HashMap[Long,List[(String, String)]]) // roomId => List[userId, userName]
           (implicit stashBuffer: StashBuffer[Command],timer:TimerScheduler[Command]) = {
       Behaviors.receive[Command]{
         (ctx, msg) =>
@@ -73,7 +73,7 @@ object RoomManager {
               roomInUse.find(_._2.exists(_._1 == uid)) match{
                 case Some(t) =>
                   roomInUse.put(t._1,t._2.filterNot(_._1 == uid))
-                  getRoomActor(ctx,t._1) ! RoomActor.LeftRoom(t._1, uid,name,roomInUse(t._1))
+                  getRoomActor(ctx,t._1) ! RoomActor.LeftRoom(uid,name,roomInUse(t._1))
                   if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
                 case None => log.debug(s"该玩家不在任何房间")
               }

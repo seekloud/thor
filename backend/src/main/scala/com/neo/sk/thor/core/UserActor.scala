@@ -9,8 +9,7 @@ import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
 import com.neo.sk.utils.byteObject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
 import com.neo.sk.thor.Boot.roomManager
-import com.neo.sk.thor.core.thor.GridServer
-import com.neo.sk.thor.shared.ptcl.thor.Adventurer
+import com.neo.sk.thor.core.game.ThorSchemaServerImpl
 import org.seekloud.byteobject.ByteObject._
 
 import scala.concurrent.duration._
@@ -32,9 +31,9 @@ object UserActor {
   case class DispatchMsg(msg: WsMsgSource) extends Command
 
   case class StartGame(roomId: Option[Long]) extends Command
-  case class JoinRoom(userId: Long, name: String, userActor:ActorRef[UserActor.Command], roomIdOpt:Option[Long] = None) extends Command with RoomManager.Command
+  case class JoinRoom(playerId: String, name: String, userActor:ActorRef[UserActor.Command], roomIdOpt:Option[Long] = None) extends Command with RoomManager.Command
   case class LeftRoom[U](actorRef:ActorRef[U]) extends Command
-  case class JoinRoomSuccess(grid: GridServer, userId: Long, roomActor: ActorRef[RoomActor.Command]) extends Command
+  case class JoinRoomSuccess(grid: ThorSchemaServerImpl, playerId: String, roomActor: ActorRef[RoomActor.Command]) extends Command
 
   case class UserFrontActor(actor:ActorRef[WsMsgSource]) extends Command
 
@@ -73,18 +72,18 @@ object UserActor {
     Flow.fromSinkAndSource(in, out)
   }
 
-  def create(userId: Long, userInfo:UserInfo):Behavior[Command] = {
+  def create(playerId: String, userInfo:UserInfo):Behavior[Command] = {
     Behaviors.setup[Command]{ctx =>
       log.debug(s"${ctx.self.path} is starting...")
       implicit val stashBuffer = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] { implicit timer =>
         implicit val sendBuffer = new MiddleBufferInJvm(8192)
-        switchBehavior(ctx,"init",init(userId, userInfo),InitTime,TimeOut("init"))
+        switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
       }
     }
   }
 
-  private def init(userId: Long, userInfo: UserInfo)(
+  private def init(playerId: String, userInfo: UserInfo)(
     implicit stashBuffer:StashBuffer[Command],
     sendBuffer:MiddleBufferInJvm,
     timer:TimerScheduler[Command]
@@ -94,7 +93,7 @@ object UserActor {
         msg match {
           case UserFrontActor(frontActor) =>
             ctx.watchWith(frontActor,LeftRoom(frontActor))
-            switchBehavior(ctx,"idle",idle(userId, userInfo,System.currentTimeMillis(), frontActor))
+            switchBehavior(ctx,"idle",idle(playerId, userInfo,System.currentTimeMillis(), frontActor))
 
           case LeftRoom(actor) =>
             ctx.unwatch(actor)
@@ -111,7 +110,7 @@ object UserActor {
     }
   }
 
-  private def idle(userId: Long, userInfo: UserInfo,startTime:Long, frontActor:ActorRef[WsMsgSource])(
+  private def idle(playerId: String, userInfo: UserInfo,startTime:Long, frontActor:ActorRef[WsMsgSource])(
     implicit stashBuffer:StashBuffer[Command],
     timer:TimerScheduler[Command],
     sendBuffer:MiddleBufferInJvm
@@ -120,18 +119,18 @@ object UserActor {
       (ctx, msg) =>
         msg match {
           case StartGame(roomIdOpt) =>
-            roomManager ! JoinRoom(userId, userInfo.name, ctx.self, roomIdOpt)
+            roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, roomIdOpt)
             Behaviors.same
 
-          case JoinRoomSuccess(grid, userId, roomActor) =>
-            frontActor ! Wrap(UserInfo(userId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
-            switchBehavior(ctx,"play",play(userId, userInfo, grid, startTime, frontActor, roomActor))
+          case JoinRoomSuccess(grid, playerId, roomActor) =>
+            frontActor ! Wrap(UserInfo(playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            switchBehavior(ctx,"play",play(playerId, userInfo, grid, startTime, frontActor, roomActor))
             Behaviors.same
 
 
           case LeftRoom(actor) =>
             ctx.unwatch(actor)
-            switchBehavior(ctx,"init",init(userId, userInfo),InitTime,TimeOut("init"))
+            switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
 
           case unknowMsg =>
             Behavior.same
@@ -140,9 +139,9 @@ object UserActor {
   }
 
   private def play(
-                    userId: Long,
+                    playerId: String,
                     userInfo: UserInfo,
-                    grid: GridServer,
+                    grid: ThorSchemaServerImpl,
                     startTime: Long,
                     frontActor: ActorRef[WsMsgSource],
                     roomActor: ActorRef[RoomActor.Command])(
@@ -156,7 +155,7 @@ object UserActor {
           case WsMessage(m) =>
             m match {
               case Some(event: UserActionEvent) =>
-                roomActor ! RoomActor.WsMessage(userId, event)
+                roomActor ! RoomActor.WsMessage(playerId, event)
               case _ =>
             }
             Behaviors.same
@@ -164,7 +163,7 @@ object UserActor {
           case DispatchMsg(m) =>
             if(m.asInstanceOf[Wrap].isKillMsg) { //玩家死亡
               frontActor ! m
-              roomManager ! RoomManager.LeftRoom(userId, userInfo.name)
+              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
               Behaviors.stopped
             }else{
               frontActor ! m
@@ -173,7 +172,7 @@ object UserActor {
 
           case LeftRoom(actor) =>
             ctx.unwatch(actor)
-            roomManager ! RoomManager.LeftRoom(userId, userInfo.name)
+            roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
             Behaviors.stopped
 
           case unknownMsg =>

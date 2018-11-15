@@ -1,6 +1,6 @@
 package com.neo.sk.thor.core.thor
 
-import com.neo.sk.thor.shared.ptcl.thor.Adventurer
+import com.neo.sk.thor.shared.ptcl.`object`.Adventurer
 
 /**
   * @author Jingyi

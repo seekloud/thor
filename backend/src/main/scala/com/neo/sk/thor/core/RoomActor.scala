@@ -2,7 +2,8 @@ package com.neo.sk.thor.core
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
-import com.neo.sk.thor.core.thor.GridServer
+import com.neo.sk.thor.common.AppSettings
+import com.neo.sk.thor.core.game.ThorSchemaServerImpl
 import com.neo.sk.thor.shared.ptcl._
 import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
@@ -24,10 +25,10 @@ object RoomActor {
 
   final case class ChildDead[U](name:String,childRef:ActorRef[U]) extends Command
 
-  case class JoinRoom(roomId: Long, userId: Long, name: String,userActor: ActorRef[UserActor.Command]) extends Command
-  case class LeftRoom(userId: Long, name: String, userList: List[(Long, String)]) extends Command
-//  case class GetKilled(userId: Long, name: String) extends Command with RoomManager.Command
-  case class WsMessage(userId: Long, msg: UserActionEvent) extends Command
+  case class JoinRoom(roomId: Long, playerId: String, name: String,userActor: ActorRef[UserActor.Command]) extends Command
+  case class LeftRoom(playerId: String, name: String, userList: List[(String, String)]) extends Command
+//  case class GetKilled(playerId: String, name: String) extends Command with RoomManager.Command
+  case class WsMessage(playerId: String, msg: UserActionEvent) extends Command
   case object GameLoop extends Command
 
 
@@ -40,9 +41,9 @@ object RoomActor {
       ctx =>
         Behaviors.withTimers[Command]{
           implicit timer =>
-            val subscribersMap = mutable.HashMap[Long, ActorRef[UserActor.Command]]()
+            val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建grid
-            val grid = new GridServer(ctx, log, dispatch(subscribersMap), dispatchTo(subscribersMap),Boundary.getBoundary)
+            val grid = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
             timer.startPeriodicTimer(GameLoopKey,GameLoop,Frame.millsAServerFrame.millis)
             idle(roomId, Nil, subscribersMap, grid, 0L)
         }
@@ -51,9 +52,9 @@ object RoomActor {
 
   def idle(
           roomId: Long,
-          newPlayer: List[(Long, ActorRef[UserActor.Command])],
-          subscribersMap: mutable.HashMap[Long, ActorRef[UserActor.Command]],
-          grid: GridServer,
+          newPlayer: List[(String, ActorRef[UserActor.Command])],
+          subscribersMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
+          grid: ThorSchemaServerImpl,
           tickCount: Long
           )(
             implicit timer: TimerScheduler[Command]
@@ -62,11 +63,11 @@ object RoomActor {
       (ctx, msg) =>
         msg match {
           case JoinRoom(roomId, userId, name, userActor) =>
-            //TODO grid处理用户加入
+            grid.joinGame(userId, name, userActor)
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, grid, tickCount)
 
           case LeftRoom(userId, name, userList) =>
-            //TODO grid处理用户离开
+            grid.leftGame(userId, name)
             subscribersMap.remove(userId)
             dispatch(subscribersMap)(UserLeftRoom(userId, name))
 
@@ -74,12 +75,12 @@ object RoomActor {
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, grid, tickCount)
 
           case WsMessage(userId, msg) =>
-            //TODO grid处理用户操作
+            grid.receiveUserAction(msg)
             msg match {
               case a: MouseMove =>
-                dispatch(subscribersMap)(MouseMoveServer(a.userId, math.max(a.frame, grid.systemFrame), a))
+                dispatch(subscribersMap)(MouseMove(a.playerId, a.direction, math.max(a.frame, grid.systemFrame), a.serialNum))
               case a: MouseClick =>
-                dispatch(subscribersMap)(MouseClickServer(a.userId, math.max(a.frame, grid.systemFrame), a))
+                dispatch(subscribersMap)(MouseClick(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
               case _ => //do nothing
             }
             Behavior.same
@@ -88,7 +89,7 @@ object RoomActor {
             //grid定时更新
             grid.update()
 
-            val gridData = grid.getGridState()
+            val gridData = grid.getThorSchemaState()
             if (tickCount % 20 == 5) {
               //同步全量数据
               dispatch(subscribersMap)(GridSyncState(gridData))
@@ -116,12 +117,12 @@ object RoomActor {
 
 
   //向所有用户发数据
-  def dispatch(subscribers:mutable.HashMap[Long,ActorRef[UserActor.Command]])(msg: WsMsgServer) = {
+  def dispatch(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(msg: WsMsgServer) = {
     subscribers.values.foreach( _ ! UserActor.DispatchMsg(msg))
   }
 
   //向特定用户发数据
-  def dispatchTo(subscribers:mutable.HashMap[Long,ActorRef[UserActor.Command]])(id: Long,msg: WsMsgServer) = {
+  def dispatchTo(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(id: String,msg: WsMsgServer) = {
     subscribers.get(id).foreach( _ ! UserActor.DispatchMsg(msg))
   }
 

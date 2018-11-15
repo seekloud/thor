@@ -47,9 +47,9 @@ object UserManager {
         msg match {
           case GetWebSocketFlow(name,replyTo, roomIdOpt) =>
 
-            val playerInfo = UserInfo(uidGenerator.getAndIncrement(), name)
+            val playerInfo = UserInfo(uidGenerator.getAndIncrement().toString, name)
 
-            val userActor = getUserActor(ctx, playerInfo.uId, playerInfo)
+            val userActor = getUserActor(ctx, playerInfo.playerId, playerInfo)
             replyTo ! getWebSocketFlow(userActor)
             userActor ! UserActor.StartGame(roomIdOpt)
             Behaviors.same
@@ -115,7 +115,7 @@ object UserManager {
       Supervision.Resume
   }
 
-  private def getUserActor(ctx: ActorContext[Command],id: Long, userInfo: UserInfo):ActorRef[UserActor.Command] = {
+  private def getUserActor(ctx: ActorContext[Command],id: String, userInfo: UserInfo):ActorRef[UserActor.Command] = {
     val childName = s"UserActor-${id}"
     ctx.child(childName).getOrElse{
       val actor = ctx.spawn(UserActor.create(id, userInfo),childName)
