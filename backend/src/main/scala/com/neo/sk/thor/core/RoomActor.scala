@@ -25,30 +25,13 @@ object RoomActor {
   final case class ChildDead[U](name:String,childRef:ActorRef[U]) extends Command
 
   case class JoinRoom(roomId: Long, userId: Long, name: String,userActor: ActorRef[UserActor.Command]) extends Command
-  case class LeftRoom(roomId: Long, userId: Long, name: String, userList: List[(Long, String)]) extends Command
-  case class GetKilled(userId: Long, name: String) extends Command with RoomManager.Command
+  case class LeftRoom(userId: Long, name: String, userList: List[(Long, String)]) extends Command
+//  case class GetKilled(userId: Long, name: String) extends Command with RoomManager.Command
   case class WsMessage(userId: Long, msg: UserActionEvent) extends Command
   case object GameLoop extends Command
 
-  final case class SwitchBehavior(
-                                   name: String,
-                                   behavior: Behavior[Command],
-                                   durationOpt: Option[FiniteDuration] = None,
-                                   timeOut: TimeOut = TimeOut("busy time error")
-                                 ) extends Command
 
   case class TimeOut(msg:String) extends Command
-
-  private final case object BehaviorChangeKey
-  private[this] def switchBehavior(ctx: ActorContext[Command],
-                                   behaviorName: String, behavior: Behavior[Command], durationOpt: Option[FiniteDuration] = None,timeOut: TimeOut  = TimeOut("busy time error"))
-                                  (implicit stashBuffer: StashBuffer[Command],
-                                   timer:TimerScheduler[Command]) = {
-    log.debug(s"${ctx.self.path} becomes $behaviorName behavior.")
-    timer.cancel(BehaviorChangeKey)
-    durationOpt.foreach(timer.startSingleTimer(BehaviorChangeKey,timeOut,_))
-    stashBuffer.unstashAll(ctx,behavior)
-  }
 
   private final case object GameLoopKey
   def create(roomId: Long): Behavior[Command] = {
@@ -58,6 +41,7 @@ object RoomActor {
         Behaviors.withTimers[Command]{
           implicit timer =>
             val subscribersMap = mutable.HashMap[Long, ActorRef[UserActor.Command]]()
+            //为新房间创建grid
             val grid = new GridServer(ctx, log, dispatch(subscribersMap), dispatchTo(subscribersMap),Boundary.getBoundary)
             timer.startPeriodicTimer(GameLoopKey,GameLoop,Frame.millsAServerFrame.millis)
             idle(roomId, Nil, subscribersMap, grid, 0L)
@@ -81,17 +65,13 @@ object RoomActor {
             //TODO grid处理用户加入
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, grid, tickCount)
 
-          case LeftRoom(roomId, userId, name, userList) =>
+          case LeftRoom(userId, name, userList) =>
             //TODO grid处理用户离开
             subscribersMap.remove(userId)
             dispatch(subscribersMap)(UserLeftRoom(userId, name))
 
-            if(userList.isEmpty && roomId > 1l) Behavior.stopped
+            if(userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, grid, tickCount)
-
-          case GetKilled(userId, name) =>
-            subscribersMap.remove(userId)
-            idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, grid, tickCount)
 
           case WsMessage(userId, msg) =>
             //TODO grid处理用户操作
@@ -105,16 +85,20 @@ object RoomActor {
             Behavior.same
 
           case GameLoop =>
+            //grid定时更新
             grid.update()
 
             val gridData = grid.getGridState()
             if (tickCount % 20 == 5) {
+              //同步全量数据
               dispatch(subscribersMap)(GridSyncState(gridData))
             }
             if(tickCount % 20 == 1){
+              //排行榜
 //              dispatch(subscribersMap)(Ranks(grid.currentRank,grid.historyRank))
             }
             newPlayer.foreach{
+              //为新用户分发全量数据
               player => dispatchTo(subscribersMap)(player._1, GridSyncState(gridData))
             }
             idle(roomId, Nil, subscribersMap, grid, tickCount+1)
@@ -131,11 +115,12 @@ object RoomActor {
   }
 
 
-
+  //向所有用户发数据
   def dispatch(subscribers:mutable.HashMap[Long,ActorRef[UserActor.Command]])(msg: WsMsgServer) = {
     subscribers.values.foreach( _ ! UserActor.DispatchMsg(msg))
   }
 
+  //向特定用户发数据
   def dispatchTo(subscribers:mutable.HashMap[Long,ActorRef[UserActor.Command]])(id: Long,msg: WsMsgServer) = {
     subscribers.get(id).foreach( _ ! UserActor.DispatchMsg(msg))
   }
