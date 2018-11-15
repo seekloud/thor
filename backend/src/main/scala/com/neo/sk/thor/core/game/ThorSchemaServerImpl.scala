@@ -35,7 +35,7 @@ case class ThorSchemaServerImpl (
 
   override def info(msg: String): Unit = log.info(msg)
 
-  private val propIdGenerator = new AtomicInteger(100)
+  private val foodIdGenerator = new AtomicInteger(100)
 
   private var justJoinUser:List[(String, String, ActorRef[UserActor.Command])] = Nil
 
@@ -58,7 +58,7 @@ case class ThorSchemaServerImpl (
 
   private final def gengerateFood(level: Int = 1, position: Point, radius: Float = 2): Unit ={
     //生成食物事件，被后台定时事件调用，前端不产生此事件，食物的属性暂且全部作为参数
-    val foodState = FoodState(propIdGenerator.getAndIncrement(), level, position, radius)
+    val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius)
     val event = GenerateFood(systemFrame, foodState)
     addGameEvent(event)
     //TODO dispatch ?
