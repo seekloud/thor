@@ -1,5 +1,5 @@
 package com.neo.sk.thor.shared.ptcl.thor
-import com.neo.sk.thor.shared.ptcl.`object`.{AdventurerImpl, AdventurerState}
+import com.neo.sk.thor.shared.ptcl.`object`.{AdventurerImpl, AdventurerState, Food}
 import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent}
 
@@ -124,10 +124,9 @@ class ThorSchemaImpl(
       adventurerMap.put(a.playerId, adventurer)
     }
     thorSchemaSate.food.foreach { f =>
-      //TODO complete
-//      val food = new FoodImpl(config, f)
-//      quadTree.insert(food)
-//      foodMap.put(f.fId, food)
+      val food = Food(f)
+      quadTree.insert(food)
+      foodMap.put(f.fId, food)
     }
 
     waitSyncData = false
