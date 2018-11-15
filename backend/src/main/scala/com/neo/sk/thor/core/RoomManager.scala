@@ -47,20 +47,21 @@ object RoomManager {
         (ctx, msg) =>
           msg match {
             case JoinRoom(userId, name, userActor, roomIdOpt) =>
+              //为新用户分配房间
               roomIdOpt match {
-                case Some(roomId) =>
+                case Some(roomId) => //用户指定roomId
                   roomInUse.get(roomId) match {
                     case Some(list) => roomInUse.put(roomId, (userId, name) :: list)
                     case None => roomInUse.put(roomId, List((userId, name)))
                   }
                   getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, userId, name, userActor)
 
-                case None =>
+                case None => //随机分配room
                   roomInUse.find(p => p._2.length < personLimit).toList.sortBy(_._1).headOption match{
                     case Some(t) =>
                       roomInUse.put(t._1,(userId, name) :: t._2)
                       getRoomActor(ctx,t._1) ! RoomActor.JoinRoom(t._1, userId, name, userActor)
-                    case None =>
+                    case None =>  //创建新房间
                       var roomId = roomIdGenerator.getAndIncrement()
                       while(roomInUse.exists(_._1 == roomId))roomId = roomIdGenerator.getAndIncrement()
                       roomInUse.put(roomId,List((userId, name)))
@@ -75,17 +76,7 @@ object RoomManager {
                   roomInUse.put(t._1,t._2.filterNot(_._1 == uid))
                   getRoomActor(ctx,t._1) ! RoomActor.LeftRoom(t._1, uid,name,roomInUse(t._1))
                   if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
-                  log.debug(s"玩家：${uid}--$name remember to come back!!!$roomInUse")
                 case None => log.debug(s"该玩家不在任何房间")
-              }
-              Behaviors.same
-
-            case GetKilled(uid, name) =>
-              roomInUse.find(_._2.exists(_._1 == uid)) match{
-                case Some(t) =>
-                  roomInUse.put(t._1,t._2.filterNot(_._1 == uid))
-                  getRoomActor(ctx,t._1) ! GetKilled(uid, name)
-                case None =>log.debug(s"this user doesn't exist")
               }
               Behaviors.same
 

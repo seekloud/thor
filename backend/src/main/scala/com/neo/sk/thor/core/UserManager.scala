@@ -124,8 +124,4 @@ object UserManager {
     }.upcast[UserActor.Command]
   }
 
-  private def getUserActorOpt(ctx: ActorContext[Command],id:String):Option[ActorRef[UserActor.Command]] = {
-    val childName = s"UserActor-${id}"
-    ctx.child(childName).map(_.upcast[UserActor.Command])
-  }
 }
