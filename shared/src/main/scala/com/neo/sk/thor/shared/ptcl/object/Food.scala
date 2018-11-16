@@ -17,7 +17,7 @@ trait Food extends CircleObjectOfGame {
 
   override protected var position: Point
 
-  override val radius: Float
+  override var radius: Float
 
   def getFoodState: FoodState = {
     FoodState(fId, level, position, radius)
@@ -34,5 +34,5 @@ case class AddNormalFood(
                         fId: Long,
                         var level: Int,
                         var position: model.Point,
-                        radius: Float
+                        var radius: Float
                         ) extends Food
