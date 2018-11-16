@@ -29,7 +29,7 @@ trait Adventurer extends CircleObjectOfGame {
   var level: Int
   var energy: Int
 //  var radius: Int
-  var position: Point
+//  var position: Point
   var direction: Float
   var weaponLevel: Int
   var weaponLength: Int
@@ -42,6 +42,12 @@ trait Adventurer extends CircleObjectOfGame {
     if(this.isIntersects(p)){
       eatFoodCallback(p)
     }
+  }
+
+  //判断是否被攻击
+  def checkAttacked(p:Adventurer,attackedCallback: Adventurer => Unit): Unit ={
+    if(this.position.distance(p.position) < (this.weaponLength + p.radius) && scala.math.abs(p.position.getTheta(this.position) - this.direction) < (scala.math.Pi / 3))
+      attackedCallback(p)
   }
 
   def getAdventurerState: AdventurerState = {
@@ -68,7 +74,7 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  def  speedUp() = {
+  def speedUp() = {
     if (!isSpeedUp) isSpeedUp = true
     speed *= SpeedLevel.speedUpRatio
     energy -= Energy.speedUpStep
@@ -80,7 +86,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
 
-
+  //TODO 位置移动 击杀
 
 
 }
@@ -106,7 +112,7 @@ case class AdventurerImpl(
       adventurerState.killNum)
   }
 
-  override val radius: Float = config.thorRadius
+  override val radius: Float = config.adventurerRadius
 
 
 

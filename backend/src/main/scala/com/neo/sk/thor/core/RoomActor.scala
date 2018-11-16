@@ -79,8 +79,12 @@ object RoomActor {
             msg match {
               case a: MouseMove =>
                 dispatch(subscribersMap)(MouseMove(a.playerId, a.direction, math.max(a.frame, grid.systemFrame), a.serialNum))
-              case a: MouseClick =>
-                dispatch(subscribersMap)(MouseClick(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+              case a: MouseClickDownLeft =>
+                dispatch(subscribersMap)(MouseClickDownLeft(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+              case a: MouseClickDownRight =>
+                dispatch(subscribersMap)(MouseClickDownRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+              case a: MouseClickUpRight =>
+                dispatch(subscribersMap)(MouseClickUpRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
               case _ => //do nothing
             }
             Behavior.same
