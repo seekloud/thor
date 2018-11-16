@@ -13,7 +13,18 @@ final case class GridBoundary(width:Int,height:Int){
 }
 
 final case class AdventurerParams(
-  radius: Float
+  speedLevel: List[Float],
+  radiusLevel: List[Float],
+  maxEnergyList: List[Int],
+  containEnergyList: List[Int]
+)
+
+final case class FoodParams(
+  energyList: List[Int],
+  radiusList: List[Float]
+)
+final case class WeaponParams(
+  lengthList: List[Float]
 )
 
 
@@ -23,12 +34,17 @@ trait ThorGameConfig {
 
   def boundary: Point
 
-  def adventurerRadius:Float
+  def getAdventurerRadiusByLevel(l: Int): Float
 
-  def getEnergyByFoodLevel(foodLevel: Int): Int
-  def getMaxEnergyByLevel(adventurerLevel: Int): Int
-  def getWeaponLevelByLevel(adventurerLevel: Int): Int
-  def getWeaponLengthByLevel(adventurerLevel: Int): Int
+  def getRadiusByFoodLevel(l: Int): Float
+
+  def getEnergyByFoodLevel(l: Int): Int
+
+  def getMaxEnergyByLevel(l: Int): Int
+
+  def getWeaponLevelByLevel(l: Int): Int
+
+  def getWeaponLengthByLevel(l: Int): Float
 
 }
 
@@ -36,30 +52,35 @@ trait ThorGameConfig {
 case class ThorGameConfigImpl (
   gridBoundary: GridBoundary,
   frameDuration:Long,
-  adventurerParams: AdventurerParams
+  adventurerParams: AdventurerParams,
+  foodParams: FoodParams,
+  weaponParams: WeaponParams
 ) extends ThorGameConfig {
 
   def getThorGameConfigImpl(): ThorGameConfigImpl = this
 
   def boundary = gridBoundary.getBoundary
 
-  def adventurerRadius = adventurerParams.radius
-
-
-  //TODO 详写
-  def getEnergyByFoodLevel(foodLevel: Int) = {
-    0
-  }
-  def getMaxEnergyByLevel(adventurerLevel: Int) = {
-    0
-  }
-  def getWeaponLevelByLevel(adventurerLevel: Int)= {
-    0
-  }
-  def getWeaponLengthByLevel(adventurerLevel: Int) = {
-    0
+  def getAdventurerRadiusByLevel(l: Int) = {
+    adventurerParams.radiusLevel(l)
   }
 
+
+  override def getRadiusByFoodLevel(l: Int): Float = {
+    foodParams.radiusList(l)
+  }
+  override def getEnergyByFoodLevel(l: Int): Int = {
+    foodParams.energyList(l)
+  }
+  override def getMaxEnergyByLevel(l: Int): Int = {
+    adventurerParams.maxEnergyList(l)
+  }
+  override def getWeaponLevelByLevel(l: Int): Int = {
+    l
+  }
+  override def getWeaponLengthByLevel(l: Int): Float = {
+    weaponParams.lengthList(l)
+  }
 
 
 }
