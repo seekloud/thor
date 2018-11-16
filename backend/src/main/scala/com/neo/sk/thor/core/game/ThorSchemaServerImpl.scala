@@ -113,8 +113,8 @@ case class ThorSchemaServerImpl (
     def generateAdventurer(playerId: String, name: String) = {
 
       def genPosition():Point = {
-        Point(random.nextInt(boundary.x.toInt - (2 * config.thorRadius.toInt)) + config.thorRadius.toInt,
-          random.nextInt(boundary.y.toInt - (2 * config.thorRadius.toInt)) + config.thorRadius.toInt)
+        Point(random.nextInt(boundary.x.toInt - 15),
+          random.nextInt(boundary.y.toInt - 15))
       }
 
       def genAdventurer() = {
@@ -138,7 +138,7 @@ case class ThorSchemaServerImpl (
         val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
         addGameEvent(event)
-        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef)
+        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef, config)
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
     }

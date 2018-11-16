@@ -1,7 +1,7 @@
 package com.neo.sk.thor.common
 
 import java.util.concurrent.TimeUnit
-import com.neo.sk.thor.core.game.ThorSchemaServerImpl
+import com.neo.sk.thor.core.game.ThorGameConfigServerImpl
 
 import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
 import com.neo.sk.utils.SessionSupport.SessionConfig
@@ -36,7 +36,7 @@ object AppSettings {
   val dependence = config.getConfig("dependence")
 
   val personLimit = appConfig.getInt("RoomManager.personLimit")
-//  val thorGameConfig:ThorGameConfig = TankGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
+  val thorGameConfig:ThorGameConfig = ThorGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
 
 //  val wxConfig = appConfig.getConfig("wx.config")
 //  val mpAppId = wxConfig.getString("mpAppId")

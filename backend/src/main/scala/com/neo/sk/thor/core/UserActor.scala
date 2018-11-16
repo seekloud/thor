@@ -9,8 +9,9 @@ import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
 import com.neo.sk.thor.Boot.roomManager
-import com.neo.sk.thor.core.game.ThorSchemaServerImpl
+import com.neo.sk.thor.core.game.{ThorGameConfigServerImpl, ThorSchemaServerImpl}
 import com.neo.sk.thor.core.thor.AdventurerServer
+import com.neo.sk.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.byteobject.ByteObject._
 
 import scala.concurrent.duration._
@@ -34,7 +35,7 @@ object UserActor {
   case class StartGame(roomId: Option[Long]) extends Command
   case class JoinRoom(playerId: String, name: String, userActor:ActorRef[UserActor.Command], roomIdOpt:Option[Long] = None) extends Command with RoomManager.Command
   case class LeftRoom[U](actorRef:ActorRef[U]) extends Command
-  case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, roomActor: ActorRef[RoomActor.Command]) extends Command
+  case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl) extends Command
 
   case class UserFrontActor(actor:ActorRef[WsMsgSource]) extends Command
 
@@ -123,8 +124,8 @@ object UserActor {
             roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, roomIdOpt)
             Behaviors.same
 
-          case JoinRoomSuccess(adventurer, playerId, roomActor) =>
-            frontActor ! Wrap(UserInfo(playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          case JoinRoomSuccess(adventurer, playerId, roomActor, config) =>
+            frontActor ! Wrap(YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
             switchBehavior(ctx,"play",play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
             Behaviors.same
 
