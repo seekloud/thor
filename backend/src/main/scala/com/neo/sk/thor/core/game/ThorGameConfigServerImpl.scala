@@ -1,7 +1,7 @@
 package com.neo.sk.thor.core.game
 
 import akka.util.Helpers
-import com.neo.sk.thor.shared.ptcl.config.{AdventurerParams, GridBoundary, ThorGameConfig, ThorGameConfigImpl}
+import com.neo.sk.thor.shared.ptcl.config._
 import com.neo.sk.thor.shared.ptcl.model.Point
 import com.typesafe.config.Config
 
@@ -29,22 +29,34 @@ class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val adventurerSpeedLevel = config.getDoubleList("thorGame.adventurer.speed")
     .requiring(_.size() >= 1,"minimum supported adventurer speed size is 1").asScala.map(_.toFloat).toList
 
+  private[this] val adventurerMaxEnergyLevel = config.getIntList("thorGame.adventurer.maxEnergy")
+    .requiring(_.size() >= 1,"minimum supported adventurer max energy size is 1").asScala.map(_.toInt).toList
+
+
+  private[this] val adventurerContainEnergyLevel = config.getIntList("thorGame.adventurer.containEnergy")
+    .requiring(_.size() >= 1,"minimum supported adventurer max energy size is 1").asScala.map(_.toInt).toList
 
   private[this] val weaponLengthLevel = config.getDoubleList("thorGame.weapon.length")
     .requiring(_.size() >= 1,"minimum supported weapon length size is 1").asScala.map(_.toFloat).toList
 
   private[this] val foodEnergyLevel = config.getIntList("thorGame.food.energy")
-    .requiring(_.size() >= 1,"minimum supported food energy size is 1")
+    .requiring(_.size() >= 1,"minimum supported food energy size is 1").asScala.map(_.toInt).toList
 
   private[this] val foodRadiusLevel = config.getDoubleList("thorGame.food.radius")
     .requiring(_.size() >= 1,"minimum supported food energy size is 1").asScala.map(_.toFloat).toList
 
+
+
 //  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
 //    .requiring(_ > 0, "minimum supported adventurer radius is 1").toFloat
 
-  private[this] val adventurerParams = AdventurerParams(adventurerSpeedLevel, adventurerRadiusLevel)
+  private[this] val adventurerParams = AdventurerParams(adventurerSpeedLevel, adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel)
 
-  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, adventurerParams)
+  private[this] val foodParams = FoodParams(foodEnergyLevel, foodRadiusLevel)
+
+  private[this] val weaponParams = WeaponParams(weaponLengthLevel)
+
+  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, adventurerParams, foodParams, weaponParams)
 
   def getThorGameConfig: ThorGameConfigImpl = thorGameConfig
 
@@ -54,10 +66,11 @@ class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   def getAdventurerRadiusByLevel(adventurerLevel: Int): Float = thorGameConfig.getAdventurerRadiusByLevel(adventurerLevel)
 
-  def getEnergyByFoodLevel(foodLevel: Int) = thorGameConfig.getEnergyByFoodLevel(foodLevel)
-  def getMaxEnergyByLevel(adventurerLevel: Int) = thorGameConfig.getMaxEnergyByLevel(adventurerLevel)
-  def getWeaponLevelByLevel(adventurerLevel: Int) = thorGameConfig.getWeaponLevelByLevel(adventurerLevel)
-  def getWeaponLengthByLevel(adventurerLevel: Int) = thorGameConfig.getWeaponLengthByLevel(adventurerLevel)
+  override def getRadiusByFoodLevel(l: Int): Float = thorGameConfig.getRadiusByFoodLevel(l)
+  def getEnergyByFoodLevel(l: Int) = thorGameConfig.getEnergyByFoodLevel(l)
+  def getMaxEnergyByLevel(l: Int) = thorGameConfig.getMaxEnergyByLevel(l)
+  def getWeaponLevelByLevel(l: Int) = thorGameConfig.getWeaponLevelByLevel(l)
+  def getWeaponLengthByLevel(l: Int) = thorGameConfig.getWeaponLengthByLevel(l)
 
 
 
