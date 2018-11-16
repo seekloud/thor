@@ -46,6 +46,8 @@ trait ThorGameConfig {
 
   def getWeaponLengthByLevel(l: Int): Float
 
+  def getThorGameConfigImpl(): ThorGameConfigImpl
+
 }
 
 

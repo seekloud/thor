@@ -138,7 +138,7 @@ case class ThorSchemaServerImpl (
         val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
         addGameEvent(event)
-        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef, config)
+        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef, config.getThorGameConfigImpl())
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
     }
