@@ -113,8 +113,8 @@ case class ThorSchemaServerImpl (
     def generateAdventurer(playerId: String, name: String) = {
 
       def genPosition():Point = {
-        Point(random.nextInt(boundary.x.toInt - (2 * config.thorRadius.toInt)) + config.thorRadius.toInt,
-          random.nextInt(boundary.y.toInt - (2 * config.thorRadius.toInt)) + config.thorRadius.toInt)
+        Point(random.nextInt(boundary.x.toInt - (2 * config.adventurerRadius.toInt)) + config.adventurerRadius.toInt,
+          random.nextInt(boundary.y.toInt - (2 * config.adventurerRadius.toInt)) + config.adventurerRadius.toInt)
       }
 
       def genAdventurer() = {

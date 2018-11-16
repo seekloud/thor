@@ -13,7 +13,7 @@ final case class GridBoundary(width:Int,height:Int){
 }
 
 final case class AdventurerParams(
-  radius: Float,
+  radiusList: List[Float],
   maxEnergyList: List[Int]
 )
 
@@ -55,7 +55,7 @@ case class ThorGameConfigImpl (
 
   def boundary = gridBoundary.getBoundary
 
-  def adventurerRadius = adventurerParams.radius
+  def adventurerRadius = adventurerParams.radiusList.head
 
 
   override def getRadiusByFoodLevel(foodLevel: Int): Float = {
