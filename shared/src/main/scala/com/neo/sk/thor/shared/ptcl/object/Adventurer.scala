@@ -13,7 +13,7 @@ case class AdventurerState(
   name: String,
   level: Int,
   energy: Int,
-  radius: Float,
+  radiusLevel: Int,
   position: Point,
   direction: Float,
   weaponLevel: Int,
@@ -51,7 +51,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState(implicit config: ThorGameConfig): AdventurerState = {
-    AdventurerState(playerId, name, level, energy, config.getAdventurerRadiusByLevel(radiusLevel), position, direction, weaponLevel, weaponLength, speed, isSpeedUp, killNum)
+    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, weaponLevel, weaponLength, speed, isSpeedUp, killNum)
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
@@ -101,13 +101,13 @@ case class AdventurerImpl(
   var position: Point,
   var direction: Float,
   var weaponLevel: Int,
-  var weaponLength: Int,
+  var weaponLength: Float,
   var speed: Float,
   var isSpeedUp: Boolean,
   var killNum: Int
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
-    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.position,
+    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.radiusLevel, adventurerState.position,
       adventurerState.direction, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speed, adventurerState.isSpeedUp,
       adventurerState.killNum)
   }
