@@ -6,7 +6,7 @@ import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.Flow
 import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
-import com.neo.sk.utils.byteObject.MiddleBufferInJvm
+import org.seekloud.byteobject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
 import com.neo.sk.thor.Boot.roomManager
 import com.neo.sk.thor.core.game.ThorSchemaServerImpl

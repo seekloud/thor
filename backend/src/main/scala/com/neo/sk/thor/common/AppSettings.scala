@@ -36,7 +36,7 @@ object AppSettings {
   val dependence = config.getConfig("dependence")
 
   val personLimit = appConfig.getInt("RoomManager.personLimit")
-  val thorGameConfig:ThorGameConfig = TankGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
+//  val thorGameConfig:ThorGameConfig = TankGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
 
 //  val wxConfig = appConfig.getConfig("wx.config")
 //  val mpAppId = wxConfig.getString("mpAppId")
