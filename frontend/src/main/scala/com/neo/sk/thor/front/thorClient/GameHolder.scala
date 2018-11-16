@@ -19,8 +19,8 @@ import org.scalajs.dom.raw.{Event, FileReader, MessageEvent, MouseEvent}
 
 import scala.collection.mutable
 import scala.scalajs.js.typedarray.ArrayBuffer
-import org.seekloud.byteobject.ByteObject.bytesDecode
-import org.seekloud.byteobject.MiddleBufferInJs
+//import org.seekloud.byteobject.ByteObject.bytesDecode
+//import org.seekloud.byteobject.MiddleBufferInJs
 import scala.xml.Elem
 import org.scalajs.dom
 
@@ -42,10 +42,10 @@ class GameHolder(canvasName: String) {
 
   private[this] val canvasBounds = canvasBoundary / canvasUnit
 
-  var gridOpt : Option[ThorSchemaClientImpl] = null
+  var gridOpt : Option[ThorSchemaClientImpl] = None
   var thorSchema = gridOpt.get
-  private[this] var myId = ""
-  private[this] var myName = ""
+  private[this] var myId = thorSchema.myId
+  private[this] var myName = thorSchema.myName
   private[this] var firstCome = true
   private[this] var currentRank = List.empty[Score]
   private[this] var historyRank = List.empty[Score]
@@ -132,7 +132,7 @@ class GameHolder(canvasName: String) {
             case Right(data) =>
               data match {
                 case YourInfo(config, id, name) =>
-                  thorSchema = new ThorSchemaClientImpl(ctx,config,id,name)
+                  thorSchema = ThorSchemaClientImpl(ctx,config,id,name)
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
 
@@ -165,6 +165,7 @@ class GameHolder(canvasName: String) {
 
   def addActionListenEvent(): Unit = {
     canvas.focus()
+    canvas.oncontextmenu = _=> false //取消右键弹出行为
     canvas.onmousemove = { (e: dom.MouseEvent) =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBoundary / 2).toFloat
@@ -174,13 +175,40 @@ class GameHolder(canvasName: String) {
       thorSchema.addMyAction(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
       e.preventDefault()
     }
-    canvas.onclick = { (e: MouseEvent) =>
-      val currentTime = System.currentTimeMillis()
-      val data = MouseClick(myId,thorSchema.systemFrame,getActionSerialNum)
-      websocketClient.sendMsg(data)
-      thorSchema.addMyAction(MouseClick(myId,thorSchema.systemFrame,getActionSerialNum))
-      e.preventDefault()
+    canvas.onmousedown = {(e: dom.MouseEvent) =>
+      if(e.button == 0){ //左键
+        val event = MouseClickDownLeft(myId, thorSchema.systemFrame, getActionSerialNum)
+        websocketClient.sendMsg(event)
+        thorSchema.preExecuteUserEvent(event)
+        thorSchema.addMyAction(event)
+        e.preventDefault()
+      }
+      else if(e.button == 2){ //右键
+        val event = MouseClickDownRight(myId, thorSchema.systemFrame, getActionSerialNum)
+        websocketClient.sendMsg(event)
+        thorSchema.preExecuteUserEvent(event) // actionEventMap
+        thorSchema.addMyAction(event) // myAdventurerAction
+        e.preventDefault()
+      }
+      else ()
     }
+    canvas.onmouseup = {(e: dom.MouseEvent) =>
+      if(e.button == 2){ //右键
+        val event = MouseClickUpRight(myId, thorSchema.systemFrame, getActionSerialNum)
+        websocketClient.sendMsg(event)
+        thorSchema.preExecuteUserEvent(event)
+        thorSchema.addMyAction(event)
+        e.preventDefault()
+      }
+      else ()
+    }
+//    canvas.onclick = { (e: MouseEvent) =>
+//      val currentTime = System.currentTimeMillis()
+//      val data = MouseClick(myId,thorSchema.systemFrame,getActionSerialNum)
+//      websocketClient.sendMsg(data)
+//      thorSchema.addMyAction(MouseClick(myId,thorSchema.systemFrame,getActionSerialNum))
+//      e.preventDefault()
+//    }
 
   }
 

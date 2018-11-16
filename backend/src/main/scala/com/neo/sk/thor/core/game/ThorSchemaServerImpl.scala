@@ -50,7 +50,13 @@ case class ThorSchemaServerImpl (
   override protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food): Unit = {
     val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
     addGameEvent(event)
-    //TODO dispatch ?
+    dispatch(event)
+  }
+
+  override protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
+    val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
+    addGameEvent(event)
+    dispatch(event)
   }
 
   override def update(): Unit = super.update()
@@ -62,7 +68,7 @@ case class ThorSchemaServerImpl (
     val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius)
     val event = GenerateFood(systemFrame, foodState)
     addGameEvent(event)
-    //TODO dispatch ?
+    dispatch(event)
   }
 
   def genFood(num: Int) = {
@@ -93,7 +99,9 @@ case class ThorSchemaServerImpl (
 
     val act = action match {
       case a: MouseMove => a.copy(frame = f)
-      case a: MouseClick => a.copy(frame = f)
+      case a: MouseClickDownLeft => a.copy(frame = f)
+      case a: MouseClickDownRight => a.copy(frame = f)
+      case a: MouseClickUpRight => a.copy(frame = f)
     }
 
     addUserAction(act)

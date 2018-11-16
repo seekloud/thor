@@ -99,14 +99,22 @@ trait ThorSchema extends KillInformation{
         case Some(adventurer) =>
           action match {
             case a: MouseMove => adventurer.setAdventurerDirection(a.direction)
-            case a: MouseClick => //TODO 击杀
+            case a: MouseClickDownLeft =>
+              val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
+              adventurerMaybeAttacked.foreach(a => adventurer.checkAttacked(a,adventurerAttackedCallback(killer = adventurer)))
+            case a: MouseClickDownRight => adventurer.speedUp()
+            case a: MouseClickUpRight => adventurer.cancleSpeedUp()
           }
         case None =>
           info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
 
       }
     }
+  }
 
+  protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit ={
+    //重写，后台被攻击事件
+    //前端暂不操作，可能有一个对面死掉的动画
   }
 
 

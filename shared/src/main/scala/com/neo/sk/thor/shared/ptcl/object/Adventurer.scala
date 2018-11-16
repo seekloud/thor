@@ -44,6 +44,12 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
+  //判断是否被攻击
+  def checkAttacked(p:Adventurer,attackedCallback: Adventurer => Unit): Unit ={
+    if(this.position.distance(p.position) < (this.weaponLength + p.radius) && scala.math.abs(p.position.getTheta(this.position) - this.direction) < (scala.math.Pi / 3))
+      attackedCallback(p)
+  }
+
   def getAdventurerState: AdventurerState = {
     AdventurerState(playerId, name, level, energy, position, direction, weaponLevel, weaponLength, speed, isSpeedUp, killNum)
   }
