@@ -14,6 +14,7 @@ import akka.actor.typed.scaladsl.AskPattern._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import com.neo.sk.thor.Boot.{executor, scheduler, timeout}
 import com.neo.sk.thor.core.UserManager
+import com.neo.sk.thor.Boot.userManager
 
 
 trait HttpService
@@ -49,8 +50,10 @@ trait HttpService
         } ~
           path("join"){
           parameter('name){ name =>
-            log.debug(s"sssssssssname=${name}")
-            complete("sss")
+            val flowFuture:Future[Flow[Message,Message,Any]] = userManager ? (UserManager.GetWebSocketFlow(name,_,None))
+            dealFutureResult(
+              flowFuture.map(t => handleWebSocketMessages(t))
+            )
           }
         }
 
