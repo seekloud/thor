@@ -3,7 +3,7 @@ package com.neo.sk.thor.core
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import com.neo.sk.thor.common.AppSettings
-import com.neo.sk.thor.core.game.{ThorGameConfigServer, ThorSchemaServerImpl}
+import com.neo.sk.thor.core.game.{ThorSchemaServerImpl}
 import com.neo.sk.thor.shared.ptcl._
 import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
@@ -43,7 +43,7 @@ object RoomActor {
           implicit timer =>
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建grid
-            val grid = ThorSchemaServerImpl(ThorGameConfigServer(), ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
+            val grid = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
             timer.startPeriodicTimer(GameLoopKey,GameLoop,Frame.millsAServerFrame.millis)
             idle(roomId, Nil, subscribersMap, grid, 0L)
         }

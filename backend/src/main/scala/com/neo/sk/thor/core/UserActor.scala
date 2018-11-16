@@ -125,7 +125,8 @@ object UserActor {
             Behaviors.same
 
           case JoinRoomSuccess(adventurer, playerId, roomActor, config) =>
-            frontActor ! Wrap(YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            val ws = YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            frontActor ! Wrap(ws)
             switchBehavior(ctx,"play",play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
             Behaviors.same
 
