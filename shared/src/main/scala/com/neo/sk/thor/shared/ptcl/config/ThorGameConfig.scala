@@ -8,19 +8,28 @@ import com.neo.sk.thor.shared.ptcl.model.Point
   * Time: 16:13
   */
 
-final case class GridBoundary(width: Int, height: Int) {
-  def getBoundary: Point = Point(width, height)
+final case class GridBoundary(width:Int,height:Int){
+  def getBoundary:Point = Point(width,height)
 }
 
 final case class AdventurerParams(
   speedLevel: List[Float],
-  radiusLevel: List[Float]
+  radiusLevel: List[Float],
+  maxEnergyList: List[Int]
+)
+
+final case class FoodParams(
+  energyList: List[Int],
+  radiusList: List[Float]
+)
+final case class WeaponParams(
+  lengthList: List[Int]
 )
 
 
 trait ThorGameConfig {
 
-  def frameDuration: Long
+  def frameDuration:Long
 
   def boundary: Point
 
@@ -37,10 +46,12 @@ trait ThorGameConfig {
 }
 
 
-case class ThorGameConfigImpl(
+case class ThorGameConfigImpl (
   gridBoundary: GridBoundary,
-  frameDuration: Long,
-  adventurerParams: AdventurerParams
+  frameDuration:Long,
+  adventurerParams: AdventurerParams,
+  foodParams: FoodParams,
+  weaponParams: WeaponParams
 ) extends ThorGameConfig {
 
   def getThorGameConfigImpl(): ThorGameConfigImpl = this
@@ -52,21 +63,20 @@ case class ThorGameConfigImpl(
   }
 
 
-  //TODO 详写
-  def getEnergyByFoodLevel(l: Int) = {
-    0
+  override def getRadiusByFoodLevel(foodLevel: Int): Float = {
+    foodParams.radiusList(foodLevel)
   }
-
-  def getMaxEnergyByLevel(l: Int) = {
-    0
+  override def getEnergyByFoodLevel(foodLevel: Int): Int = {
+    foodParams.energyList(foodLevel)
   }
-
-  def getWeaponLevelByLevel(l: Int) = {
-    0
+  override def getMaxEnergyByLevel(adventurerLevel: Int): Int = {
+    adventurerParams.maxEnergyList(adventurerLevel)
   }
-
-  def getWeaponLengthByLevel(l: Int) = {
-    0
+  override def getWeaponLevelByLevel(adventurerLevel: Int): Int = {
+    adventurerLevel
+  }
+  override def getWeaponLengthByLevel(adventurerLevel: Int): Int = {
+    weaponParams.lengthList(adventurerLevel)
   }
 
 
