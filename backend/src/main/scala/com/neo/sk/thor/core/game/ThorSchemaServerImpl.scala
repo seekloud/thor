@@ -21,7 +21,7 @@ import scala.collection.mutable
   * Time: 11:37
   */
 case class ThorSchemaServerImpl (
-                             override implicit val config: ThorGameConfig,
+                             config: ThorGameConfig,
                              roomActorRef:ActorRef[RoomActor.Command],
                              timer:TimerScheduler[RoomActor.Command],
                              log:Logger,
@@ -135,7 +135,7 @@ case class ThorSchemaServerImpl (
     justJoinUser.foreach{
       case (playerId, name, ref) =>
         val adventurer = generateAdventurer(playerId, name)
-        val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState, systemFrame)
+        val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState(config), systemFrame)
         dispatch(event)
         addGameEvent(event)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef, config.getThorGameConfigImpl())

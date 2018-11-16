@@ -24,6 +24,8 @@ import scala.scalajs.js.typedarray.ArrayBuffer
 import scala.xml.Elem
 import org.scalajs.dom
 
+import scala.language.implicitConversions
+
 /**
   * Created by Jingyi on 2018/11/9
   */
@@ -153,7 +155,7 @@ class GameHolder(canvasName: String) {
                 case  _ => println(s"接收到无效消息")
               }
             case Left(error) =>
-              println(s"decode msg failed,error:${error.message}")
+              println(s"decode msg failed,error:${error.toString}")
           }
         }
       case unknow =>

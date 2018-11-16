@@ -11,7 +11,7 @@ import scala.collection.mutable
   * Time: 16:54
   */
 class ThorSchemaImpl(
-  override implicit val config: ThorGameConfig,
+  override val config: ThorGameConfig,
   myId: String,
   myName: String
 ) extends ThorSchema with EsRecover {

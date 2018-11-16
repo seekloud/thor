@@ -13,6 +13,7 @@ import com.neo.sk.thor.core.game.{ThorGameConfigServerImpl, ThorSchemaServerImpl
 import com.neo.sk.thor.core.thor.AdventurerServer
 import com.neo.sk.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.byteobject.ByteObject._
+import scala.language.implicitConversions
 
 import scala.concurrent.duration._
 

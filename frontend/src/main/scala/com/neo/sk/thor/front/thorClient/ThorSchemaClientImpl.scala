@@ -15,7 +15,7 @@ import scala.collection.mutable
   */
 case class ThorSchemaClientImpl (
                              protected val ctx:dom.CanvasRenderingContext2D,
-                             override implicit val config: ThorGameConfig,
+                             override val config: ThorGameConfig,
                              myId: String,
                              myName: String
                            ) extends ThorSchemaImpl(config, myId, myName)
