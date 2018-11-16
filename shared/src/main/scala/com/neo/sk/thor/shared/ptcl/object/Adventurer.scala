@@ -29,7 +29,7 @@ trait Adventurer extends CircleObjectOfGame {
   var level: Int
   var energy: Int
 //  var radius: Int
-  var position: Point
+//  var position: Point
   var direction: Float
   var weaponLevel: Int
   var weaponLength: Int
@@ -74,7 +74,7 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  def  speedUp() = {
+  def speedUp() = {
     if (!isSpeedUp) isSpeedUp = true
     speed *= SpeedLevel.speedUpRatio
     energy -= Energy.speedUpStep
@@ -86,7 +86,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
 
-
+  //TODO 位置移动 击杀
 
 
 }
@@ -112,7 +112,7 @@ case class AdventurerImpl(
       adventurerState.killNum)
   }
 
-  override val radius: Float = config.thorRadius
+  override val radius: Float = config.adventurerRadius
 
 
 
