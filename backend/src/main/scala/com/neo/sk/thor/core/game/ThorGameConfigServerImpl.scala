@@ -23,10 +23,26 @@ class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val gameFameDuration = config.getLong("thorGame.frameDuration")
     .requiring(t => t >= 1l,"minimum game frame duration is 1 ms")
 
-  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
-    .requiring(_ > 0, "minimum supported adventurer radius is 1").toFloat
+  private[this] val adventurerRadiusLevel = config.getDoubleList("thorGame.adventurer.radius")
+    .requiring(_.size() >= 1,"minimum supported adventurer radius size is 1").asScala.map(_.toFloat).toList
 
-  private[this] val adventurerParams = AdventurerParams(adventurerRadiusData)
+  private[this] val adventurerSpeedLevel = config.getDoubleList("thorGame.adventurer.speed")
+    .requiring(_.size() >= 1,"minimum supported adventurer speed size is 1").asScala.map(_.toFloat).toList
+
+
+  private[this] val weaponLengthLevel = config.getDoubleList("thorGame.weapon.length")
+    .requiring(_.size() >= 1,"minimum supported weapon length size is 1").asScala.map(_.toFloat).toList
+
+  private[this] val foodEnergyLevel = config.getIntList("thorGame.food.energy")
+    .requiring(_.size() >= 1,"minimum supported food energy size is 1")
+
+  private[this] val foodRadiusLevel = config.getDoubleList("thorGame.food.radius")
+    .requiring(_.size() >= 1,"minimum supported food energy size is 1").asScala.map(_.toFloat).toList
+
+//  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
+//    .requiring(_ > 0, "minimum supported adventurer radius is 1").toFloat
+
+  private[this] val adventurerParams = AdventurerParams(adventurerSpeedLevel, adventurerRadiusLevel)
 
   private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, adventurerParams)
 
@@ -36,7 +52,7 @@ class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   def frameDuration:Long = thorGameConfig.frameDuration
 
-  def adventurerRadius:Float = thorGameConfig.adventurerRadius
+  def getAdventurerRadiusByLevel(adventurerLevel: Int): Float = thorGameConfig.getAdventurerRadiusByLevel(adventurerLevel)
 
   def getEnergyByFoodLevel(foodLevel: Int) = thorGameConfig.getEnergyByFoodLevel(foodLevel)
   def getMaxEnergyByLevel(adventurerLevel: Int) = thorGameConfig.getMaxEnergyByLevel(adventurerLevel)
