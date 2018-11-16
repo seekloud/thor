@@ -14,7 +14,7 @@ trait CircleObjectOfGame extends ObjectOfGame{
 
 
 
-  val radius:Float //半径
+  var radius:Float //半径
 
 
   final def getRadius = radius

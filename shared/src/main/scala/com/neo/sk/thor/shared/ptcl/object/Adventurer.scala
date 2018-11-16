@@ -13,11 +13,11 @@ case class AdventurerState(
   name: String,
   level: Int,
   energy: Int,
-//  radius: Int,
+  radius: Float,
   position: Point,
   direction: Float,
   weaponLevel: Int,
-  weaponLength: Int,
+  weaponLength: Float,
   speed: Float,
   isSpeedUp: Boolean,
   killNum: Int,
@@ -28,11 +28,11 @@ trait Adventurer extends CircleObjectOfGame {
   val name: String
   var level: Int
   var energy: Int
-//  var radius: Int
+  var radiusLevel: Int
 //  var position: Point
   var direction: Float
   var weaponLevel: Int
-  var weaponLength: Int
+  var weaponLength: Float
   var speed: Float
   var isSpeedUp: Boolean
   var killNum: Int
@@ -50,8 +50,8 @@ trait Adventurer extends CircleObjectOfGame {
       attackedCallback(p)
   }
 
-  def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, position, direction, weaponLevel, weaponLength, speed, isSpeedUp, killNum)
+  def getAdventurerState(implicit config: ThorGameConfig): AdventurerState = {
+    AdventurerState(playerId, name, level, energy, config.getAdventurerRadiusByLevel(radiusLevel), position, direction, weaponLevel, weaponLength, speed, isSpeedUp, killNum)
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
@@ -97,7 +97,7 @@ case class AdventurerImpl(
   name: String,
   var level: Int,
   var energy: Int,
-//  radius: Int,
+  var radiusLevel: Int,
   var position: Point,
   var direction: Float,
   var weaponLevel: Int,
@@ -112,7 +112,7 @@ case class AdventurerImpl(
       adventurerState.killNum)
   }
 
-  override val radius: Float = config.adventurerRadius
+  override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
 
 
 
