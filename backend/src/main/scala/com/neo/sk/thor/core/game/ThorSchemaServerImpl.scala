@@ -65,6 +65,19 @@ case class ThorSchemaServerImpl (
     //TODO dispatch ?
   }
 
+  def genFood(num: Int) = {
+
+    def genPosition():Point = {
+      Point(random.nextInt(boundary.x.toInt - 10),
+        random.nextInt(boundary.y.toInt - 10))
+    }
+
+    (1 to num).foreach{
+      t =>
+        gengerateFood(random.nextInt(5) + 1, genPosition())
+    }
+  }
+
   def joinGame(userId:String, name:String, userActor:ActorRef[UserActor.Command]):Unit = {
     justJoinUser = (userId, name, userActor) :: justJoinUser
   }
