@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
+import com.neo.sk.thor.core.thor.AdventurerServer
 import com.neo.sk.thor.core.{RoomActor, UserActor}
 import com.neo.sk.thor.shared.ptcl.`object`._
 import org.slf4j.Logger
@@ -84,6 +85,44 @@ case class ThorSchemaServerImpl (
 
     addUserAction(act)
     dispatch(act)
+  }
+
+  override def handleUserEnterRoomNow() = {
+
+    def generateAdventurer(playerId: String, name: String) = {
+
+      def genPosition():Point = {
+        Point(random.nextInt(boundary.x.toInt - (2 * config.thorRadius.toInt)) + config.thorRadius.toInt,
+          random.nextInt(boundary.y.toInt - (2 * config.thorRadius.toInt)) + config.thorRadius.toInt)
+      }
+
+      def genAdventurer() = {
+        val position = genPosition()
+        var adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
+        var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
+//        while (adventurer.isIntersectsObject(objects)){
+//          val position = genPosition()
+//          adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
+//          objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
+//        }
+        adventurer
+      }
+
+      genAdventurer()
+    }
+
+    justJoinUser.foreach{
+      case (playerId, name, ref) =>
+        val adventurer = generateAdventurer(playerId, name)
+        val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState, systemFrame)
+        dispatch(event)
+        addGameEvent(event)
+        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef)
+        adventurerMap.put(playerId, adventurer)
+        quadTree.insert(adventurer)
+    }
+
+    justJoinUser = Nil
   }
 
 }

@@ -65,7 +65,7 @@ trait ThorSchema extends KillInformation{
   }
 
   //处理本帧加入的用户
-  protected def handleUserEnterRoomNow(): Unit = {
+  def handleUserEnterRoomNow(): Unit = {
     gameEventMap.get(systemFrame).foreach {
       events =>
         handleUserEnterRoomEvent(events.filter(_.isInstanceOf[UserEnterRoom]).map(_.asInstanceOf[UserEnterRoom]).reverse)
