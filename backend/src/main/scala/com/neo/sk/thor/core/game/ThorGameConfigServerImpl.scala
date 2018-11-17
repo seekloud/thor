@@ -58,7 +58,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, adventurerParams, foodParams, weaponParams)
 
-  def getThorGameConfig: ThorGameConfigImpl = thorGameConfig
+  def getThorGameConfigImpl: ThorGameConfigImpl = thorGameConfig
 
   def boundary:Point = thorGameConfig.boundary
 

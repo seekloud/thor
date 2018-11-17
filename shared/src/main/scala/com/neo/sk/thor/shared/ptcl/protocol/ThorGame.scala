@@ -1,7 +1,7 @@
 package com.neo.sk.thor.shared.ptcl.protocol
 
 import com.neo.sk.thor.shared.ptcl.`object`.{AdventurerState, FoodState}
-import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
+import com.neo.sk.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
 import com.neo.sk.thor.shared.ptcl.model.Score
 import com.neo.sk.thor.shared.ptcl.thor.ThorSchemaState
 
@@ -43,7 +43,7 @@ object ThorGame {
 
   final case class UserInfo(playerId: String, name: String) extends WsMsgServer
 
-  final case class YourInfo(config: ThorGameConfig, id: String, name: String) extends WsMsgServer
+  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String) extends WsMsgServer
 
   final case class UserEnterRoom(playerId: String, name: String, adventurer: AdventurerState, override val frame: Long = 0l) extends UserEvent with WsMsgServer
 

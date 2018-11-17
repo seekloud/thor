@@ -2,7 +2,7 @@ package com.neo.sk.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
+//import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
 import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
@@ -19,8 +19,8 @@ import org.scalajs.dom.raw.{Event, FileReader, MessageEvent, MouseEvent}
 
 import scala.collection.mutable
 import scala.scalajs.js.typedarray.ArrayBuffer
-//import org.seekloud.byteobject.ByteObject.bytesDecode
-//import org.seekloud.byteobject.MiddleBufferInJs
+import org.seekloud.byteobject.ByteObject.bytesDecode
+import org.seekloud.byteobject.MiddleBufferInJs
 import scala.xml.Elem
 import org.scalajs.dom
 
@@ -122,7 +122,7 @@ class GameHolder(canvasName: String) {
 
 
   private def wsMessageHandler(e: MessageEvent) = {
-    import com.neo.sk.thor.front.utils.byteObject.ByteObject._
+//    import com.neo.sk.thor.front.utils.byteObject.ByteObject._
     e.data match {
       case blobMsg: Blob =>
         val fr = new FileReader()
