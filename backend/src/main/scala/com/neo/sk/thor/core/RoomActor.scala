@@ -142,7 +142,7 @@ object RoomActor {
   def dispatchTo(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(id: String,msg: WsMsgServer)(implicit sendBuffer:MiddleBufferInJvm)  = {
 
     val isKillMsg = msg.isInstanceOf[BeAttacked]
-    subscribers.values.foreach( _ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(),isKillMsg)))
+    subscribers.get(id).foreach( _ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(),isKillMsg)))
   }
 
 }
