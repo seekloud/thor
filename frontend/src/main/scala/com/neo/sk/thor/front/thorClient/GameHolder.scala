@@ -31,6 +31,8 @@ import scala.language.implicitConversions
   */
 class GameHolder(canvasName: String) {
 
+  println("GameHolder ...")
+
   import io.circe._, io.circe.generic.auto.exportDecoder, io.circe.parser._, io.circe.syntax._
 
 
@@ -45,13 +47,12 @@ class GameHolder(canvasName: String) {
   private[this] val canvasBounds = canvasBoundary / canvasUnit
 
   var gridOpt : Option[ThorSchemaClientImpl] = None
-  var thorSchema = gridOpt.get
-  private[this] var myId = thorSchema.myId
-  private[this] var myName = thorSchema.myName
+//  var thorSchema = gridOpt.get
+  private[this] var myId = "test"
+  private[this] var myName = "testName"
   private[this] var firstCome = true
   private[this] var currentRank = List.empty[Score]
   private[this] var historyRank = List.empty[Score]
-  private[this] var barrage = ""  //弹幕
 
   private[this] val actionSerialNumGenerator = new AtomicInteger(0)
   private[this] val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
@@ -67,31 +68,11 @@ class GameHolder(canvasName: String) {
   private var nextFrame = 0
   private var logicFrameTime = System.currentTimeMillis()
 
-  private[this] final val maxRollBackFrames = 5
-  private[this] val gameEventMap = new mutable.HashMap[Long, List[WsMsgServer]]()
-  private[this] val gameSnapshotMap = new mutable.HashMap[Long, ThorSchemaState]()
-  private[this] val historyAction = new mutable.HashMap[Long, (Long, Long, UserActionEvent)]()
+  var barrage = ""
 
 
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
 
-  def addGameEvent(f: Long, event: WsMsgServer) = {
-
-  }
-
-
-  def addActionWithFrame(id: Int, adventurerAction: UserActionEvent, frame: Long) = {
-  }
-
-  def addActionWithFrameFromServer(id: Int, adventurerAction: UserActionEvent, frame: Long) = {
-
-  }
-
-
-  //从第frame开始回滚到现在
-  def rollback(frame: Long) = {
-
-  }
 
 
   def gameRender(): Double => Unit = { d =>
@@ -132,9 +113,11 @@ class GameHolder(canvasName: String) {
           val middleDataInJs = new MiddleBufferInJs(buf)
           bytesDecode[WsMsgServer](middleDataInJs) match {
             case Right(data) =>
+              dom.console.log(data.toString)
               data match {
                 case YourInfo(config, id, name) =>
-                  thorSchema = ThorSchemaClientImpl(ctx,config,id,name)
+                  gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
+
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
 
@@ -172,37 +155,52 @@ class GameHolder(canvasName: String) {
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBoundary / 2).toFloat
       val currentTime = System.currentTimeMillis()
-      val data = MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum)
-      websocketClient.sendMsg(data)
-      thorSchema.addMyAction(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
+      gridOpt match{
+        case Some(thorSchema: ThorSchemaClientImpl) =>
+          val data = MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum)
+          websocketClient.sendMsg(data)
+          thorSchema.addMyAction(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
+        case None =>
+      }
+
       e.preventDefault()
     }
     canvas.onmousedown = {(e: dom.MouseEvent) =>
-      if(e.button == 0){ //左键
-        val event = MouseClickDownLeft(myId, thorSchema.systemFrame, getActionSerialNum)
-        websocketClient.sendMsg(event)
-        thorSchema.preExecuteUserEvent(event)
-        thorSchema.addMyAction(event)
-        e.preventDefault()
+      gridOpt match{
+        case Some(thorSchema: ThorSchemaClientImpl) =>
+          if(e.button == 0){ //左键
+            val event = MouseClickDownLeft(myId, thorSchema.systemFrame, getActionSerialNum)
+            websocketClient.sendMsg(event)
+            thorSchema.preExecuteUserEvent(event)
+            thorSchema.addMyAction(event)
+            e.preventDefault()
+          }
+          else if(e.button == 2){ //右键
+            val event = MouseClickDownRight(myId, thorSchema.systemFrame, getActionSerialNum)
+            websocketClient.sendMsg(event)
+            thorSchema.preExecuteUserEvent(event) // actionEventMap
+            thorSchema.addMyAction(event) // myAdventurerAction
+            e.preventDefault()
+          }
+          else ()
+        case None =>
       }
-      else if(e.button == 2){ //右键
-        val event = MouseClickDownRight(myId, thorSchema.systemFrame, getActionSerialNum)
-        websocketClient.sendMsg(event)
-        thorSchema.preExecuteUserEvent(event) // actionEventMap
-        thorSchema.addMyAction(event) // myAdventurerAction
-        e.preventDefault()
-      }
-      else ()
+
     }
     canvas.onmouseup = {(e: dom.MouseEvent) =>
-      if(e.button == 2){ //右键
-        val event = MouseClickUpRight(myId, thorSchema.systemFrame, getActionSerialNum)
-        websocketClient.sendMsg(event)
-        thorSchema.preExecuteUserEvent(event)
-        thorSchema.addMyAction(event)
-        e.preventDefault()
+      gridOpt match{
+        case Some(thorSchema: ThorSchemaClientImpl) =>
+          if(e.button == 2){ //右键
+            val event = MouseClickUpRight(myId, thorSchema.systemFrame, getActionSerialNum)
+            websocketClient.sendMsg(event)
+            thorSchema.preExecuteUserEvent(event)
+            thorSchema.addMyAction(event)
+            e.preventDefault()
+          }
+          else ()
+        case None =>
       }
-      else ()
+
     }
 //    canvas.onclick = { (e: MouseEvent) =>
 //      val currentTime = System.currentTimeMillis()
@@ -216,6 +214,7 @@ class GameHolder(canvasName: String) {
 
   //游戏启动
   def start(name: String): Unit = {
+    println(s"start $name")
     myName = name
     canvas.focus()
     if (firstCome) {
@@ -224,25 +223,25 @@ class GameHolder(canvasName: String) {
       websocketClient.setup(name)
       gameLoop()
       timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
-      nextFrame = dom.window.requestAnimationFrame(gameRender())
     }
     else if(websocketClient.getWsState){
       websocketClient.sendMsg(RestartGame(name))
       timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
-      nextFrame = dom.window.requestAnimationFrame(gameRender())
     }else{
       JsFunc.alert("网络连接失败，请重新刷新")
     }
   }
 
-//  var tickCount = 0L
-//  var testStartTime = System.currentTimeMillis()
-//  var testEndTime = System.currentTimeMillis()
-//  var startTime = System.currentTimeMillis()
+  var tickCount = 0L
+  var testStartTime = System.currentTimeMillis()
+  var testEndTime = System.currentTimeMillis()
+  var startTime = System.currentTimeMillis()
 
   def gameLoop(): Unit = {
-    logicFrameTime = System.currentTimeMillis()
-    thorSchema.update()
+    gridOpt match{
+      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.update()
+      case None =>
+    }
   }
 
 
@@ -256,13 +255,16 @@ class GameHolder(canvasName: String) {
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
-//  def drawGame(curFrame: Int, maxClientFrame: Int): Unit = {
-//    //
-//    // rintln("111111111111111111111")
-//  }
+  def drawGame(curFrame: Int, maxClientFrame: Int): Unit = {
+    //
+    // rintln("111111111111111111111")
+  }
 
   def drawGameByTime(offsetTime: Long): Unit = {
+    gridOpt match{
+      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime)
+      case None =>
+    }
 
-    thorSchema.drawGame(offsetTime)
   }
 }

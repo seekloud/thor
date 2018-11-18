@@ -36,6 +36,7 @@ object EntryPage extends Page{
   }
 
   def joinGame(): Unit = {
+    println("joinGame")
     val userName = dom.document.getElementById("userName").asInstanceOf[Input].value
 //    dom.window.location.hash = s"home/$userName"
     showGame := 1

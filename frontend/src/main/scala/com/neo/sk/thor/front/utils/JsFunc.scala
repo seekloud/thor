@@ -20,6 +20,8 @@ object JsFunc extends js.Object{
 
   def alert(msg: String): Unit = js.native
 
+  def console(msg: String): Unit = js.native
+
 
 
 

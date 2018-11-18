@@ -19,7 +19,7 @@ import scala.collection.mutable
 trait AdventurerClient { this: ThorSchemaClientImpl =>
 
   private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-  mapImg.setAttribute("src", s"${Routes.base}/static/img/金牌.png")
+  mapImg.setAttribute("src", s"${Routes.base}/static/img/logo-sheet0.png")
 
   def drawAdventurer(): Unit ={
 

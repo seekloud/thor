@@ -11,13 +11,14 @@ import org.scalajs.dom.ext.Color
 import scala.collection.mutable
 trait DrawOtherClient {this: ThorSchemaClientImpl =>
   private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-  mapImg.setAttribute("src", s"${Routes.base}/static/img/金牌.png")
+  mapImg.setAttribute("src", s"${Routes.base}/static/img/bigmap.png")
 
   def drawBackground():Unit = {
     ctx.save()
     val pat = ctx.createPattern(mapImg,"repeat")
     ctx.fillStyle = pat
     ctx.fillRect(0,0,boundary.x,boundary.y)
+    ctx.fill()
     ctx.restore()
   }
 

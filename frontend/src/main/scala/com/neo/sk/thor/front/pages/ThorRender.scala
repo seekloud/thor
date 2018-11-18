@@ -23,6 +23,8 @@ object ThorRender extends Page{
 
   def init() = {
 
+    println("ThorRender init")
+
     val gameHolder = new GameHolder("GameView")
     gameHolder.start("test")
   }
@@ -30,6 +32,7 @@ object ThorRender extends Page{
 
 
   override def render: Elem ={
+    println("ThorRender render")
     Shortcut.scheduleOnce(() =>init(),0)
     <div>
       <div >{modal}</div>

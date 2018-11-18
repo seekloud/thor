@@ -14,6 +14,8 @@ class WebSocketClient(
                        closeCallback:Event => Unit
                      ) {
 
+  println("WebSocketClient...")
+
   private var wsSetup = false
 
   private var websocketStreamOpt : Option[WebSocket] = None
