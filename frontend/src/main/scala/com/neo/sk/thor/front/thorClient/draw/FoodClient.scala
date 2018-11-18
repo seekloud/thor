@@ -8,12 +8,16 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.html
 
 import scala.collection.mutable
+import scala.util.Random
 
 /**
   * Created by Jingyi on 2018/11/9
   */
 trait FoodClient { this: ThorSchemaClientImpl =>
-  private val foodImg1 = "/thor/static/img/food-sheet0.png"
+
+  val random = new Random(System.currentTimeMillis())
+
+  private def foodImg1 = s"/thor/static/img/food-sheet0-1.png"
   private val foodImg2 = "/thor/static/img/food-sheet1.png"
   private val foodImg3 = "/thor/static/img/food-sheet2.png"
 
@@ -22,7 +26,7 @@ trait FoodClient { this: ThorSchemaClientImpl =>
 //    val foodCtx = foodCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
     val img = food.level match {
       case 1 => foodImg1
-      case 2 => foodImg2
+      case 2 => foodImg1
       case _ => foodImg3
     }
     val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]

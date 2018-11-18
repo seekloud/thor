@@ -24,7 +24,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   def drawAdventurer(canvasUnit: Int): Unit ={
     def drawAnAdventurer(adventurer: Adventurer) = {
       val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-      mapImg.setAttribute("src", s"/thor/static/img/logo-sheet0.png")
+      mapImg.setAttribute("src", s"/thor/static/img/skins-sheet0-0.png")
       val r = adventurer.getAdventurerState.radius
       val sx = adventurer.getAdventurerState.position.x - r
       val sy = adventurer.getAdventurerState.position.y - r
