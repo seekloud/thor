@@ -50,7 +50,7 @@ trait Adventurer extends CircleObjectOfGame {
       attackedCallback(p)
   }
 
-  def getAdventurerState(implicit config: ThorGameConfig): AdventurerState = {
+  def getAdventurerState: AdventurerState = {
     AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, weaponLevel, weaponLength, speed, isSpeedUp, killNum)
   }
 

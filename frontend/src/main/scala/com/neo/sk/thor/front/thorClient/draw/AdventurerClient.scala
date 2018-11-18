@@ -18,16 +18,31 @@ import scala.collection.mutable
 
 trait AdventurerClient { this: ThorSchemaClientImpl =>
 
-  private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-  mapImg.setAttribute("src", s"${Routes.base}/static/img/logo-sheet0.png")
+//  private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
+//  mapImg.setAttribute("src", s"${Routes.base}/static/img/logo-sheet0.png")
 
-  def drawAdventurer(): Unit ={
-
+  def drawAdventurer(canvasUnit: Int): Unit ={
+    def drawAnAdventurer(adventurer: Adventurer) = {
+      val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
+      mapImg.setAttribute("src", s"/thor/static/img/logo-sheet0.png")
+      val r = adventurer.getAdventurerState.radius
+      val sx = adventurer.getAdventurerState.position.x - r
+      val sy = adventurer.getAdventurerState.position.y - r
+      val dx = 2 * r
+      val dy = 2 * r
+      ctx.save()
+      ctx.drawImage(mapImg, sx * canvasUnit, sy * canvasUnit, dx * canvasUnit, dy * canvasUnit)
+      ctx.restore()
+    }
+    adventurerMap.map{
+      adventurer =>
+        drawAnAdventurer(adventurer._2)
+    }
   }
 
-  def drawAdventurerByOffsetTime(offset:Point,offsetTime:Long): Unit ={
+  def drawAdventurerByOffsetTime(offsetTime:Long, canvasUnit: Int): Unit ={
 
-
+    drawAdventurer(canvasUnit)
   }
 
 }
