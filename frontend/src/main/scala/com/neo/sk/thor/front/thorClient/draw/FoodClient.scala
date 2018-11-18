@@ -18,8 +18,8 @@ trait FoodClient { this: ThorSchemaClientImpl =>
   private val foodImg3 = "thor/static/img/food-sheet2.png"
 
   private def generateFood(food:Food) = {
-    val foodCanvas = dom.document.createElement("foodCanvas").asInstanceOf[html.Canvas]
-    val foodCtx = foodCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+//    val foodCanvas = dom.document.createElement("foodCanvas").asInstanceOf[html.Canvas]
+//    val foodCtx = foodCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
     val img = food.level match {
       case 1 => foodImg1
       case 2 => foodImg2
@@ -32,7 +32,9 @@ trait FoodClient { this: ThorSchemaClientImpl =>
     val sy = food.getFoodState.position.y - r
     val dx = sx + 2 * r
     val dy = sy + 2 * r
-    foodCtx.drawImage(mapImg, sx, sy, dx, dy)
+    ctx.save()
+    ctx.drawImage(mapImg, sx, sy, dx, dy)
+    ctx.restore()
   }
   def drawFood() = {
     foodMap.map{foods=>
