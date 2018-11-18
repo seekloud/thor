@@ -22,7 +22,13 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   mapImg.setAttribute("src", s"${Routes.base}/static/img/logo-sheet0.png")
 
   def drawAdventurer(): Unit ={
+    def drawAnAdventurer(adventurer: Adventurer) = {
 
+    }
+    adventurerMap.map{
+      adventurer =>
+        drawAnAdventurer(adventurer._2)
+    }
   }
 
   def drawAdventurerByOffsetTime(offset:Point,offsetTime:Long): Unit ={
