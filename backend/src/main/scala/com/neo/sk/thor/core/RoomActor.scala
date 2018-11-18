@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory
 import concurrent.duration._
 import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration
+import scala.language.implicitConversions
+import org.seekloud.byteobject.ByteObject._
 
 /**
   * @author Jingyi
@@ -44,6 +46,7 @@ object RoomActor {
           implicit timer =>
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建grid
+            implicit val sendBuffer = new MiddleBufferInJvm(81920)
             val grid = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
             timer.startPeriodicTimer(GameLoopKey,GameLoop,Frame.millsAServerFrame.millis)
             idle(roomId, Nil, subscribersMap, grid, 0L)
@@ -58,7 +61,8 @@ object RoomActor {
           grid: ThorSchemaServerImpl,
           tickCount: Long
           )(
-            implicit timer: TimerScheduler[Command]
+            implicit timer: TimerScheduler[Command],
+            sendBuffer:MiddleBufferInJvm
           ): Behavior[Command] = {
     Behaviors.receive{
       (ctx, msg) =>
@@ -128,8 +132,7 @@ object RoomActor {
     }
   }
 
-  import scala.language.implicitConversions
-  import org.seekloud.byteobject.ByteObject._
+
   //向所有用户发数据
   def dispatch(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer:MiddleBufferInJvm) = {
 //    println(subscribers)
