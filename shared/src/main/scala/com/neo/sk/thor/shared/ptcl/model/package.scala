@@ -118,8 +118,8 @@ package object model {
 
 
   object Boundary{
-    val w = 360
-    val h = 180
+    val w = 200
+    val h = 100
 
     def getBoundary:Point = Point(w,h)
   }

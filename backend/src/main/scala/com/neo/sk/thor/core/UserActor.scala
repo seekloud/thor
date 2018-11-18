@@ -129,7 +129,6 @@ object UserActor {
             val ws = YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             switchBehavior(ctx,"play",play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
-            Behaviors.same
 
 
           case LeftRoom(actor) =>
@@ -165,7 +164,6 @@ object UserActor {
             Behaviors.same
 
           case DispatchMsg(m) =>
-            log.debug(s"dispatchMsg $m")
             if(m.asInstanceOf[Wrap].isKillMsg) { //玩家死亡
               frontActor ! m
               roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)

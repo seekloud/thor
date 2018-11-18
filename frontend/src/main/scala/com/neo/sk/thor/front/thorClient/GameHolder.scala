@@ -41,7 +41,7 @@ class GameHolder(canvasName: String) {
 
   private[this] val bounds = Point(Boundary.w,Boundary.h)
 
-  private[this] val canvasUnit = 10
+  private[this] val canvasUnit = (dom.window.innerWidth / Boundary.w).toInt
   private[this] val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
 
   private[this] val canvasBounds = canvasBoundary / canvasUnit
@@ -78,7 +78,7 @@ class GameHolder(canvasName: String) {
   def gameRender(): Double => Unit = { d =>
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
-    drawGameByTime(offsetTime)
+    drawGameByTime(offsetTime, canvasUnit)
     nextFrame = dom.window.requestAnimationFrame(gameRender())
 
   }
@@ -119,6 +119,7 @@ class GameHolder(canvasName: String) {
                   println("get YourInfo")
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
                   timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
+                  nextFrame = dom.window.requestAnimationFrame(gameRender())
 
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
@@ -134,11 +135,10 @@ class GameHolder(canvasName: String) {
                   historyRank = history
 
                 case GridSyncState(d) =>
-                  dom.console.log(d.toString)
+//                  dom.console.log(d.toString)
                   SynData = Some(d)
                   gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
-                  nextFrame = dom.window.requestAnimationFrame(gameRender())
 
                 case  _ => println(s"接收到无效消息")
               }
@@ -263,9 +263,9 @@ class GameHolder(canvasName: String) {
     // rintln("111111111111111111111")
   }
 
-  def drawGameByTime(offsetTime: Long): Unit = {
+  def drawGameByTime(offsetTime: Long, canvasUnit: Int): Unit = {
     gridOpt match{
-      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime)
+      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit)
       case None =>
     }
 
