@@ -126,6 +126,7 @@ trait ThorSchema extends KillInformation{
 
   protected final def handleMyAction(actions: List[UserActionEvent]) = { //TODO 处理出现错误的帧
 
+
   }
 
   final protected def handleMyActionNow() = {
@@ -172,7 +173,6 @@ trait ThorSchema extends KillInformation{
       killerOpt.foreach(_.killNum += 1)
       quadTree.remove(adventurer)
       adventurerMap.remove(adventurer.playerId)
-      //TODO 击杀信息
       addKillInfo(e.killerName, adventurer.name)
     }
   }
