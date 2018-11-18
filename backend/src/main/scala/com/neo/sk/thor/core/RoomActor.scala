@@ -3,10 +3,11 @@ package com.neo.sk.thor.core
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import com.neo.sk.thor.common.AppSettings
-import com.neo.sk.thor.core.game.{ThorSchemaServerImpl}
+import com.neo.sk.thor.core.game.ThorSchemaServerImpl
 import com.neo.sk.thor.shared.ptcl._
 import com.neo.sk.thor.shared.ptcl.model._
 import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
+import org.seekloud.byteobject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
 
 import concurrent.duration._
@@ -63,6 +64,7 @@ object RoomActor {
       (ctx, msg) =>
         msg match {
           case JoinRoom(roomId, userId, name, userActor) =>
+            println("join room")
             grid.joinGame(userId, name, userActor)
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, grid, tickCount)
 
@@ -90,14 +92,17 @@ object RoomActor {
             Behavior.same
 
           case GameLoop =>
+//            println("game loop")
             //grid定时更新
             grid.update()
 
             val gridData = grid.getThorSchemaState()
             if (tickCount % 20 == 5) {
               //生成食物+同步全量数据
-              grid.genFood(20)
-              dispatch(subscribersMap)(GridSyncState(grid.getThorSchemaState()))
+              grid.genFood(5)
+              val data = grid.getThorSchemaState()
+//              log.debug(s"sync data $data")
+              dispatch(subscribersMap)(GridSyncState(data))
             }
             if(tickCount % 20 == 1){
               //排行榜
@@ -105,7 +110,10 @@ object RoomActor {
             }
             newPlayer.foreach{
               //为新用户分发全量数据
-              player => dispatchTo(subscribersMap)(player._1, GridSyncState(gridData))
+              player =>
+                log.debug(s"new player $player")
+                subscribersMap.put(player._1, player._2)
+                dispatchTo(subscribersMap)(player._1, GridSyncState(gridData))
             }
             idle(roomId, Nil, subscribersMap, grid, tickCount+1)
 
@@ -120,15 +128,21 @@ object RoomActor {
     }
   }
 
-
+  import scala.language.implicitConversions
+  import org.seekloud.byteobject.ByteObject._
   //向所有用户发数据
-  def dispatch(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(msg: WsMsgServer) = {
-    subscribers.values.foreach( _ ! UserActor.DispatchMsg(msg))
+  def dispatch(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer:MiddleBufferInJvm) = {
+//    println(subscribers)
+//    subscribers.values.foreach( _ ! UserActor.DispatchMsg(msg))
+    val isKillMsg = msg.isInstanceOf[BeAttacked]
+    subscribers.values.foreach( _ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(),isKillMsg)))
   }
 
   //向特定用户发数据
-  def dispatchTo(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(id: String,msg: WsMsgServer) = {
-    subscribers.get(id).foreach( _ ! UserActor.DispatchMsg(msg))
+  def dispatchTo(subscribers:mutable.HashMap[String,ActorRef[UserActor.Command]])(id: String,msg: WsMsgServer)(implicit sendBuffer:MiddleBufferInJvm)  = {
+
+    val isKillMsg = msg.isInstanceOf[BeAttacked]
+    subscribers.values.foreach( _ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(),isKillMsg)))
   }
 
 }

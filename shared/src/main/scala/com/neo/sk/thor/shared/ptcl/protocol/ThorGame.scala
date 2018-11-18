@@ -12,11 +12,11 @@ object ThorGame {
     val frame: Long
   }
 
-  trait UserEvent extends GameEvent
+  sealed trait UserEvent extends GameEvent
 
   trait EnvironmentEvent extends GameEvent
 
-  trait UserActionEvent extends UserEvent {
+  sealed trait UserActionEvent extends UserEvent {
     val playerId: String
     val serialNum:Int
   }

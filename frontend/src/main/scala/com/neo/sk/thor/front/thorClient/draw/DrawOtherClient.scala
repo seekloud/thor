@@ -14,6 +14,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
   mapImg.setAttribute("src", s"${Routes.base}/static/img/bigmap.png")
 
   def drawBackground():Unit = {
+    println("drawBackground")
     ctx.save()
     val pat = ctx.createPattern(mapImg,"repeat")
     ctx.fillStyle = pat

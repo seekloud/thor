@@ -116,7 +116,9 @@ class GameHolder(canvasName: String) {
               dom.console.log(data.toString)
               data match {
                 case YourInfo(config, id, name) =>
+                  println("get YourInfo")
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
+                  timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
 
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
@@ -132,8 +134,11 @@ class GameHolder(canvasName: String) {
                   historyRank = history
 
                 case GridSyncState(d) =>
+                  dom.console.log(d.toString)
                   SynData = Some(d)
+                  gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
+                  nextFrame = dom.window.requestAnimationFrame(gameRender())
 
                 case  _ => println(s"接收到无效消息")
               }
@@ -222,11 +227,9 @@ class GameHolder(canvasName: String) {
       addActionListenEvent()
       websocketClient.setup(name)
       gameLoop()
-      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
     }
     else if(websocketClient.getWsState){
       websocketClient.sendMsg(RestartGame(name))
-      timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
     }else{
       JsFunc.alert("网络连接失败，请重新刷新")
     }
