@@ -14,7 +14,7 @@ import scala.xml.Elem
 /**
   * Created by Jingyi on 2018/11/9
   */
-object ThorRender extends Page{
+class ThorRender(name: String) extends Page{
 
   private val canvas = <canvas id ="GameView" tabindex="1"></canvas>
 
@@ -26,7 +26,7 @@ object ThorRender extends Page{
     println("ThorRender init")
 
     val gameHolder = new GameHolder("GameView")
-    gameHolder.start("test")
+    gameHolder.start(name)
   }
 
 

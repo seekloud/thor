@@ -12,7 +12,7 @@ object MainPage extends PageSwitcher {
 
 
   private val currentPage: Rx[Elem] = currentHashVar.map {
-    case "home" :: Nil => ThorRender.render
+    case "play" :: name :: Nil => new ThorRender(name).render
     case "entry" :: Nil => EntryPage.render
     case _ => EntryPage.render
   }

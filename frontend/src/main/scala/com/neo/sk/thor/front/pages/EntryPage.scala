@@ -32,7 +32,7 @@ object EntryPage extends Page{
       </div>
 
     case 1 =>
-      ThorRender.render
+      new ThorRender(dom.document.getElementById("userName").asInstanceOf[Input].value).render
   }
 
   def joinGame(): Unit = {
