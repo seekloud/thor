@@ -79,6 +79,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   override def getThorSpeedByLevel(l: Int): Point = thorGameConfig.getThorSpeedByLevel(l)
 
+  def getAdventurerLevelSize: Int = thorGameConfig.getAdventurerLevelSize
+
 
 
 

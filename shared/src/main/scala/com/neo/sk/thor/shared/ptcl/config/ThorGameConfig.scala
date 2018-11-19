@@ -59,6 +59,8 @@ trait ThorGameConfig {
 
   def getMoveDistanceByFrame(l: Int) = getThorSpeedByLevel(l) * frameDuration / 1000
 
+  def getAdventurerLevelSize: Int
+
 }
 
 
@@ -98,6 +100,8 @@ case class ThorGameConfigImpl (
   }
 
   def getThorSpeedByLevel(l: Int) = adventurerParams.speeds.getThorSpeedByLevel(l)
+
+  def getAdventurerLevelSize: Int = adventurerParams.radius.size
 
 
 }
