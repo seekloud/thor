@@ -21,7 +21,7 @@ final case class AdventurerParams(
   radius: List[Float],
   maxEnergyList: List[Int],
   containEnergyList: List[Int],
-  facePalstance: Int
+  facePalstance: Float
 )
 
 final case class FoodParams(
@@ -39,7 +39,7 @@ trait ThorGameConfig {
 
   def boundary: Point
 
-  def facePalstance: Int
+  def facePalstance: Float
 
   def getAdventurerRadiusByLevel(l: Int): Float
 
@@ -74,7 +74,7 @@ case class ThorGameConfigImpl (
 
   def boundary = gridBoundary.getBoundary
 
-  def facePalstance: Int = adventurerParams.facePalstance
+  def facePalstance: Float = adventurerParams.facePalstance
 
   def getAdventurerRadiusByLevel(l: Int) = {
     adventurerParams.radius(l)

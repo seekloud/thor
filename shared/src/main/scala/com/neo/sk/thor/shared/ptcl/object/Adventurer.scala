@@ -77,7 +77,7 @@ trait Adventurer extends CircleObjectOfGame {
   def setFaceDirection(target: Float)(implicit config: ThorGameConfig) = {
     if (target > faceDirection) {
       faceDirection += config.facePalstance
-    } else (target < faceDirection) {
+    } else {
       faceDirection -= config.facePalstance
     }
   }
