@@ -44,6 +44,8 @@ trait ThorSchema extends KillInformation{
   protected val actionEventMap = mutable.HashMap[Long, List[UserActionEvent]]() //frame -> List[UserActionEvent]
   protected val myAdventurerAction = mutable.HashMap[Long,List[UserActionEvent]]()
 
+  protected val attackingAdventureMap = mutable.HashMap[String, Int]()//playerId -> 攻击执行程度
+
 
   protected val quadTree: QuadTree = new QuadTree(Rectangle(Point(0, 0), boundary))
 
@@ -102,8 +104,10 @@ trait ThorSchema extends KillInformation{
               adventurer.setMoveDirection(a.direction)
               adventurer.setFaceDirection(a.direction)
             case a: MouseClickDownLeft =>
-              val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
-              adventurerMaybeAttacked.foreach(a => adventurer.checkAttacked(a,adventurerAttackedCallback(killer = adventurer)))
+              attackingAdventureMap.get(a.playerId) match {
+                case Some(_) => ()
+                case None => attackingAdventureMap.put(a.playerId, 6) //TODO 动画持续帧数 现在是6
+              }
             case a: MouseClickDownRight => adventurer.speedUp(config)
             case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
           }
@@ -168,6 +172,20 @@ trait ThorSchema extends KillInformation{
 //
 //
 //  }
+
+  protected final def handleAdventurerAttackingNow(): Unit={
+    attackingAdventureMap.map{ attacking =>
+      adventurerMap.filter(_._1 == attacking._1).values.foreach{adventurer =>
+        val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
+        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer)))
+      }
+      if(attacking._2 <= 0){
+        attackingAdventureMap.remove(attacking._1)
+      }
+      println(attacking._1+" : "+attacking._2)
+      (attacking._1, attacking._2 - 1)
+    }
+  }
 
   protected final def handleAdventurerAttacked(e: BeAttacked): Unit = {
     val killerOpt = adventurerMap.get(e.killerId)
@@ -259,6 +277,7 @@ trait ThorSchema extends KillInformation{
     handleUserActionEventNow()
 
 //    handleAdventurerMove()
+    handleAdventurerAttackingNow()
     handleAdventurerAttackedNow()
     handleAdventurerEatFoodNow()
     handleGenerateFoodNow()

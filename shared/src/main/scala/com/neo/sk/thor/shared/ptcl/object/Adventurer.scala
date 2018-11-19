@@ -51,9 +51,14 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
+  //判断扇形区域碰撞,角度为刀的角度
+  def isSectorDuang(Theta: Double, o: Adventurer) ={
+    this.position.distance(o.position) < (this.radius + this.weaponLength + o.radius) && scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) < scala.math.Pi * (1.5/6)
+  }
+
   //判断是否被攻击
-  def checkAttacked(p: Adventurer, attackedCallback: Adventurer => Unit): Unit = {
-    if (this.position.distance(p.position) < (this.weaponLength + this.weaponLength + p.radius) && scala.math.abs(p.position.getTheta(this.position) - this.direction) < (scala.math.Pi / 3))
+  def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit): Unit = {
+    if (isSectorDuang(scala.math.Pi * 1.5 / 6 * attackingStep - scala.math.Pi/3 , p))
       attackedCallback(p)
   }
 
