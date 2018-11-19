@@ -80,7 +80,7 @@ case class ThorSchemaServerImpl (
 
     (1 to num).foreach{
       t =>
-        gengerateFood(random.nextInt(5) + 1, genPosition())
+        gengerateFood(random.nextInt(5), genPosition())
     }
   }
 
