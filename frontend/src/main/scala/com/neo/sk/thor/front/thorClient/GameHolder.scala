@@ -150,6 +150,8 @@ class GameHolder(canvasName: String) {
 
                 case x: GenerateFood =>
 
+                case x: EatFood =>
+
                 case  x => dom.window.console.log(s"接收到无效消息$x")
               }
             case Left(error) =>
