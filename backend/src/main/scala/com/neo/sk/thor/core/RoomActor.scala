@@ -82,17 +82,17 @@ object RoomActor {
 
           case WsMessage(userId, msg) =>
             grid.receiveUserAction(msg)
-            msg match {
-              case a: MouseMove =>
-                dispatch(subscribersMap)(MouseMove(a.playerId, a.direction, math.max(a.frame, grid.systemFrame), a.serialNum))
-              case a: MouseClickDownLeft =>
-                dispatch(subscribersMap)(MouseClickDownLeft(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
-              case a: MouseClickDownRight =>
-                dispatch(subscribersMap)(MouseClickDownRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
-              case a: MouseClickUpRight =>
-                dispatch(subscribersMap)(MouseClickUpRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
-              case _ => //do nothing
-            }
+//            msg match {
+//              case a: MouseMove =>
+//                dispatch(subscribersMap)(MouseMove(a.playerId, a.direction, math.max(a.frame, grid.systemFrame), a.serialNum))
+//              case a: MouseClickDownLeft =>
+//                dispatch(subscribersMap)(MouseClickDownLeft(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+//              case a: MouseClickDownRight =>
+//                dispatch(subscribersMap)(MouseClickDownRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+//              case a: MouseClickUpRight =>
+//                dispatch(subscribersMap)(MouseClickUpRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+//              case _ => //do nothing
+//            }
             Behavior.same
 
           case GameLoop =>

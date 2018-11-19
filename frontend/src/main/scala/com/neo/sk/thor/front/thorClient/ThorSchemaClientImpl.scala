@@ -31,8 +31,8 @@ with DrawOtherClient{
         case Some(adventurer) =>
           //TODO 各种环境绘画
           drawBackground()
-          drawAdventurerByOffsetTime(offSetTime, canvasUnit)
           drawFoodByOffsetTime(offSetTime, canvasUnit)
+          drawAdventurerByOffsetTime(offSetTime, canvasUnit)
         case None =>()
       }
     }
