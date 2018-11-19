@@ -2,6 +2,8 @@ package com.neo.sk.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.neo.sk.thor.shared.ptcl.config.ThorGameConfigImpl
+
 //import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
@@ -38,9 +40,9 @@ class GameHolder(canvasName: String) {
   private[this] val canvas = dom.document.getElementById(canvasName).asInstanceOf[Canvas]
   private[this] val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-  private[this] val bounds = Point(Boundary.w,Boundary.h)
+//  private[this] val bounds = Point(Boundary.w,Boundary.h)
 
-  private[this] val canvasUnit = (dom.window.innerWidth / Boundary.w).toInt
+  private[this] val canvasUnit = 10
   private[this] val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
 
   private[this] val canvasBounds = canvasBoundary / canvasUnit
@@ -49,6 +51,7 @@ class GameHolder(canvasName: String) {
 //  var thorSchema = gridOpt.get
   private[this] var myId = "test"
   private[this] var myName = "testName"
+  private[this] var gameConfig: Option[ThorGameConfigImpl] = None
   private[this] var firstCome = true
   private[this] var currentRank = List.empty[Score]
   private[this] var historyRank = List.empty[Score]
@@ -77,7 +80,7 @@ class GameHolder(canvasName: String) {
   def gameRender(): Double => Unit = { d =>
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
-    drawGameByTime(offsetTime, canvasUnit)
+    drawGameByTime(offsetTime, canvasUnit, canvasBounds)
     nextFrame = dom.window.requestAnimationFrame(gameRender())
 
   }
@@ -118,8 +121,8 @@ class GameHolder(canvasName: String) {
                   println("get YourInfo")
                   myId = id
                   myName = name
+                  gameConfig = Some(config)
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
-                  myId = id
                   timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
 
@@ -244,6 +247,7 @@ class GameHolder(canvasName: String) {
   var startTime = System.currentTimeMillis()
 
   def gameLoop(): Unit = {
+    logicFrameTime = System.currentTimeMillis()
     gridOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.update()
       case None =>
@@ -266,9 +270,9 @@ class GameHolder(canvasName: String) {
     // rintln("111111111111111111111")
   }
 
-  def drawGameByTime(offsetTime: Long, canvasUnit: Int): Unit = {
+  def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
     gridOpt match{
-      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit)
+      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds, gameConfig.get)
       case None =>
     }
 

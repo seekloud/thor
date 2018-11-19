@@ -21,13 +21,13 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 //  private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
 //  mapImg.setAttribute("src", s"${Routes.base}/static/img/logo-sheet0.png")
 
-  def drawAdventurer(canvasUnit: Int): Unit ={
+  def drawAdventurer(offset: Point, canvasUnit: Int): Unit ={
     def drawAnAdventurer(adventurer: Adventurer) = {
       val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
       mapImg.setAttribute("src", s"/thor/static/img/skins-sheet0-0.png")
       val r = adventurer.getAdventurerState.radius
-      val sx = adventurer.getAdventurerState.position.x - r
-      val sy = adventurer.getAdventurerState.position.y - r
+      val sx = adventurer.getAdventurerState.position.x - r + offset.x
+      val sy = adventurer.getAdventurerState.position.y - r + offset.x
       val dx = 2 * r
       val dy = 2 * r
       ctx.save()
@@ -40,9 +40,9 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     }
   }
 
-  def drawAdventurerByOffsetTime(offsetTime:Long, canvasUnit: Int): Unit ={
+  def drawAdventurerByOffsetTime(offset: Point, canvasUnit: Int): Unit ={
 
-    drawAdventurer(canvasUnit)
+    drawAdventurer(offset, canvasUnit)
   }
 
 }

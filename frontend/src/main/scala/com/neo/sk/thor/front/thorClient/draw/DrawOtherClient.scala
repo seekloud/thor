@@ -13,11 +13,11 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
   private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
   mapImg.setAttribute("src", s"${Routes.base}/static/img/bigmap.png")
 
-  def drawBackground():Unit = {
+  def drawBackground(offset: Point, canvasUnit: Int):Unit = {
     ctx.save()
     val pat = ctx.createPattern(mapImg,"repeat")
     ctx.fillStyle = pat
-    ctx.fillRect(0,0,dom.window.innerWidth ,dom.window.innerHeight)
+    ctx.fillRect(offset.x,offset.x,config.boundary.x * canvasUnit ,config.boundary.y * canvasUnit)
     ctx.fill()
     ctx.restore()
   }
