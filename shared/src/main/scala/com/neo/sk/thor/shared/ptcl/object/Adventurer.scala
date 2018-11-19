@@ -17,6 +17,7 @@ case class AdventurerState(
   radiusLevel: Int,
   position: Point,
   direction: Float,
+  faceDirection: Float,
   weaponLevel: Int,
   weaponLength: Float,
   speedLevel: Int,
@@ -33,6 +34,7 @@ trait Adventurer extends CircleObjectOfGame {
   var radiusLevel: Int
   //  var position: Point
   var direction: Float
+  var faceDirection: Float
   var weaponLevel: Int
   var weaponLength: Float
   var speedLevel: Int
@@ -56,7 +58,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, weaponLevel, weaponLength, speedLevel, isSpeedUp, killNum, isMove)
+    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, faceDirection, weaponLevel, weaponLength, speedLevel, isSpeedUp, killNum, isMove)
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
@@ -68,8 +70,16 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  def setAdventurerDirection(d: Float) = {
+  def setMoveDirection(d: Float) = {
     direction = d
+  }
+
+  def setFaceDirection(target: Float)(implicit config: ThorGameConfig) = {
+    if (target > faceDirection) {
+      faceDirection += config.facePalstance
+    } else (target < faceDirection) {
+      faceDirection -= config.facePalstance
+    }
   }
 
   def updateLevel(implicit thorGameConfig: ThorGameConfig) = {
@@ -122,6 +132,7 @@ case class AdventurerImpl(
   var radiusLevel: Int,
   var position: Point,
   var direction: Float,
+  var faceDirection: Float,
   var weaponLevel: Int,
   var weaponLength: Float,
   var speedLevel: Int,
@@ -131,7 +142,7 @@ case class AdventurerImpl(
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
     this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.radiusLevel, adventurerState.position,
-      adventurerState.direction, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speedLevel, adventurerState.isSpeedUp,
+      adventurerState.direction, adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speedLevel, adventurerState.isSpeedUp,
       adventurerState.killNum, adventurerState.isMove)
   }
 

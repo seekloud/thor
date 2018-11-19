@@ -98,7 +98,9 @@ trait ThorSchema extends KillInformation{
       adventurerMap.get(action.playerId) match {
         case Some(adventurer) =>
           action match {
-            case a: MouseMove => adventurer.setAdventurerDirection(a.direction)
+            case a: MouseMove =>
+              adventurer.setMoveDirection(a.direction)
+              adventurer.setFaceDirection(a.direction)
             case a: MouseClickDownLeft =>
               val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
               adventurerMaybeAttacked.foreach(a => adventurer.checkAttacked(a,adventurerAttackedCallback(killer = adventurer)))
