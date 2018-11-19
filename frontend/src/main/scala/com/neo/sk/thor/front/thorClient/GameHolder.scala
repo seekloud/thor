@@ -117,6 +117,8 @@ class GameHolder(canvasName: String) {
               data match {
                 case YourInfo(config, id, name) =>
                   println("get YourInfo")
+                  myId = id
+                  myName = name
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
                   timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
@@ -140,7 +142,7 @@ class GameHolder(canvasName: String) {
                   gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
 
-                case  x => dom.window.console(s"接收到无效消息$x")
+                case  x => dom.window.console.log(s"接收到无效消息$x")
               }
             case Left(error) =>
               println(s"decode msg failed,error:${error.toString}")
