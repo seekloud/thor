@@ -11,7 +11,6 @@ import com.neo.sk.thor.shared.ptcl.protocol.ThorGame._
 import com.neo.sk.thor.shared.ptcl.protocol._
 import com.neo.sk.thor.shared.ptcl.thor.ThorSchemaState
 import mhtml.Var
-import org.scalajs.dom
 import org.scalajs.dom.Blob
 import org.scalajs.dom.ext.{Color, KeyCode}
 import org.scalajs.dom.html.{Canvas, Image}
