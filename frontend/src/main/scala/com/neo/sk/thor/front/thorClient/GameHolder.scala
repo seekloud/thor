@@ -120,6 +120,7 @@ class GameHolder(canvasName: String) {
                   myId = id
                   myName = name
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
+                  myId = id
                   timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
 
@@ -167,6 +168,7 @@ class GameHolder(canvasName: String) {
           val data = MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum)
           websocketClient.sendMsg(data)
           thorSchema.addMyAction(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
+          thorSchema.preExecuteUserEvent(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
         case None =>
       }
 
