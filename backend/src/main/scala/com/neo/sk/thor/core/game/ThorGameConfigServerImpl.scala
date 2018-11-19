@@ -67,6 +67,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   def frameDuration:Long = thorGameConfig.frameDuration
 
+  def facePalstance: Float = thorGameConfig.facePalstance
+
   def getAdventurerRadiusByLevel(adventurerLevel: Int): Float = thorGameConfig.getAdventurerRadiusByLevel(adventurerLevel)
 
   override def getRadiusByFoodLevel(l: Int): Float = thorGameConfig.getRadiusByFoodLevel(l)
