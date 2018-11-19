@@ -50,7 +50,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 //  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
 //    .requiring(_ > 0, "minimum supported adventurer radius is 1").toFloat
 
-  private[this] val adventurerParams = AdventurerParams(adventurerSpeedLevel, adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel)
+  private[this] val adventurerParams = AdventurerParams(AdventurerMoveSpeed(adventurerSpeedLevel), adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel)
 
   private[this] val foodParams = FoodParams(foodEnergyLevel, foodRadiusLevel)
 
@@ -71,6 +71,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   def getMaxEnergyByLevel(l: Int) = thorGameConfig.getMaxEnergyByLevel(l)
   def getWeaponLevelByLevel(l: Int) = thorGameConfig.getWeaponLevelByLevel(l)
   def getWeaponLengthByLevel(l: Int) = thorGameConfig.getWeaponLengthByLevel(l)
+
+  override def getThorSpeedByLevel(l: Int): Point = thorGameConfig.getThorSpeedByLevel(l)
 
 
 

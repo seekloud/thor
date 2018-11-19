@@ -12,9 +12,13 @@ final case class GridBoundary(width:Int,height:Int){
   def getBoundary:Point = Point(width,height)
 }
 
+final case class AdventurerMoveSpeed(speeds: List[Float]) {
+  def getThorSpeedByLevel(l: Int) = Point(speeds(l), 0)
+}
+
 final case class AdventurerParams(
-  speedLevel: List[Float],
-  radiusLevel: List[Float],
+  speeds: AdventurerMoveSpeed,
+  radius: List[Float],
   maxEnergyList: List[Int],
   containEnergyList: List[Int]
 )
@@ -48,6 +52,10 @@ trait ThorGameConfig {
 
   def getThorGameConfigImpl(): ThorGameConfigImpl
 
+  def getThorSpeedByLevel(l: Int):Point
+
+  def getMoveDistanceByFrame(l: Int) = getThorSpeedByLevel(l) * frameDuration / 1000
+
 }
 
 
@@ -64,7 +72,7 @@ case class ThorGameConfigImpl (
   def boundary = gridBoundary.getBoundary
 
   def getAdventurerRadiusByLevel(l: Int) = {
-    adventurerParams.radiusLevel(l)
+    adventurerParams.radius(l)
   }
 
 
@@ -83,6 +91,8 @@ case class ThorGameConfigImpl (
   override def getWeaponLengthByLevel(l: Int): Float = {
     weaponParams.lengthList(l)
   }
+
+  def getThorSpeedByLevel(l: Int) = adventurerParams.speeds.getThorSpeedByLevel(l)
 
 
 }

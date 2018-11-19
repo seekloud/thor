@@ -24,6 +24,7 @@ object Constants {
     val levelThree = 3
     val levelFour = 4
     val levelFive = 5
+    val levelSix = 6
   }
 
   object SpeedLevel {
