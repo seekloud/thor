@@ -140,7 +140,7 @@ class GameHolder(canvasName: String) {
                   gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
 
-                case  _ => println(s"接收到无效消息")
+                case  x => dom.window.console(s"接收到无效消息$x")
               }
             case Left(error) =>
               println(s"decode msg failed,error:${error.toString}")
