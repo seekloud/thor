@@ -26,7 +26,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val adventurerRadiusLevel = config.getDoubleList("thorGame.adventurer.radius")
     .requiring(_.size() >= 1,"minimum supported adventurer radius size is 1").asScala.map(_.toFloat).toList
 
-  private[this] val adventurerSpeedLevel = config.getDoubleList("thorGame.adventurer.speed")
+  private[this] val adventurerSpeedLevel = config.getDoubleList("thorGame.adventurer.speeds")
     .requiring(_.size() >= 1,"minimum supported adventurer speed size is 1").asScala.map(_.toFloat).toList
 
   private[this] val adventurerMaxEnergyLevel = config.getIntList("thorGame.adventurer.maxEnergy")

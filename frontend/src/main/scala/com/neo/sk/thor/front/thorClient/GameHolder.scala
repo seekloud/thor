@@ -46,6 +46,7 @@ class GameHolder(canvasName: String) {
   private[this] val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
 
   private[this] val canvasBounds = canvasBoundary / canvasUnit
+  println(canvasBounds)
 
   var gridOpt : Option[ThorSchemaClientImpl] = None
 //  var thorSchema = gridOpt.get
@@ -115,10 +116,10 @@ class GameHolder(canvasName: String) {
           val middleDataInJs = new MiddleBufferInJs(buf)
           bytesDecode[WsMsgServer](middleDataInJs) match {
             case Right(data) =>
-              dom.console.log(data.toString)
+//              dom.console.log(data.toString)
               data match {
                 case YourInfo(config, id, name) =>
-                  println("get YourInfo")
+                  dom.console.log(s"get YourInfo ${config} ${id} ${name}")
                   myId = id
                   myName = name
                   gameConfig = Some(config)
@@ -144,6 +145,10 @@ class GameHolder(canvasName: String) {
                   SynData = Some(d)
                   gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
+
+                case x: MouseMove =>
+
+                case x: GenerateFood =>
 
                 case  x => dom.window.console.log(s"接收到无效消息$x")
               }
@@ -272,7 +277,7 @@ class GameHolder(canvasName: String) {
 
   def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
     gridOpt match{
-      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds, gameConfig.get)
+      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
       case None =>
     }
 
