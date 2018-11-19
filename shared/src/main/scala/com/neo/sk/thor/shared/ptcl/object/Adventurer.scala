@@ -1,9 +1,10 @@
 package com.neo.sk.thor.shared.ptcl.`object`
 
 import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
-import com.neo.sk.thor.shared.ptcl.model.Point
-import com.neo.sk.thor.shared.ptcl.model.Constants
+import com.neo.sk.thor.shared.ptcl.model
+import com.neo.sk.thor.shared.ptcl.model.{Constants, Point, Rectangle}
 import com.neo.sk.thor.shared.ptcl.model.Constants.{AdventurerLevel, Energy, SpeedLevel}
+import com.neo.sk.thor.shared.ptcl.util.QuadTree
 
 /**
   * Created by Jingyi on 2018/11/9
@@ -18,9 +19,10 @@ case class AdventurerState(
   direction: Float,
   weaponLevel: Int,
   weaponLength: Float,
-  speed: Float,
+  speedLevel: Int,
   isSpeedUp: Boolean,
   killNum: Int,
+  isMove: Boolean
 )
 
 trait Adventurer extends CircleObjectOfGame {
@@ -29,34 +31,37 @@ trait Adventurer extends CircleObjectOfGame {
   var level: Int
   var energy: Int
   var radiusLevel: Int
-//  var position: Point
+  //  var position: Point
   var direction: Float
   var weaponLevel: Int
   var weaponLength: Float
-  var speed: Float
+  var speedLevel: Int
   var isSpeedUp: Boolean
   var killNum: Int
+  var isMove: Boolean
+
+  def getMoveState() = isMove
 
   //判断adventurer是否吃到食物
-  def checkEatFood(p:Food,eatFoodCallback:Food => Unit):Unit = {
-    if(this.isIntersects(p)){
+  def checkEatFood(p: Food, eatFoodCallback: Food => Unit): Unit = {
+    if (this.isIntersects(p)) {
       eatFoodCallback(p)
     }
   }
 
   //判断是否被攻击
-  def checkAttacked(p:Adventurer,attackedCallback: Adventurer => Unit): Unit ={
-    if(this.position.distance(p.position) < (this.weaponLength + this.weaponLength + p.radius) && scala.math.abs(p.position.getTheta(this.position) - this.direction) < (scala.math.Pi / 3))
+  def checkAttacked(p: Adventurer, attackedCallback: Adventurer => Unit): Unit = {
+    if (this.position.distance(p.position) < (this.weaponLength + this.weaponLength + p.radius) && scala.math.abs(p.position.getTheta(this.position) - this.direction) < (scala.math.Pi / 3))
       attackedCallback(p)
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, weaponLevel, weaponLength, speed, isSpeedUp, killNum)
+    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, weaponLevel, weaponLength, speedLevel, isSpeedUp, killNum, isMove)
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
     this.energy += config.getEnergyByFoodLevel(food.level)
-    if(energy > config.getMaxEnergyByLevel(this.level)){
+    if (energy > config.getMaxEnergyByLevel(this.level)) {
       this.level += 1
       this.weaponLength = config.getWeaponLengthByLevel(this.level)
       this.weaponLevel = config.getWeaponLevelByLevel(this.level)
@@ -67,26 +72,43 @@ trait Adventurer extends CircleObjectOfGame {
     direction = d
   }
 
-  def updateLevel() = {
-    if (level != AdventurerLevel.levelFive) {
-      level += AdventurerLevel.step
-      speed -= SpeedLevel.step
+  def updateLevel(implicit thorGameConfig: ThorGameConfig) = {
+    if (level != AdventurerLevel.levelSix) {
+      level += 1
+      speedLevel += 1
     }
   }
 
-  def speedUp() = {
+  def speedUp(implicit thorGameConfig: ThorGameConfig) = {
     if (!isSpeedUp) isSpeedUp = true
-    speed *= SpeedLevel.speedUpRatio
-    energy -= Energy.speedUpStep
+    energy -= 5
   }
 
-  def cancleSpeedUp() = {
+  def cancleSpeedUp(implicit thorGameConfig: ThorGameConfig) = {
     if (isSpeedUp) isSpeedUp = false
-    speed = speed / SpeedLevel.speedUpRatio
   }
 
+  def move(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Unit = {
+    if (isMove) {
+      val moveDistance = thorGameConfig.getMoveDistanceByFrame(this.speedLevel).rotate(direction)
 
-  //TODO 位置移动 击杀
+      val horizontalDistance = moveDistance.copy(y = 0)
+      val verticalDistance = moveDistance.copy(x = 0)
+      List(horizontalDistance, verticalDistance).foreach { d =>
+        if (d.x != 0 || d.y != 0) {
+          val originPosition = this.position
+          this.position = this.position + d
+          val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
+          if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
+            quadTree.updateObject(this)
+          } else {
+            this.position = originPosition
+          }
+        }
+      }
+
+    }
+  }
 
 
 }
@@ -102,21 +124,18 @@ case class AdventurerImpl(
   var direction: Float,
   var weaponLevel: Int,
   var weaponLength: Float,
-  var speed: Float,
+  var speedLevel: Int,
   var isSpeedUp: Boolean,
-  var killNum: Int
+  var killNum: Int,
+  var isMove: Boolean
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
     this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.radiusLevel, adventurerState.position,
-      adventurerState.direction, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speed, adventurerState.isSpeedUp,
-      adventurerState.killNum)
+      adventurerState.direction, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speedLevel, adventurerState.isSpeedUp,
+      adventurerState.killNum, adventurerState.isMove)
   }
 
   override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
-
-
-
-
 
 
 }

@@ -102,8 +102,8 @@ trait ThorSchema extends KillInformation{
             case a: MouseClickDownLeft =>
               val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
               adventurerMaybeAttacked.foreach(a => adventurer.checkAttacked(a,adventurerAttackedCallback(killer = adventurer)))
-            case a: MouseClickDownRight => adventurer.speedUp()
-            case a: MouseClickUpRight => adventurer.cancleSpeedUp()
+            case a: MouseClickDownRight => adventurer.speedUp(config)
+            case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
           }
         case None =>
           info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
@@ -245,7 +245,14 @@ trait ThorSchema extends KillInformation{
     )
   }
 
+  protected def adventurerMove(): Unit = {
+    adventurerMap.values.foreach { adventurer =>
+      adventurer.move(boundary, quadTree)
+    }
+  }
+
   def update(): Unit = {
+    adventurerMove()
     handleUserLeftRoomNow()
     handleUserActionEventNow()
 
