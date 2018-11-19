@@ -119,7 +119,6 @@ class GameHolder(canvasName: String) {
                   myId = id
                   myName = name
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
-                  myId = id
                   timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
 
@@ -160,14 +159,13 @@ class GameHolder(canvasName: String) {
     canvas.oncontextmenu = _=> false //取消右键弹出行为
     canvas.onmousemove = { (e: dom.MouseEvent) =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
-      val theta = point.getTheta(canvasBoundary / 2).toFloat
-      val currentTime = System.currentTimeMillis()
+      val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
       gridOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          val data = MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum)
+          val data = MouseMove(thorSchema.myId,theta,thorSchema.systemFrame,getActionSerialNum)
           websocketClient.sendMsg(data)
-          thorSchema.addMyAction(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
-          thorSchema.preExecuteUserEvent(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
+          thorSchema.addMyAction(data)
+          thorSchema.preExecuteUserEvent(data)
         case None =>
       }
 
