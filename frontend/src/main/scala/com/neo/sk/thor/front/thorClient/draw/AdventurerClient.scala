@@ -64,11 +64,13 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy) + Point(-r, r + gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
 
       val namePosition = position
-      ctx.fillStyle = "#006699"
+      ctx.fillStyle = "#ffffff"
       ctx.textAlign = "center"
       ctx.font = "normal normal 20px 楷体"
-      ctx.lineWidth = 2
-      ctx.fillText(s"${adventurer.name}", namePosition.x+offset.x, namePosition.y+offset.y)
+//      ctx.lineWidth = 2
+//      println(s"sx:$sx sy:$sy")
+      ctx.textAlign = "center"
+      ctx.fillText(s"${adventurer.name}", (sx + r) * canvasUnit, (sy + dy) * canvasUnit + 20)
       ctx.closePath()
     }
     adventurerMap.map{
