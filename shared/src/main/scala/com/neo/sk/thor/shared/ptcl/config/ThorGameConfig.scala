@@ -55,9 +55,9 @@ trait ThorGameConfig {
 
   def getThorGameConfigImpl(): ThorGameConfigImpl
 
-  def getThorSpeedByLevel(l: Int):Point
+  def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false): Point
 
-  def getMoveDistanceByFrame(l: Int) = getThorSpeedByLevel(l) * frameDuration / 1000
+  def getMoveDistanceByFrame(l: Int, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
 
   def getAdventurerLevelSize: Int
 
@@ -99,7 +99,7 @@ case class ThorGameConfigImpl (
     weaponParams.lengthList(l)
   }
 
-  def getThorSpeedByLevel(l: Int) = adventurerParams.speeds.getThorSpeedByLevel(l)
+  def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false) = adventurerParams.speeds.getThorSpeedByLevel(l)
 
   def getAdventurerLevelSize: Int = adventurerParams.radius.size
 
