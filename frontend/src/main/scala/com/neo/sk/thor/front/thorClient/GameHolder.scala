@@ -2,6 +2,8 @@ package com.neo.sk.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.neo.sk.thor.shared.ptcl.config.ThorGameConfigImpl
+
 //import com.neo.sk.thor.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.thor.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.thor.shared.ptcl
@@ -38,17 +40,19 @@ class GameHolder(canvasName: String) {
   private[this] val canvas = dom.document.getElementById(canvasName).asInstanceOf[Canvas]
   private[this] val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-  private[this] val bounds = Point(Boundary.w,Boundary.h)
+//  private[this] val bounds = Point(Boundary.w,Boundary.h)
 
-  private[this] val canvasUnit = (dom.window.innerWidth / Boundary.w).toInt
+  private[this] val canvasUnit = 10
   private[this] val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
 
   private[this] val canvasBounds = canvasBoundary / canvasUnit
+  println(canvasBounds)
 
   var gridOpt : Option[ThorSchemaClientImpl] = None
 //  var thorSchema = gridOpt.get
   private[this] var myId = "test"
   private[this] var myName = "testName"
+  private[this] var gameConfig: Option[ThorGameConfigImpl] = None
   private[this] var firstCome = true
   private[this] var currentRank = List.empty[Score]
   private[this] var historyRank = List.empty[Score]
@@ -77,7 +81,7 @@ class GameHolder(canvasName: String) {
   def gameRender(): Double => Unit = { d =>
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
-    drawGameByTime(offsetTime, canvasUnit)
+    drawGameByTime(offsetTime, canvasUnit, canvasBounds)
     nextFrame = dom.window.requestAnimationFrame(gameRender())
 
   }
@@ -112,14 +116,14 @@ class GameHolder(canvasName: String) {
           val middleDataInJs = new MiddleBufferInJs(buf)
           bytesDecode[WsMsgServer](middleDataInJs) match {
             case Right(data) =>
-              dom.console.log(data.toString)
+//              dom.console.log(data.toString)
               data match {
                 case YourInfo(config, id, name) =>
-                  println("get YourInfo")
+                  dom.console.log(s"get YourInfo ${config} ${id} ${name}")
                   myId = id
                   myName = name
+                  gameConfig = Some(config)
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
-                  myId = id
                   timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
 
@@ -142,6 +146,12 @@ class GameHolder(canvasName: String) {
                   gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
 
+                case x: MouseMove =>
+
+                case x: GenerateFood =>
+
+                case x: EatFood =>
+
                 case  x => dom.window.console.log(s"接收到无效消息$x")
               }
             case Left(error) =>
@@ -160,14 +170,13 @@ class GameHolder(canvasName: String) {
     canvas.oncontextmenu = _=> false //取消右键弹出行为
     canvas.onmousemove = { (e: dom.MouseEvent) =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
-      val theta = point.getTheta(canvasBoundary / 2).toFloat
-      val currentTime = System.currentTimeMillis()
+      val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
       gridOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          val data = MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum)
+          val data = MouseMove(thorSchema.myId,theta,thorSchema.systemFrame,getActionSerialNum)
           websocketClient.sendMsg(data)
-          thorSchema.addMyAction(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
-          thorSchema.preExecuteUserEvent(MouseMove(myId,theta,thorSchema.systemFrame,getActionSerialNum))
+          thorSchema.addMyAction(data)
+          thorSchema.preExecuteUserEvent(data)
         case None =>
       }
 
@@ -244,6 +253,7 @@ class GameHolder(canvasName: String) {
   var startTime = System.currentTimeMillis()
 
   def gameLoop(): Unit = {
+    logicFrameTime = System.currentTimeMillis()
     gridOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.update()
       case None =>
@@ -266,9 +276,9 @@ class GameHolder(canvasName: String) {
     // rintln("111111111111111111111")
   }
 
-  def drawGameByTime(offsetTime: Long, canvasUnit: Int): Unit = {
+  def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
     gridOpt match{
-      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit)
+      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
       case None =>
     }
 

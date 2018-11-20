@@ -1,8 +1,10 @@
 package com.neo.sk.thor.front.thorClient
 
 import com.neo.sk.thor.front.thorClient.draw.{AdventurerClient, DrawOtherClient, FoodClient}
+import com.neo.sk.thor.shared.ptcl
 import com.neo.sk.thor.shared.ptcl.`object`.Adventurer
-import com.neo.sk.thor.shared.ptcl.config.ThorGameConfig
+import com.neo.sk.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
+import com.neo.sk.thor.shared.ptcl.model.Point
 import com.neo.sk.thor.shared.ptcl.thor.ThorSchemaImpl
 import org.scalajs.dom
 
@@ -25,14 +27,20 @@ with DrawOtherClient{
 
 //  protected val adventurerAttackAnimationMap: mutable.HashMap[Int, Int] = mutable.HashMap[Int, Int]() //可能存在的挥刀动画 id->动画id
 
-  def drawGame(offSetTime:Long, canvasUnit: Int): Unit ={
+  def drawGame(offSetTime:Long, canvasUnit: Int, canvasBounds: Point): Unit ={
     if(!waitSyncData){
       adventurerMap.get(myId) match{
         case Some(adventurer) =>
           //TODO 各种环境绘画
-          drawBackground()
-          drawFoodByOffsetTime(offSetTime, canvasUnit)
-          drawAdventurerByOffsetTime(offSetTime, canvasUnit)
+          //保持自己的adventurer在屏幕中央~
+          val moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
+
+          val offset = (canvasBounds - Point(adventurer.getAdventurerState.radius, adventurer.getAdventurerState.radius))/2 -
+            (adventurer.getAdventurerState.position + moveDistance)
+
+          drawBackground(offset, canvasUnit, canvasBounds)
+          drawFoodByOffsetTime(offset, canvasUnit, canvasBounds)
+          drawAdventurerByOffsetTime(offSetTime, offset, canvasUnit)
         case None =>()
       }
     }

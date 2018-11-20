@@ -88,7 +88,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def updateLevel(implicit thorGameConfig: ThorGameConfig) = {
-    if (level != AdventurerLevel.levelSix) {
+    if (level != thorGameConfig.getAdventurerLevelSize) {
       level += 1
       speedLevel += 1
     }
