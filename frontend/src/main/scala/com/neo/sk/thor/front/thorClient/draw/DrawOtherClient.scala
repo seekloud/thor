@@ -22,9 +22,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.fillStyle = "#171b1f"
     ctx.fillRect(0, 0, canvasBoundary.x * canvasUnit, canvasBoundary.y * canvasUnit)
     ctx.fill()
-    ctx.drawImage(mapImg, -offset.x * canvasUnit,-offset.y * canvasUnit,
-      config.boundary.x * canvasUnit,config.boundary.y * canvasUnit, 0, 0,
-      config.boundary.x * canvasUnit, config.boundary.y * canvasUnit)
+    ctx.drawImage(mapImg, offset.x * canvasUnit, offset.y * canvasUnit, config.boundary.x * canvasUnit, config.boundary.y * canvasUnit)
     ctx.restore()
   }
 
