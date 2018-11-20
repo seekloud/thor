@@ -31,13 +31,16 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val position = adventurer.getAdventurerState.position
       var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
       //如果达到边界 则不再往外走
-      if(position.x - r < 0 || position.x + r > config.boundary.x) moveDistance = moveDistance.copy(x = 0)
-      if(position.y - r < 0 || position.y + r > config.boundary.y) moveDistance = moveDistance.copy(y = 0)
+      val delay = 0.5
+      if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
+      if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
 
       val sx = position.x + offset.x + moveDistance.x
       val sy = position.y + offset.y + moveDistance.y
       val dx = 2 * r
       val dy = 2 * r
+
+      println(s"position-r:${position - Point(r, r)}")
 
 //      println(s"face:${adventurer.getAdventurerState.faceDirection} direction:${adventurer.getAdventurerState.direction}")
       ctx.translate((sx + r) * canvasUnit, (sy + r) * canvasUnit)
