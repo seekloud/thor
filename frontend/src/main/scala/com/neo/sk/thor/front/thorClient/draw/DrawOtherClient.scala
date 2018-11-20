@@ -26,6 +26,36 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.restore()
   }
 
+  private val bar = dom.document.createElement("img").asInstanceOf[html.Image]
+  bar.setAttribute("src", s"${Routes.base}/static/img/weaponlevelbar_bg-sheet0.png")
+  private val fillBar = dom.document.createElement("img").asInstanceOf[html.Image]
+  fillBar.setAttribute("src", s"${Routes.base}/static/img/weaponlevelbar_fg-sheet0.png")
+
+  private val barLength = 288
+  private val barHeight = 45
+  private val barLeft = (dom.window.innerWidth - barLength)/2
+  private val barTop = dom.window.innerHeight - barHeight - 20
+  private val maxFillLenght = 696
+  def drawEnergyBar(adventurer: Adventurer): Unit = {
+    //fixme 垃圾代码
+    ctx.save()
+    ctx.drawImage(bar, barLeft, barTop, barLength, barHeight )
+    ctx.fillStyle = "#ffffff"
+    ctx.textAlign = "center"
+    ctx.fillText(adventurer.level.toString, barLeft + 18, barTop + 28)
+    ctx.restore()
+//    println(s"${fillLength}")
+    val offsetL = 74
+    val offsetT = 15
+    val fillMax = barLength-offsetL - 5
+
+    val preLevel = if(adventurer.level == 1) 0 else config.getMaxEnergyByLevel(adventurer.level - 1)
+    val nowLevel = config.getMaxEnergyByLevel(adventurer.level)
+    val fillLength = (adventurer.energy - preLevel).toFloat / (nowLevel - preLevel) * fillMax
+    val rateX = fillMax.toFloat/697
+    ctx.drawImage(fillBar, (fillMax-fillLength)/rateX,0, fillLength/rateX, 49 , barLeft+offsetL, barTop+offsetT, fillLength, barHeight - offsetT*2 - 1)
+  }
+
 
 
 }

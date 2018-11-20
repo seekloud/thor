@@ -46,6 +46,7 @@ with DrawOtherClient{
           drawBackground(offset, canvasUnit, canvasBounds)
           drawFoodByOffsetTime(offset, canvasUnit, canvasBounds)
           drawAdventurerByOffsetTime(offSetTime, offset, canvasUnit)
+          drawEnergyBar(adventurer)
         case None =>()
       }
     }
