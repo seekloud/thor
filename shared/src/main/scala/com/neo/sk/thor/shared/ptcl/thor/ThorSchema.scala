@@ -106,7 +106,7 @@ trait ThorSchema extends KillInformation{
             case a: MouseClickDownLeft =>
               attackingAdventureMap.get(a.playerId) match {
                 case Some(_) => ()
-                case None => attackingAdventureMap.put(a.playerId, 6) //TODO 动画持续帧数 现在是6
+                case None => attackingAdventureMap.put(a.playerId, 3) //TODO 动画持续帧数 现在是3
               }
             case a: MouseClickDownRight => adventurer.speedUp(config)
             case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
@@ -174,7 +174,7 @@ trait ThorSchema extends KillInformation{
 //  }
 
   protected final def handleAdventurerAttackingNow(): Unit={
-    attackingAdventureMap.map{ attacking =>
+    attackingAdventureMap.foreach{ attacking =>
       adventurerMap.filter(_._1 == attacking._1).values.foreach{adventurer =>
         val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
         adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer)))
@@ -182,8 +182,8 @@ trait ThorSchema extends KillInformation{
       if(attacking._2 <= 0){
         attackingAdventureMap.remove(attacking._1)
       }
-      println(attacking._1+" : "+attacking._2)
-      (attacking._1, attacking._2 - 1)
+      else attackingAdventureMap.update(attacking._1, attacking._2 - 1)
+//      println(attacking._1+" : "+attacking._2)
     }
   }
 
