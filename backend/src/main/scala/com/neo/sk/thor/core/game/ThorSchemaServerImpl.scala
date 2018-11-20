@@ -56,7 +56,7 @@ case class ThorSchemaServerImpl (
   override protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
     val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
     addGameEvent(event)
-    dispatch(event)
+    dispatchTo(adventurer.playerId, event)
   }
 
   override def update(): Unit = super.update()
@@ -91,7 +91,7 @@ case class ThorSchemaServerImpl (
   def leftGame(userId:String,name:String) = {
     val event = UserLeftRoom(userId,name,systemFrame)
     addGameEvent(event)
-    dispatch(event)
+//    dispatch(event)
   }
 
   def receiveUserAction(action: UserActionEvent):Unit = {

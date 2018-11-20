@@ -58,9 +58,11 @@ trait Adventurer extends CircleObjectOfGame {
 
   //判断是否被攻击
   def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit): Unit = {
-//    println("attacking")
-    if (isSectorDuang(scala.math.Pi * 1.5 / 3 * attackingStep - scala.math.Pi/3 , p))
+    println(s"attacking: ${p.playerId},$attackingStep")
+    if (isSectorDuang(scala.math.Pi * 1.5 / 3 * attackingStep - scala.math.Pi/3 , p)){
+      println(s"${p.playerId} is attacked")
       attackedCallback(p)
+    }
   }
 
   def getAdventurerState: AdventurerState = {
