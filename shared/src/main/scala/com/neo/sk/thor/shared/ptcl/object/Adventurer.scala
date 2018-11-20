@@ -51,9 +51,15 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
+  //判断扇形区域碰撞,角度为刀的角度
+  def isSectorDuang(Theta: Double, o: Adventurer) ={
+    this.position.distance(o.position) < (this.radius + this.weaponLength + o.radius) && scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) < scala.math.Pi * (1.5/3)
+  }
+
   //判断是否被攻击
-  def checkAttacked(p: Adventurer, attackedCallback: Adventurer => Unit): Unit = {
-    if (this.position.distance(p.position) < (this.weaponLength + this.weaponLength + p.radius) && scala.math.abs(p.position.getTheta(this.position) - this.direction) < (scala.math.Pi / 3))
+  def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit): Unit = {
+//    println("attacking")
+    if (isSectorDuang(scala.math.Pi * 1.5 / 3 * attackingStep - scala.math.Pi/3 , p))
       attackedCallback(p)
   }
 
@@ -111,6 +117,14 @@ trait Adventurer extends CircleObjectOfGame {
           val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
           if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
             quadTree.updateObject(this)
+          } else if (movedRec.topLeft.x < 0){
+            this.position = Point(0, this.position.y)
+          } else if (movedRec.topLeft.y <0) {
+            this.position = Point(this.position.x, 0)
+          } else if (movedRec.downRight.x > boundary.x) {
+            this.position = Point(boundary.x, this.position.y)
+          } else if (movedRec.downRight.y > boundary.y) {
+            this.position = Point(this.position.x, boundary.y)
           } else {
             this.position = originPosition
           }
@@ -119,7 +133,6 @@ trait Adventurer extends CircleObjectOfGame {
 
     }
   }
-
 
 }
 
