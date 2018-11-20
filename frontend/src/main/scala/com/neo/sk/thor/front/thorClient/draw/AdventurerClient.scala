@@ -23,6 +23,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 //  mapImg.setAttribute("src", s"${Routes.base}/static/img/logo-sheet0.png")
 
   def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Int): Unit ={
+
     def drawAnAdventurer(adventurer: Adventurer) = {
       val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
       mapImg.setAttribute("src", s"/thor/static/img/skins-sheet0-0.png")
