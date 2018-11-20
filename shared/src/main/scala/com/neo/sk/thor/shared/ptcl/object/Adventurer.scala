@@ -160,16 +160,16 @@ trait Adventurer extends CircleObjectOfGame {
             quadTree.updateObject(this)
           }
           if (movedRec.topLeft.x <= 0 || movedRec.topLeft.y <= 0) {
-            if (movedRec.topLeft.x <= 0) this.position = Point(radius, this.position.y);
+            if (movedRec.topLeft.x <= 0) this.position = Point(radius, this.position.y)
             moveDistance = moveDistance.copy(x = radius - originPosition.x)
-            if (movedRec.topLeft.y <= 0) this.position = Point(this.position.x, radius);
+            if (movedRec.topLeft.y <= 0) this.position = Point(this.position.x, radius)
             moveDistance = moveDistance.copy(y = radius - originPosition.y)
             quadTree.updateObject(this)
           }
           if (movedRec.downRight.x >= boundary.x || movedRec.downRight.y >= boundary.y) {
-            if (movedRec.downRight.x >= boundary.x) this.position = Point(boundary.x - radius, this.position.y);
+            if (movedRec.downRight.x >= boundary.x) this.position = Point(boundary.x - radius, this.position.y)
             moveDistance = moveDistance.copy(x = boundary.x - radius - originPosition.x)
-            if (movedRec.downRight.y >= boundary.y) this.position = Point(this.position.x, boundary.y - radius);
+            if (movedRec.downRight.y >= boundary.y) this.position = Point(this.position.x, boundary.y - radius)
             moveDistance = moveDistance.copy(y = boundary.y - radius - originPosition.y)
             quadTree.updateObject(this)
           }
