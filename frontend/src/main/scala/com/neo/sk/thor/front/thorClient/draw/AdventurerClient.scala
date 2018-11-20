@@ -40,19 +40,19 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val dx = 2 * r
       val dy = 2 * r
 
-//      println(s"position:${position} position-r:${position - Point(r, r)}")
-
-      CanvasUtils.rotateImage(ctx, mapImg, Point(sx, sy), dx, dy, adventurer.getAdventurerState.direction)
+      println(s"position:${position} position-r:${position - Point(r, r)} position+r:${position + Point(r, r)}" )
+      println(s"moveDistance:$moveDistance")
+//      CanvasUtils.rotateImage(ctx, mapImg, Point(sx, sy), dx, dy, adventurer.getAdventurerState.direction)
 //      println(s"face:${adventurer.getAdventurerState.faceDirection} direction:${adventurer.getAdventurerState.direction}")
-//      ctx.save()
-//      ctx.translate((sx + r) * canvasUnit, (sy + r) * canvasUnit)
-//      ctx.rotate(adventurer.getAdventurerState.direction)
-//      ctx.drawImage(mapImg, -r * canvasUnit, -r * canvasUnit, dx * canvasUnit, dy * canvasUnit)
-//      // 恢复设置（恢复的步骤要跟你修改的步骤向反）
-//      ctx.rotate(-adventurer.getAdventurerState.direction)
-//      ctx.translate(-(sx + r) * canvasUnit, -(sy + r) * canvasUnit)
-//      // 之后canvas的原点又回到左上角，旋转角度为0
-//      ctx.restore()
+      ctx.save()
+      ctx.translate((sx + r) * canvasUnit, (sy + r) * canvasUnit)
+      ctx.rotate(adventurer.getAdventurerState.direction)
+      ctx.drawImage(mapImg, -r * canvasUnit, -r * canvasUnit, dx * canvasUnit, dy * canvasUnit)
+      // 恢复设置（恢复的步骤要跟你修改的步骤向反）
+      ctx.rotate(-adventurer.getAdventurerState.direction)
+      ctx.translate(-(sx + r) * canvasUnit, -(sy + r) * canvasUnit)
+      // 之后canvas的原点又回到左上角，旋转角度为0
+      ctx.restore()
     }
     adventurerMap.map{
       adventurer =>
