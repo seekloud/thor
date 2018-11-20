@@ -99,7 +99,9 @@ case class ThorGameConfigImpl (
     weaponParams.lengthList(l)
   }
 
-  def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false) = adventurerParams.speeds.getThorSpeedByLevel(l)
+  def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false) = if (isSpeedUp) {
+    adventurerParams.speeds.getThorSpeedByLevel(l) * 1.5.toFloat
+  } else adventurerParams.speeds.getThorSpeedByLevel(l)
 
   def getAdventurerLevelSize: Int = adventurerParams.radius.size
 
