@@ -125,6 +125,8 @@ trait Adventurer extends CircleObjectOfGame {
             this.position = Point(boundary.x, this.position.y)
           } else if (movedRec.downRight.y > boundary.y) {
             this.position = Point(this.position.x, boundary.y)
+          } else {
+            this.position = originPosition
           }
         }
       }
