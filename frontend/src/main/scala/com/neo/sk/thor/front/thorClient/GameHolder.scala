@@ -133,9 +133,14 @@ class GameHolder(canvasName: String) {
 
                 case UserLeftRoom(userId, name, _) =>
                   barrage = s"${name}离开了游戏"
+                  println(s"user left $name")
+                  gridOpt.foreach{ grid => grid.leftGame(userId, name)}
 
                 case BeAttacked(userId, name, killerId, killerName, _) =>
                   barrage = s"${killerName}杀死了${name}"
+                  println(s"be attacked by $killerName")
+                  dom.window.cancelAnimationFrame(nextFrame)
+                  drawGameStop(killerName)
 
                 case Ranks(current, history) =>
                   currentRank = current
@@ -270,6 +275,17 @@ class GameHolder(canvasName: String) {
     ctx.textBaseline = "top"
     ctx.font = "36px Helvetica"
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
+  }
+
+  def drawGameStop(killer: String): Unit = {
+    ctx.fillStyle = Color.Black.toString()
+    ctx.fillRect(0, 0, dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+    ctx.fillStyle = "rgb(250, 250, 250)"
+    ctx.textAlign = "left"
+    ctx.textBaseline = "top"
+    ctx.font = "36px Helvetica"
+    ctx.fillText(s"您已经死亡,被玩家=${killer}所杀", 150, 180)
+    println()
   }
 
   def drawGame(curFrame: Int, maxClientFrame: Int): Unit = {

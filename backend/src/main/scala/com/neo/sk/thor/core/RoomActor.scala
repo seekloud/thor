@@ -77,6 +77,7 @@ object RoomActor {
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, grid, tickCount)
 
           case LeftRoom(userId, name, userList) =>
+            log.debug(s"roomactor - ${userId} left room")
             grid.leftGame(userId, name)
             subscribersMap.remove(userId)
             dispatch(subscribersMap)(UserLeftRoom(userId, name))

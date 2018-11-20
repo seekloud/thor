@@ -26,15 +26,6 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.restore()
   }
 
-  def drawGameStop(): Unit = {
-    ctx.fillStyle = Color.Black.toString()
-    ctx.fillRect(0, 0, dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
-    ctx.fillStyle = "rgb(250, 250, 250)"
-    ctx.textAlign = "left"
-    ctx.textBaseline = "top"
-    ctx.font = "36px Helvetica"
-    ctx.fillText(s"您已经死亡,被玩家=${}所杀", 150, 180)
-    println()
-  }
+
 
 }

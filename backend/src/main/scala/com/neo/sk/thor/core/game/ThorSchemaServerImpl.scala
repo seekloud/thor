@@ -88,7 +88,7 @@ case class ThorSchemaServerImpl (
     justJoinUser = (userId, name, userActor) :: justJoinUser
   }
 
-  def leftGame(userId:String,name:String) = {
+  override def leftGame(userId:String,name:String) = {
     val event = UserLeftRoom(userId,name,systemFrame)
     addGameEvent(event)
 //    dispatch(event)

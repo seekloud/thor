@@ -121,6 +121,8 @@ trait ThorSchema extends KillInformation{
   protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit ={
     //重写，后台被攻击事件
     //前端暂不操作，可能有一个对面死掉的动画
+    val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
+    addGameEvent(event)
   }
 
 
@@ -272,6 +274,12 @@ trait ThorSchema extends KillInformation{
     adventurerMap.values.foreach { adventurer =>
       adventurer.move(boundary, quadTree)
     }
+  }
+
+  def leftGame(userId:String,name:String) = {
+    val event = UserLeftRoom(userId,name,systemFrame)
+    addGameEvent(event)
+    //    dispatch(event)
   }
 
   def update(): Unit = {
