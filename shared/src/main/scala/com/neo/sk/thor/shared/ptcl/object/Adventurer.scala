@@ -118,13 +118,15 @@ trait Adventurer extends CircleObjectOfGame {
           if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
             quadTree.updateObject(this)
           } else if (movedRec.topLeft.x <= 0){
-            this.position = Point(0, this.position.y)
+            this.position = Point(0, originPosition.y)
           } else if (movedRec.topLeft.y <= 0) {
-            this.position = Point(this.position.x, 0)
+            this.position = Point(originPosition.x, 0)
           } else if (movedRec.downRight.x >= boundary.x) {
-            this.position = Point(boundary.x, this.position.y)
+            this.position = Point(boundary.x, originPosition.y)
           } else if (movedRec.downRight.y >= boundary.y) {
-            this.position = Point(this.position.x, boundary.y)
+            this.position = Point(originPosition.x, boundary.y)
+          } else {
+            this.position = originPosition
           }
         }
       }
