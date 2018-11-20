@@ -53,6 +53,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     val nowLevel = config.getMaxEnergyByLevel(adventurer.level)
     val fillLength = (adventurer.energy - preLevel).toFloat / (nowLevel - preLevel) * fillMax
     val rateX = fillMax.toFloat/697
+    println(s"energy:${adventurer.energy} pre:$preLevel now:$nowLevel")
     ctx.drawImage(fillBar, (fillMax-fillLength)/rateX,0, fillLength/rateX, 49 , barLeft+offsetL, barTop+offsetT, fillLength, barHeight - offsetT*2 - 1)
   }
 

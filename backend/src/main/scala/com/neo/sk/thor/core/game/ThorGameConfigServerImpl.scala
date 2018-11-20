@@ -75,10 +75,10 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   def getAdventurerRadiusByLevel(adventurerLevel: Int): Float = thorGameConfig.getAdventurerRadiusByLevel(adventurerLevel)
 
   override def getRadiusByFoodLevel(l: Int): Float = thorGameConfig.getRadiusByFoodLevel(l)
-  def getEnergyByFoodLevel(l: Int) = thorGameConfig.getEnergyByFoodLevel(l-1)
-  def getMaxEnergyByLevel(l: Int) = thorGameConfig.getMaxEnergyByLevel(l-1)
-  def getWeaponLevelByLevel(l: Int) = thorGameConfig.getWeaponLevelByLevel(l-1)
-  def getWeaponLengthByLevel(l: Int) = thorGameConfig.getWeaponLengthByLevel(l-1)
+  def getEnergyByFoodLevel(l: Int) = thorGameConfig.getEnergyByFoodLevel(l)
+  def getMaxEnergyByLevel(l: Int) = thorGameConfig.getMaxEnergyByLevel(l)
+  def getWeaponLevelByLevel(l: Int) = thorGameConfig.getWeaponLevelByLevel(l)
+  def getWeaponLengthByLevel(l: Int) = thorGameConfig.getWeaponLengthByLevel(l)
 
   override def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false): Point = thorGameConfig.getThorSpeedByLevel(l, isSpeedUp)
 

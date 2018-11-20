@@ -25,8 +25,8 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Int): Unit ={
     //fixme 垃圾代码
     def drawAnAdventurer(adventurer: Adventurer) = {
-      val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-      mapImg.setAttribute("src", s"/thor/static/img/skins-sheet0-0.png")
+//      val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
+//      mapImg.setAttribute("src", s"/thor/static/img/Adventurer-${adventurer.level}.png")
       val r = adventurer.getAdventurerState.radius
       val position = adventurer.getAdventurerState.position
       var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
@@ -40,8 +40,8 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val dx = 2 * r
       val dy = 2 * r
 
-      val src = s"/thor/static/img/skins-sheet0-0.png"
-      val weapon = s"/thor/static/img/weapon-second .png"
+      val src = s"/thor/static/img/Adventurer-${adventurer.level}.png"
+      val weapon = s"/thor/static/img/weapon-${adventurer.level}.png"
       CanvasUtils.rotateImage(ctx, src, Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit, dy * canvasUnit, adventurer.getAdventurerState.direction)
 
       var step = 3
@@ -55,7 +55,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       }
       val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 - math.Pi / 12).toFloat
       val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
-      val weaponWidth = weaponLength.toFloat / 3 * 2
+      val weaponWidth = 5
       val gap = 0
       val move: Float = if(isAttacting) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0
 //      println(s"d: ${adventurer.getAdventurerState.direction} angle:${angle}")

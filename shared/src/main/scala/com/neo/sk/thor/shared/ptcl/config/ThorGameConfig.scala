@@ -91,13 +91,13 @@ case class ThorGameConfigImpl (
     foodParams.energyList(l)
   }
   override def getMaxEnergyByLevel(l: Int): Int = {
-    adventurerParams.maxEnergyList(l)
+    adventurerParams.maxEnergyList(l-1)
   }
   override def getWeaponLevelByLevel(l: Int): Int = {
     l
   }
   override def getWeaponLengthByLevel(l: Int): Float = {
-    weaponParams.lengthList(l)
+    weaponParams.lengthList(l-1)
   }
 
   def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false) = if (isSpeedUp) {
