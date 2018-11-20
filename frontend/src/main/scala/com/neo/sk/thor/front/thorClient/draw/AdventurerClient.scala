@@ -30,7 +30,6 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val r = adventurer.getAdventurerState.radius
       val position = adventurer.getAdventurerState.position
       var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
-      if(adventurer.getAdventurerState.getAdventurerState.isSpeedUp) moveDistance = moveDistance * 1.5.toFloat
       //如果达到边界 则不再往外走
       val delay = 0.5
       if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
@@ -42,17 +41,15 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val dy = 2 * r
 
       val src = s"/thor/static/img/skins-sheet0-0.png"
-      CanvasUtils.rotateImage(ctx, src, Point(sx, sy) * canvasUnit, dx * canvasUnit, dy * canvasUnit, adventurer.getAdventurerState.direction)
-//      println(s"face:${adventurer.getAdventurerState.faceDirection} direction:${adventurer.getAdventurerState.direction}")
-//      ctx.save()
-//      ctx.translate((sx + r) * canvasUnit, (sy + r) * canvasUnit)
-//      ctx.rotate(adventurer.getAdventurerState.direction)
-//      ctx.drawImage(mapImg, -r * canvasUnit, -r * canvasUnit, dx * canvasUnit, dy * canvasUnit)
-//      // 恢复设置（恢复的步骤要跟你修改的步骤向反）
-//      ctx.rotate(-adventurer.getAdventurerState.direction)
-//      ctx.translate(-(sx + r) * canvasUnit, -(sy + r) * canvasUnit)
-//      // 之后canvas的原点又回到左上角，旋转角度为0
-//      ctx.restore()
+      val weapon = s"/thor/static/img/weapon second .png"
+      CanvasUtils.rotateImage(ctx, src, Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit, dy * canvasUnit, adventurer.getAdventurerState.direction)
+
+      val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
+      val weaponWidth = weaponLength.toFloat / 3 * 2
+      val gap = 4
+      val angle = adventurer.getAdventurerState.direction + 30/180 * math.Pi
+      CanvasUtils.rotateImage(ctx, weapon, Point(sx, sy) * canvasUnit, Point(0, -(r + gap)) * canvasUnit, weaponLength * canvasUnit, weaponWidth * canvasUnit, angle.toFloat)
+
     }
     adventurerMap.map{
       adventurer =>

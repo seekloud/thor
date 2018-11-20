@@ -124,7 +124,8 @@ class GameHolder(canvasName: String) {
                   myName = name
                   gameConfig = Some(config)
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
-                  timer = Shortcut.schedule(gameLoop,ptcl.model.Frame.millsAServerFrame)
+                  gridOpt.foreach{grid => timer = Shortcut.schedule(gameLoop,grid.config.frameDuration)}
+
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
 
                 case UserEnterRoom(userId, name, _, _) =>
