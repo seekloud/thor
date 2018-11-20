@@ -52,7 +52,7 @@ object RoomActor {
             //为新房间创建grid
             implicit val sendBuffer = new MiddleBufferInJvm(81920)
             val grid = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
-            timer.startPeriodicTimer(GameLoopKey, GameLoop, Frame.millsAServerFrame.millis)
+            timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
             idle(roomId, Nil, subscribersMap, grid, 0L)
         }
     }

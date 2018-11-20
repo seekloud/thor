@@ -10,7 +10,8 @@ import org.scalajs.dom.html.Image
   * @version 创建时间：2018/11/20
   */
 object CanvasUtils {
-  def rotateImage(ctx:dom.CanvasRenderingContext2D, src:String, position: Point, offset:Point, width: Float, height: Float, angle: Float) = {
+  def rotateImage(ctx:dom.CanvasRenderingContext2D, src:String, position: Point, offset:Point,
+                  width: Float, height: Float, angle: Float) = {
     val img = dom.document.createElement("img").asInstanceOf[html.Image]
     img.setAttribute("src", src)
     ctx.save()
