@@ -35,12 +35,12 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
       if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
 
-      val sx = position.x + offset.x + moveDistance.x
-      val sy = position.y + offset.y + moveDistance.y
+      val sx = position.x + offset.x + moveDistance.x - r
+      val sy = position.y + offset.y + moveDistance.y - r
       val dx = 2 * r
       val dy = 2 * r
 
-      println(s"position-r:${position - Point(r, r)}")
+      println(s"position:${position} position-r:${position - Point(r, r)}")
 
 //      println(s"face:${adventurer.getAdventurerState.faceDirection} direction:${adventurer.getAdventurerState.direction}")
       ctx.translate((sx + r) * canvasUnit, (sy + r) * canvasUnit)

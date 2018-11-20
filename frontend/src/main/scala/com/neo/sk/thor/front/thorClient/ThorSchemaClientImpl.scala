@@ -33,15 +33,15 @@ with DrawOtherClient{
         case Some(adventurer) =>
           //TODO 各种环境绘画
           //保持自己的adventurer在屏幕中央~
-          val position = adventurer.getAdventurerState.position
           val r = adventurer.getAdventurerState.radius
+          val position = adventurer.getAdventurerState.position - Point(r, r)
           var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
           //如果达到边界 则不再往外走
           val delay = 0.5
           if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
           if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
 //          println(s"position $position r $r")
-          val offset = (canvasBounds - Point(r, r) * 2)/2 - (adventurer.getAdventurerState.position + moveDistance)
+          val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
 
           drawBackground(offset, canvasUnit, canvasBounds)
           drawFoodByOffsetTime(offset, canvasUnit, canvasBounds)
