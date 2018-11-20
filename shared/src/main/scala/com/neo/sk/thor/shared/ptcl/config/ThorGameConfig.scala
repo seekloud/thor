@@ -58,7 +58,7 @@ trait ThorGameConfig {
 
   def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false): Point
 
-  def getMoveDistanceByFrame(l: Int, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
+  def   getMoveDistanceByFrame(l: Int, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
 
   def getAdventurerLevelSize: Int
 
