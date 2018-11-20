@@ -106,7 +106,11 @@ trait Adventurer extends CircleObjectOfGame {
 
   def move(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (isMove) {
-      val moveDistance = thorGameConfig.getMoveDistanceByFrame(this.speedLevel).rotate(direction)
+      val moveDistance = if (isSpeedUp) {
+        thorGameConfig.getMoveDistanceByFrame(this.speedLevel).rotate(direction)
+      } else {
+        thorGameConfig.getMoveDistanceByFrame(this.speedLevel).rotate(direction)
+      }
 
       val horizontalDistance = moveDistance.copy(y = 0)
       val verticalDistance = moveDistance.copy(x = 0)
@@ -118,15 +122,13 @@ trait Adventurer extends CircleObjectOfGame {
           if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
             quadTree.updateObject(this)
           } else if (movedRec.topLeft.x <= 0){
-            this.position = Point(0, originPosition.y)
+            this.position = Point(radius, this.position.y)
           } else if (movedRec.topLeft.y <= 0) {
-            this.position = Point(originPosition.x, 0)
+            this.position = Point(this.position.x, radius)
           } else if (movedRec.downRight.x >= boundary.x) {
-            this.position = Point(boundary.x, originPosition.y)
+            this.position = Point(boundary.x - radius, this.position.y)
           } else if (movedRec.downRight.y >= boundary.y) {
-            this.position = Point(originPosition.x, boundary.y)
-          } else {
-            this.position = originPosition
+            this.position = Point(this.position.x, boundary.y - radius)
           }
         }
       }
