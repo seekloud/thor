@@ -33,9 +33,15 @@ with DrawOtherClient{
         case Some(adventurer) =>
           //TODO 各种环境绘画
           //保持自己的adventurer在屏幕中央~
-          val moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
+          val position = adventurer.getAdventurerState.position
+          val r = adventurer.getAdventurerState.radius
+          var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
+          //如果达到边界 则不再往外走
+          if(position.x - r < 0 || position.x + r > config.boundary.x) moveDistance = moveDistance.copy(x = 0)
+          if(position.y - r < 0 || position.y + r > config.boundary.y) moveDistance = moveDistance.copy(y = 0)
 
-          val offset = (canvasBounds - Point(adventurer.getAdventurerState.radius, adventurer.getAdventurerState.radius))/2 -
+//          println(s"position $position r $r")
+          val offset = (canvasBounds - Point(r, r) * 2)/2 -
             (adventurer.getAdventurerState.position + moveDistance)
 
           drawBackground(offset, canvasUnit, canvasBounds)

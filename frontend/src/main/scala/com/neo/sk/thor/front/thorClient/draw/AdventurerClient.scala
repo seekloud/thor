@@ -26,13 +26,28 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     def drawAnAdventurer(adventurer: Adventurer) = {
       val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
       mapImg.setAttribute("src", s"/thor/static/img/skins-sheet0-0.png")
-      val moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
       val r = adventurer.getAdventurerState.radius
-      val sx = adventurer.getAdventurerState.position.x + offset.x + moveDistance.x
-      val sy = adventurer.getAdventurerState.position.y + offset.y + moveDistance.y
+      val position = adventurer.getAdventurerState.position
+      var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
+      //如果达到边界 则不再往外走
+      if(position.x - r < 0 || position.x + r > config.boundary.x) moveDistance = moveDistance.copy(x = 0)
+      if(position.y - r < 0 || position.y + r > config.boundary.y) moveDistance = moveDistance.copy(y = 0)
+
+      val sx = position.x + offset.x + moveDistance.x
+      val sy = position.y + offset.y + moveDistance.y
       val dx = 2 * r
       val dy = 2 * r
-      ctx.drawImage(mapImg, sx * canvasUnit, sy * canvasUnit, dx * canvasUnit, dy * canvasUnit)
+
+//      println(s"face:${adventurer.getAdventurerState.faceDirection} direction:${adventurer.getAdventurerState.direction}")
+      ctx.translate((sx + r) * canvasUnit, (sy + r) * canvasUnit)
+      ctx.rotate(adventurer.getAdventurerState.direction)
+      ctx.drawImage(mapImg, -r * canvasUnit, -r * canvasUnit, dx * canvasUnit, dy * canvasUnit)
+      // 恢复设置（恢复的步骤要跟你修改的步骤向反）
+      ctx.rotate(-adventurer.getAdventurerState.direction)
+      ctx.translate(-(sx + r) * canvasUnit, -(sy + r) * canvasUnit)
+      // 之后canvas的原点又回到左上角，旋转角度为0
+//      println(s"sx:${adventurer.getAdventurerState.position.x} sy:${adventurer.getAdventurerState.position.y}")
+//      ctx.drawImage(mapImg, sx * canvasUnit, sy * canvasUnit, dx * canvasUnit, dy * canvasUnit)
       ctx.restore()
     }
     adventurerMap.map{
