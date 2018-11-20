@@ -107,9 +107,9 @@ trait Adventurer extends CircleObjectOfGame {
   def move(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (isMove) {
       val moveDistance = if (isSpeedUp) {
-        thorGameConfig.getMoveDistanceByFrame(this.speedLevel).rotate(direction)
+        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
       } else {
-        thorGameConfig.getMoveDistanceByFrame(this.speedLevel).rotate(direction)
+        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
       }
 
       val horizontalDistance = moveDistance.copy(y = 0)

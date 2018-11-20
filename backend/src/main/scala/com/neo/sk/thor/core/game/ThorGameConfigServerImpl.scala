@@ -77,7 +77,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   def getWeaponLevelByLevel(l: Int) = thorGameConfig.getWeaponLevelByLevel(l)
   def getWeaponLengthByLevel(l: Int) = thorGameConfig.getWeaponLengthByLevel(l)
 
-  override def getThorSpeedByLevel(l: Int): Point = thorGameConfig.getThorSpeedByLevel(l)
+  override def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false): Point = thorGameConfig.getThorSpeedByLevel(l, isSpeedUp)
 
   def getAdventurerLevelSize: Int = thorGameConfig.getAdventurerLevelSize
 
