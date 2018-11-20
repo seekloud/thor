@@ -41,7 +41,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val dy = 2 * r
 
       val src = s"/thor/static/img/skins-sheet0-0.png"
-      val weapon = s"/thor/static/img/weapon second .png"
+      val weapon = s"/thor/static/img/weapon-second .png"
       CanvasUtils.rotateImage(ctx, src, Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit, dy * canvasUnit, adventurer.getAdventurerState.direction)
 
       var step = 3
@@ -63,6 +63,13 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 //      CanvasUtils.rotateImage(ctx, weapon, Point(sx, sy) * canvasUnit, Point(0, -(r + gap)) * canvasUnit, weaponLength * canvasUnit, weaponWidth * canvasUnit, angle)
       CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy) + Point(-r, r + gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
 
+      val namePosition = position
+      ctx.fillStyle = "#006699"
+      ctx.textAlign = "center"
+      ctx.font = "normal normal 20px 楷体"
+      ctx.lineWidth = 2
+      ctx.fillText(s"${adventurer.name}", namePosition.x+offset.x, namePosition.y+offset.y)
+      ctx.closePath()
     }
     adventurerMap.map{
       adventurer =>
