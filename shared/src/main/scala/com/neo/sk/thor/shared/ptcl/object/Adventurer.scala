@@ -117,15 +117,20 @@ trait Adventurer extends CircleObjectOfGame {
           val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
           if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
             quadTree.updateObject(this)
-          } else {
-            this.position = originPosition
+          } else if (movedRec.topLeft.x < 0){
+            this.position = Point(0, this.position.y)
+          } else if (movedRec.topLeft.y <0) {
+            this.position = Point(this.position.x, 0)
+          } else if (movedRec.downRight.x > boundary.x) {
+            this.position = Point(boundary.x, this.position.y)
+          } else if (movedRec.downRight.y > boundary.y) {
+            this.position = Point(this.position.x, boundary.y)
           }
         }
       }
 
     }
   }
-
 
 }
 
