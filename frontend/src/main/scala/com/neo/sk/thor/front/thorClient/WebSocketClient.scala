@@ -40,24 +40,24 @@ class WebSocketClient(
   def setup(name:String):Unit = {
     println("set up")
 
-    val websocketStream = new WebSocket(getWebSocketUri(name))
-    websocketStreamOpt = Some(websocketStream)
-    websocketStream.onopen = { (event: Event) =>
+    val webSocketStream = new WebSocket(getWebSocketUri(name))
+    websocketStreamOpt = Some(webSocketStream)
+    webSocketStream.onopen = { (event: Event) =>
       wsSetup = true
       connectSuccessCallback(event)
     }
-    websocketStream.onerror = { (event: Event) =>
+    webSocketStream.onerror = { (event: Event) =>
       wsSetup = false
       websocketStreamOpt = None
       connectErrorCallback(event)
     }
 
-    websocketStream.onmessage = { (event: MessageEvent) =>
+    webSocketStream.onmessage = { (event: MessageEvent) =>
 //        println(s"recv msg:${event.data.toString}")
       messageHandler(event)
     }
 
-    websocketStream.onclose = { (event: Event) =>
+    webSocketStream.onclose = { (event: Event) =>
       wsSetup = false
       websocketStreamOpt = None
       closeCallback(event)

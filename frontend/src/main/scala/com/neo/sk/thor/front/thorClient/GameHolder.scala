@@ -230,10 +230,17 @@ class GameHolder(canvasName: String) {
 
     }
      canvas.onkeydown = {(e : dom.KeyboardEvent) =>
-       if (e.keyCode == KeyCode.Space){
-         firstCome = true
-         start(myName)
-         e.preventDefault()
+       gridOpt match{
+         case Some(thorSchema: ThorSchemaClientImpl) =>
+           if (!thorSchema.adventurerMap.contains(myId)){
+             if (e.keyCode == KeyCode.Space){
+               firstCome = true
+               start(myName)
+               websocketClient.sendMsg(RestartGame(myName))
+               e.preventDefault()
+             }
+           }
+         case None => ()
        }
      }
 //    canvas.onclick = { (e: MouseEvent) =>

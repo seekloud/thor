@@ -40,7 +40,7 @@ trait Adventurer extends CircleObjectOfGame {
   var killNum: Int
   var isMove: Boolean
 
-  val maxLevel = 5
+  val maxLevel = 20
   def getMoveState() = isMove
 
   //判断adventurer是否吃到食物
