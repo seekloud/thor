@@ -193,6 +193,7 @@ trait ThorSchema extends KillInformation{
   protected final def handleAdventurerAttacked(e: BeAttacked): Unit = {
     val killerOpt = adventurerMap.get(e.killerId)
     adventurerMap.get(e.playerId).foreach { adventurer =>
+      println(s"handle ${e.playerId} attacked")
       killerOpt.foreach(_.killNum += 1)
       quadTree.remove(adventurer)
       adventurerMap.remove(adventurer.playerId)

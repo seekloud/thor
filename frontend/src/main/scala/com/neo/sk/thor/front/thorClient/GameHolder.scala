@@ -52,6 +52,7 @@ class GameHolder(canvasName: String) {
 //  var thorSchema = gridOpt.get
   private[this] var myId = "test"
   private[this] var myName = "testName"
+  private[this] var killer = "someone"
   private[this] var gameConfig: Option[ThorGameConfigImpl] = None
   private[this] var firstCome = true
   private[this] var currentRank = List.empty[Score]
@@ -142,8 +143,11 @@ class GameHolder(canvasName: String) {
                 case BeAttacked(userId, name, killerId, killerName, _) =>
                   barrage = s"${killerName}杀死了${name}"
                   barrageTime = 300
+                  killer = killerName
                   println(s"be attacked by $killerName")
+                  gridOpt.foreach{grid => grid.adventurerMap.remove(userId)}
                   dom.window.cancelAnimationFrame(nextFrame)
+                  dom.window.clearInterval(timer)
                   gridOpt.get.drawGameStop(killerName)
 
                 case Ranks(current, history) =>
@@ -157,10 +161,16 @@ class GameHolder(canvasName: String) {
                   justSynced = true
 
                 case x: MouseMove =>
+                case x: MouseClickDownLeft =>
+                case x: MouseClickDownRight =>
+                case x: MouseClickUpRight =>
+
+                  gridOpt.foreach(_.receiveUserEvent(x))
 
                 case x: GenerateFood =>
 
                 case x: EatFood =>
+//                  gridOpt.foreach(_.)
 
                 case  x => dom.window.console.log(s"接收到无效消息$x")
               }
@@ -183,10 +193,13 @@ class GameHolder(canvasName: String) {
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
       gridOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          val data = MouseMove(thorSchema.myId,theta,thorSchema.systemFrame,getActionSerialNum)
-          websocketClient.sendMsg(data)
-          thorSchema.addMyAction(data)
-          thorSchema.preExecuteUserEvent(data)
+          if(thorSchema.adventurerMap.contains(myId)){
+            val data = MouseMove(thorSchema.myId,theta,thorSchema.systemFrame,getActionSerialNum)
+            websocketClient.sendMsg(data)
+            thorSchema.addMyAction(data)
+            thorSchema.preExecuteUserEvent(data)
+          }
+
         case None =>
       }
 
@@ -195,21 +208,22 @@ class GameHolder(canvasName: String) {
     canvas.onmousedown = {(e: dom.MouseEvent) =>
       gridOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if(e.button == 0){ //左键
-            val event = MouseClickDownLeft(myId, thorSchema.systemFrame, getActionSerialNum)
-            websocketClient.sendMsg(event)
-            thorSchema.preExecuteUserEvent(event)
-            thorSchema.addMyAction(event)
-            e.preventDefault()
-          }
-          else if(e.button == 2){ //右键
-            val event = MouseClickDownRight(myId, thorSchema.systemFrame, getActionSerialNum)
-            websocketClient.sendMsg(event)
-            thorSchema.preExecuteUserEvent(event) // actionEventMap
-            thorSchema.addMyAction(event) // myAdventurerAction
-            e.preventDefault()
-          }
-          else ()
+          if(thorSchema.adventurerMap.contains(myId))
+            if(e.button == 0){ //左键
+              val event = MouseClickDownLeft(myId, thorSchema.systemFrame, getActionSerialNum)
+              websocketClient.sendMsg(event)
+              thorSchema.preExecuteUserEvent(event)
+              thorSchema.addMyAction(event)
+              e.preventDefault()
+            }
+            else if(e.button == 2){ //右键
+              val event = MouseClickDownRight(myId, thorSchema.systemFrame, getActionSerialNum)
+              websocketClient.sendMsg(event)
+              thorSchema.preExecuteUserEvent(event) // actionEventMap
+              thorSchema.addMyAction(event) // myAdventurerAction
+              e.preventDefault()
+            }
+            else ()
         case None =>
       }
 
@@ -217,14 +231,15 @@ class GameHolder(canvasName: String) {
     canvas.onmouseup = {(e: dom.MouseEvent) =>
       gridOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if(e.button == 2){ //右键
-            val event = MouseClickUpRight(myId, thorSchema.systemFrame, getActionSerialNum)
-            websocketClient.sendMsg(event)
-            thorSchema.preExecuteUserEvent(event)
-            thorSchema.addMyAction(event)
-            e.preventDefault()
-          }
-          else ()
+          if(thorSchema.adventurerMap.contains(myId))
+            if(e.button == 2){ //右键
+              val event = MouseClickUpRight(myId, thorSchema.systemFrame, getActionSerialNum)
+              websocketClient.sendMsg(event)
+              thorSchema.preExecuteUserEvent(event)
+              thorSchema.addMyAction(event)
+              e.preventDefault()
+            }
+            else ()
         case None =>
       }
 
@@ -232,8 +247,11 @@ class GameHolder(canvasName: String) {
      canvas.onkeydown = {(e : dom.KeyboardEvent) =>
        gridOpt match{
          case Some(thorSchema: ThorSchemaClientImpl) =>
+           println(s"contains${thorSchema.adventurerMap.contains(myId)}")
+           println(s"nonempty${thorSchema.adventurerMap.get(myId).nonEmpty}")
            if (!thorSchema.adventurerMap.contains(myId)){
              if (e.keyCode == KeyCode.Space){
+               println("restart!!!!")
                firstCome = true
                start(myName)
                websocketClient.sendMsg(RestartGame(myName))
@@ -289,13 +307,22 @@ class GameHolder(canvasName: String) {
   def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
     gridOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
-        thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
-        thorSchema.drawRank(historyRank,false,myId)
-        thorSchema.drawRank(currentRank,true,myId)
-        if (barrageTime > 0){
-          thorSchema.drawBarrage(barrage,canvasBoundary.x*0.5,canvasBoundary.y*0.17)
-          barrageTime -= 1
+        if(thorSchema.adventurerMap.contains(myId)){
+          thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
+          thorSchema.drawRank(historyRank,false,myId)
+          thorSchema.drawRank(currentRank,true,myId)
+          if (barrageTime > 0){
+            thorSchema.drawBarrage(barrage,canvasBoundary.x*0.5,canvasBoundary.y*0.17)
+            barrageTime -= 1
+          }
         }
+        else if(firstCome){
+          thorSchema.drawGameLoading()
+        }
+        else{
+          thorSchema.drawGameStop(killer)
+        }
+
       case None =>
     }
 
