@@ -20,15 +20,13 @@ import scala.collection.mutable
   * Date: 2018/11/15
   * Time: 11:37
   */
-case class ThorSchemaServerImpl (
-                             config: ThorGameConfig,
-                             roomActorRef:ActorRef[RoomActor.Command],
-                             timer:TimerScheduler[RoomActor.Command],
-                             log:Logger,
-                             dispatch:WsMsgServer => Unit,
-                             dispatchTo:(String, WsMsgServer) => Unit,
-                             // TODO 参数
-                           )extends ThorSchema{
+case class ThorSchemaServerImpl(
+  config: ThorGameConfig,
+  roomActorRef: ActorRef[RoomActor.Command],
+  timer: TimerScheduler[RoomActor.Command],
+  log: Logger,
+  dispatch: WsMsgServer => Unit,
+  dispatchTo: (String, WsMsgServer) => Unit) extends ThorSchema {
 
   import scala.language.implicitConversions
 
@@ -38,7 +36,7 @@ case class ThorSchemaServerImpl (
 
   private val foodIdGenerator = new AtomicInteger(100)
 
-  private var justJoinUser:List[(String, String, ActorRef[UserActor.Command])] = Nil
+  private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil
 
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
     //TODO AdventurerState 转 Adventurer 具体实现
@@ -59,11 +57,46 @@ case class ThorSchemaServerImpl (
     dispatchTo(adventurer.playerId, event)
   }
 
-  override def update(): Unit = super.update()
+  implicit val scoreOrdering = new Ordering[Score] {
+    override def compare(x: Score, y: Score): Int = {
+      var r = y.e - x.e
+      if (r == 0) {
+        r = y.k - x.k
+      }
+      r
+    }
+  }
+
+  private[this] def updateRanks() = {
+    currentRankList = adventurerMap.values.map(a => Score(a.playerId, a.name, a.killNum, a.energy)).toList.sorted
+    var historyChange = false
+    currentRankList.foreach { cScore =>
+      historyRankMap.get(cScore.id) match {
+        case Some(oldScore) if cScore.e > oldScore.e || (cScore.e == oldScore.e && cScore.k > oldScore.k) =>
+          historyRankMap += (cScore.id -> cScore)
+          historyChange = true
+        case None if cScore.e > historyRankThreshold =>
+          historyRankMap += (cScore.id -> cScore)
+          historyChange = true
+        case _ => // do nothing
+      }
+    }
+
+    if (historyChange) {
+      historyRank = historyRankMap.values.toList.sorted.take(historyRankLength)
+      historyRankThreshold = historyRank.lastOption.map(_.e).getOrElse(-1)
+      historyRankMap = historyRank.map(s => s.id -> s).toMap
+    }
+  }
+
+  override def update(): Unit = {
+    super.update()
+    updateRanks()
+  }
 
   //↓↓↓只有后台执行的函数↓↓↓
 
-  private final def generateFood(level: Int = 1, position: Point, radius: Float = 2): Unit ={
+  private final def generateFood(level: Int = 1, position: Point, radius: Float = 2): Unit = {
     //生成食物事件，被后台定时事件调用，前端不产生此事件，食物的属性暂且全部作为参数,color作为随机数
     val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius, random.nextInt(4))
     val event = GenerateFood(systemFrame, foodState)
@@ -73,30 +106,30 @@ case class ThorSchemaServerImpl (
 
   def genFood(num: Int) = {
 
-    def genPosition():Point = {
+    def genPosition(): Point = {
       Point(random.nextInt(boundary.x.toInt - 10),
         random.nextInt(boundary.y.toInt - 10))
     }
 
-    (1 to num).foreach{
+    (1 to num).foreach {
       t =>
         if(foodMap.size < config.getFoodMax())
           generateFood(random.nextInt(5), genPosition())
     }
   }
 
-  def joinGame(userId:String, name:String, userActor:ActorRef[UserActor.Command]):Unit = {
+  def joinGame(userId: String, name: String, userActor: ActorRef[UserActor.Command]): Unit = {
     justJoinUser = (userId, name, userActor) :: justJoinUser
   }
 
-  override def leftGame(userId:String,name:String) = {
-    val event = UserLeftRoom(userId,name,systemFrame)
+  override def leftGame(userId: String, name: String) = {
+    val event = UserLeftRoom(userId, name, systemFrame)
     addGameEvent(event)
-//    dispatch(event)
+    //    dispatch(event)
   }
 
-  def receiveUserAction(action: UserActionEvent):Unit = {
-    val f = math.max(action.frame,systemFrame)
+  def receiveUserAction(action: UserActionEvent): Unit = {
+    val f = math.max(action.frame, systemFrame)
 
     val act = action match {
       case a: MouseMove => a.copy(frame = f)
@@ -113,7 +146,7 @@ case class ThorSchemaServerImpl (
 
     def generateAdventurer(playerId: String, name: String) = {
 
-      def genPosition():Point = {
+      def genPosition(): Point = {
         Point(random.nextInt(boundary.x.toInt - 15),
           random.nextInt(boundary.y.toInt - 15))
       }
@@ -122,18 +155,18 @@ case class ThorSchemaServerImpl (
         val position = genPosition()
         var adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
         var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
-//        while (adventurer.isIntersectsObject(objects)){
-//          val position = genPosition()
-//          adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
-//          objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
-//        }
+        //        while (adventurer.isIntersectsObject(objects)){
+        //          val position = genPosition()
+        //          adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
+        //          objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
+        //        }
         adventurer
       }
 
       genAdventurer()
     }
 
-    justJoinUser.foreach{
+    justJoinUser.foreach {
       case (playerId, name, ref) =>
         val adventurer = generateAdventurer(playerId, name)
         val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState, systemFrame)
