@@ -27,7 +27,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     def drawAnAdventurer(adventurer: Adventurer) = {
 //      val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
 //      mapImg.setAttribute("src", s"/thor/static/img/Adventurer-${adventurer.level}.png")
-      val r = adventurer.getAdventurerState.radius
+      val r = config.getAdventurerRadiusByLevel(adventurer.level)
       val position = adventurer.getAdventurerState.position
       var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
       //如果达到边界 则不再往外走
@@ -39,6 +39,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val sy = position.y + offset.y + moveDistance.y - r
       val dx = 2 * r
       val dy = 2 * r
+      println(s"dx:$dx")
 
       val src = s"/thor/static/img/Adventurer-${adventurer.level}.png"
       val weapon = s"/thor/static/img/weapon-${adventurer.level}.png"
