@@ -159,6 +159,7 @@ class GameHolder(canvasName: String) {
                   justSynced = true
 
                 case GridSyncStateWithNewFood(d) =>
+                  gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
 
 

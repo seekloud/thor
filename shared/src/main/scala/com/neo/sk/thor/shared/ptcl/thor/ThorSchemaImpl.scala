@@ -112,12 +112,12 @@ class ThorSchemaImpl(
     }
     val endTime = System.currentTimeMillis()
     if (curFrame < thorSchemaSate.f) {
-      println(s"handleThorSchemaState update to now user time=${endTime - startTime}")
+      println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
     }
     systemFrame = thorSchemaSate.f
     quadTree.clear()
     adventurerMap.clear()
-    foodMap.clear()
+    if (!thorSchemaSate.isIncrement) foodMap.clear()
     thorSchemaSate.adventurer.foreach { a =>
       val adventurer = new AdventurerImpl(config, a)
       quadTree.insert(adventurer)
