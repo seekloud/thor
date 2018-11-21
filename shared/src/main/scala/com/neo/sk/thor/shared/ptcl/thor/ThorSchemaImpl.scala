@@ -123,10 +123,18 @@ class ThorSchemaImpl(
       quadTree.insert(adventurer)
       adventurerMap.put(a.playerId, adventurer)
     }
-    thorSchemaSate.food.foreach { f =>
-      val food = Food(f)
-      quadTree.insert(food)
-      foodMap.put(f.fId, food)
+    if (!thorSchemaSate.isIncrement) {
+      thorSchemaSate.food.foreach { f =>
+        val food = Food(f)
+        quadTree.insert(food)
+        foodMap.put(f.fId, food)
+      }
+    } else {
+      thorSchemaSate.food.foreach { f =>
+        val food = Food(f)
+        foodMap.put(f.fId, food)
+      }
+      foodMap.values.foreach {f => quadTree.insert(f)}
     }
 
     waitSyncData = false

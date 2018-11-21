@@ -52,13 +52,13 @@ trait Adventurer extends CircleObjectOfGame {
 
   //判断扇形区域碰撞,角度为刀的角度
   def isSectorDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig) = {
-    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(weaponLevel) + o.radius) && scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) < scala.math.Pi * (1.5 / 3)
+    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(weaponLevel) + o.radius) && scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) < scala.math.Pi * (2.0 / 9.0)
   }
 
-  //判断是否被攻击
+  //判断是否攻击到其他
   def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit)(implicit config: ThorGameConfig): Unit = {
-    println(s"attacking: ${p.playerId},$attackingStep")
-    if (isSectorDuang(scala.math.Pi * 1.5 / 3 * attackingStep - scala.math.Pi/3 , p)){
+//    println(s"attacking: ${p.playerId},$attackingStep")
+    if (isSectorDuang(scala.math.Pi * 2.0 / 9.0 * attackingStep - 0 , p)){
       println(s"${p.playerId} is attacked")
       attackedCallback(p)
     }
@@ -69,6 +69,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def attacking(killedLevel: Int)(implicit config: ThorGameConfig): Unit ={
+    println(s"killing $killedLevel Level adventurer")
     this.energy += config.getEnergyByKillingAdventurerLevel(killedLevel)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
       updateLevel
