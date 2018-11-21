@@ -57,7 +57,7 @@ class ThorSchemaImpl(
           if (e.frame != preFrame) {
             println(s"preFrame=$preFrame eventFrame=${e.frame} curFrame=$systemFrame")
             if (preFrame < e.frame && esRecoverSupport) {
-              if (preFrame > systemFrame) {
+              if (preFrame >= systemFrame) {
                 removePreEvent(preFrame, e.playerId, e.serialNum)
                 addUserAction(e)
               } else if (e.frame >= systemFrame) {
@@ -79,7 +79,7 @@ class ThorSchemaImpl(
           }
       }
     } else {
-      if (e.frame > systemFrame) {
+      if (e.frame >= systemFrame) {
         addUserAction(e)
       } else if (esRecoverSupport) {
         println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=$e")

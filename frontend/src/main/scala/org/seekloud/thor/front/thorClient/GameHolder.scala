@@ -48,8 +48,8 @@ class GameHolder(canvasName: String) {
   private[this] val canvasBounds = canvasBoundary / canvasUnit
   println(canvasBounds)
 
-  var gridOpt : Option[ThorSchemaClientImpl] = None
-//  var thorSchema = gridOpt.get
+  var thorSchemaOpt : Option[ThorSchemaClientImpl] = None
+//  var thorSchema = thorSchemaOpt.get
   private[this] var myId = "test"
   private[this] var myName = "testName"
   private[this] var killer = "someone"
@@ -124,8 +124,8 @@ class GameHolder(canvasName: String) {
                   myId = id
                   myName = name
                   gameConfig = Some(config)
-                  gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
-                  gridOpt.foreach{grid => timer = Shortcut.schedule(gameLoop,grid.config.frameDuration)}
+                  thorSchemaOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
+                  thorSchemaOpt.foreach{grid => timer = Shortcut.schedule(gameLoop,grid.config.frameDuration)}
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
                   firstCome = false
                 case UserEnterRoom(userId, name, _, _) =>
@@ -136,7 +136,7 @@ class GameHolder(canvasName: String) {
                   barrage = s"${name}离开了游戏"
                   barrageTime = 300
                   println(s"user left $name")
-                  gridOpt.foreach{ grid => grid.leftGame(userId, name)}
+                  thorSchemaOpt.foreach{ grid => grid.leftGame(userId, name)}
 
                 case BeAttacked(userId, name, killerId, killerName, _) =>
                   barrage = s"${killerName}杀死了${name}"
@@ -145,7 +145,7 @@ class GameHolder(canvasName: String) {
                   println(s"be attacked by $killerName")
                   dom.window.cancelAnimationFrame(nextFrame)
                   dom.window.clearInterval(timer)
-                  gridOpt.foreach{grid =>
+                  thorSchemaOpt.foreach{grid =>
                     grid.adventurerMap.remove(userId)
                     grid.drawGameStop(killerName)
                   }
@@ -156,19 +156,21 @@ class GameHolder(canvasName: String) {
 
                 case GridSyncState(d) =>
 //                  dom.console.log(d.toString)
-                  gridOpt.foreach(_.receiveThorSchemaState(d))
+                  thorSchemaOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
 
 
-                case x: MouseMove => gridOpt.foreach(_.receiveUserEvent(x))
-                case x: MouseClickDownLeft => gridOpt.foreach(_.receiveUserEvent(x))
-                case x: MouseClickDownRight => gridOpt.foreach(_.receiveUserEvent(x))
-                case x: MouseClickUpRight => gridOpt.foreach(_.receiveUserEvent(x))
+                case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
+//                case x: MouseClickDownLeft => thorSchemaOpt.foreach(_.receiveUserEvent(x))
+//                case x: MouseClickDownRight => thorSchemaOpt.foreach(_.receiveUserEvent(x))
+//                case x: MouseClickUpRight => thorSchemaOpt.foreach(_.receiveUserEvent(x))
+
+                case e: GameEvent => thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
                 case x: GenerateFood =>
 
                 case x: EatFood =>
-//                  gridOpt.foreach(_.)
+//                  thorSchemaOpt.foreach(_.)
 
                 case  x => dom.window.console.log(s"接收到无效消息$x")
               }
@@ -189,7 +191,7 @@ class GameHolder(canvasName: String) {
     canvas.onmousemove = { (e: dom.MouseEvent) =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
-      gridOpt match{
+      thorSchemaOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId)){
             val data = MouseMove(thorSchema.myId,theta,thorSchema.systemFrame,getActionSerialNum)
@@ -204,7 +206,7 @@ class GameHolder(canvasName: String) {
       e.preventDefault()
     }
     canvas.onmousedown = {(e: dom.MouseEvent) =>
-      gridOpt match{
+      thorSchemaOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId))
             if(e.button == 0){ //左键
@@ -227,7 +229,7 @@ class GameHolder(canvasName: String) {
 
     }
     canvas.onmouseup = {(e: dom.MouseEvent) =>
-      gridOpt match{
+      thorSchemaOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId))
             if(e.button == 2){ //右键
@@ -243,7 +245,7 @@ class GameHolder(canvasName: String) {
 
     }
      canvas.onkeydown = {(e : dom.KeyboardEvent) =>
-       gridOpt match{
+       thorSchemaOpt match{
          case Some(thorSchema: ThorSchemaClientImpl) =>
            if (!thorSchema.adventurerMap.contains(myId)){
              if (e.keyCode == KeyCode.Space){
@@ -292,7 +294,7 @@ class GameHolder(canvasName: String) {
 
   def gameLoop(): Unit = {
     logicFrameTime = System.currentTimeMillis()
-    gridOpt match{
+    thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.update()
       case None =>
     }
@@ -301,7 +303,7 @@ class GameHolder(canvasName: String) {
 
 
   def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
-    gridOpt match{
+    thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if(thorSchema.adventurerMap.contains(myId)){
           thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)

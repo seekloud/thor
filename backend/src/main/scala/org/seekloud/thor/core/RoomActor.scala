@@ -49,11 +49,11 @@ object RoomActor {
         Behaviors.withTimers[Command] {
           implicit timer =>
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
-            //为新房间创建grid
+            //为新房间创建thorSchema
             implicit val sendBuffer = new MiddleBufferInJvm(81920)
-            val grid = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
+            val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
             timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
-            idle(roomId, Nil, subscribersMap, grid, 0L)
+            idle(roomId, Nil, subscribersMap, thorSchema, 0L)
         }
     }
   }
@@ -62,7 +62,7 @@ object RoomActor {
     roomId: Long,
     newPlayer: List[(String, ActorRef[UserActor.Command])],
     subscribersMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
-    grid: ThorSchemaServerImpl,
+    thorSchema: ThorSchemaServerImpl,
     tickCount: Long
   )(
     implicit timer: TimerScheduler[Command],
@@ -73,59 +73,59 @@ object RoomActor {
         msg match {
           case JoinRoom(roomId, userId, name, userActor) =>
             println("join room")
-            grid.joinGame(userId, name, userActor)
-            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, grid, tickCount)
+            thorSchema.joinGame(userId, name, userActor)
+            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, thorSchema, tickCount)
 
           case LeftRoom(userId, name, userList) =>
             log.debug(s"roomactor - ${userId} left room")
-            grid.leftGame(userId, name)
+            thorSchema.leftGame(userId, name)
             subscribersMap.remove(userId)
             dispatch(subscribersMap)(UserLeftRoom(userId, name))
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
-            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, grid, tickCount)
+            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, thorSchema, tickCount)
 
           case WsMessage(userId, msg) =>
-            grid.receiveUserAction(msg)
+            thorSchema.receiveUserAction(msg)
             //            msg match {
             //              case a: MouseMove =>
-            //                dispatch(subscribersMap)(MouseMove(a.playerId, a.direction, math.max(a.frame, grid.systemFrame), a.serialNum))
+            //                dispatch(subscribersMap)(MouseMove(a.playerId, a.direction, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
             //              case a: MouseClickDownLeft =>
-            //                dispatch(subscribersMap)(MouseClickDownLeft(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+            //                dispatch(subscribersMap)(MouseClickDownLeft(a.playerId, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
             //              case a: MouseClickDownRight =>
-            //                dispatch(subscribersMap)(MouseClickDownRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+            //                dispatch(subscribersMap)(MouseClickDownRight(a.playerId, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
             //              case a: MouseClickUpRight =>
-            //                dispatch(subscribersMap)(MouseClickUpRight(a.playerId, math.max(a.frame, grid.systemFrame), a.serialNum))
+            //                dispatch(subscribersMap)(MouseClickUpRight(a.playerId, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
             //              case _ => //do nothing
             //            }
             Behavior.same
 
           case GameLoop =>
             //            println("game loop")
-            //grid定时更新
-            grid.update()
+            //thorSchema定时更新
+            thorSchema.update()
 
-            val gridData = grid.getThorSchemaState()
+            val thorSchemaData = thorSchema.getThorSchemaState()
             if (tickCount % 40 == 5) {
               //生成食物+同步全量adventurer数据+新生成的食物
-              val newFood = grid.genFood(5)
+              val newFood = thorSchema.genFood(5)
 
-              val data = if(tickCount % 120 == 5) grid.getThorSchemaState()
-              else grid.getThorSchemaState().copy(food = newFood, isIncrement = true)
+              val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
+              else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
 
               dispatch(subscribersMap)(GridSyncState(data))
             }
             if (tickCount % 20 == 1) {
               //排行榜
-              dispatch(subscribersMap)(Ranks(grid.currentRankList,grid.historyRank))
+              dispatch(subscribersMap)(Ranks(thorSchema.currentRankList,thorSchema.historyRank))
             }
             newPlayer.foreach {
               //为新用户分发全量数据
               player =>
                 subscribersMap.put(player._1, player._2)
-                dispatchTo(subscribersMap)(player._1, GridSyncState(gridData))
+                dispatchTo(subscribersMap)(player._1, GridSyncState(thorSchemaData))
             }
-            idle(roomId, Nil, subscribersMap, grid, tickCount + 1)
+            idle(roomId, Nil, subscribersMap, thorSchema, tickCount + 1)
 
           case ChildDead(_, childRef) =>
             ctx.unwatch(childRef)
