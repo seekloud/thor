@@ -55,14 +55,14 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 - math.Pi / 12).toFloat
       val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
       val weaponWidth = 5
-      val gap = 0
+      val gap:Float = 0.5.toFloat
       val move: Float = if(isAttacting) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0
 //      println(s"d: ${adventurer.getAdventurerState.direction} angle:${angle}")
 //      val angle = adventurer.getAdventurerState.direction + 30/180 * math.Pi
 //      CanvasUtils.rotateImage(ctx, weapon, Point(sx, sy) * canvasUnit, Point(0, -(r + gap)) * canvasUnit, weaponLength * canvasUnit, weaponWidth * canvasUnit, angle)
-      CanvasUtils.rotateImage(ctx, weapon, (Point(sx + r, sy + r) + Point(0, r + gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
+      CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy + r) + Point(0, r + gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
 
-      val namePosition = position
+
       ctx.fillStyle = "#ffffff"
       ctx.textAlign = "center"
       ctx.font = "normal normal 20px 楷体"

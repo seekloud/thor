@@ -144,10 +144,12 @@ class GameHolder(canvasName: String) {
                   barrageTime = 300
                   killer = killerName
                   println(s"be attacked by $killerName")
-                  gridOpt.foreach{grid => grid.adventurerMap.remove(userId)}
                   dom.window.cancelAnimationFrame(nextFrame)
                   dom.window.clearInterval(timer)
-                  gridOpt.get.drawGameStop(killerName)
+                  gridOpt.foreach{grid =>
+                    grid.adventurerMap.remove(userId)
+                    grid.drawGameStop(killerName)
+                  }
 
                 case Ranks(current, history) =>
                   currentRank = current
@@ -246,8 +248,6 @@ class GameHolder(canvasName: String) {
      canvas.onkeydown = {(e : dom.KeyboardEvent) =>
        gridOpt match{
          case Some(thorSchema: ThorSchemaClientImpl) =>
-           println(s"contains${thorSchema.adventurerMap.contains(myId)}")
-           println(s"nonempty${thorSchema.adventurerMap.get(myId).nonEmpty}")
            if (!thorSchema.adventurerMap.contains(myId)){
              if (e.keyCode == KeyCode.Space){
                println("restart!!!!")
