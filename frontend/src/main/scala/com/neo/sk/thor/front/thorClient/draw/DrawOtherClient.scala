@@ -54,8 +54,8 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     val preLevel = if(adventurer.level == 1) 0 else config.getMaxEnergyByLevel(adventurer.level - 1)
     val nowLevel = config.getMaxEnergyByLevel(adventurer.level)
     val fillLength = (adventurer.energy - preLevel).toFloat / (nowLevel - preLevel) * fillMax
-    val rateX = fillMax.toFloat/697
-    ctx.drawImage(fillBar, (fillMax-fillLength)/rateX,0, fillLength/rateX, 49 , barLeft+offsetL, barTop+offsetT, fillLength, barHeight - offsetT*2 - 1)
+    val rateX = fillMax.toFloat/fillBar.width
+    ctx.drawImage(fillBar, (fillMax-fillLength)/rateX,0, fillLength/rateX, fillBar.height , barLeft+offsetL, barTop+offsetT, fillLength, barHeight - offsetT*2 - 1)
   }
 
   def drawBarrage(s:String,x:Double,y:Double):Unit={
