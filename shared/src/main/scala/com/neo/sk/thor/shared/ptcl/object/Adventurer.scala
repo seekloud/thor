@@ -115,6 +115,8 @@ trait Adventurer extends CircleObjectOfGame {
       val moveDistance = if (isSpeedUp) {
         if (energy >= thorGameConfig.speedUpEnergyLoose) {
           energy -= thorGameConfig.speedUpEnergyLoose
+        } else {
+          cancleSpeedUp
         }
         thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
       } else {
