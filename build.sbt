@@ -13,7 +13,7 @@ val projectVersion = "2018.11.9"
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 
-val projectMainClass = "com.neo.sk.thor.Boot"
+val projectMainClass = "org.seekloud.thor.Boot"
 
 def commonSettings = Seq(
   version := projectVersion,
@@ -48,7 +48,7 @@ lazy val frontend = (project in file("frontend"))
   .settings(skip in packageJSDependencies := false)
   .settings(
     scalaJSUseMainModuleInitializer := false,
-    //mainClass := Some("com.neo.sk.virgour.front.Main"),
+    //mainClass := Some("org.seekloud.virgour.front.Main"),
     libraryDependencies ++= Seq(
       "io.circe" %%% "circe-core" % "0.8.0",
       "io.circe" %%% "circe-generic" % "0.8.0",
