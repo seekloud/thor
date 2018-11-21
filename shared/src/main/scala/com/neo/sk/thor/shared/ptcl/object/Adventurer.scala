@@ -95,7 +95,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def updateLevel(implicit thorGameConfig: ThorGameConfig) = {
-    if (level != thorGameConfig.getAdventurerLevelSize) {
+    if (level < thorGameConfig.getAdventurerLevelSize) {
       level += 1
       speedLevel += 1
       weaponLevel += 1

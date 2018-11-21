@@ -8,8 +8,8 @@ import com.neo.sk.thor.shared.ptcl.model.Point
   * Time: 16:13
   */
 
-final case class GridBoundary(width:Int,height:Int){
-  def getBoundary:Point = Point(width,height)
+final case class GridBoundary(width: Int, height: Int) {
+  def getBoundary: Point = Point(width, height)
 }
 
 final case class AdventurerMoveSpeed(speeds: List[Float]) {
@@ -31,6 +31,7 @@ final case class FoodParams(
   energyList: List[Int],
   radiusList: List[Float]
 )
+
 final case class WeaponParams(
   lengthList: List[Float]
 )
@@ -38,7 +39,7 @@ final case class WeaponParams(
 
 trait ThorGameConfig {
 
-  def frameDuration:Long
+  def frameDuration: Long
 
   def boundary: Point
 
@@ -64,7 +65,7 @@ trait ThorGameConfig {
 
   def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false): Point
 
-  def   getMoveDistanceByFrame(l: Int, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
+  def getMoveDistanceByFrame(l: Int, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
 
   def getAdventurerLevelSize: Int
 
@@ -73,9 +74,9 @@ trait ThorGameConfig {
 }
 
 
-case class ThorGameConfigImpl (
+case class ThorGameConfigImpl(
   gridBoundary: GridBoundary,
-  frameDuration:Long,
+  frameDuration: Long,
   adventurerParams: AdventurerParams,
   foodParams: FoodParams,
   weaponParams: WeaponParams
@@ -105,11 +106,11 @@ case class ThorGameConfigImpl (
   }
 
   override def getEnergyByKillingAdventurerLevel(l: Int): Int = {
-    adventurerParams.containEnergyList(l-1)
+    adventurerParams.containEnergyList(l - 1)
   }
 
   override def getMaxEnergyByLevel(l: Int): Int = {
-    adventurerParams.maxEnergyList(l-1)
+    adventurerParams.maxEnergyList(l - 1)
   }
 
   override def getWeaponLevelByLevel(l: Int): Int = {
@@ -117,7 +118,7 @@ case class ThorGameConfigImpl (
   }
 
   override def getWeaponLengthByLevel(l: Int): Float = {
-    weaponParams.lengthList(l-1)
+    weaponParams.lengthList(l - 1)
   }
 
   def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false) = if (isSpeedUp) {
