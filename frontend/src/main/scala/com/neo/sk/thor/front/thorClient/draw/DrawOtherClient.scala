@@ -116,19 +116,15 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     }
     ctx.fillStyle="rgba(192,192,192,0.6)"
     ctx.drawImage(rankImg,x,0,250,250)
-    drawTextLine(s"       ${text}        ", x+40, index, RankBaseLine+2,2)
+//    drawTextLine(s"       ${text}        ", x+40, index, RankBaseLine+2,2)
     ctx.beginPath()
+    ctx.fillStyle="white"
     Rank.foreach { score =>
-      if (index<4){
+      if (index<5){
         index += 1
-        if (score.id!=id){
-          ctx.fillStyle="white"
-        }
-        else {
+        if (score.id == id)
           yourNameIn = true
-          ctx.fillStyle="#FFFF00"
-        }
-        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", x+10, index*2, RankBaseLine+3,3)
+        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", x+10, index*2, RankBaseLine,3)
       }
     }
     index+=1
