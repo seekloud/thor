@@ -160,12 +160,10 @@ class GameHolder(canvasName: String) {
                   justSynced = true
 
 
-                case x: MouseMove =>
-                case x: MouseClickDownLeft =>
-                case x: MouseClickDownRight =>
-                case x: MouseClickUpRight =>
-
-                  gridOpt.foreach(_.receiveUserEvent(x))
+                case x: MouseMove => gridOpt.foreach(_.receiveUserEvent(x))
+                case x: MouseClickDownLeft => gridOpt.foreach(_.receiveUserEvent(x))
+                case x: MouseClickDownRight => gridOpt.foreach(_.receiveUserEvent(x))
+                case x: MouseClickUpRight => gridOpt.foreach(_.receiveUserEvent(x))
 
                 case x: GenerateFood =>
 
