@@ -9,11 +9,17 @@ import org.scalajs.dom.html.Input
 import scala.xml.Elem
 
 /**
-  * User: XySiRan
+  * User: XuSiRan
   * Date: 2018/11/13
   * Time: 11:13
   */
 object EntryPage extends Page{
+  val defaultName: String =
+    if(dom.window.localStorage.getItem("entry_nickname") == null){
+      ""
+    }
+    else
+      dom.window.localStorage.getItem("entry_nickname")
   val showGame = Var(0)
   val show = showGame.map{
     case 0 =>
@@ -23,7 +29,7 @@ object EntryPage extends Page{
             <h1>Thor</h1>
           </div>
           <div class="text">
-            <input type="text" class="form-control" id="userName" placeholder="nickname"></input>
+            <input type="text" class="form-control" id="userName" placeholder="nickname" value={s"$defaultName"}></input>
           </div>
           <div class="button">
             <button type="button" class="btn" onclick={()=>joinGame()}>join</button>
@@ -38,6 +44,7 @@ object EntryPage extends Page{
   def joinGame(): Unit = {
     println("joinGame")
     val userName = dom.document.getElementById("userName").asInstanceOf[Input].value
+    dom.window.localStorage.setItem("entry_nickname", userName)
 //    dom.window.location.hash = s"home/$userName"
     showGame := 1
   }
