@@ -106,7 +106,7 @@ object RoomActor {
             grid.update()
 
             val gridData = grid.getThorSchemaState()
-            if (tickCount % 20 == 5) {
+            if (tickCount % 40 == 5) {
               //生成食物+同步全量adventurer数据+新生成的食物
               val newFood = grid.genFood(5)
               val data = grid.getThorSchemaState().copy(food = newFood)
