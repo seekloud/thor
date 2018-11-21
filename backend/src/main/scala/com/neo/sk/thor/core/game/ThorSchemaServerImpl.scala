@@ -52,8 +52,8 @@ case class ThorSchemaServerImpl(
   }
 
   override protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
+    super.adventurerAttackedCallback(killer)(adventurer)
     val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
-    addGameEvent(event)
     dispatchTo(adventurer.playerId, event)
   }
 
