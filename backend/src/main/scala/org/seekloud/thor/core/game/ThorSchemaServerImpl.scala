@@ -6,7 +6,7 @@ import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
 import org.seekloud.thor.core.thor.AdventurerServer
 import org.seekloud.thor.core.{RoomActor, UserActor}
-import org.seekloud.thor.shared.ptcl.`object`._
+import org.seekloud.thor.shared.ptcl.component._
 import org.slf4j.Logger
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model._

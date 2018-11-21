@@ -3,7 +3,7 @@ package org.seekloud.thor.front.thorClient.draw
 import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl
-import org.seekloud.thor.shared.ptcl.`object`.Adventurer
+import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.html

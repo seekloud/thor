@@ -1,5 +1,5 @@
 package org.seekloud.thor.shared.ptcl.thor
-import org.seekloud.thor.shared.ptcl.`object`.{AdventurerImpl, AdventurerState, Food}
+import org.seekloud.thor.shared.ptcl.component.{AdventurerImpl, AdventurerState, Food}
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent}
 

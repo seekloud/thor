@@ -3,7 +3,7 @@ package org.seekloud.thor.shared.ptcl.thor
 import java.awt.event.KeyEvent
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 
-import org.seekloud.thor.shared.ptcl.`object`.{Adventurer, AdventurerState, Food, FoodState}
+import org.seekloud.thor.shared.ptcl.component.{Adventurer, AdventurerState, Food, FoodState}
 import org.seekloud.thor.shared.ptcl.model._
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._

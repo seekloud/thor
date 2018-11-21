@@ -1,6 +1,6 @@
 package org.seekloud.thor.shared.ptcl.util
 
-import org.seekloud.thor.shared.ptcl.`object`.ObjectOfGame
+import org.seekloud.thor.shared.ptcl.component.ObjectOfGame
 import org.seekloud.thor.shared.ptcl.model
 
 /**

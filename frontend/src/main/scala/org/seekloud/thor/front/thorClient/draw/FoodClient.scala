@@ -2,7 +2,7 @@ package org.seekloud.thor.front.thorClient.draw
 
 import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
-import org.seekloud.thor.shared.ptcl.`object`.Food
+import org.seekloud.thor.shared.ptcl.component.Food
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement

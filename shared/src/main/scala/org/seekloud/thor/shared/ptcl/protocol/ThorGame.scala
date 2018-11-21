@@ -1,6 +1,6 @@
 package org.seekloud.thor.shared.ptcl.protocol
 
-import org.seekloud.thor.shared.ptcl.`object`.{AdventurerState, FoodState}
+import org.seekloud.thor.shared.ptcl.component.{AdventurerState, FoodState}
 import org.seekloud.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
 import org.seekloud.thor.shared.ptcl.model.Score
 import org.seekloud.thor.shared.ptcl.thor.{ThorSchemaState}

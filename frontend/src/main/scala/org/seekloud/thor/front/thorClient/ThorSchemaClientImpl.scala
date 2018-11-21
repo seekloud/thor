@@ -2,7 +2,7 @@ package org.seekloud.thor.front.thorClient
 
 import org.seekloud.thor.front.thorClient.draw.{AdventurerClient, DrawOtherClient, FoodClient}
 import org.seekloud.thor.shared.ptcl
-import org.seekloud.thor.shared.ptcl.`object`.Adventurer
+import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaImpl
