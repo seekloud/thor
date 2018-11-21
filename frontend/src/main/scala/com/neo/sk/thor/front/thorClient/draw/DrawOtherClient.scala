@@ -127,7 +127,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
       else {
         ctx.fillStyle="#FFFF00"
       }
-      drawTextLine(s"$index:  ${score.n.take(5)}    score=${score.d}   kill=${score.k}", x+10, index*2, RankBaseLine,3)
+      drawTextLine(s"$index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", x+10, index*2, RankBaseLine,3)
     }
     index+=1
   }
