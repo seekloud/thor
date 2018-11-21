@@ -98,8 +98,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def speedUp(implicit thorGameConfig: ThorGameConfig) = {
-    if (!isSpeedUp) isSpeedUp = true
-    energy -= 5
+    if (!isSpeedUp && energy > thorGameConfig.speedUpEnergyLoose) isSpeedUp = true
   }
 
   def cancleSpeedUp(implicit thorGameConfig: ThorGameConfig) = {
@@ -109,6 +108,9 @@ trait Adventurer extends CircleObjectOfGame {
   def move(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (isMove) {
       val moveDistance = if (isSpeedUp) {
+        if (energy >= thorGameConfig.speedUpEnergyLoose) {
+          energy -= thorGameConfig.speedUpEnergyLoose
+        }
         thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
       } else {
         thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)

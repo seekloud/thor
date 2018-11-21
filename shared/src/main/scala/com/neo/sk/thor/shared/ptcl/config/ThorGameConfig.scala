@@ -22,7 +22,8 @@ final case class AdventurerParams(
   maxEnergyList: List[Int],
   containEnergyList: List[Int],
   facePalstance: Float,
-  speedUpRate: Float
+  speedUpRate: Float,
+  speedUpEnergyLoose: Int
 )
 
 final case class FoodParams(
@@ -64,6 +65,8 @@ trait ThorGameConfig {
   def   getMoveDistanceByFrame(l: Int, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
 
   def getAdventurerLevelSize: Int
+
+  def speedUpEnergyLoose: Int
 
 }
 
@@ -115,6 +118,8 @@ case class ThorGameConfigImpl (
   } else adventurerParams.speeds.getThorSpeedByLevel(l)
 
   def getAdventurerLevelSize: Int = adventurerParams.radius.size
+
+  override def speedUpEnergyLoose: Int = adventurerParams.speedUpEnergyLoose
 
 
 }
