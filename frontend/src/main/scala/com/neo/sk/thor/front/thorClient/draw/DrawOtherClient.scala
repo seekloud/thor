@@ -10,8 +10,10 @@ import org.scalajs.dom.ext.Color
 
 import scala.collection.mutable
 trait DrawOtherClient {this: ThorSchemaClientImpl =>
-  private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
+  private val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
   mapImg.setAttribute("src", s"${Routes.base}/static/img/map.jpg")
+  private val rankImg = dom.document.createElement("img").asInstanceOf[html.Image]
+  rankImg.setAttribute("src",s"${Routes.base}/static/img/rank.png")
 
   def drawBackground(offset: Point, canvasUnit: Int, canvasBoundary: Point):Unit = {
     ctx.save()
@@ -94,8 +96,8 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
       case 3 =>
         ctx.font = "16px Comic Sans MS"
       case _ =>
-        ctx.font = "20px 黑体"
-        ctx.fillStyle="white"
+        ctx.font = "18px 黑体"
+        ctx.fillStyle="black"
 
     }
     ctx.fillText(str, x, (lineNum + lineBegin - 1) * 14)
@@ -106,30 +108,36 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     val RankBaseLine = 2
     var index = 0
     var x=10
-    var text="排行榜"
+    var yourNameIn = false
+    var text="  排行榜"
     if (!CurrentOrNot){
       x=dom.document.documentElement.clientWidth - 260
       text="历史排行榜"
     }
     ctx.fillStyle="rgba(192,192,192,0.6)"
-    ctx.fillRect(x,0,250,40+35*num)
-    drawTextLine(s"       ${text}        ", x+40, index, RankBaseLine-1,2)
+    ctx.drawImage(rankImg,x,0,250,250)
+    drawTextLine(s"       ${text}        ", x+40, index, RankBaseLine+2,2)
     ctx.beginPath()
-    ctx.strokeStyle=Color.White.toString()
-    ctx.moveTo(x,30)
-    ctx.lineTo(x+250,30)
-    ctx.stroke()
     Rank.foreach { score =>
-      index += 1
-      if (score.id!=id){
-        ctx.fillStyle="white"
+      if (index<4){
+        index += 1
+        if (score.id!=id){
+          ctx.fillStyle="white"
+        }
+        else {
+          yourNameIn = true
+          ctx.fillStyle="#FFFF00"
+        }
+        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", x+10, index*2, RankBaseLine+3,3)
       }
-      else {
-        ctx.fillStyle="#FFFF00"
-      }
-      drawTextLine(s"$index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", x+10, index*2, RankBaseLine,3)
     }
     index+=1
+    if (!yourNameIn){
+      ctx.fillStyle="#FFFF00"
+      val yourScore = Rank.find(_.id == id).get
+      drawTextLine(s" $index:  ${yourScore.n.take(5)}    score=${yourScore.e}   kill=${yourScore.k}", x+10, index*2, RankBaseLine+3,3)
+    }
+
   }
 
 }

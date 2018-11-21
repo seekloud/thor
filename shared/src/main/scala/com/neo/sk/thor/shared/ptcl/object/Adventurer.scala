@@ -95,7 +95,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def updateLevel(implicit thorGameConfig: ThorGameConfig) = {
-    if (level != thorGameConfig.getAdventurerLevelSize) {
+    if (level < thorGameConfig.getAdventurerLevelSize) {
       level += 1
       speedLevel += 1
       weaponLevel += 1
@@ -115,6 +115,8 @@ trait Adventurer extends CircleObjectOfGame {
       val moveDistance = if (isSpeedUp) {
         if (energy >= thorGameConfig.speedUpEnergyLoose) {
           energy -= thorGameConfig.speedUpEnergyLoose
+        } else {
+          cancleSpeedUp
         }
         thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
       } else {
