@@ -25,7 +25,6 @@ case class AdventurerServer(
                         var direction: Float = 0,
                         var faceDirection: Float = 0,
                         var weaponLevel: Int = 1,
-                        var weaponLength: Float = 1,
                         var speedLevel: Int = 0,
                         var isSpeedUp: Boolean = false,
                         var killNum: Int = 0,
@@ -36,7 +35,7 @@ case class AdventurerServer(
 
   def this(roomActor:ActorRef[RoomActor.Command], timer:TimerScheduler[RoomActor.Command],config: ThorGameConfig,adventurerState: AdventurerState){
     this(roomActor, timer, config,adventurerState.playerId,adventurerState.name,adventurerState.position,adventurerState.level,adventurerState.energy,adventurerState.radiusLevel,adventurerState.direction,
-      adventurerState.faceDirection, adventurerState.weaponLevel,adventurerState.weaponLength, adventurerState.speedLevel,adventurerState.isSpeedUp,adventurerState.killNum, adventurerState.isMove)
+      adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.speedLevel,adventurerState.isSpeedUp,adventurerState.killNum, adventurerState.isMove)
   }
 
 }

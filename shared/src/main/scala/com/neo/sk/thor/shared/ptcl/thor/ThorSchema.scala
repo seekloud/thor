@@ -121,6 +121,7 @@ trait ThorSchema extends KillInformation{
   protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit ={
     //重写，后台被攻击事件
     //前端暂不操作，可能有一个对面死掉的动画
+    killer.attacking(adventurer.level) // 干掉对面加能量
     val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
     addGameEvent(event)
   }
@@ -179,7 +180,7 @@ trait ThorSchema extends KillInformation{
     attackingAdventureMap.foreach{ attacking =>
       adventurerMap.filter(_._1 == attacking._1).values.foreach{adventurer =>
         val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
-        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer)))
+        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer))(config))
       }
       if(attacking._2 <= 0){
         attackingAdventureMap.remove(attacking._1)

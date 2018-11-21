@@ -52,6 +52,8 @@ trait ThorGameConfig {
 
   def getEnergyByFoodLevel(l: Int): Int
 
+  def getEnergyByKillingAdventurerLevel(l: Int): Int
+
   def getMaxEnergyByLevel(l: Int): Int
 
   def getWeaponLevelByLevel(l: Int): Int
@@ -101,6 +103,11 @@ case class ThorGameConfigImpl (
   override def getEnergyByFoodLevel(l: Int): Int = {
     foodParams.energyList(l)
   }
+
+  override def getEnergyByKillingAdventurerLevel(l: Int): Int = {
+    adventurerParams.containEnergyList(l-1)
+  }
+
   override def getMaxEnergyByLevel(l: Int): Int = {
     adventurerParams.maxEnergyList(l-1)
   }

@@ -72,6 +72,7 @@ class GameHolder(canvasName: String) {
   private var logicFrameTime = System.currentTimeMillis()
 
   var barrage = ""
+  var barrageTime = 0
 
 
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
@@ -130,14 +131,17 @@ class GameHolder(canvasName: String) {
 
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
+                  barrageTime = 300
 
                 case UserLeftRoom(userId, name, _) =>
                   barrage = s"${name}离开了游戏"
+                  barrageTime = 300
                   println(s"user left $name")
                   gridOpt.foreach{ grid => grid.leftGame(userId, name)}
 
                 case BeAttacked(userId, name, killerId, killerName, _) =>
                   barrage = s"${killerName}杀死了${name}"
+                  barrageTime = 300
                   println(s"be attacked by $killerName")
                   dom.window.cancelAnimationFrame(nextFrame)
                   drawGameStop(killerName)
@@ -225,6 +229,13 @@ class GameHolder(canvasName: String) {
       }
 
     }
+     canvas.onkeydown = {(e : dom.KeyboardEvent) =>
+       if (e.keyCode == KeyCode.Space){
+         firstCome = true
+         start(myName)
+         e.preventDefault()
+       }
+     }
 //    canvas.onclick = { (e: MouseEvent) =>
 //      val currentTime = System.currentTimeMillis()
 //      val data = MouseClick(myId,thorSchema.systemFrame,getActionSerialNum)
@@ -266,6 +277,13 @@ class GameHolder(canvasName: String) {
     }
   }
 
+  def drawBarrage(s:String,x:Double,y:Double):Unit={
+    ctx.save()
+    ctx.font="30px Comic Sans Ms"
+    ctx.fillStyle=Color.White.toString()
+    ctx.fillText(s,x,y)
+    ctx.restore()
+  }
 
   def drawGameLoading(): Unit = {
     ctx.fillStyle = Color.Black.toString()
@@ -284,7 +302,8 @@ class GameHolder(canvasName: String) {
     ctx.textAlign = "left"
     ctx.textBaseline = "top"
     ctx.font = "36px Helvetica"
-    ctx.fillText(s"您已经死亡,被玩家=${killer}所杀", 150, 180)
+    ctx.fillText(s"您已经死亡,被玩家 ${killer} 所杀", 150, 180)
+    ctx.fillText(s"Press space to restart", 150, 300)
     println()
   }
 
@@ -295,7 +314,12 @@ class GameHolder(canvasName: String) {
 
   def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
     gridOpt match{
-      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
+      case Some(thorSchema: ThorSchemaClientImpl) =>
+        thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
+        if (barrageTime > 0){
+          drawBarrage(barrage,canvasBoundary.x*0.5,canvasBoundary.y*0.17)
+          barrageTime -= 1
+        }
       case None =>
     }
 

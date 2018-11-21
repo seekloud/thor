@@ -19,7 +19,6 @@ case class AdventurerState(
   direction: Float,
   faceDirection: Float,
   weaponLevel: Int,
-  weaponLength: Float,
   speedLevel: Int,
   isSpeedUp: Boolean,
   killNum: Int,
@@ -36,12 +35,12 @@ trait Adventurer extends CircleObjectOfGame {
   var direction: Float
   var faceDirection: Float
   var weaponLevel: Int
-  var weaponLength: Float
   var speedLevel: Int
   var isSpeedUp: Boolean
   var killNum: Int
   var isMove: Boolean
 
+  val maxLevel = 5
   def getMoveState() = isMove
 
   //判断adventurer是否吃到食物
@@ -52,12 +51,12 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   //判断扇形区域碰撞,角度为刀的角度
-  def isSectorDuang(Theta: Double, o: Adventurer) = {
-    this.position.distance(o.position) < (this.radius + this.weaponLength + o.radius) && scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) < scala.math.Pi * (1.5 / 3)
+  def isSectorDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig) = {
+    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(weaponLevel) + o.radius) && scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) < scala.math.Pi * (1.5 / 3)
   }
 
   //判断是否被攻击
-  def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit): Unit = {
+  def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit)(implicit config: ThorGameConfig): Unit = {
     println(s"attacking: ${p.playerId},$attackingStep")
     if (isSectorDuang(scala.math.Pi * 1.5 / 3 * attackingStep - scala.math.Pi/3 , p)){
       println(s"${p.playerId} is attacked")
@@ -66,15 +65,20 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, faceDirection, weaponLevel, weaponLength, speedLevel, isSpeedUp, killNum, isMove)
+    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, faceDirection, weaponLevel, speedLevel, isSpeedUp, killNum, isMove)
+  }
+
+  def attacking(killedLevel: Int)(implicit config: ThorGameConfig): Unit ={
+    this.energy += config.getEnergyByKillingAdventurerLevel(killedLevel)
+    if (energy > config.getMaxEnergyByLevel(this.level)) {
+      updateLevel
+    }
   }
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
     this.energy += config.getEnergyByFoodLevel(food.level)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
-      this.level += 1
-      this.weaponLength = config.getWeaponLengthByLevel(this.level)
-      this.weaponLevel = config.getWeaponLevelByLevel(this.level)
+      updateLevel
     }
   }
 
@@ -94,6 +98,7 @@ trait Adventurer extends CircleObjectOfGame {
     if (level != thorGameConfig.getAdventurerLevelSize) {
       level += 1
       speedLevel += 1
+      weaponLevel += 1
     }
   }
 
@@ -195,7 +200,6 @@ case class AdventurerImpl(
   var direction: Float,
   var faceDirection: Float,
   var weaponLevel: Int,
-  var weaponLength: Float,
   var speedLevel: Int,
   var isSpeedUp: Boolean,
   var killNum: Int,
@@ -203,7 +207,7 @@ case class AdventurerImpl(
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
     this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.radiusLevel, adventurerState.position,
-      adventurerState.direction, adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.weaponLength, adventurerState.speedLevel, adventurerState.isSpeedUp,
+      adventurerState.direction, adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.speedLevel, adventurerState.isSpeedUp,
       adventurerState.killNum, adventurerState.isMove)
   }
 
