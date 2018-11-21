@@ -71,8 +71,6 @@ object ThorGame {
 
   final case class GridSyncState(d: ThorSchemaState) extends WsMsgServer
 
-  //同步全量adventurer数据+新生成的食物
-  final case class GridSyncStateWithNewFood(d: ThorSchemaState) extends WsMsgServer
 
 
   sealed trait GameSnapshot

@@ -109,8 +109,11 @@ object RoomActor {
             if (tickCount % 40 == 5) {
               //生成食物+同步全量adventurer数据+新生成的食物
               val newFood = grid.genFood(5)
-              val data = grid.getThorSchemaState().copy(food = newFood)
-              dispatch(subscribersMap)(GridSyncStateWithNewFood(data))
+
+              val data = if(tickCount % 120 == 5) grid.getThorSchemaState()
+              else grid.getThorSchemaState().copy(food = newFood, isIncrement = true)
+
+              dispatch(subscribersMap)(GridSyncState(data))
             }
             if (tickCount % 20 == 1) {
               //排行榜
