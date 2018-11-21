@@ -176,7 +176,7 @@ object UserActor {
           case DispatchMsg(m) =>
             if (m.asInstanceOf[Wrap].isKillMsg) { //玩家死亡
               frontActor ! m
-              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
+//              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
               Behaviors.stopped
             } else {
               frontActor ! m
