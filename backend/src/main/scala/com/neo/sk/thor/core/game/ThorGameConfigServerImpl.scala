@@ -45,6 +45,9 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val weaponLengthLevel = config.getDoubleList("thorGame.weapon.length")
     .requiring(_.size() >= 1,"minimum supported weapon length size is 1").asScala.map(_.toFloat).toList
 
+  private[this] val foodMax = config.getInt("thorGame.food.max")
+    .requiring(t => t >= 30,"minimum supported food max size is 30")
+
   private[this] val foodEnergyLevel = config.getIntList("thorGame.food.energy")
     .requiring(_.size() >= 1,"minimum supported food energy size is 1").asScala.map(_.toInt).toList
 
@@ -58,7 +61,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private[this] val adventurerParams = AdventurerParams(AdventurerMoveSpeed(adventurerSpeedLevel), adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel, adventurerFacePalstance, adventurerSpeedUpRate)
 
-  private[this] val foodParams = FoodParams(foodEnergyLevel, foodRadiusLevel)
+  private[this] val foodParams = FoodParams(foodMax, foodEnergyLevel, foodRadiusLevel)
 
   private[this] val weaponParams = WeaponParams(weaponLengthLevel)
 
