@@ -126,9 +126,8 @@ class GameHolder(canvasName: String) {
                   gameConfig = Some(config)
                   gridOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
                   gridOpt.foreach{grid => timer = Shortcut.schedule(gameLoop,grid.config.frameDuration)}
-
                   nextFrame = dom.window.requestAnimationFrame(gameRender())
-
+                  firstCome = false
                 case UserEnterRoom(userId, name, _, _) =>
                   barrage = s"${name}加入了游戏"
                   barrageTime = 300
@@ -276,7 +275,6 @@ class GameHolder(canvasName: String) {
     myName = name
     canvas.focus()
     if (firstCome) {
-      firstCome = false
       addActionListenEvent()
       websocketClient.setup(name)
       gameLoop()
@@ -315,15 +313,26 @@ class GameHolder(canvasName: String) {
             barrageTime -= 1
           }
         }
-        else if(firstCome){
-          thorSchema.drawGameLoading()
-        }
-        else{
-          thorSchema.drawGameStop(killer)
-        }
+//        else if(firstCome){
+//          thorSchema.drawGameLoading()
+//        }
+//        else{
+//          thorSchema.drawGameStop(killer)
+//        }
 
       case None =>
+          drawGameLoading()
     }
 
+  }
+
+  def drawGameLoading(): Unit = {
+    ctx.fillStyle = Color.Black.toString()
+    ctx.fillRect(0, 0, dom.window.innerWidth, dom.window.innerHeight)
+    ctx.fillStyle = "rgb(250, 250, 250)"
+    ctx.textAlign = "left"
+    ctx.textBaseline = "top"
+    ctx.font = "36px Helvetica"
+    ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 }

@@ -33,23 +33,23 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
   private val fillBar = dom.document.createElement("img").asInstanceOf[html.Image]
   fillBar.setAttribute("src", s"${Routes.base}/static/img/weaponlevelbar_fg-sheet0.png")
 
-  private val barLength = 288
-  private val barHeight = 45
+  private val barLength = 500
+  private val barHeight = barLength / 288 * 70
   private val barLeft = (dom.window.innerWidth - barLength)/2
   private val barTop = dom.window.innerHeight - barHeight - 20
-  private val maxFillLenght = 696
   def drawEnergyBar(adventurer: Adventurer): Unit = {
     //fixme 垃圾代码
     ctx.save()
     ctx.drawImage(bar, barLeft, barTop, barLength, barHeight )
     ctx.fillStyle = "#ffffff"
     ctx.textAlign = "center"
-    ctx.fillText(adventurer.level.toString, barLeft + 18, barTop + 28)
+    ctx.fillText(adventurer.level.toString, barLeft + 32, barTop + 26)
+    ctx.font = "48px Comic Sans Ms"
     ctx.restore()
 //    println(s"${fillLength}")
-    val offsetL = 74
-    val offsetT = 15
-    val fillMax = barLength-offsetL - 5
+    val offsetL = 128
+    val offsetT = barHeight / 3
+    val fillMax = barLength-offsetL - 8
 
     val preLevel = if(adventurer.level == 1) 0 else config.getMaxEnergyByLevel(adventurer.level - 1)
     val nowLevel = config.getMaxEnergyByLevel(adventurer.level)
