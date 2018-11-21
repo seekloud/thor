@@ -108,6 +108,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     val RankBaseLine = 2
     var index = 0
     var x=10
+    var yourRank = 100
     var yourNameIn = false
     var text="  排行榜"
     if (!CurrentOrNot){
@@ -120,8 +121,10 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.beginPath()
     ctx.fillStyle="white"
     Rank.foreach { score =>
-      if (index<5){
-        index += 1
+      index += 1
+      if (score.id == id)
+        yourRank = index
+      if (index<6){
         if (score.id == id)
           yourNameIn = true
         drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", x+10, index*2, RankBaseLine,3)
@@ -130,8 +133,11 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     index+=1
     if (!yourNameIn){
       ctx.fillStyle="#FFFF00"
-      val yourScore = Rank.find(_.id == id).get
-      drawTextLine(s" $index:  ${yourScore.n.take(5)}    score=${yourScore.e}   kill=${yourScore.k}", x+10, index*2, RankBaseLine+3,3)
+      Rank.find(_.id == id) match {
+        case Some(yourScore) =>
+          drawTextLine(s" $yourRank :  ${yourScore.n.take(5)}    score=${yourScore.e}   kill=${yourScore.k}", x+10, 12, RankBaseLine,3)
+        case None =>
+      }
     }
 
   }
