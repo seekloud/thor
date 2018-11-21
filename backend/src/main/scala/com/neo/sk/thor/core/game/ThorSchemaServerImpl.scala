@@ -133,10 +133,10 @@ case class ThorSchemaServerImpl(
     //    dispatch(event)
   }
 
-  def receiveUserAction(action: UserActionEvent): Unit = {
-    val f = math.max(action.frame, systemFrame)
+  def receiveUserAction(preExecuteUserAction: UserActionEvent): Unit = {
+    val f = math.max(preExecuteUserAction.frame, systemFrame)
 
-    val act = action match {
+    val act = preExecuteUserAction match {
       case a: MouseMove => a.copy(frame = f)
       case a: MouseClickDownLeft => a.copy(frame = f)
       case a: MouseClickDownRight => a.copy(frame = f)
