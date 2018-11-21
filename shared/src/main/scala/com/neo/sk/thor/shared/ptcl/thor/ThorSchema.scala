@@ -180,7 +180,7 @@ trait ThorSchema extends KillInformation{
     attackingAdventureMap.foreach{ attacking =>
       adventurerMap.filter(_._1 == attacking._1).values.foreach{adventurer =>
         val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
-        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer)))
+        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer))(config))
       }
       if(attacking._2 <= 0){
         attackingAdventureMap.remove(attacking._1)
