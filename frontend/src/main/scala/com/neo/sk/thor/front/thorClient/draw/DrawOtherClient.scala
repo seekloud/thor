@@ -5,7 +5,7 @@ import com.neo.sk.thor.shared.ptcl.`object`.Adventurer
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.html
-import com.neo.sk.thor.shared.ptcl.model.Point
+import com.neo.sk.thor.shared.ptcl.model.{Point, Score}
 import org.scalajs.dom.ext.Color
 
 import scala.collection.mutable
@@ -56,6 +56,80 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.drawImage(fillBar, (fillMax-fillLength)/rateX,0, fillLength/rateX, 49 , barLeft+offsetL, barTop+offsetT, fillLength, barHeight - offsetT*2 - 1)
   }
 
+  def drawBarrage(s:String,x:Double,y:Double):Unit={
+    ctx.save()
+    ctx.font="30px Comic Sans Ms"
+    ctx.fillStyle=Color.White.toString()
+    ctx.fillText(s,x,y)
+    ctx.restore()
+  }
 
+  def drawGameLoading(): Unit = {
+    ctx.fillStyle = Color.Black.toString()
+    ctx.fillRect(0, 0, dom.window.innerWidth, dom.window.innerHeight)
+    ctx.fillStyle = "rgb(250, 250, 250)"
+    ctx.textAlign = "left"
+    ctx.textBaseline = "top"
+    ctx.font = "36px Helvetica"
+    ctx.fillText("请稍等，正在连接服务器", 150, 180)
+  }
+
+  def drawGameStop(killer: String): Unit = {
+    ctx.fillStyle = Color.Black.toString()
+    ctx.fillRect(0, 0, dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+    ctx.fillStyle = "rgb(250, 250, 250)"
+    ctx.textAlign = "left"
+    ctx.textBaseline = "top"
+    ctx.font = "36px Helvetica"
+    ctx.fillText(s"您已经死亡,被玩家 ${killer} 所杀", 150, 180)
+    ctx.fillText(s"Press space to restart", 150, 300)
+    println()
+  }
+
+
+  def drawTextLine(str: String, x: Int, lineNum: Int, lineBegin: Int = 0,`type`:Int) = {
+    ctx.textAlign = "left"
+    ctx.textBaseline = "top"
+    `type` match{
+      case 3 =>
+        ctx.font = "16px Comic Sans MS"
+      case _ =>
+        ctx.font = "20px 黑体"
+        ctx.fillStyle="white"
+
+    }
+    ctx.fillText(str, x, (lineNum + lineBegin - 1) * 14)
+  }
+
+  def drawRank(Rank:List[Score],CurrentOrNot:Boolean,id:String):Unit={
+    val num=Rank.size
+    val RankBaseLine = 2
+    var index = 0
+    var x=10
+    var text="排行榜"
+    if (!CurrentOrNot){
+      x=dom.document.documentElement.clientWidth - 260
+      text="历史排行榜"
+    }
+    ctx.fillStyle="rgba(192,192,192,0.6)"
+    ctx.fillRect(x,0,250,40+35*num)
+    drawTextLine(s"       ${text}        ", x+40, index, RankBaseLine-1,2)
+    ctx.beginPath()
+    ctx.strokeStyle=Color.White.toString()
+    ctx.moveTo(x,30)
+    ctx.lineTo(x+250,30)
+    ctx.stroke()
+    Rank.foreach { score =>
+      index += 1
+      if (score.id!=id){
+        ctx.fillStyle="white"
+      }
+      else {
+        ctx.fillStyle="#FFFF00"
+      }
+      drawTextLine(s"$index:  ${score.n.take(5)}    score=${score.d}   kill=${score.k}", x+10, index*2, RankBaseLine,3)
+    }
+    index+=1
+  }
 
 }
