@@ -161,9 +161,6 @@ class GameHolder(canvasName: String) {
 
 
                 case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
-//                case x: MouseClickDownLeft => thorSchemaOpt.foreach(_.receiveUserEvent(x))
-//                case x: MouseClickDownRight => thorSchemaOpt.foreach(_.receiveUserEvent(x))
-//                case x: MouseClickUpRight => thorSchemaOpt.foreach(_.receiveUserEvent(x))
 
                 case e: GameEvent => thorSchemaOpt.foreach(_.receiveGameEvent(e))
 

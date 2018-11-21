@@ -3,7 +3,6 @@ package org.seekloud.thor.shared.ptcl.component
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model
 import org.seekloud.thor.shared.ptcl.model.{Constants, Point, Rectangle}
-import org.seekloud.thor.shared.ptcl.model.Constants.{AdventurerLevel, Energy, SpeedLevel}
 import org.seekloud.thor.shared.ptcl.util.QuadTree
 
 /**
