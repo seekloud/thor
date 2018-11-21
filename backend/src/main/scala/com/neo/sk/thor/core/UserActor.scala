@@ -166,6 +166,9 @@ object UserActor {
             m match {
               case Some(event: UserActionEvent) =>
                 roomActor ! RoomActor.WsMessage(playerId, event)
+              case Some(event: RestartGame) =>
+                log.debug(s"restartGame $event")
+                JoinRoom(userInfo.playerId, userInfo.name, ctx.self )
               case _ =>
             }
             Behaviors.same

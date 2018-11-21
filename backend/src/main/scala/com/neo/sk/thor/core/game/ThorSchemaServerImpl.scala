@@ -82,9 +82,6 @@ case class ThorSchemaServerImpl (
       t =>
         if(foodMap.size < config.getFoodMax())
           generateFood(random.nextInt(5), genPosition())
-        else{
-          print("food max!!!")
-        }
     }
   }
 

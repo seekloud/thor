@@ -39,7 +39,6 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val sy = position.y + offset.y + moveDistance.y - r
       val dx = 2 * r
       val dy = 2 * r
-      println(s"dx:$dx")
 
       val src = s"/thor/static/img/Adventurer-${adventurer.level}.png"
       val weapon = s"/thor/static/img/weapon-${adventurer.level}.png"
@@ -62,7 +61,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 //      println(s"d: ${adventurer.getAdventurerState.direction} angle:${angle}")
 //      val angle = adventurer.getAdventurerState.direction + 30/180 * math.Pi
 //      CanvasUtils.rotateImage(ctx, weapon, Point(sx, sy) * canvasUnit, Point(0, -(r + gap)) * canvasUnit, weaponLength * canvasUnit, weaponWidth * canvasUnit, angle)
-      CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy) + Point(-r, r + gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
+      CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy) + Point(0, r + gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
 
       val namePosition = position
       ctx.fillStyle = "#ffffff"

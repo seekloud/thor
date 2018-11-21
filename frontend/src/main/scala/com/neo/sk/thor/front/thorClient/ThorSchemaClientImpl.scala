@@ -35,7 +35,7 @@ with DrawOtherClient{
           //保持自己的adventurer在屏幕中央~
           val r = adventurer.getAdventurerState.radius
           val position = adventurer.getAdventurerState.position
-          var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / ptcl.model.Frame.millsAServerFrame
+          var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
           //如果达到边界 则不再往外走
           val delay = 0.5
           if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)

@@ -133,7 +133,7 @@ package object model {
 
   object Frame{
 
-    val millsAServerFrame = 120
+//    val millsAServerFrame = 120
 
   }
 
