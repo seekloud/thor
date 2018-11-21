@@ -156,15 +156,6 @@ class ThorSchemaImpl(
         addGameSnapshot(systemFrame, this.getThorSchemaState())
 
       }
-    } else if (thorSchemaStateOpt.nonEmpty && (thorSchemaStateOpt.get.f - 1 == systemFrame || thorSchemaStateOpt.get.f - 2 > systemFrame)) {
-      info(s"同步数据，curSystemFrame=$systemFrame,sync game container state frame=${thorSchemaStateOpt.get.f}")
-      handleThorSchemaState(thorSchemaStateOpt.get)
-      thorSchemaStateOpt = None
-      if (esRecoverSupport) {
-        clearEsRecoverData()
-        addGameSnapshot(systemFrame, this.getThorSchemaState())
-
-      }
     } else {
       super.update()
       if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
