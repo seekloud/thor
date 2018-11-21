@@ -37,15 +37,23 @@ trait ThorSchema extends KillInformation{
 
   var systemFrame: Long = 0L //系统帧数
 
+  /*元素*/
   val adventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
   val foodMap = mutable.HashMap[Long, Food]() // foodId -> food
 
+  /*事件*/
   protected val gameEventMap = mutable.HashMap[Long, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
   protected val actionEventMap = mutable.HashMap[Long, List[UserActionEvent]]() //frame -> List[UserActionEvent]
   protected val myAdventurerAction = mutable.HashMap[Long,List[UserActionEvent]]()
 
   protected val attackingAdventureMap = mutable.HashMap[String, Int]()//playerId -> 攻击执行程度
 
+  /*排行榜*/
+  var currentRankList = List.empty[Score]
+  var historyRankMap = Map.empty[String, Score]
+  var historyRank = historyRankMap.values.toList.sortBy(_.e).reverse
+  var historyRankThreshold =if (historyRank.isEmpty)-1 else historyRank.map(_.e).min
+  val historyRankLength = 5
 
   protected val quadTree: QuadTree = new QuadTree(Rectangle(Point(0, 0), boundary))
 
