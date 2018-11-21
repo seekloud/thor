@@ -275,6 +275,7 @@ class GameHolder(canvasName: String) {
     myName = name
     canvas.focus()
     if (firstCome) {
+      drawGameLoading()
       addActionListenEvent()
       websocketClient.setup(name)
       gameLoop()
@@ -313,12 +314,6 @@ class GameHolder(canvasName: String) {
             barrageTime -= 1
           }
         }
-//        else if(firstCome){
-//          thorSchema.drawGameLoading()
-//        }
-//        else{
-//          thorSchema.drawGameStop(killer)
-//        }
 
       case None =>
           drawGameLoading()
@@ -327,6 +322,7 @@ class GameHolder(canvasName: String) {
   }
 
   def drawGameLoading(): Unit = {
+    println("loading")
     ctx.fillStyle = Color.Black.toString()
     ctx.fillRect(0, 0, dom.window.innerWidth, dom.window.innerHeight)
     ctx.fillStyle = "rgb(250, 250, 250)"
