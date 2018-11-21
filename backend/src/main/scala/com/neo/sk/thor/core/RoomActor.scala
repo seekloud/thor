@@ -115,7 +115,7 @@ object RoomActor {
             }
             if (tickCount % 20 == 1) {
               //排行榜
-              dispatch(subscribersMap)(Ranks(grid.currentRank,grid.historyRank))
+//              dispatch(subscribersMap)(Ranks(grid.currentRank,grid.historyRank))
             }
             newPlayer.foreach {
               //为新用户分发全量数据

@@ -142,6 +142,16 @@ object UserActor {
             ctx.unwatch(actor)
             switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
+          case WsMessage(reqOpt) =>
+            reqOpt match {
+              case Some(t:RestartGame) =>
+                log.debug(s"restart$t")
+                roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
+                idle(userInfo.playerId,userInfo.copy(name = t.name),startTime,frontActor)
+
+              case _ =>
+                Behaviors.same
+            }
           case unknowMsg =>
             Behavior.same
         }
@@ -175,9 +185,10 @@ object UserActor {
 
           case DispatchMsg(m) =>
             if (m.asInstanceOf[Wrap].isKillMsg) { //玩家死亡
+              log.debug(s"deadmsg $m")
               frontActor ! m
 //              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
-              Behaviors.stopped
+              Behaviors.same
             } else {
               frontActor ! m
               Behaviors.same
