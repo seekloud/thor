@@ -80,7 +80,11 @@ case class ThorSchemaServerImpl (
 
     (1 to num).foreach{
       t =>
-        generateFood(random.nextInt(5), genPosition())
+        if(foodMap.size < config.getFoodMax())
+          generateFood(random.nextInt(5), genPosition())
+        else{
+          print("food max!!!")
+        }
     }
   }
 
