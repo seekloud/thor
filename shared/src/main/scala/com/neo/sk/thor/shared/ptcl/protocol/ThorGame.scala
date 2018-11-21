@@ -3,7 +3,7 @@ package com.neo.sk.thor.shared.ptcl.protocol
 import com.neo.sk.thor.shared.ptcl.`object`.{AdventurerState, FoodState}
 import com.neo.sk.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
 import com.neo.sk.thor.shared.ptcl.model.Score
-import com.neo.sk.thor.shared.ptcl.thor.{ThorSchemaAdventurer, ThorSchemaState}
+import com.neo.sk.thor.shared.ptcl.thor.{ThorSchemaState}
 
 
 object ThorGame {
