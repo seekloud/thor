@@ -69,6 +69,10 @@ trait Adventurer extends CircleObjectOfGame {
     AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, faceDirection, weaponLevel, weaponLength, speedLevel, isSpeedUp, killNum, isMove)
   }
 
+  def attacking(killedLevel: Int)(implicit config: ThorGameConfig): Unit ={
+    this.energy += config.getEnergyByKillingAdventurerLevel(killedLevel)
+  }
+
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
     this.energy += config.getEnergyByFoodLevel(food.level)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
