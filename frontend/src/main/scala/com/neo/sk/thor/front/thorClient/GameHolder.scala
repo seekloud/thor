@@ -256,7 +256,7 @@ class GameHolder(canvasName: String) {
                e.preventDefault()
              }
            }
-         case None => ()
+         case None =>
        }
      }
 //    canvas.onclick = { (e: MouseEvent) =>
