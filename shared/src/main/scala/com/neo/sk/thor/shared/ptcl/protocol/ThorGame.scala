@@ -3,7 +3,7 @@ package com.neo.sk.thor.shared.ptcl.protocol
 import com.neo.sk.thor.shared.ptcl.`object`.{AdventurerState, FoodState}
 import com.neo.sk.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
 import com.neo.sk.thor.shared.ptcl.model.Score
-import com.neo.sk.thor.shared.ptcl.thor.ThorSchemaState
+import com.neo.sk.thor.shared.ptcl.thor.{ThorSchemaAdventurer, ThorSchemaState}
 
 
 object ThorGame {
@@ -70,6 +70,9 @@ object ThorGame {
   final case class Ranks(currentRank: List[Score], historyRank: List[Score]) extends WsMsgServer
 
   final case class GridSyncState(d: ThorSchemaState) extends WsMsgServer
+
+  //同步全量adventurer数据+新生成的食物
+  final case class GridSyncStateWithNewFood(d: ThorSchemaState) extends WsMsgServer
 
 
   sealed trait GameSnapshot

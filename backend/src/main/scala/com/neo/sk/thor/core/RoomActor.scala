@@ -107,11 +107,10 @@ object RoomActor {
 
             val gridData = grid.getThorSchemaState()
             if (tickCount % 20 == 5) {
-              //生成食物+同步全量数据
-              grid.genFood(5)
-              val data = grid.getThorSchemaState()
-              //              log.debug(s"sync data $data")
-              dispatch(subscribersMap)(GridSyncState(data))
+              //生成食物+同步全量adventurer数据+新生成的食物
+              val newFood = grid.genFood(5)
+              val data = grid.getThorSchemaState().copy(food = newFood)
+              dispatch(subscribersMap)(GridSyncStateWithNewFood(data))
             }
             if (tickCount % 20 == 1) {
               //排行榜
@@ -120,7 +119,6 @@ object RoomActor {
             newPlayer.foreach {
               //为新用户分发全量数据
               player =>
-                log.debug(s"new player $player")
                 subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap)(player._1, GridSyncState(gridData))
             }

@@ -96,15 +96,17 @@ case class ThorSchemaServerImpl(
 
   //↓↓↓只有后台执行的函数↓↓↓
 
-  private final def generateFood(level: Int = 1, position: Point, radius: Float = 2): Unit = {
+  private final def generateFood(level: Int = 1, position: Point, radius: Float = 2): FoodState = {
     //生成食物事件，被后台定时事件调用，前端不产生此事件，食物的属性暂且全部作为参数,color作为随机数
     val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius, random.nextInt(4))
     val event = GenerateFood(systemFrame, foodState)
     addGameEvent(event)
     dispatch(event)
+    foodState
   }
 
-  def genFood(num: Int) = {
+  def genFood(num: Int): List[FoodState] = {
+    var foodList: List[FoodState] = List()
 
     def genPosition(): Point = {
       Point(random.nextInt(boundary.x.toInt - 10),
@@ -113,9 +115,12 @@ case class ThorSchemaServerImpl(
 
     (1 to num).foreach {
       t =>
-        if(foodMap.size < config.getFoodMax())
-          generateFood(random.nextInt(5), genPosition())
+        if(foodMap.size < config.getFoodMax()){
+          val food = generateFood(random.nextInt(5), genPosition())
+          foodList = foodList :+ food
+        }
     }
+    foodList
   }
 
   def joinGame(userId: String, name: String, userActor: ActorRef[UserActor.Command]): Unit = {

@@ -61,7 +61,6 @@ class GameHolder(canvasName: String) {
   private[this] val actionSerialNumGenerator = new AtomicInteger(0)
   private[this] val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
 
-  var SynData : scala.Option[ThorSchemaState] = None
   var justSynced = false
 
   canvas.width = canvasBoundary.x.toInt
@@ -156,9 +155,12 @@ class GameHolder(canvasName: String) {
 
                 case GridSyncState(d) =>
 //                  dom.console.log(d.toString)
-                  SynData = Some(d)
                   gridOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
+
+                case GridSyncStateWithNewFood(d) =>
+                  justSynced = true
+
 
                 case x: MouseMove =>
                 case x: MouseClickDownLeft =>

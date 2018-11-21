@@ -280,6 +280,7 @@ trait ThorSchema extends KillInformation{
     )
   }
 
+
   protected def adventurerMove(): Unit = {
     adventurerMap.values.foreach { adventurer =>
       adventurer.move(boundary, quadTree)
