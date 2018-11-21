@@ -19,7 +19,9 @@ import scala.collection.mutable
 case class ThorSchemaState(
   f: Long,
   adventurer: List[AdventurerState],
-  food: List[FoodState])
+  food: List[FoodState],
+  isIncrement: Boolean = false
+)
 
 trait ThorSchema extends KillInformation{
 
