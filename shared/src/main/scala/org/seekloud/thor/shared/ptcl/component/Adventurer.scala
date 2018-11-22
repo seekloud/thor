@@ -110,10 +110,12 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def reduceLevel(implicit thorGameConfig: ThorGameConfig): Unit = {
-    if (this.energy <= thorGameConfig.getMaxEnergyByLevel(this.level - 1) && this.level > 1) {
-      this.level -= 1
-      speedLevel -= 1
-      weaponLevel -= 1
+    if (this.level > 1) {
+      if (this.energy <= thorGameConfig.getMaxEnergyByLevel(this.level - 1)) {
+        this.level -= 1
+        speedLevel -= 1
+        weaponLevel -= 1
+      }
     }
   }
 
