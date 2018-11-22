@@ -37,8 +37,8 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
         if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
       }
 
-      val sx = position.x + offset.x + moveDistance.x - r
-      val sy = position.y + offset.y + moveDistance.y - r
+      val sx = position.x + offset.x + moveDistance.x
+      val sy = position.y + offset.y + moveDistance.y
       val dx = 2 * r
       val dy = 2 * r
 
@@ -55,17 +55,15 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
             isAttacting = true
         case _ =>
       }
-      val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3).toFloat
+      val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 + 1/12 * math.Pi).toFloat
       val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
       val weaponWidth = 5
       val gap:Float = 1
       val move: Float = if(isAttacting) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0
-//      println(s"d: ${adventurer.getAdventurerState.direction} angle:${angle}")
-//      val angle = adventurer.getAdventurerState.direction + 30/180 * math.Pi
-//      CanvasUtils.rotateImage(ctx, weapon, Point(sx, sy) * canvasUnit, Point(0, -(r + gap)) * canvasUnit, weaponLength * canvasUnit, weaponWidth * canvasUnit, angle)
-      println(s"d:${adventurer.direction} angle:${angle} rotate${angle + move + math.Pi.toFloat/2}")
-      println(s"${Point(r+gap, -r)} ${Point(r+gap, -r).rotate(angle + move + math.Pi.toFloat/2)}")
-      CanvasUtils.rotateImage(ctx, weapon, (Point(sx+r, sy+r) + Point(r+gap, -r).rotate(angle + move + math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
+//      println(s"d:${adventurer.direction} angle:${angle} rotate${angle + move + math.Pi.toFloat/2}")
+//      println(s"${Point(r+gap, -r)} ${Point(r+gap, -r).rotate(angle + move + math.Pi.toFloat/2)}")
+//      CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy) + Point(r + gap+weaponLength / 2, 0).rotate(angle + move + math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
+      CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy) + Point(-r - gap.toFloat, gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
 
 
       ctx.fillStyle = "#ffffff"
@@ -74,7 +72,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 //      ctx.lineWidth = 2
 //      println(s"sx:$sx sy:$sy")
       ctx.textAlign = "center"
-      ctx.fillText(s"${adventurer.name}", (sx + r) * canvasUnit, (sy + dy) * canvasUnit + 20)
+      ctx.fillText(s"${adventurer.name}", (sx) * canvasUnit, (sy + dy) * canvasUnit + 20)
       ctx.closePath()
     }
     adventurerMap.map{
