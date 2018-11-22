@@ -55,7 +55,7 @@ class ThorSchemaImpl(
       uncheckedActionMap.get(e.serialNum) match {
         case Some(preFrame) =>
           if (e.frame != preFrame) {
-            println(s"preFrame=$preFrame eventFrame=${e.frame} curFrame=$systemFrame")
+//            println(s"preFrame=$preFrame eventFrame=${e.frame} curFrame=$systemFrame")
             if (preFrame < e.frame && esRecoverSupport) {
               if (preFrame >= systemFrame) {
                 removePreEvent(preFrame, e.playerId, e.serialNum)
@@ -156,7 +156,7 @@ class ThorSchemaImpl(
   override def update(): Unit = {
     if (thorSchemaStateOpt.nonEmpty) {
       val thorSchemaState = thorSchemaStateOpt.get
-      info(s"立即同步所有数据，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
+      info(s"立即同步所有数据，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
       handleThorSchemaState(thorSchemaState)
       thorSchemaStateOpt = None
       if (esRecoverSupport) {
