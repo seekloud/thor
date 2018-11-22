@@ -238,9 +238,7 @@ case class AdventurerImpl(
   }
 
   override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
-
-  override var levelUpExecute: Int = config.getAdventurerDyingAnimation
-//  def getPosition4Animation(boundary: Point, quadTree: QuadTree, offsetTime: Long): Point = {
+  //  def getPosition4Animation(boundary: Point, quadTree: QuadTree, offsetTime: Long): Point = {
 //
 //  }
 
