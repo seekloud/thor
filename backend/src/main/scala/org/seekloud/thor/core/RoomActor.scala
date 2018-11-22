@@ -72,7 +72,7 @@ object RoomActor {
       (ctx, msg) =>
         msg match {
           case JoinRoom(roomId, userId, name, userActor) =>
-            println("join room")
+            println(s"user $userId join room $roomId")
             thorSchema.joinGame(userId, name, userActor)
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, thorSchema, tickCount)
 
@@ -87,17 +87,6 @@ object RoomActor {
 
           case WsMessage(userId, msg) =>
             thorSchema.receiveUserAction(msg)
-            //            msg match {
-            //              case a: MouseMove =>
-            //                dispatch(subscribersMap)(MouseMove(a.playerId, a.direction, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
-            //              case a: MouseClickDownLeft =>
-            //                dispatch(subscribersMap)(MouseClickDownLeft(a.playerId, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
-            //              case a: MouseClickDownRight =>
-            //                dispatch(subscribersMap)(MouseClickDownRight(a.playerId, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
-            //              case a: MouseClickUpRight =>
-            //                dispatch(subscribersMap)(MouseClickUpRight(a.playerId, math.max(a.frame, thorSchema.systemFrame), a.serialNum))
-            //              case _ => //do nothing
-            //            }
             Behavior.same
 
           case GameLoop =>
