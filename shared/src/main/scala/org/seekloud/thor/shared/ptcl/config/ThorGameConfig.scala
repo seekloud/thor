@@ -13,7 +13,7 @@ final case class GridBoundary(width: Int, height: Int) {
 }
 
 final case class AdventurerMoveSpeed(speeds: List[Float]) {
-  def getThorSpeedByLevel(l: Int) = Point(speeds(l), 0)
+  def getThorSpeedByLevel(l: Int) = Point(speeds(l - 1), 0)
 }
 
 final case class AdventurerParams(
@@ -89,7 +89,7 @@ case class ThorGameConfigImpl(
   def facePalstance: Float = adventurerParams.facePalstance
 
   def getAdventurerRadiusByLevel(l: Int) = {
-    adventurerParams.radius(l)
+    adventurerParams.radius(l - 1)
   }
 
 
