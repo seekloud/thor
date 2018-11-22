@@ -20,12 +20,12 @@ object CanvasUtils {
     val tmpPosition = position
 //    val tmpPosition = position.copy(y = position.y + (position.y-drawHeight)/2)
     ctx.save()
-    ctx.translate(tmpPosition.x + width/2, tmpPosition.y + drawHeight/2)
+    ctx.translate(tmpPosition.x, tmpPosition.y)
     ctx.rotate(angle)
     ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, width, drawHeight)
     // 恢复设置（恢复的步骤要跟你修改的步骤向反）
     ctx.rotate(-angle)
-    ctx.translate(-(tmpPosition.x + width/2), -(tmpPosition.y + drawHeight/2))
+    ctx.translate(-tmpPosition.x, -tmpPosition.y)
     // 之后canvas的原点又回到左上角，旋转角度为0
     ctx.restore()
   }

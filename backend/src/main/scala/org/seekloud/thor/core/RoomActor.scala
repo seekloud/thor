@@ -97,7 +97,7 @@ object RoomActor {
             val thorSchemaData = thorSchema.getThorSchemaState()
             if (tickCount % 40 == 5) {
               //生成食物+同步全量adventurer数据+新生成的食物
-              val newFood = thorSchema.genFood(5)
+              val newFood = thorSchema.genFood(15)
 
               val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
               else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
