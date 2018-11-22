@@ -28,11 +28,14 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
       val position = adventurer.getAdventurerState.position
-      var moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
-      //如果达到边界 则不再往外走
-      val delay = 0.5
-      if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
-      if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
+      var moveDistance = Point(0, 0)
+      if(adventurer.isMove){
+        moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
+        //如果达到边界 则不再往外走
+        val delay = 0.5
+        if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
+        if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
+      }
 
       val sx = position.x + offset.x + moveDistance.x - r
       val sy = position.y + offset.y + moveDistance.y - r
@@ -52,15 +55,17 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
             isAttacting = true
         case _ =>
       }
-      val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 - math.Pi / 12).toFloat
+      val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3).toFloat
       val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
       val weaponWidth = 5
-      val gap:Float = 0.5.toFloat
+      val gap:Float = 1
       val move: Float = if(isAttacting) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0
 //      println(s"d: ${adventurer.getAdventurerState.direction} angle:${angle}")
 //      val angle = adventurer.getAdventurerState.direction + 30/180 * math.Pi
 //      CanvasUtils.rotateImage(ctx, weapon, Point(sx, sy) * canvasUnit, Point(0, -(r + gap)) * canvasUnit, weaponLength * canvasUnit, weaponWidth * canvasUnit, angle)
-      CanvasUtils.rotateImage(ctx, weapon, (Point(sx, sy + r) + Point(0, r + gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
+      println(s"d:${adventurer.direction} angle:${angle} rotate${angle + move + math.Pi.toFloat/2}")
+      println(s"${Point(r+gap, -r)} ${Point(r+gap, -r).rotate(angle + move + math.Pi.toFloat/2)}")
+      CanvasUtils.rotateImage(ctx, weapon, (Point(sx+r, sy+r) + Point(r+gap, -r).rotate(angle + move + math.Pi.toFloat/2)) * canvasUnit, Point(0, 0), weaponLength * canvasUnit, weaponWidth * canvasUnit, angle + move)
 
 
       ctx.fillStyle = "#ffffff"
