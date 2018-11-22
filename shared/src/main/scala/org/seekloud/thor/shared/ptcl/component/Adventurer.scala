@@ -38,8 +38,8 @@ trait Adventurer extends CircleObjectOfGame {
   var isSpeedUp: Boolean
   var killNum: Int
   var isMove: Boolean
+  var levelUpExecute: Int = 5
 
-  val maxLevel = 20
   def getMoveState() = isMove
 
   //判断adventurer是否吃到食物
@@ -102,10 +102,17 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def updateLevel(implicit thorGameConfig: ThorGameConfig) = {
-    if (level < thorGameConfig.getAdventurerLevelSize) {
-      level += 1
-      speedLevel += 1
-      weaponLevel += 1
+    if (levelUpExecute == thorGameConfig.getAdventurerLevelUpAnimation) {
+      if (level < thorGameConfig.getAdventurerLevelSize) {
+        level += 1
+        speedLevel += 1
+        weaponLevel += 1
+      }
+    } else {
+      if (levelUpExecute > 0)
+        levelUpExecute -= 1
+      else
+        levelUpExecute = thorGameConfig.getAdventurerLevelUpAnimation
     }
   }
 
@@ -232,6 +239,7 @@ case class AdventurerImpl(
 
   override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
 
+  override var levelUpExecute: Int = config.getAdventurerDyingAnimation
 //  def getPosition4Animation(boundary: Point, quadTree: QuadTree, offsetTime: Long): Point = {
 //
 //  }

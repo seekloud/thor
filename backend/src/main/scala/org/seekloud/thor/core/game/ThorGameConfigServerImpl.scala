@@ -45,6 +45,15 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val adventurerSpeedUpEnergyLoose = config.getInt("thorGame.adventurer.speedUpEnergyLoose")
     .requiring(t => t > 1,"minimum supported adventurer speed up energy loss  is 1")
 
+  private[this] val adventurerDyingAnimation = config.getInt("thorGame.adventurer.dyingAnimation")
+    .requiring(t => t > 1,"minimum supported adventurer dying animation  is 1")
+
+  private[this] val adventurerSpeedUpAnimation = config.getInt("thorGame.adventurer.speedUpAnimation")
+    .requiring(t => t > 1,"minimum supported adventurer speed up animation  is 1")
+
+  private[this] val adventurerLevelUpAnimation = config.getInt("thorGame.adventurer.levelUpAnimation")
+    .requiring(t => t > 1,"minimum supported adventurer level up animation  is 1")
+
 
   private[this] val weaponLengthLevel = config.getDoubleList("thorGame.weapon.length")
     .requiring(_.size() >= 1,"minimum supported weapon length size is 1").asScala.map(_.toFloat).toList
@@ -63,7 +72,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 //  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
 //    .requiring(_ > 0, "minimum supported adventurer radius is 1").toFloat
 
-  private[this] val adventurerParams = AdventurerParams(AdventurerMoveSpeed(adventurerSpeedLevel), adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel, adventurerFacePalstance, adventurerSpeedUpRate, adventurerSpeedUpEnergyLoose)
+  private[this] val adventurerParams = AdventurerParams(AdventurerMoveSpeed(adventurerSpeedLevel), adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel,
+    adventurerFacePalstance, adventurerSpeedUpRate, adventurerSpeedUpEnergyLoose, adventurerDyingAnimation, adventurerSpeedUpAnimation, adventurerLevelUpAnimation)
 
   private[this] val foodParams = FoodParams(foodMax, foodEnergyLevel, foodRadiusLevel)
 
@@ -95,6 +105,10 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   override def speedUpEnergyLoose: Int = thorGameConfig.adventurerParams.speedUpEnergyLoose
 
   override def getFoodMax(): Int = thorGameConfig.getFoodMax()
+
+  def getAdventurerDyingAnimation: Int = thorGameConfig.getAdventurerDyingAnimation
+
+  override def getAdventurerLevelUpAnimation: Int = thorGameConfig.getAdventurerLevelUpAnimation
 
 
 
