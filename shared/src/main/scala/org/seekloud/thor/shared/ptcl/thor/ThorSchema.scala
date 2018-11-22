@@ -325,7 +325,6 @@ trait ThorSchema extends KillInformation{
     handleAdventurerAttackedNow()
     handleAdventurerDyingNow()
     handleAdventurerEatFoodNow()
-    handleAdventurerLevelUpNow()
     handleGenerateFoodNow()
     handleUserEnterRoomNow()
 
