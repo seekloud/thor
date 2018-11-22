@@ -83,7 +83,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def setMoveDirection(d: Float, mouseDistance: Float)(implicit config: ThorGameConfig) = {
-    if (mouseDistance > config.getAdventurerRadiusByLevel(this.level))
+    if (mouseDistance > config.getAdventurerRadiusByLevel(this.level) * 10)
       {
         isMove = true
         direction = d
