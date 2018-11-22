@@ -49,6 +49,7 @@ trait ThorSchema extends KillInformation{
   protected val myAdventurerAction = mutable.HashMap[Long,List[UserActionEvent]]()
 
   protected val attackingAdventureMap = mutable.HashMap[String, Int]()//playerId -> 攻击执行程度
+  protected val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
 
   /*排行榜*/
   var currentRankList = List.empty[Score]
@@ -208,6 +209,16 @@ trait ThorSchema extends KillInformation{
     }
   }
 
+  final protected def handleAdventurerDyingNow(): Unit = {
+    dyingAdventurerMap.foreach { dying =>
+      if (dying._2._2 <= 0) {
+        dyingAdventurerMap.remove(dying._1)
+      } else {
+        dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 -1))
+      }
+    }
+  }
+
   protected final def handleAdventurerAttacked(e: BeAttacked): Unit = {
     val killerOpt = adventurerMap.get(e.killerId)
     adventurerMap.get(e.playerId).foreach { adventurer =>
@@ -215,6 +226,7 @@ trait ThorSchema extends KillInformation{
       killerOpt.foreach(_.killNum += 1)
       quadTree.remove(adventurer)
       adventurerMap.remove(adventurer.playerId)
+      dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
       addKillInfo(e.killerName, adventurer.name)
     }
   }
@@ -311,7 +323,9 @@ trait ThorSchema extends KillInformation{
 //    handleAdventurerMove()
     handleAdventurerAttackingNow()
     handleAdventurerAttackedNow()
+    handleAdventurerDyingNow()
     handleAdventurerEatFoodNow()
+    handleAdventurerLevelUpNow()
     handleGenerateFoodNow()
     handleUserEnterRoomNow()
 

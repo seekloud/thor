@@ -23,7 +23,10 @@ final case class AdventurerParams(
   containEnergyList: List[Int],
   facePalstance: Float,
   speedUpRate: Float,
-  speedUpEnergyLoose: Int
+  speedUpEnergyLoose: Int,
+  dyingAnimation: Int,
+  speedUpAnimation: Int,
+  levelUpAnimation: Int
 )
 
 final case class FoodParams(
@@ -70,6 +73,10 @@ trait ThorGameConfig {
   def getAdventurerLevelSize: Int
 
   def speedUpEnergyLoose: Int
+
+  def getAdventurerDyingAnimation: Int
+
+  def getAdventurerLevelUpAnimation: Int
 
 }
 
@@ -128,6 +135,11 @@ case class ThorGameConfigImpl(
   def getAdventurerLevelSize: Int = adventurerParams.radius.size
 
   override def speedUpEnergyLoose: Int = adventurerParams.speedUpEnergyLoose
+
+  def getAdventurerDyingAnimation: Int = adventurerParams.dyingAnimation
+
+  def getAdventurerLevelUpAnimation: Int = adventurerParams.levelUpAnimation
+
 
 
 }
