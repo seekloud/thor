@@ -109,6 +109,14 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
+  def reduceLevel(implicit thorGameConfig: ThorGameConfig): Unit = {
+    if (this.energy <= thorGameConfig.getMaxEnergyByLevel(this.level - 1) && this.level > 1) {
+      this.level -= 1
+      speedLevel -= 1
+      weaponLevel -= 1
+    }
+  }
+
   def speedUp(implicit thorGameConfig: ThorGameConfig) = {
     if (!isSpeedUp && energy > thorGameConfig.speedUpEnergyLoose) isSpeedUp = true
   }
@@ -122,6 +130,7 @@ trait Adventurer extends CircleObjectOfGame {
       val moveDistance = if (isSpeedUp) {
         if (energy >= thorGameConfig.speedUpEnergyLoose) {
           energy -= thorGameConfig.speedUpEnergyLoose
+          reduceLevel
         } else {
           cancleSpeedUp
         }
