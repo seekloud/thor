@@ -25,7 +25,7 @@ case class AdventurerServer(
                         var direction: Float = 0,
                         var faceDirection: Float = 0,
                         var weaponLevel: Int = 1,
-                        var speedLevel: Int = 0,
+                        var speedLevel: Int = 1,
                         var isSpeedUp: Boolean = false,
                         var killNum: Int = 0,
                         var isMove: Boolean = true
