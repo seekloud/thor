@@ -16,7 +16,7 @@ object Constants {
     val replayLoading = 6
   }
 
-  val preExecuteFrameOffset = 2 //预执行2帧
+  val preExecuteFrameOffset = 4 //预执行2帧
 
 
 }

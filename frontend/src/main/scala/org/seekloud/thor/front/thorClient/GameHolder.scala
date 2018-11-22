@@ -187,7 +187,7 @@ class GameHolder(canvasName: String) {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId)){
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
-            println(s"mouseDistance: $mouseDistance")
+//            println(s"mouseDistance: $mouseDistance")
             val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame,getActionSerialNum)
             websocketClient.sendMsg(data)
             thorSchema.addMyAction(data)
