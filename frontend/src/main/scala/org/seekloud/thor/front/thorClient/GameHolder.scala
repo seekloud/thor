@@ -164,11 +164,6 @@ class GameHolder(canvasName: String) {
 
                 case e: GameEvent => thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
-                case x: GenerateFood =>
-
-                case x: EatFood =>
-//                  thorSchemaOpt.foreach(_.)
-
                 case  x => dom.window.console.log(s"接收到无效消息$x")
               }
             case Left(error) =>
@@ -191,7 +186,9 @@ class GameHolder(canvasName: String) {
       thorSchemaOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId)){
-            val data = MouseMove(thorSchema.myId,theta,thorSchema.systemFrame,getActionSerialNum)
+            val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
+            println(s"mouseDistance: $mouseDistance")
+            val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame,getActionSerialNum)
             websocketClient.sendMsg(data)
             thorSchema.addMyAction(data)
             thorSchema.preExecuteUserEvent(data)

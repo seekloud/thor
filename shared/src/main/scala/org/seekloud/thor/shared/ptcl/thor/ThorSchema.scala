@@ -111,12 +111,17 @@ trait ThorSchema extends KillInformation{
         case Some(adventurer) =>
           action match {
             case a: MouseMove =>
-              adventurer.setMoveDirection(a.direction)
+              adventurer.setMoveDirection(a.direction, a.mouseDistance)
               adventurer.setFaceDirection(a.direction)
             case a: MouseClickDownLeft =>
               attackingAdventureMap.get(a.playerId) match {
                 case Some(_) => ()
-                case None => attackingAdventureMap.put(a.playerId, 3) //TODO 动画持续帧数 现在是3
+                case None =>
+                  attackingAdventureMap.put(a.playerId, 3) //TODO 动画持续帧数 现在是3
+                  adventurerMap.filter(_._1 == a.playerId).values.foreach {
+                    adventurer =>
+                      adventurer.isMove = false
+                  }
               }
             case a: MouseClickDownRight => adventurer.speedUp(config)
             case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
@@ -192,6 +197,10 @@ trait ThorSchema extends KillInformation{
         adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer))(config))
       }
       if(attacking._2 <= 0){
+        adventurerMap.filter(_._1 == attacking._1).values.foreach {
+          adventurer =>
+            adventurer.isMove = true
+        }
         attackingAdventureMap.remove(attacking._1)
       }
       else attackingAdventureMap.update(attacking._1, attacking._2 - 1)
