@@ -92,6 +92,10 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
       ctx.drawImage(img, (position.x + offset.x - r) * canvasUnit, (position.y + offset.y - r) * canvasUnit)
     }
+
+    dyingAdventurerMap.map{
+      adventurer =>
+    }
   }
 
   def drawAdventurerByOffsetTime(offSetTime: Long, offset: Point, canvasUnit: Int): Unit ={
