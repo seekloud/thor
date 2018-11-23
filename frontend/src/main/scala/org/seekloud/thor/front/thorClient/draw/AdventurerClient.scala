@@ -134,6 +134,8 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val offsetHeight =  - 200 + movePerStep * (step - offSetTime.toFloat/config.frameDuration)
       val opacity = 0.1 * step
 
+      println(step)
+
       ctx.save()
       ctx.globalAlpha = opacity
       ctx.drawImage(img, (position.x + offset.x + moveDistance.x) * canvasUnit - width/2, (position.y + offset.y + moveDistance.y - r) * canvasUnit - height/2 + offsetHeight)
