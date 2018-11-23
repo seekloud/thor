@@ -97,12 +97,14 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     }
   }
 
-  def drawDead(offset: Point, canvasUnit: Int): Unit = {
+  def drawDead(offset: Point, offsetTime:Long, canvasUnit: Int): Unit = {
 
     def drawADead(adventurer: Adventurer, step: Int): Unit = {
 
+      val o = if(offsetTime.toFloat/config.frameDuration > 0.5) 1 else 0
+
       val img = dom.document.createElement("img").asInstanceOf[html.Image]
-      img.setAttribute("src", s"/thor/static/img/kill${7 - step}.png")
+      img.setAttribute("src", s"/thor/static/img/kill${7 - step*2 + o}.png")
 
       val position = adventurer.getAdventurerState.position
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
