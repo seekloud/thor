@@ -28,7 +28,7 @@
         </encoder>
     </appender>
 
-  <logger name="com.neo" level="DEBUG" additivity="true" />
+  <logger name="org" level="DEBUG" additivity="true" />
 
   <logger name="akka" level="INFO" additivity="true"/>
 
