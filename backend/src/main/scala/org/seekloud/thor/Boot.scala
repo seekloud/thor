@@ -18,7 +18,7 @@ import akka.stream.scaladsl._
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.actor.typed.scaladsl.adapter._
-import org.seekloud.thor.core.{RoomManager, UserManager}
+import org.seekloud.thor.core.{RoomManager, UserManager, ESheepLinkClient}
 
 import scala.concurrent.duration._
 
@@ -45,6 +45,8 @@ object Boot extends HttpService {
   val roomManager: ActorRef[RoomManager.Command] = system.spawn(RoomManager.create(),"roomManager")
 
   val userManager: ActorRef[UserManager.Command] = system.spawn(UserManager.create(),"userManager")
+
+  val eSheepLinkClient: ActorRef[ESheepLinkClient.Command] = system.spawn(ESheepLinkClient.create(),"ESheepLinkClient")
 
 
 //  var testTime = System.currentTimeMillis()

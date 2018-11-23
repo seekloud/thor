@@ -10,6 +10,7 @@ import akka.stream.scaladsl.Flow
 import akka.util.Timeout
 import org.seekloud.thor.common.AppSettings
 import akka.actor.typed.scaladsl.AskPattern._
+import java.net.URLEncoder
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import org.seekloud.thor.Boot.{executor, scheduler, timeout}
@@ -19,7 +20,8 @@ import org.seekloud.thor.Boot.userManager
 
 trait HttpService
   extends ResourceService
-  with ServiceUtils {
+  with ServiceUtils
+  with PlatService{
 
   import akka.actor.typed.scaladsl.AskPattern._
   import org.seekloud.utils.CirceSupport._
@@ -43,7 +45,7 @@ trait HttpService
 
 
   lazy val routes: Route = pathPrefix(AppSettings.rootPath) {
-    resourceRoutes ~
+    resourceRoutes ~ platEnterRoute ~
       (pathPrefix("game") & get){
         pathEndOrSingleSlash{
           getFromResource("html/admin.html")
@@ -55,9 +57,24 @@ trait HttpService
               flowFuture.map(t => handleWebSocketMessages(t))
             )
           }
-        }
+        } ~ platGameRoutes
 
       }
+  }
+
+  def platEnterRoute: Route = path("playGame"){
+    parameter(
+      'playerId.as[String],
+      'playerName.as[String],
+      'accessCode.as[String],
+      'roomId.as[Long].?
+    ) {
+      case (playerId, playerName, accessCode, roomIdOpt) =>
+        redirect(s"/thor/game/#/thor/playGame/$playerId/${URLEncoder.encode(playerName, "utf-8")}" + roomIdOpt.map(s => s"/$s").getOrElse("") + s"/$accessCode",
+          StatusCodes.SeeOther
+        )
+
+    }
   }
 
 

@@ -22,9 +22,11 @@ class WebSocketClient(
 
   def getWsState = wsSetup
 
-  def getWebSocketUri(name:String): String = {
+  def getWebSocketUri(name: String, id: String, accessCode: String): String = {
     val wsProtocol = if (dom.document.location.protocol == "https:") "wss" else "ws"
-    s"$wsProtocol://${dom.document.location.host}${Routes.wsJoinGameUrl(name)}"
+    if(id.equals("1"))
+      s"$wsProtocol://${dom.document.location.host}${Routes.wsJoinGameUrl(name)}"
+    else s"$wsProtocol://${dom.document.location.host}${Routes.wsJoinGameUrlESheep(id, name, accessCode)}"
   }
 
   private val sendBuffer:MiddleBufferInJs = new MiddleBufferInJs(2048)
@@ -37,10 +39,10 @@ class WebSocketClient(
   }
 
 
-  def setup(name:String):Unit = {
+  def setup(name:String, id:String, accessCode: String):Unit = {
     println("set up")
 
-    val webSocketStream = new WebSocket(getWebSocketUri(name))
+    val webSocketStream = new WebSocket(getWebSocketUri(name, id, accessCode))
     websocketStreamOpt = Some(webSocketStream)
     webSocketStream.onopen = { (event: Event) =>
       wsSetup = true
