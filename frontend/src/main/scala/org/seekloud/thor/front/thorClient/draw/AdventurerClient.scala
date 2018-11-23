@@ -104,7 +104,8 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val o = if(offsetTime.toFloat/config.frameDuration > 0.5) 1 else 0
 
       val img = dom.document.createElement("img").asInstanceOf[html.Image]
-      img.setAttribute("src", s"/thor/static/img/kill${7 - step*2 + o}.png")
+      img.setAttribute("src", s"/thor/static/img/kill${5 - step*2 + o}.png")
+      println(s"step:$step o:${o} img:${5 - step*2 + o}")
 
       val position = adventurer.getAdventurerState.position
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
@@ -149,7 +150,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   def drawAdventurerByOffsetTime(offSetTime: Long, offset: Point, canvasUnit: Int): Unit ={
 
     drawAdventurer(offSetTime, offset, canvasUnit)
-    drawDead(offset, canvasUnit)
+    drawDead(offset, offSetTime, canvasUnit)
     adventurerMap.get(myId).foreach{
       adventurer =>
         drawLevelUp(adventurer, adventurer.getAdventurerState.levelUpExecute, offSetTime, offset, canvasUnit)
