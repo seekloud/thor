@@ -306,6 +306,7 @@ trait ThorSchema extends KillInformation{
   protected def adventurerMove(): Unit = {
     adventurerMap.values.foreach { adventurer =>
       adventurer.move(boundary, quadTree)
+      if (adventurer.isUpdateLevel) adventurer.updateLevel
     }
   }
 
@@ -319,6 +320,10 @@ trait ThorSchema extends KillInformation{
     adventurerMove()
     handleUserLeftRoomNow()
     handleUserActionEventNow()
+
+    if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
+      handleMyActionNow()
+    }
 
 //    handleAdventurerMove()
     handleAdventurerAttackingNow()

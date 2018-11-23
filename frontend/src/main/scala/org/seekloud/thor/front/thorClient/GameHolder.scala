@@ -190,7 +190,9 @@ class GameHolder(canvasName: String) {
 //            println(s"mouseDistance: $mouseDistance")
             val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame,getActionSerialNum)
             websocketClient.sendMsg(data)
-            thorSchema.addMyAction(data)
+//            if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
+//              thorSchema.addMyAction(data)
+//            }
             thorSchema.preExecuteUserEvent(data)
           }
 
@@ -207,14 +209,14 @@ class GameHolder(canvasName: String) {
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
-              thorSchema.addMyAction(event)
+//              thorSchema.addMyAction(event)
               e.preventDefault()
             }
             else if(e.button == 2){ //右键
               val event = MouseClickDownRight(myId, thorSchema.systemFrame, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event) // actionEventMap
-              thorSchema.addMyAction(event) // myAdventurerAction
+//              thorSchema.addMyAction(event) // myAdventurerAction
               e.preventDefault()
             }
             else ()
@@ -230,7 +232,7 @@ class GameHolder(canvasName: String) {
               val event = MouseClickUpRight(myId, thorSchema.systemFrame, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
-              thorSchema.addMyAction(event)
+//              thorSchema.addMyAction(event)
               e.preventDefault()
             }
             else ()
