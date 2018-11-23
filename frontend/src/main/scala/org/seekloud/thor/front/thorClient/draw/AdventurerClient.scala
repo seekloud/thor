@@ -86,17 +86,26 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     def drawADead(adventurer: Adventurer, step: Int): Unit = {
 
       val img = dom.document.createElement("img").asInstanceOf[html.Image]
-      img.setAttribute("src", s"/thor/static/img/kill$step.png")
+      img.setAttribute("src", s"/thor/static/img/kill${7 - step}.png")
 
       val position = adventurer.getAdventurerState.position
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
 
-      ctx.drawImage(img, (position.x + offset.x - r) * canvasUnit, (position.y + offset.y - r) * canvasUnit)
+      val width = img.width
+      val height = img.height
+
+      ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width/2, (position.y + offset.y) * canvasUnit - height/2)
     }
 
     dyingAdventurerMap.map{
       adventurer =>
         drawADead(adventurer._2._1, adventurer._2._2)
+    }
+  }
+
+  def drawLevelUp(adventurer: Adventurer) = {
+    if(adventurer){
+
     }
   }
 
