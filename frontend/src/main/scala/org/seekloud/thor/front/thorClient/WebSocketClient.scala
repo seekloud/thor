@@ -24,7 +24,7 @@ class WebSocketClient(
 
   def getWebSocketUri(name: String, id: String, accessCode: String): String = {
     val wsProtocol = if (dom.document.location.protocol == "https:") "wss" else "ws"
-    if(id.isEmpty)
+    if(id.equals("1"))
       s"$wsProtocol://${dom.document.location.host}${Routes.wsJoinGameUrl(name)}"
     else s"$wsProtocol://${dom.document.location.host}${Routes.wsJoinGameUrlESheep(id, name, accessCode)}"
   }

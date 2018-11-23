@@ -23,7 +23,7 @@ object ESheepClient extends HttpUtil {
   def gsKey2Token(): Future[Either[Throwable, GetTokenByGsKeyRsp]] ={
 
     val methodName = "test_name_gsKey2Token"
-    val url = "http://flowdev.neoap.com/esheep/api/gameServer/gsKey2Token" //FIXME 修改url
+    val url = "http://10.1.29.250:30374/esheep/api/gameServer/gsKey2Token" //FIXME 修改url
     val jsonStr = GsKey2TokenReq(thorId, thorKey).asJson.noSpaces
 
     postJsonRequestSend(methodName, url, Nil, jsonStr).map{
@@ -37,7 +37,7 @@ object ESheepClient extends HttpUtil {
 
   def verifyAccessCode(accessCode: String, token: String): Future[Either[Throwable, GetPlayerByAccessCodeRsp]] ={
     val methodName = "test_name_verifyAccessCode"
-    val url = s"http://flowdev.neoap.com/esheep/api/gameServer/verifyAccessCode?token=$token"//FIXME 修改url
+    val url = s"http://10.1.29.250:30374/esheep/api/gameServer/verifyAccessCode?token=$token"//FIXME 修改url
     val jsonStr = VerifyAccessCodeReq(thorId, accessCode).asJson.noSpaces
 
     postJsonRequestSend(methodName, url, Nil, jsonStr).map{
