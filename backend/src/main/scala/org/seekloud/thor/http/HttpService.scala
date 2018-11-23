@@ -52,7 +52,7 @@ trait HttpService
         } ~
           path("join"){
           parameter('name){ name =>
-            val flowFuture:Future[Flow[Message,Message,Any]] = userManager ? (UserManager.GetWebSocketFlow(name,_,None))
+            val flowFuture:Future[Flow[Message,Message,Any]] = userManager ? (UserManager.GetWebSocketFlow("test", name,_,None))
             dealFutureResult(
               flowFuture.map(t => handleWebSocketMessages(t))
             )

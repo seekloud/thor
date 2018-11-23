@@ -24,7 +24,7 @@ object UserManager {
 
   final case class ChildDead[U](name: String, childRef: ActorRef[U]) extends Command
 
-  final case class GetWebSocketFlow(name:String,replyTo:ActorRef[Flow[Message,Message,Any]], roomId:Option[Long] = None) extends Command
+  final case class GetWebSocketFlow(id: String, name:String,replyTo:ActorRef[Flow[Message,Message,Any]], roomId:Option[Long] = None) extends Command
 
   def create(): Behavior[Command] = {
     log.debug(s"UserManager start...")
@@ -45,9 +45,10 @@ object UserManager {
     Behaviors.receive[Command]{
       (ctx, msg) =>
         msg match {
-          case GetWebSocketFlow(name,replyTo, roomIdOpt) =>
+          case GetWebSocketFlow(id, name,replyTo, roomIdOpt) =>
 
-            val playerInfo = UserInfo(uidGenerator.getAndIncrement().toString, name)
+//              val playerInfo = UserInfo(uidGenerator.getAndIncrement().toString, name)
+            val playerInfo = UserInfo(if(id.equals("test")) uidGenerator.getAndIncrement().toString else id, name)
 
             val userActor = getUserActor(ctx, playerInfo.playerId, playerInfo)
             replyTo ! getWebSocketFlow(userActor)

@@ -46,7 +46,7 @@ trait PlatService extends ServiceUtils{
         VerifyAccessCode.flatMap {
           case GetPlayerByAccessCodeRsp(data, 0, "ok") =>
             println("ws and access ok")
-            val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow(name, _, None))
+            val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow(id, name, _, None))
             flowFuture.map(t => handleWebSocketMessages(t))
           case GetPlayerByAccessCodeRsp(data, _, _) =>
             println("ws and accessCode error")
