@@ -40,7 +40,7 @@ case class ThorSchemaServerImpl(
 
   private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil
 
-  private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，killing, killed, score)
+  private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，)
 
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
     new AdventurerImpl(config, adventurer)

@@ -69,9 +69,9 @@ object ESheepProtocol {
                              )
 
   final case class GetPlayerByAccessCodeRsp(
-                                        data: PlayerData,
+                                        data: Option[PlayerData],
                                         errCode: Int,
                                         msg: String
                                         ) extends ESheepResponse
-  val ErrorGetPlayerByAccessCodeRsp = GetPlayerByAccessCodeRsp(PlayerData("",""), 200001, "accessCode error")
+  val ErrorGetPlayerByAccessCodeRsp = GetPlayerByAccessCodeRsp(None, 200001, "accessCode error")
 }

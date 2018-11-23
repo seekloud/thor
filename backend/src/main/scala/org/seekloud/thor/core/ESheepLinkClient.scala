@@ -3,12 +3,16 @@ package org.seekloud.thor.core
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.{ActorContext, StashBuffer, TimerScheduler}
-import org.seekloud.thor.protocol.ESheepProtocol.{ESheepRecord, ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
+import org.seekloud.thor.protocol.ESheepProtocol.{CommonRsp, ESheepRecord, ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
 import org.seekloud.utils.ESheepClient
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
 import org.seekloud.thor.Boot.executor
+import io.circe.generic.auto._
+import io.circe.syntax._
+import io.circe.parser._
+
 
 /**
   * User: XuSiRan
@@ -114,7 +118,7 @@ object ESheepLinkClient {
         case UpdateToken =>
           ESheepClient.gsKey2Token().map{
             case Right(rsp) =>
-              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, rsp.data.expireTime.seconds)
+              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, (rsp.data.expireTime/2).seconds)
               ctx.self ! SwitchBehavior("idle", idle(rsp.data.token))
             case Left(e) =>
               timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, 20.seconds)
@@ -126,8 +130,18 @@ object ESheepLinkClient {
         case VerifyAccessCode(accessCode, replyTo) =>
           ESheepClient.verifyAccessCode(accessCode, token).map{
             case Right(rsp) =>
-              println(s"verifyAccessCode success: $rsp")
-              replyTo ! rsp
+              if(rsp.errCode == 0){
+                println(s"verifyAccessCode success: $rsp")
+                replyTo ! rsp
+              }
+              else if(rsp.errCode == 200003){
+                ctx.self ! UpdateToken
+                println(s"verifyAccessCode error: $rsp, try UpdateToken")
+              }
+              else{
+                println(s"verifyAccessCode error: $rsp")
+                replyTo ! ErrorGetPlayerByAccessCodeRsp
+              }
             case Left(e) =>
               println(s"verifyAccessCode error: $e")
               replyTo ! ErrorGetPlayerByAccessCodeRsp
