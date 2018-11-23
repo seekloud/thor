@@ -248,7 +248,7 @@ class GameHolder(canvasName: String) {
              if (e.keyCode == KeyCode.Space){
                println("restart!!!!")
                firstCome = true
-               start(myName)
+               start(myName, null, null) // FIXME 重启没有验证accessCode
                websocketClient.sendMsg(RestartGame(myName))
                e.preventDefault()
              }
@@ -267,14 +267,14 @@ class GameHolder(canvasName: String) {
   }
 
   //游戏启动
-  def start(name: String): Unit = {
+  def start(name: String, id: String, accessCode: String): Unit = {
     println(s"start $name")
     myName = name
     canvas.focus()
     if (firstCome) {
       drawGameLoading()
       addActionListenEvent()
-      websocketClient.setup(name)
+      websocketClient.setup(name, id, accessCode)
       gameLoop()
     }
     else if(websocketClient.getWsState){

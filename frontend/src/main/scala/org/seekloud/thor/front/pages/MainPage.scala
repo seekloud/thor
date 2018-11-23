@@ -12,9 +12,10 @@ object MainPage extends PageSwitcher {
 
 
   private val currentPage: Rx[Elem] = currentHashVar.map {
+    case "thor" :: "playGame" :: playerId :: playerName :: accessCode :: Nil=> new ThorRender(playerName, playerId, accessCode).render
     case "play" :: name :: Nil => new ThorRender(name).render
     case "entry" :: Nil => EntryPage.render
-    case _ => EntryPage.render
+    case _ => println("error in switch"); EntryPage.render
   }
 
 
