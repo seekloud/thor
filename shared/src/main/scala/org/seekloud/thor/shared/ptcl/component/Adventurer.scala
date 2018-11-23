@@ -38,6 +38,7 @@ trait Adventurer extends CircleObjectOfGame {
   var isSpeedUp: Boolean
   var killNum: Int
   var isMove: Boolean
+  var isUpdateLevel: Boolean = false
   var levelUpExecute: Int = 100
 
   def getMoveState() = isMove
@@ -105,6 +106,7 @@ trait Adventurer extends CircleObjectOfGame {
     if (levelUpExecute > thorGameConfig.getAdventurerLevelUpAnimation) {
       if (level < thorGameConfig.getAdventurerLevelSize) {
         levelUpExecute = thorGameConfig.getAdventurerLevelUpAnimation
+        isUpdateLevel = true
         level += 1
         speedLevel += 1
         weaponLevel += 1
@@ -112,8 +114,10 @@ trait Adventurer extends CircleObjectOfGame {
     } else {
       if (levelUpExecute > 0)
         levelUpExecute -= 1
-      else
+      else {
+        isUpdateLevel = false
         levelUpExecute = thorGameConfig.getAdventurerLevelUpAnimation + 100
+      }
     }
   }
 
