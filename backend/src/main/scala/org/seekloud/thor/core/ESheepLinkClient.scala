@@ -3,7 +3,7 @@ package org.seekloud.thor.core
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.{ActorContext, StashBuffer, TimerScheduler}
-import org.seekloud.thor.protocol.ESheepProtocol.{ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
+import org.seekloud.thor.protocol.ESheepProtocol.{ESheepRecord, ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
 import org.seekloud.utils.ESheepClient
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -27,6 +27,8 @@ object ESheepLinkClient {
   case object UpdateToken extends Command // 更新token
 
   case class VerifyAccessCode(accessCode: String, replyTo: ActorRef[GetPlayerByAccessCodeRsp]) extends Command // 接受用户accessCode,反向验证
+
+  case class AddRecord2ESheep(eSheepRecord: ESheepRecord) extends Command
 
   case class TimeOut(msg: String) extends Command
 
@@ -124,11 +126,20 @@ object ESheepLinkClient {
         case VerifyAccessCode(accessCode, replyTo) =>
           ESheepClient.verifyAccessCode(accessCode, token).map{
             case Right(rsp) =>
-              println(s"success: $rsp")
+              println(s"verifyAccessCode success: $rsp")
               replyTo ! rsp
             case Left(e) =>
-              println(s"error: $e")
+              println(s"verifyAccessCode error: $e")
               replyTo ! ErrorGetPlayerByAccessCodeRsp
+          }
+          Behaviors.same
+
+        case AddRecord2ESheep(record) =>
+          ESheepClient.addRecord2ESheep(record, token).map{
+            case Right(rsp) =>
+              println(s"verifyAccessCode success: $rsp")
+            case Left(e) =>
+              println(s"verifyAccessCode error: $e")
           }
           Behaviors.same
 

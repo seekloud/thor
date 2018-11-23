@@ -5,13 +5,15 @@ import java.util.concurrent.atomic.AtomicInteger
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
 import org.seekloud.thor.core.thor.AdventurerServer
-import org.seekloud.thor.core.{RoomActor, UserActor}
+import org.seekloud.thor.core.{ESheepLinkClient, RoomActor, UserActor}
+import org.seekloud.thor.protocol.ESheepProtocol.{ESheepRecord, ESheepRecordSimple}
 import org.seekloud.thor.shared.ptcl.component._
 import org.slf4j.Logger
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model._
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchema
+import org.seekloud.thor.Boot.eSheepLinkClient
 
 import scala.collection.mutable
 
@@ -38,8 +40,9 @@ case class ThorSchemaServerImpl(
 
   private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil
 
+  private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，killing, killed, score)
+
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
-    //TODO AdventurerState 转 Adventurer 具体实现
     new AdventurerImpl(config, adventurer)
   }
 
@@ -54,6 +57,12 @@ case class ThorSchemaServerImpl(
   override protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
     super.adventurerAttackedCallback(killer)(adventurer)
     val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
+    RecordMap.get(adventurer.playerId).foreach{ a =>
+      a.killed += 1
+      a.killing += adventurer.killNum
+      a.score += adventurer.energy
+    }
+    println(RecordMap)
     dispatchTo(adventurer.playerId, event)
   }
 
@@ -130,6 +139,18 @@ case class ThorSchemaServerImpl(
   override def leftGame(userId: String, name: String) = {
     val event = UserLeftRoom(userId, name, systemFrame)
     addGameEvent(event)
+    RecordMap.get(userId).foreach { a =>
+      val record = ESheepRecord(
+        playerId = userId,
+        nickname = name,
+        killing = a.killing ,
+        killed = a.killed ,
+        score = a.score,
+        startTime = a.startTime,
+        endTime = System.currentTimeMillis())
+      eSheepLinkClient ! ESheepLinkClient.AddRecord2ESheep(record)
+    }
+
     //    dispatch(event)
   }
 
@@ -178,6 +199,7 @@ case class ThorSchemaServerImpl(
         dispatch(event)
         addGameEvent(event)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef, config.getThorGameConfigImpl())
+        RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0)) //TODO 进入房间添加战绩空位,检测重复
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
     }

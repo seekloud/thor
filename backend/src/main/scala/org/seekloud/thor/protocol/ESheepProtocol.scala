@@ -9,6 +9,29 @@ object ESheepProtocol {
 
   trait ESheepRequest
 
+  final case class ESheepRecordSimple(
+                                       startTime: Long,
+                                       var killing: Int ,
+                                       var killed: Int ,
+                                       var score: Int
+                                     )
+
+  final case class ESheepRecord(
+                                 playerId: String,
+                                 gameId: Long = 1000000006l,
+                                 nickname: String,
+                                 killing: Int ,
+                                 killed: Int ,
+                                 score: Int,
+                                 gameExtent: String = "",
+                                 startTime: Long,
+                                 endTime: Long
+                               )
+
+  final case class AddESheepRecordRsp(
+                                       playerRecord: ESheepRecord
+                                     )
+
   final case class GsKey2TokenReq(
                               gameId: Long,
                               gsKey: String
@@ -23,6 +46,11 @@ object ESheepProtocol {
     val errCode: Int
     val msg: String
   }
+
+  final case class CommonRsp(
+                             errCode: Int,
+                             msg: String
+                             ) extends ESheepResponse
 
   final case class GsToken(
                           token: String,
