@@ -320,6 +320,10 @@ trait ThorSchema extends KillInformation{
     handleUserLeftRoomNow()
     handleUserActionEventNow()
 
+    if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
+      handleMyActionNow()
+    }
+
 //    handleAdventurerMove()
     handleAdventurerAttackingNow()
     handleAdventurerAttackedNow()

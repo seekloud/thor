@@ -18,5 +18,7 @@ object Constants {
 
   val preExecuteFrameOffset = 2 //预执行2帧
 
+  val fakeRender = false
+
 
 }
