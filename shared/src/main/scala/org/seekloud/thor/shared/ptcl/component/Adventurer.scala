@@ -237,7 +237,7 @@ case class AdventurerImpl(
   var isSpeedUp: Boolean,
   var killNum: Int,
   var isMove: Boolean,
-  var isLevelUp: Boolean,
+  var isUpdateLevel: Boolean,
   var levelUpExecute: Int
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
