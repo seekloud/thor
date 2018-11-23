@@ -16,7 +16,7 @@ object CanvasUtils {
     img.setAttribute("src", src)
     val imgWidth = img.width
     val imgHeight = img.height
-    val drawHeight = width / imgWidth * imgHeight
+    val drawHeight = if(height == 0) width / imgWidth * imgHeight else height
     val tmpPosition = position
 //    val tmpPosition = position.copy(y = position.y + (position.y-drawHeight)/2)
     ctx.save()

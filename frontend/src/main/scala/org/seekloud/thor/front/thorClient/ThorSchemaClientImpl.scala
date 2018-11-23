@@ -33,16 +33,7 @@ with DrawOtherClient{
         case Some(adventurer) =>
           //TODO 各种环境绘画
           //保持自己的adventurer在屏幕中央~
-          val r = adventurer.getAdventurerState.radius
-          val position = adventurer.getAdventurerState.position
-          var moveDistance = Point(0, 0)
-          if(adventurer.isMove){
-            moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
-            //如果达到边界 则不再往外走
-            val delay = 0.5
-            if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
-            if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
-          }
+          val moveDistance = getMoveDistance(adventurer, offSetTime)
           val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
 
           drawBackground(offset, canvasUnit, canvasBounds)
