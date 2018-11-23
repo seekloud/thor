@@ -28,14 +28,16 @@ case class AdventurerServer(
                         var speedLevel: Int = 1,
                         var isSpeedUp: Boolean = false,
                         var killNum: Int = 0,
-                        var isMove: Boolean = true
+                        var isMove: Boolean = true,
+                        var isUpdateLevel: Boolean = false,
+                        var levelUpExecute: Int = 100
                       ) extends Adventurer{
 
   override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
 
   def this(roomActor:ActorRef[RoomActor.Command], timer:TimerScheduler[RoomActor.Command],config: ThorGameConfig,adventurerState: AdventurerState){
     this(roomActor, timer, config,adventurerState.playerId,adventurerState.name,adventurerState.position,adventurerState.level,adventurerState.energy,adventurerState.radiusLevel,adventurerState.direction,
-      adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.speedLevel,adventurerState.isSpeedUp,adventurerState.killNum, adventurerState.isMove)
+      adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.speedLevel,adventurerState.isSpeedUp,adventurerState.killNum, adventurerState.isMove, adventurerState.isUpdateLevel, adventurerState.levelUpExecute)
   }
 
 }

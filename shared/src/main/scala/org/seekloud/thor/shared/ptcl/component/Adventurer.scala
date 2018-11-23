@@ -21,7 +21,9 @@ case class AdventurerState(
   speedLevel: Int,
   isSpeedUp: Boolean,
   killNum: Int,
-  isMove: Boolean
+  isMove: Boolean,
+  isUpdateLevel: Boolean,
+  levelUpExecute: Int
 )
 
 trait Adventurer extends CircleObjectOfGame {
@@ -38,8 +40,8 @@ trait Adventurer extends CircleObjectOfGame {
   var isSpeedUp: Boolean
   var killNum: Int
   var isMove: Boolean
-  var isUpdateLevel: Boolean = false
-  var levelUpExecute: Int = 100
+  var isUpdateLevel: Boolean
+  var levelUpExecute: Int
 
   def getMoveState() = isMove
 
@@ -65,7 +67,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, faceDirection, weaponLevel, speedLevel, isSpeedUp, killNum, isMove)
+    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, faceDirection, weaponLevel, speedLevel, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute)
   }
 
   def attacking(killedLevel: Int)(implicit config: ThorGameConfig): Unit ={
@@ -234,12 +236,14 @@ case class AdventurerImpl(
   var speedLevel: Int,
   var isSpeedUp: Boolean,
   var killNum: Int,
-  var isMove: Boolean
+  var isMove: Boolean,
+  var isLevelUp: Boolean,
+  var levelUpExecute: Int
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
     this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.radiusLevel, adventurerState.position,
       adventurerState.direction, adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.speedLevel, adventurerState.isSpeedUp,
-      adventurerState.killNum, adventurerState.isMove)
+      adventurerState.killNum, adventurerState.isMove, adventurerState.isUpdateLevel, adventurerState.levelUpExecute)
   }
 
   override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
