@@ -120,7 +120,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   }
 
   def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset:Point, canvasUnit: Int) = {
-    if(adventurer.isUpdateLevel){
+    if(adventurer.getAdventurerState.isUpdateLevel){
       val img = dom.document.createElement("img").asInstanceOf[html.Image]
       img.setAttribute("src", s"/thor/static/img/level-up.png")
 
@@ -150,7 +150,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     drawDead(offset, canvasUnit)
     adventurerMap.get(myId).foreach{
       adventurer =>
-        drawLevelUp(adventurer, adventurer.levelUpExecute, offSetTime, offset, canvasUnit)
+        drawLevelUp(adventurer, adventurer.getAdventurerState.levelUpExecute, offSetTime, offset, canvasUnit)
     }
   }
 
