@@ -247,7 +247,7 @@ class GameHolder(canvasName: String) {
              if (e.keyCode == KeyCode.Space){
                println("restart!!!!")
                firstCome = true
-               start(myName, null, null) // FIXME 重启没有验证accessCode
+               start(myName, "1", "1") // FIXME 重启没有验证accessCode
                websocketClient.sendMsg(RestartGame(myName))
                e.preventDefault()
              }
