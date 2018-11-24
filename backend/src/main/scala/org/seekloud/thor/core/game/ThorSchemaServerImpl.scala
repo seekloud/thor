@@ -32,6 +32,8 @@ case class ThorSchemaServerImpl(
 
   import scala.language.implicitConversions
 
+  init()
+
   override def debug(msg: String): Unit = log.debug(msg)
 
   override def info(msg: String): Unit = log.info(msg)
@@ -97,6 +99,12 @@ case class ThorSchemaServerImpl(
       historyRankMap = historyRank.map(s => s.id -> s).toMap
     }
   }
+
+//  override def clearEventWhenUpdate(): Unit = {
+//    gameEventMap -= systemFrame - 1
+//    actionEventMap -= systemFrame - 1
+//    systemFrame += 1
+//  }
 
   override def update(): Unit = {
     super.update()
@@ -205,6 +213,10 @@ case class ThorSchemaServerImpl(
     }
 
     justJoinUser = Nil
+  }
+
+  private def init(): Unit = {
+    clearEventWhenUpdate()
   }
 
 }
