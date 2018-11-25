@@ -39,6 +39,8 @@ object ThorGame {
 
   final case class Wrap(ws: Array[Byte], isKillMsg: Boolean = false) extends WsMsgSource
 
+  final case class PingPackage(sendTime:Long) extends WsMsgServer with WsMsgFront
+
   sealed trait WsMsgServer extends WsMsgSource
 
 

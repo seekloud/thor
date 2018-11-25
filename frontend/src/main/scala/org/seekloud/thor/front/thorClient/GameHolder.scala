@@ -3,6 +3,7 @@ package org.seekloud.thor.front.thorClient
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 
 //import org.seekloud.thor.front.utils.byteObject.MiddleBufferInJs
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
@@ -266,6 +267,10 @@ class GameHolder(canvasName: String) {
 //      e.preventDefault()
 //    }
 
+  }
+
+  protected def sendMsg2Server(msg:ThorGame.WsMsgFront):Unit ={
+      websocketClient.sendMsg(msg)
   }
 
   //游戏启动
