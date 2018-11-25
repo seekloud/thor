@@ -71,6 +71,10 @@ object AppSettings {
   val ramblerAuthCheck = appConfig.getBoolean("ramblerAuthCheck")
 
 
+  val gameDataDirectoryPath = appConfig.getString("gameDataDirectoryPath")
+  val gameRecordIsWork = appConfig.getBoolean("gameRecordIsWork")
+  val gameRecordTime = appConfig.getInt("gameRecordTime")
+
 
   val slickConfig = config.getConfig("slick.db")
   val slickUrl = slickConfig.getString("url")
@@ -125,9 +129,6 @@ object AppSettings {
 //  val upperRainbowProtocol = upperRainbowConfig.getString("protocol")
   val upperRainbowHost = upperRainbowConfig.getString("host")
   val upperRainbowPort = upperRainbowConfig.getInt("port")
-
-  val gameDataDirectoryPath = appConfig.getString("gameDataDirectoryPath")
-  val gameRecordIsWork = appConfig.getBoolean("gameRecordIsWork")
 
 
   object UpperRainbowConfig{

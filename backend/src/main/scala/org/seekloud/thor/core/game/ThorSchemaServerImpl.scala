@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
-import org.seekloud.thor.core.thor.AdventurerServer
 import org.seekloud.thor.core.{ESheepLinkClient, RoomActor, UserActor}
 import org.seekloud.thor.protocol.ESheepProtocol.{ESheepRecord, ESheepRecordSimple}
 import org.seekloud.thor.shared.ptcl.component._

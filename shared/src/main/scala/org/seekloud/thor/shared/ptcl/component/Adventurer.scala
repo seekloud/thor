@@ -4,10 +4,12 @@ import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model
 import org.seekloud.thor.shared.ptcl.model.{Constants, Point, Rectangle}
 import org.seekloud.thor.shared.ptcl.util.QuadTree
-
 /**
-  * Created by Jingyi on 2018/11/9
+  * User: TangYaruo
+  * Date: 2018/11/25
+  * Time: 17:24
   */
+
 case class AdventurerState(
   playerId: String,
   name: String,
@@ -59,7 +61,7 @@ trait Adventurer extends CircleObjectOfGame {
 
   //判断是否攻击到其他
   def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit)(implicit config: ThorGameConfig): Unit = {
-//    println(s"attacking: ${p.playerId},$attackingStep")
+    //    println(s"attacking: ${p.playerId},$attackingStep")
     if (isSectorDuang(scala.math.Pi * 2.0 / 9.0 * attackingStep - 0 , p)){
       println(s"${p.playerId} is attacked")
       attackedCallback(p)
@@ -87,10 +89,10 @@ trait Adventurer extends CircleObjectOfGame {
 
   def setMoveDirection(d: Float, mouseDistance: Float)(implicit config: ThorGameConfig) = {
     if (mouseDistance > config.getAdventurerRadiusByLevel(this.level) * 10)
-      {
-        isMove = true
-        direction = d
-      }
+    {
+      isMove = true
+      direction = d
+    }
     else
       isMove = false
 
@@ -247,9 +249,5 @@ case class AdventurerImpl(
   }
 
   override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
-  //  def getPosition4Animation(boundary: Point, quadTree: QuadTree, offsetTime: Long): Point = {
-//
-//  }
-
 
 }

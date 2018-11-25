@@ -8,13 +8,12 @@ import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.slf4j.LoggerFactory
 import org.seekloud.thor.Boot.roomManager
-import org.seekloud.thor.core.game.{ThorGameConfigServerImpl, ThorSchemaServerImpl}
-import org.seekloud.thor.core.thor.AdventurerServer
+import org.seekloud.thor.core.game.{AdventurerServer, ThorGameConfigServerImpl, ThorSchemaServerImpl}
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
-import scala.language.implicitConversions
 
+import scala.language.implicitConversions
 import scala.concurrent.duration._
 
 /**
