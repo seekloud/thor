@@ -106,13 +106,14 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.restore()
     ctx.font = "26px Comic Sans Ms"
     ctx.fillStyle = "orange"
-    ctx.fillText(s"You Dead,Killer is ${killer} ", window.x * 0.4, window.y * 0.45)
-    ctx.fillText(s"Your Final level is ${level} / 9",window.x * 0.4, window.y * 0.5)
-    ctx.fillText(s"Press space to restart", window.x * 0.4, window.y * 0.55)
+    ctx.fillText(s"You Dead,Killer is ${killer} ", window.x * 0.4, window.y * 0.48)
+    ctx.fillText(s"Your Final level is ${level} / 9",window.x * 0.4, window.y * 0.55)
+
 
     ctx.drawImage(userName,window.x * 0.4, window.y * 0.7, window.x * 0.2, window.y * 0.1)
+    ctx.font = "24px Comic Sans Ms"
     ctx.fillStyle = Color.Black.toString()
-    ctx.fillText(name,window.x * 0.45, window.y * 0.72, window.x * 0.15)
+    ctx.fillText("Press space to restart",window.x * 0.42, window.y * 0.72, window.x * 0.15)
 //    ctx.drawImage(playAgain,window.x * 0.4,window.y * 0.85,window.x * 0.2,window.y * 0.1)
     ctx.restore()
   }
