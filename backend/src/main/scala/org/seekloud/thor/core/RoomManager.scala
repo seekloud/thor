@@ -7,7 +7,7 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import org.seekloud.thor.core.UserActor.JoinRoom
 import org.slf4j.LoggerFactory
 import org.seekloud.thor.common.AppSettings.personLimit
-import org.seekloud.thor.protocol.ESheepProtocol.{GetRoomListRsp, RoomList}
+import org.seekloud.thor.protocol.ESheepProtocol._
 
 import scala.collection.mutable
 
@@ -25,6 +25,10 @@ object RoomManager {
   private case class ChildDead[U](name:String,childRef:ActorRef[U]) extends Command
 
   case class GetRoomList(replyTo: ActorRef[GetRoomListRsp]) extends Command
+
+  case class GetRoomPlayerList(roomId: Long, replyTo: ActorRef[GetRoomPlayerListRsp]) extends Command
+
+  case class GetRoomByPlayer(playerId: String, replyTo: ActorRef[GetRoomIdRsp]) extends Command
 
   case class LeftRoom(playerId: String, name:String) extends Command
 
@@ -90,6 +94,24 @@ object RoomManager {
             case GetRoomList(replyTo) =>
               val roomList = roomInUse.keys.toList
               replyTo ! GetRoomListRsp(Some(RoomList(roomList)))
+              Behaviors.same
+
+            case GetRoomByPlayer(playerId, replyTo) =>
+              val userExist = roomInUse.map{roomMap => (roomMap._1, roomMap._2.exists(t => t._1.equals(playerId)))}
+              userExist.find(_._2 == true) match {
+                case Some((roomId, _)) => replyTo ! GetRoomIdRsp(Some(RoomId(roomId)))
+                case None => replyTo ! GetRoomIdRsp(None, 200003, "there isn't a room which has the user")
+              }
+              Behaviors.same
+
+            case GetRoomPlayerList(roomId, replyTo) =>
+              roomInUse.get(roomId) match{
+                case Some(userList) =>
+                  val playerDataList = userList.map(t => PlayerData(t._1, t._2))
+                  replyTo ! GetRoomPlayerListRsp(Some(PlayerList(playerDataList)))
+                case None =>
+                  replyTo ! GetRoomPlayerListRsp(None, 200005, "room is not exist")
+              }
               Behaviors.same
 
 

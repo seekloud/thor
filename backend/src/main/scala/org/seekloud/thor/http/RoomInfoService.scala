@@ -40,8 +40,33 @@ trait RoomInfoService extends ServiceUtils{
     }
   }
 
+  private val getRoomById: Route = (path("getRoomId") & post){
+    dealPostReq[GetRoomIdReq]{ req =>
+      val roomIdRsp: Future[GetRoomIdRsp] = roomManager ? (t => RoomManager.GetRoomByPlayer(req.playerId, t))
+      roomIdRsp.map{ rsp =>
+        complete(rsp)
+      }.recover{
+        case e: Exception =>
+          log.debug(s"getRoomById error in Service: $e")
+          complete(ErrorGetRoomId)
+      }
+    }
+  }
+
+  private val getPlayerByRoom: Route = (path("getRoomPlayerList") & post){
+    dealPostReq[GetRoomPlayerListReq]{ req =>
+      val playListRsp: Future[GetRoomPlayerListRsp] = roomManager ? (t => RoomManager.GetRoomPlayerList(req.roomId, t))
+      playListRsp.map{ rsp =>
+        complete(rsp)
+      }.recover{
+        case e: Exception =>
+          log.debug(s"getPlayerByRoom error in Service: $e")
+          complete(ErrorGetRoomPlayerList)
+      }
+    }
+  }
 
 
-  val roomInfoRoutes: Route =  getRoomList //~ getRoomById ~ getPlayerByRoom
+  val roomInfoRoutes: Route =  getRoomList ~ getRoomById ~ getPlayerByRoom
 
 }

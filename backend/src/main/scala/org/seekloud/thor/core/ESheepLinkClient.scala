@@ -134,6 +134,7 @@ object ESheepLinkClient {
                 replyTo ! rsp
               }
               else if(rsp.errCode == 200003){
+                timer.cancel(TimerUpdateTokenKey)
                 ctx.self ! UpdateToken
                 log.debug(s"verifyAccessCode error: $rsp, try UpdateToken")
               }
