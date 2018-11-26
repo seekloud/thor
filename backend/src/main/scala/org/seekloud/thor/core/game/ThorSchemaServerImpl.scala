@@ -40,6 +40,7 @@ case class ThorSchemaServerImpl(
   private val foodIdGenerator = new AtomicInteger(100)
 
   private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil
+  private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
 
   private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，)
 
@@ -143,6 +144,21 @@ case class ThorSchemaServerImpl(
     justJoinUser = (userId, name, userActor) :: justJoinUser
   }
 
+  def handleJoinRoom4Watch(userActor4WatchGame: ActorRef[UserActor.Command], uid: String, playerId: String) = {
+    adventurerMap.find(_._2.playerId == playerId) match {
+      case Some((_, adventurer)) =>
+        watchingMap.values.foreach(t => t.remove(uid))
+        val playerObserversMap = watchingMap.getOrElse(playerId, mutable.HashMap[String, ActorRef[UserActor.Command]]())
+        playerObserversMap.put(uid, userActor4WatchGame)
+        watchingMap.put(playerId, playerObserversMap)
+        log.debug(s"当前的watchingMaps是${watchingMap}")
+        userActor4WatchGame ! UserActor.JoinRoomSuccess4Watch(adventurer.playerId, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()))
+
+      case None =>
+        userActor4WatchGame ! UserActor.JoinRoomFail4Watch(s"观察的用户id=${playerId}不存在")
+    }
+  }
+
   override def leftGame(userId: String, name: String) = {
     val event = UserLeftRoom(userId, name, systemFrame)
     addGameEvent(event)
@@ -159,6 +175,15 @@ case class ThorSchemaServerImpl(
     }
 
     //    dispatch(event)
+  }
+
+  def leftWatchGame(uId: String, playerId: String) = {
+    watchingMap.get(playerId) match {
+      case Some(maps) =>
+        maps.remove(uId)
+        watchingMap.update(playerId, maps)
+      case None =>
+    }
   }
 
   def receiveUserAction(preExecuteUserAction: UserActionEvent): Unit = {

@@ -21,6 +21,9 @@ object ThorGame {
     val serialNum: Int
   }
 
+  final case class WsData(ws:Array[Byte]) extends WsMsgSource
+
+
   //前端
   sealed trait WsMsgFrontSource
 
@@ -63,6 +66,11 @@ object ThorGame {
   final case class MouseClickDownRight(playerId: String, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
   final case class MouseClickUpRight(playerId: String, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+
+  final case object RebuildWebSocket extends WsMsgServer
+
+  final case class WsMsgErrorRsp(errCode:Int, msg:String) extends WsMsgServer
+
 
   /*生成环境元素*/
   final case class GenerateFood(override val frame: Long, food: FoodState) extends EnvironmentEvent with WsMsgServer

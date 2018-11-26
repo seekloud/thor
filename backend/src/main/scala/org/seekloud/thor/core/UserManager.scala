@@ -8,6 +8,7 @@ import akka.http.scaladsl.model.ws.{BinaryMessage, Message, TextMessage}
 import akka.stream.{ActorAttributes, Supervision}
 import akka.stream.scaladsl.Flow
 import akka.util.ByteString
+import org.seekloud.thor.core.UserActor.{ChangeUserInfo, ChangeWatchedPlayerId}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.utils.byteObject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
@@ -25,6 +26,7 @@ object UserManager {
   final case class ChildDead[U](name: String, childRef: ActorRef[U]) extends Command
 
   final case class GetWebSocketFlow(id: String, name:String,replyTo:ActorRef[Flow[Message,Message,Any]], roomId:Option[Long] = None) extends Command
+  final case class GetWebSocketFlow4Watch(roomId: Long, watchedPlayerId:String,replyTo:ActorRef[Flow[Message,Message,Any]], watchingId: String, name: String) extends Command
 
   def create(): Behavior[Command] = {
     log.debug(s"UserManager start...")
@@ -53,6 +55,24 @@ object UserManager {
             val userActor = getUserActor(ctx, playerInfo.playerId, playerInfo)
             replyTo ! getWebSocketFlow(userActor)
             userActor ! UserActor.StartGame(roomIdOpt)
+            Behaviors.same
+
+          case GetWebSocketFlow4Watch(roomId, watchedPlayerId, replyTo, watchingId, name) =>
+            val playerInfo = UserInfo(watchingId, name)
+            getUserActorOpt(ctx, watchingId) match {
+              case Some(userActor) =>
+                userActor ! UserActor.ChangeBehaviorToInit
+              case None =>
+            }
+            val userActor = getUserActor(ctx, watchingId, playerInfo)
+            replyTo ! getWebSocketFlow(userActor)
+            userActor ! ChangeUserInfo(playerInfo)
+            //发送用户观战命令
+            userActor ! UserActor.StartWatching(roomId, watchedPlayerId)
+            Behaviors.same
+
+          case msg:ChangeWatchedPlayerId =>
+            getUserActor(ctx,msg.playerInfo.playerId,msg.playerInfo) ! msg
             Behaviors.same
 
           case ChildDead(child, childRef) =>
@@ -123,6 +143,11 @@ object UserManager {
       ctx.watchWith(actor,ChildDead(childName,actor))
       actor
     }.upcast[UserActor.Command]
+  }
+
+  private def getUserActorOpt(ctx: ActorContext[Command],id:String):Option[ActorRef[UserActor.Command]] = {
+    val childName = s"UserActor-${id}"
+    ctx.child(childName).map(_.upcast[UserActor.Command])
   }
 
 }

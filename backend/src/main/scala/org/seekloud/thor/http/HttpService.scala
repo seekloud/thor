@@ -13,9 +13,9 @@ import akka.actor.typed.scaladsl.AskPattern._
 import java.net.URLEncoder
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
-import org.seekloud.thor.Boot.{executor, scheduler, timeout}
-import org.seekloud.thor.core.UserManager
-import org.seekloud.thor.Boot.userManager
+import org.seekloud.thor.Boot.{eSheepLinkClient, executor, scheduler, timeout, userManager}
+import org.seekloud.thor.core.{ESheepLinkClient, UserManager}
+import org.seekloud.thor.protocol.ESheepProtocol.{ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
 
 
 trait HttpService
@@ -57,6 +57,27 @@ trait HttpService
               flowFuture.map(t => handleWebSocketMessages(t))
             )
           }
+        } ~
+          (path("watchGame") & get & pathEndOrSingleSlash){
+            parameter(
+              'roomId.as[Long],
+              'playerId.as[String],
+              'accessCode.as[String]
+            ){
+              case (roomId, playerId, accessCode) =>
+                val VerifyAccessCode: Future[GetPlayerByAccessCodeRsp] = eSheepLinkClient ? (ESheepLinkClient.VerifyAccessCode(accessCode, _))
+                dealFutureResult {
+                  VerifyAccessCode.flatMap {
+                    case GetPlayerByAccessCodeRsp(data, 0, "ok") =>
+                      println("ws and access ok")
+                      val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow4Watch(roomId, playerId, _, data.get.playerId, data.get.nickname))
+                      flowFuture.map(t => handleWebSocketMessages(t))
+                    case GetPlayerByAccessCodeRsp(data, _, _) =>
+                      println("ws and accessCode error")
+                      Future(complete(ErrorGetPlayerByAccessCodeRsp))
+                  }
+                }
+            }
         } ~ platGameRoutes
 
       }
@@ -71,6 +92,18 @@ trait HttpService
     ) {
       case (playerId, playerName, accessCode, roomIdOpt) =>
         redirect(s"/thor/game/#/thor/playGame/$playerId/${URLEncoder.encode(playerName, "utf-8")}" + roomIdOpt.map(s => s"/$s").getOrElse("") + s"/$accessCode",
+          StatusCodes.SeeOther
+        )
+
+    }
+  } ~ path("watchGame") {
+    parameter(
+      'roomId.as[Long],
+      'accessCode.as[String],
+      'playerId.as[String].?
+    ) {
+      case (roomId, accessCode, playerIdOpt) =>
+        redirect(s"/thor/game/#/watchGame/$roomId" + playerIdOpt.map(s => s"/$s").getOrElse("") + s"/$accessCode",
           StatusCodes.SeeOther
         )
 

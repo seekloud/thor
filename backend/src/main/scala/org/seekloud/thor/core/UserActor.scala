@@ -43,7 +43,20 @@ object UserActor {
 
   case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl) extends Command
 
+  final case class JoinRoomSuccess4Watch(watchedPlayerId: String, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
+
+  case class JoinRoomFail4Watch(msg:String) extends Command
+
   case class UserFrontActor(actor: ActorRef[WsMsgSource]) extends Command
+
+  case class ChangeUserInfo(info: UserInfo) extends Command
+
+  final case class StartWatching(roomId:Long, watchedPlayerId:String) extends Command
+
+  case class ChangeWatchedPlayerId(playerInfo:UserInfo,watchedPlayerId: String) extends Command with UserManager.Command
+
+
+  case object ChangeBehaviorToInit extends Command
 
   private final case object BehaviorChangeKey
 
@@ -108,6 +121,9 @@ object UserActor {
             ctx.unwatch(actor)
             Behaviors.stopped
 
+          case ChangeBehaviorToInit =>
+            Behaviors.same
+
           case TimeOut(m) =>
             log.debug(s"${ctx.self.path} is time out when busy,msg=${m}")
             Behaviors.stopped
@@ -136,6 +152,9 @@ object UserActor {
             frontActor ! Wrap(ws)
             switchBehavior(ctx, "play", play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
 
+          case StartWatching(roomId, watchedUserId) =>
+            roomManager ! RoomActor.JoinRoom4Watch(playerId,roomId,watchedUserId,ctx.self)
+            switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedUserId, frontActor))
 
           case LeftRoom(actor) =>
             ctx.unwatch(actor)
@@ -151,11 +170,118 @@ object UserActor {
               case _ =>
                 Behaviors.same
             }
+
+          case ChangeBehaviorToInit =>
+            dispatchTo(frontActor, RebuildWebSocket)
+            ctx.unwatch(frontActor)
+            switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+
           case unknowMsg =>
             Behavior.same
         }
     }
   }
+
+  private def watchInit(playerId:String, userInfo: UserInfo, roomId:Long, watchedPlayerId: String, frontActor:ActorRef[WsMsgSource])(
+    implicit stashBuffer:StashBuffer[Command],
+    timer:TimerScheduler[Command],
+    sendBuffer:MiddleBufferInJvm
+  ): Behavior[Command] =
+    Behaviors.receive[Command] { (ctx, msg) =>
+      msg match {
+        case ChangeUserInfo(info) =>
+          watchInit(playerId, info, roomId, watchedPlayerId, frontActor)
+
+        case JoinRoomSuccess4Watch(watchedPlayerId, config, roomActor, state) =>
+          log.debug(s"${ctx.self.path} first sync gameContainerState")
+          frontActor ! Wrap(YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          frontActor ! Wrap(state.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayerId, frontActor, roomActor))
+
+        case JoinRoomFail4Watch(error) =>
+          log.debug(s"${ctx.self.path} recv a msg=${msg}")
+          frontActor ! Wrap(WsMsgErrorRsp(1, error).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          frontActor ! CompleteMsgServer
+          Behaviors.stopped
+
+        case DispatchMsg(m) =>
+          frontActor ! m
+          Behaviors.same
+
+        case ChangeBehaviorToInit=>
+          frontActor ! Wrap(RebuildWebSocket.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          ctx.unwatch(frontActor)
+          switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+
+        case LeftRoom(actor) =>
+          ctx.unwatch(actor)
+          switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+
+        case unknowMsg =>
+          stashBuffer.stash(unknowMsg)
+          Behavior.same
+      }
+
+    }
+
+  private def watch(
+                       playerId:String,
+                       userInfo: UserInfo,
+                       roomId:Long,
+                       watchedPlayerId: String,
+                       frontActor:ActorRef[WsMsgSource],
+                       roomActor: ActorRef[RoomActor.Command])(
+                       implicit stashBuffer:StashBuffer[Command],
+                       timer:TimerScheduler[Command],
+                       sendBuffer:MiddleBufferInJvm
+                     ): Behavior[Command] =
+    Behaviors.receive[Command] { (ctx, msg) =>
+      msg match {
+        case ChangeUserInfo(info) =>
+          watch(playerId, info, roomId, watchedPlayerId, frontActor, roomActor)
+
+        case DispatchMsg(m) =>
+          if(m.asInstanceOf[Wrap].isKillMsg) {
+            frontActor ! m
+            switchBehavior(ctx,"watchInit",watchInit(playerId, userInfo, roomId, watchedPlayerId, frontActor))
+          }else{
+            frontActor ! m
+            Behaviors.same
+          }
+
+        case WsMessage(reqOpt) =>
+          reqOpt match {
+            case Some(t:UserActionEvent) =>
+              roomActor ! RoomActor.WsMessage(playerId, t)
+            case Some(t: PingPackage) =>
+              frontActor ! Wrap(t.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            case _ =>
+          }
+          Behaviors.same
+
+        case msg: ChangeWatchedPlayerId =>
+          ctx.self ! StartWatching(roomId,msg.watchedPlayerId)
+          switchBehavior(ctx,"idle",idle(playerId,userInfo, System.currentTimeMillis(),frontActor))
+
+        case ChangeBehaviorToInit=>
+          frontActor ! Wrap(RebuildWebSocket.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          roomActor ! RoomActor.LeftRoom4Watch(playerId, watchedPlayerId)
+          ctx.unwatch(frontActor)
+          switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+
+        case LeftRoom(actor) =>
+          ctx.unwatch(actor)
+          roomActor ! RoomActor.LeftRoom4Watch(playerId, watchedPlayerId)
+          Behaviors.stopped
+
+
+        case unknowMsg =>
+          log.warn(s"${ctx.self.path} recv an unknown msg=${msg}")
+          Behavior.same
+
+      }
+
+    }
 
   private def play(
     playerId: String,
@@ -204,5 +330,8 @@ object UserActor {
     }
   }
 
-
+  import org.seekloud.byteobject.ByteObject._
+  private def dispatchTo(subscriber: ActorRef[WsMsgSource],msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm)= {
+    subscriber ! WsData(List(msg).fillMiddleBuffer(sendBuffer).result())
+  }
 }

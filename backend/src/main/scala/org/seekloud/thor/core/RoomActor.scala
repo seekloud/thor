@@ -30,7 +30,11 @@ object RoomActor {
 
   case class JoinRoom(roomId: Long, playerId: String, name: String, userActor: ActorRef[UserActor.Command]) extends Command
 
+  case class JoinRoom4Watch(playerId: String,roomId: Long, watchedPlayerId: String, userActor4Watch: ActorRef[UserActor.Command]) extends Command with  RoomManager.Command
+
   case class LeftRoom(playerId: String, name: String, userList: List[(String, String)]) extends Command
+
+  case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
 
   //  case class GetKilled(playerId: String, name: String) extends Command with RoomManager.Command
   case class WsMessage(playerId: String, msg: UserActionEvent) extends Command
@@ -49,11 +53,12 @@ object RoomActor {
         Behaviors.withTimers[Command] {
           implicit timer =>
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
+            val watchingMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建thorSchema
             implicit val sendBuffer = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
             timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
-            idle(roomId, Nil, subscribersMap, thorSchema, 0L)
+            idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, 0L)
         }
     }
   }
@@ -62,6 +67,7 @@ object RoomActor {
     roomId: Long,
     newPlayer: List[(String, ActorRef[UserActor.Command])],
     subscribersMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
+    watchingMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
     thorSchema: ThorSchemaServerImpl,
     tickCount: Long
   )(
@@ -74,7 +80,13 @@ object RoomActor {
           case JoinRoom(roomId, userId, name, userActor) =>
             println(s"user $userId join room $roomId")
             thorSchema.joinGame(userId, name, userActor)
-            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, thorSchema, tickCount)
+            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
+
+          case JoinRoom4Watch(uid, _, playerId, userActor4Watch) =>
+            log.debug(s"${ctx.self.path} recv a msg=${msg}")
+            watchingMap.put(uid,userActor4Watch)
+            thorSchema.handleJoinRoom4Watch(userActor4Watch,uid,playerId)
+            Behaviors.same
 
           case LeftRoom(userId, name, userList) =>
             log.debug(s"roomactor - ${userId} left room")
@@ -83,7 +95,12 @@ object RoomActor {
             dispatch(subscribersMap)(UserLeftRoom(userId, name))
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
-            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, thorSchema, tickCount)
+            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
+
+          case LeftRoom4Watch(uid,playerId) =>
+            thorSchema.leftWatchGame(uid,playerId)
+            watchingMap.remove(uid)
+            Behaviors.same
 
           case WsMessage(userId, msg) =>
             thorSchema.receiveUserAction(msg)
@@ -114,7 +131,7 @@ object RoomActor {
                 subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap)(player._1, GridSyncState(thorSchemaData))
             }
-            idle(roomId, Nil, subscribersMap, thorSchema, tickCount + 1)
+            idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
 
           case ChildDead(_, childRef) =>
             ctx.unwatch(childRef)
