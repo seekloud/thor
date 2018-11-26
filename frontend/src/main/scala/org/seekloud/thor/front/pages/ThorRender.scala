@@ -1,7 +1,7 @@
 package org.seekloud.thor.front.pages
 
 import org.seekloud.thor.front.common.Page
-import org.seekloud.thor.front.thorClient.GameHolder
+import org.seekloud.thor.front.thorClient.{GameHolder, GameHolder4Play}
 import org.seekloud.thor.front.utils.Shortcut
 import org.seekloud.thor.shared.ptcl.model.Point
 import mhtml.Var
@@ -9,6 +9,7 @@ import org.scalajs.dom
 import org.scalajs.dom.ext.Color
 import org.scalajs.dom.html.Canvas
 import mhtml._
+
 import scala.xml.Elem
 
 /**
@@ -25,7 +26,7 @@ class ThorRender(name: String, id: String = "1", accessCode: String = "1" )exten
 
     println("ThorRender init")
 
-    val gameHolder = new GameHolder("GameView")
+    val gameHolder = new GameHolder4Play("GameView")
     gameHolder.start(name, id, accessCode)
   }
 
