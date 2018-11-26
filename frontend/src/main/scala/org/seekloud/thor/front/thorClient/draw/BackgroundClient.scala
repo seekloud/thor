@@ -42,12 +42,12 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
   def drawRank(Rank:List[Score],CurrentOrNot:Boolean,id:String):Unit={
     val RankBaseLine = 2
     var index = 0
-    val x=10
     var yourRank = 100
     var yourNameIn = false
+    val begin = if (CurrentOrNot) 10 else dom.document.documentElement.clientWidth - 260
 
     ctx.save()
-    ctx.drawImage(rankImg,x,0,250,250)
+    ctx.drawImage(rankImg, begin,0,250,250)
     ctx.fillStyle="#ffffff"
     ctx.globalAlpha = 0.6
     Rank.foreach { score =>
@@ -55,7 +55,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
       if (score.id == id) yourRank = index
       if (index<6){
         if (score.id == id) yourNameIn = true
-        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", x+10, index*2, RankBaseLine)
+        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", begin+10, index*2, RankBaseLine)
       }
     }
     index+=1
@@ -63,7 +63,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
       ctx.fillStyle="#FFFF00"
       Rank.find(_.id == id) match {
         case Some(yourScore) =>
-          drawTextLine(s" $yourRank :  ${yourScore.n.take(5)}    score=${yourScore.e}   kill=${yourScore.k}", x+10, 12, RankBaseLine)
+          drawTextLine(s" $yourRank :  ${yourScore.n.take(5)}    score=${yourScore.e}   kill=${yourScore.k}", begin+10, 12, RankBaseLine)
         case None =>
       }
     }

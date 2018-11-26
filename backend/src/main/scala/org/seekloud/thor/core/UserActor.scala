@@ -178,6 +178,8 @@ object UserActor {
               case Some(event: RestartGame) =>
                 log.debug(s"restartGame $event")
                 JoinRoom(userInfo.playerId, userInfo.name, ctx.self )
+              case Some(event: PingPackage) =>
+                frontActor ! Wrap(event.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
               case _ =>
             }
             Behaviors.same

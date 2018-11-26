@@ -96,6 +96,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
                   thorSchemaOpt.foreach(_.receiveThorSchemaState(d))
                   justSynced = true
 
+                case e:PingPackage =>
+                  receivePingPackage(e)
+
 
                 case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
