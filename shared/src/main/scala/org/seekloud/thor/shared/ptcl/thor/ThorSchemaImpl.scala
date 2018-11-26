@@ -184,11 +184,4 @@ class ThorSchemaImpl(
     super.update()
     if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
   }
-
-
-
-
-
-
-
 }

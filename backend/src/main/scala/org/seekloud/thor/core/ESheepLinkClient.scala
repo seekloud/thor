@@ -44,7 +44,6 @@ object ESheepLinkClient {
   case object TimerUpdateTokenKey
   case object BehaviorChangeKey
 
-  // TODO timer操作
   private[this] def switchBehavior(ctx: ActorContext[Command],
                                    behaviorName: String,
                                    behavior: Behavior[Command],
@@ -131,19 +130,20 @@ object ESheepLinkClient {
           ESheepClient.verifyAccessCode(accessCode, token).map{
             case Right(rsp) =>
               if(rsp.errCode == 0){
-                println(s"verifyAccessCode success: $rsp")
+                log.info(s"verifyAccessCode success: $rsp")
                 replyTo ! rsp
               }
               else if(rsp.errCode == 200003){
+                timer.cancel(TimerUpdateTokenKey)
                 ctx.self ! UpdateToken
-                println(s"verifyAccessCode error: $rsp, try UpdateToken")
+                log.debug(s"verifyAccessCode error: $rsp, try UpdateToken")
               }
               else{
-                println(s"verifyAccessCode error: $rsp")
+                log.debug(s"verifyAccessCode error: $rsp")
                 replyTo ! ErrorGetPlayerByAccessCodeRsp
               }
             case Left(e) =>
-              println(s"verifyAccessCode error: $e")
+              log.debug(s"verifyAccessCode error: $e")
               replyTo ! ErrorGetPlayerByAccessCodeRsp
           }
           Behaviors.same
@@ -151,9 +151,9 @@ object ESheepLinkClient {
         case AddRecord2ESheep(record) =>
           ESheepClient.addRecord2ESheep(record, token).map{
             case Right(rsp) =>
-              println(s"verifyAccessCode success: $rsp")
+              log.info(s"AddRecord2ESheep success: $rsp")
             case Left(e) =>
-              println(s"verifyAccessCode error: $e")
+              log.debug(s"AddRecord2ESheep error: $e")
           }
           Behaviors.same
 

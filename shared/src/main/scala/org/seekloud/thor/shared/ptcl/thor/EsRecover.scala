@@ -67,7 +67,7 @@ trait EsRecover {
     actionEventHistoryMap.get(frame).foreach{ actions =>
       actionEventHistoryMap.put(frame,actions.filterNot(t => t.playerId == playerId && t.serialNum == serialNum))
     }
-  }
+}
 
   def addUserActionHistory(e:UserActionEvent) = {
     actionEventHistoryMap.put(e.frame, e :: actionEventHistoryMap.getOrElse(e.frame, Nil))

@@ -42,6 +42,12 @@ object ESheepProtocol {
                                       accessCode: String
                                       ) extends ESheepRequest
 
+  trait RequestFromESheep
+
+  final case class GetRoomIdReq(playerId: String) extends RequestFromESheep
+
+  final case class GetRoomPlayerListReq(roomId: Long) extends RequestFromESheep
+
   trait ESheepResponse{
     val errCode: Int
     val msg: String
@@ -74,4 +80,34 @@ object ESheepProtocol {
                                         msg: String
                                         ) extends ESheepResponse
   val ErrorGetPlayerByAccessCodeRsp = GetPlayerByAccessCodeRsp(None, 200001, "accessCode error")
+
+  final case class RoomList(roomList: List[Long])
+
+  final case class GetRoomListRsp(
+                                 data: Option[RoomList],
+                                 errCode: Int = 0,
+                                 msg: String = "ok"
+                                 ) extends ESheepResponse
+  val ErrorGetRoomList = GetRoomListRsp(None, 200002, "getRoomList error in Service")
+
+  final case class RoomId(roomId: Long)
+
+  final case class GetRoomIdRsp(
+                               data: Option[RoomId],
+                               errCode: Int = 0,
+                               msg: String = "ok"
+                               ) extends ESheepResponse
+//  val NoRoomContainUser = GetRoomIdRsp(None, 200003, "there isn't a room which has the user")
+  val ErrorGetRoomId = GetRoomIdRsp(None, 200004, "getRoomId error in Service")
+
+  final case class PlayerList(
+                             playerList: List[PlayerData]
+                             )
+
+  final case class GetRoomPlayerListRsp(
+                                       data: Option[PlayerList],
+                                       errCode: Int = 0,
+                                       msg: String = "ok"
+                                       ) extends ESheepResponse
+  val ErrorGetRoomPlayerList = GetRoomPlayerListRsp(None, 200006, "getRoomId error in Service")
 }

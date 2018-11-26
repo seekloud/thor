@@ -43,4 +43,5 @@ trait NetworkInfo {
   protected def getNetworkLatency = latency
 
 
+
 }
