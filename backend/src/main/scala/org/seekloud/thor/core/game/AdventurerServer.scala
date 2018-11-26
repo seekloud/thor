@@ -1,12 +1,11 @@
-package org.seekloud.thor.core.thor
+package org.seekloud.thor.core.game
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
 import org.seekloud.thor.core.RoomActor
-import org.seekloud.thor.shared.ptcl.component.{Adventurer, AdventurerImpl, AdventurerState}
+import org.seekloud.thor.shared.ptcl.component.{Adventurer, AdventurerState}
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model.Point
-import org.seekloud.thor.shared.ptcl.thor.ThorSchemaState
 
 /**
   * @author Jingyi

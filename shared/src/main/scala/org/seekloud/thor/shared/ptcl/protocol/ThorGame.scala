@@ -18,7 +18,7 @@ object ThorGame {
 
   sealed trait UserActionEvent extends UserEvent {
     val playerId: String
-    val serialNum:Int
+    val serialNum: Int
   }
 
   //前端
@@ -36,7 +36,10 @@ object ThorGame {
   case object CompleteMsgServer extends WsMsgSource
 
   case class FailMsgServer(ex: Exception) extends WsMsgSource
-  final case class Wrap(ws:Array[Byte],isKillMsg:Boolean = false) extends WsMsgSource
+
+  final case class Wrap(ws: Array[Byte], isKillMsg: Boolean = false) extends WsMsgSource
+
+  final case class PingPackage(sendTime:Long) extends WsMsgServer with WsMsgFront
 
   sealed trait WsMsgServer extends WsMsgSource
 
@@ -72,11 +75,22 @@ object ThorGame {
   final case class GridSyncState(d: ThorSchemaState) extends WsMsgServer
 
 
-
   sealed trait GameSnapshot
 
   final case class ThorSnapshot(
     state: ThorSchemaState
   ) extends GameSnapshot
+
+  final case class GameInformation(
+    gameStartTime: Long,
+    thorGameConfig: ThorGameConfigImpl
+  )
+
+  /*replay*/
+  final case class ReplayInfo(playerId: String, name: String, f: Long, config: ThorGameConfigImpl) extends WsMsgServer
+
+  final case class EventData(list: List[WsMsgServer]) extends WsMsgServer
+
+  final case class DecodeError() extends WsMsgServer
 
 }

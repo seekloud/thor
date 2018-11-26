@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
-import org.seekloud.thor.core.thor.AdventurerServer
 import org.seekloud.thor.core.{ESheepLinkClient, RoomActor, UserActor}
 import org.seekloud.thor.protocol.ESheepProtocol.{ESheepRecord, ESheepRecordSimple}
 import org.seekloud.thor.shared.ptcl.component._
@@ -32,6 +31,8 @@ case class ThorSchemaServerImpl(
 
   import scala.language.implicitConversions
 
+  init()
+
   override def debug(msg: String): Unit = log.debug(msg)
 
   override def info(msg: String): Unit = log.info(msg)
@@ -40,7 +41,7 @@ case class ThorSchemaServerImpl(
 
   private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil
 
-  private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，killing, killed, score)
+  private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，)
 
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
     new AdventurerImpl(config, adventurer)
@@ -97,6 +98,12 @@ case class ThorSchemaServerImpl(
       historyRankMap = historyRank.map(s => s.id -> s).toMap
     }
   }
+
+//  override def clearEventWhenUpdate(): Unit = {
+//    gameEventMap -= systemFrame - 1
+//    actionEventMap -= systemFrame - 1
+//    systemFrame += 1
+//  }
 
   override def update(): Unit = {
     super.update()
@@ -205,6 +212,10 @@ case class ThorSchemaServerImpl(
     }
 
     justJoinUser = Nil
+  }
+
+  private def init(): Unit = {
+    clearEventWhenUpdate()
   }
 
 }

@@ -16,44 +16,32 @@ import scala.util.Random
   */
 trait FoodClient { this: ThorSchemaClientImpl =>
 
-  val random = new Random(System.currentTimeMillis())
+  //绘制食物
 
-  private def foodImg1 = s"/thor/static/img/food-sheet0-1.png"
-  private val foodImg2 = "/thor/static/img/food-sheet1.png"
-  private val foodImg3 = "/thor/static/img/food-sheet2.png"
+  def drawFood(offset: Point, canvasUnit: Int, canvasBoundary: Point): Unit = {
 
-  private def generateFood(food:Food, offset:Point, canvasUnit: Int, canvasBoundary: Point) = {
-//    val foodCanvas = dom.document.createElement("foodCanvas").asInstanceOf[html.Canvas]
-//    val foodCtx = foodCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-//    val img = food.level match {
-//      case 1 => foodImg1
-//      case 2 => foodImg1
-//      case _ => foodImg3
-//    }
-    val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-    mapImg.setAttribute("src", s"/thor/static/img/food-sheet0-${food.getFoodState.color}.png")
-//    val r = food.getFoodState.radius
-    val r = config.getRadiusByFoodLevel(food.getFoodState.level)
-    val sx = food.getFoodState.position.x - r + offset.x
-    val sy = food.getFoodState.position.y - r + offset.y
-    val dx = 2 * r
-    val dy = 2 * r
+    def drawAFood(food:Food, offset:Point, canvasUnit: Int, canvasBoundary: Point): Unit = {
 
-    if(0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y){
-      ctx.save()
-      ctx.drawImage(mapImg, sx * canvasUnit, sy * canvasUnit, dx * canvasUnit, dy * canvasUnit)
-      ctx.restore()
+      val img = dom.document.createElement("img").asInstanceOf[html.Image]
+      img.setAttribute("src", s"/thor/static/img/food-sheet0-${food.getFoodState.color}.png")
+
+      val r = config.getRadiusByFoodLevel(food.getFoodState.level)
+      val sx = food.getFoodState.position.x - r + offset.x
+      val sy = food.getFoodState.position.y - r + offset.y
+      val dx = 2 * r
+      val dy = 2 * r
+
+      if(0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y){
+        //只绘制视角窗口内的食物
+        ctx.save()
+        ctx.drawImage(img, sx * canvasUnit, sy * canvasUnit, dx * canvasUnit, dy * canvasUnit)
+        ctx.restore()
+      }
+
     }
 
-  }
-  def drawFood() = {
-
-
-  }
-
-  def drawFoodByOffsetTime(offset: Point, canvasUnit: Int, canvasBoundary: Point) = {
-    foodMap.map{foods=>
-      generateFood(foods._2, offset, canvasUnit,canvasBoundary)
+    foodMap.foreach{food=>
+      drawAFood(food._2, offset, canvasUnit,canvasBoundary)
     }
   }
 }

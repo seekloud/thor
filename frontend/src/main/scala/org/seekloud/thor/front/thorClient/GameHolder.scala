@@ -3,6 +3,7 @@ package org.seekloud.thor.front.thorClient
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 
 //import org.seekloud.thor.front.utils.byteObject.MiddleBufferInJs
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
@@ -49,7 +50,9 @@ class GameHolder(canvasName: String) {
   println(canvasBounds)
 
   var thorSchemaOpt : Option[ThorSchemaClientImpl] = None
-//  var thorSchema = thorSchemaOpt.get
+  private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
+
+  //  var thorSchema = thorSchemaOpt.get
   private[this] var myId = "test"
   private[this] var myName = "testName"
   private[this] var killer = "someone"
@@ -62,6 +65,7 @@ class GameHolder(canvasName: String) {
   private[this] val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
 
   var justSynced = false
+
 
   canvas.width = canvasBoundary.x.toInt
   canvas.height = canvasBoundary.y.toInt
@@ -188,7 +192,7 @@ class GameHolder(canvasName: String) {
           if(thorSchema.adventurerMap.contains(myId)){
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
 //            println(s"mouseDistance: $mouseDistance")
-            val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame,getActionSerialNum)
+            val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             websocketClient.sendMsg(data)
 //            if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
 //              thorSchema.addMyAction(data)
@@ -206,14 +210,14 @@ class GameHolder(canvasName: String) {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId))
             if(e.button == 0){ //左键
-              val event = MouseClickDownLeft(myId, thorSchema.systemFrame, getActionSerialNum)
+              val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
 //              thorSchema.addMyAction(event)
               e.preventDefault()
             }
             else if(e.button == 2){ //右键
-              val event = MouseClickDownRight(myId, thorSchema.systemFrame, getActionSerialNum)
+              val event = MouseClickDownRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event) // actionEventMap
 //              thorSchema.addMyAction(event) // myAdventurerAction
@@ -229,7 +233,7 @@ class GameHolder(canvasName: String) {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId))
             if(e.button == 2){ //右键
-              val event = MouseClickUpRight(myId, thorSchema.systemFrame, getActionSerialNum)
+              val event = MouseClickUpRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
 //              thorSchema.addMyAction(event)
@@ -263,6 +267,10 @@ class GameHolder(canvasName: String) {
 //      e.preventDefault()
 //    }
 
+  }
+
+  protected def sendMsg2Server(msg:ThorGame.WsMsgFront):Unit ={
+      websocketClient.sendMsg(msg)
   }
 
   //游戏启动
