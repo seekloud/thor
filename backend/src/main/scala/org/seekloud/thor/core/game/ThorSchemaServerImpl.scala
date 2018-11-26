@@ -177,7 +177,7 @@ case class ThorSchemaServerImpl(
     //    dispatch(event)
   }
 
-  def leftWatchGame(uId: String, playerId: String) = {
+  def leftRoom4Watch(uId: String, playerId: String) = {
     watchingMap.get(playerId) match {
       case Some(maps) =>
         maps.remove(uId)

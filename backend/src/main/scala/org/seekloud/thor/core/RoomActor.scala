@@ -98,7 +98,7 @@ object RoomActor {
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
 
           case LeftRoom4Watch(uid,playerId) =>
-            thorSchema.leftWatchGame(uid,playerId)
+            thorSchema.leftRoom4Watch(uid,playerId)
             watchingMap.remove(uid)
             Behaviors.same
 
