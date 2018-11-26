@@ -16,6 +16,9 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
 
   def drawBackground(offset: Point, canvasUnit: Int, canvasBoundary: Point):Unit = {
     ctx.save()
+    ctx.fillStyle = "#171b1f"
+    ctx.fillRect(0, 0, canvasBoundary.x * canvasUnit, canvasBoundary.y * canvasUnit)
+    ctx.fill()
     ctx.drawImage(mapImg, offset.x * canvasUnit, offset.y * canvasUnit, config.boundary.x * canvasUnit, config.boundary.y * canvasUnit)
     ctx.restore()
   }
