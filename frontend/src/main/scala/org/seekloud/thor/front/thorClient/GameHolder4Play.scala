@@ -8,6 +8,7 @@ import org.scalajs.dom.ext.KeyCode
 import org.scalajs.dom.raw.{Event, FileReader, MessageEvent}
 import org.seekloud.byteobject.ByteObject.bytesDecode
 import org.seekloud.byteobject.MiddleBufferInJs
+import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
@@ -31,7 +32,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     if (firstCome) {
       drawGameLoading()
       addActionListenEvent()
-      websocketClient.setup(name, id, accessCode)
+      val url = if(id == "1") Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id, name, accessCode)
+      websocketClient.setup(url)
       gameLoop()
     }
     else if(websocketClient.getWsState){
@@ -43,74 +45,56 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
 
-  override protected def wsMessageHandler(e: MessageEvent) = {
+  override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
-    e.data match {
-      case blobMsg: Blob =>
-        val fr = new FileReader()
-        fr.readAsArrayBuffer(blobMsg)
-        fr.onloadend = { _: Event =>
-          val buf = fr.result.asInstanceOf[ArrayBuffer]
-          val middleDataInJs = new MiddleBufferInJs(buf)
-          bytesDecode[WsMsgServer](middleDataInJs) match {
-            case Right(data) =>
-              //              dom.console.log(data.toString)
-              data match {
-                case YourInfo(config, id, name) =>
-                  dom.console.log(s"get YourInfo ${config} ${id} ${name}")
-                  myId = id
-                  myName = name
-                  gameConfig = Some(config)
-                  thorSchemaOpt = Some(ThorSchemaClientImpl(ctx,config,id,name))
-                  thorSchemaOpt.foreach{grid => timer = Shortcut.schedule(gameLoop,grid.config.frameDuration)}
-                  nextFrame = dom.window.requestAnimationFrame(gameRender())
-                  firstCome = false
-                case UserEnterRoom(userId, name, _, _) =>
-                  barrage = s"${name}加入了游戏"
-                  barrageTime = 300
+    data match {
+      case YourInfo(config, id, name) =>
+        dom.console.log(s"get YourInfo ${config} ${id} ${name}")
+        myId = id
+        myName = name
+        gameConfig = Some(config)
+        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, config, id, name))
+        thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        nextFrame = dom.window.requestAnimationFrame(gameRender())
+        firstCome = false
+      case UserEnterRoom(userId, name, _, _) =>
+        barrage = s"${name}加入了游戏"
+        barrageTime = 300
 
-                case UserLeftRoom(userId, name, _) =>
-                  barrage = s"${name}离开了游戏"
-                  barrageTime = 300
-                  println(s"user left $name")
-                  thorSchemaOpt.foreach{ grid => grid.leftGame(userId, name)}
+      case UserLeftRoom(userId, name, _) =>
+        barrage = s"${name}离开了游戏"
+        barrageTime = 300
+        println(s"user left $name")
+        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
-                case BeAttacked(userId, name, killerId, killerName, _) =>
-                  barrage = s"${killerName}杀死了${name}"
-                  barrageTime = 300
-                  killer = killerName
-                  println(s"be attacked by $killerName")
-                  dom.window.cancelAnimationFrame(nextFrame)
-                  dom.window.clearInterval(timer)
-                  thorSchemaOpt.foreach{grid =>
-                    grid.adventurerMap.remove(userId)
-                    grid.drawGameStop(killerName)
-                  }
-
-                case Ranks(current, history) =>
-                  currentRank = current
-                  historyRank = history
-
-                case GridSyncState(d) =>
-                  //                  dom.console.log(d.toString)
-                  thorSchemaOpt.foreach(_.receiveThorSchemaState(d))
-                  justSynced = true
-
-
-                case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
-
-                case e: GameEvent => thorSchemaOpt.foreach(_.receiveGameEvent(e))
-
-                case  x => dom.window.console.log(s"接收到无效消息$x")
-              }
-            case Left(error) =>
-              println(s"decode msg failed,error:${error.toString}")
-          }
+      case BeAttacked(userId, name, killerId, killerName, _) =>
+        barrage = s"${killerName}杀死了${name}"
+        barrageTime = 300
+        killer = killerName
+        println(s"be attacked by $killerName")
+        dom.window.cancelAnimationFrame(nextFrame)
+        dom.window.clearInterval(timer)
+        thorSchemaOpt.foreach { grid =>
+          grid.adventurerMap.remove(userId)
+          grid.drawGameStop(killerName)
         }
-      case unknow =>
-        println(s"recv unknow msg:${unknow}")
+
+      case Ranks(current, history) =>
+        currentRank = current
+        historyRank = history
+
+      case GridSyncState(d) =>
+        //                  dom.console.log(d.toString)
+        thorSchemaOpt.foreach(_.receiveThorSchemaState(d))
+        justSynced = true
+
+
+      case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
+
+      case e: GameEvent => thorSchemaOpt.foreach(_.receiveGameEvent(e))
+
+      case x => dom.window.console.log(s"接收到无效消息$x")
     }
-    e
   }
 
   def addActionListenEvent(): Unit = {

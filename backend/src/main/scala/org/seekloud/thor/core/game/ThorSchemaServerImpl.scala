@@ -155,7 +155,7 @@ case class ThorSchemaServerImpl(
         userActor4WatchGame ! UserActor.JoinRoomSuccess4Watch(adventurer.playerId, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()))
 
       case None =>
-        userActor4WatchGame ! UserActor.JoinRoomFail4Watch(s"观察的用户id=${playerId}不存在")
+        userActor4WatchGame ! UserActor.JoinRoomFail4Watch(s"观战的用户${playerId}不存在")
     }
   }
 

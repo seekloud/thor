@@ -2,10 +2,13 @@ package org.seekloud.thor.front.thorClient
 
 import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.utils.byteObject.MiddleBufferInJs
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.WsMsgFront
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{DecodeError, WsMsgFront, WsMsgServer}
 import org.scalajs.dom
 import org.scalajs.dom.raw._
 
+import scala.scalajs.js.typedarray.ArrayBuffer
+
+//import org.seekloud.byteobject.MiddleBufferInJs
 
 class WebSocketClient(
                        connectSuccessCallback: Event => Unit,
@@ -22,11 +25,9 @@ class WebSocketClient(
 
   def getWsState = wsSetup
 
-  def getWebSocketUri(name: String, id: String, accessCode: String): String = {
+  def getWebSocketUri(url:String): String = {
     val wsProtocol = if (dom.document.location.protocol == "https:") "wss" else "ws"
-    if(id.equals("1"))
-      s"$wsProtocol://${dom.document.location.host}${Routes.wsJoinGameUrl(name)}"
-    else s"$wsProtocol://${dom.document.location.host}${Routes.wsJoinGameUrlESheep(id, name, accessCode)}"
+      s"$wsProtocol://${dom.document.location.host}$url"
   }
 
   private val sendBuffer:MiddleBufferInJs = new MiddleBufferInJs(2048)
@@ -38,11 +39,25 @@ class WebSocketClient(
     }
   }
 
+  import org.seekloud.byteobject.ByteObject._
+  import org.seekloud.byteobject.MiddleBufferInJs
+  import scala.scalajs.js.typedarray.ArrayBuffer
+  private def wsByteDecode(a:ArrayBuffer):WsMsgServer={
+    val middleDataInJs = new MiddleBufferInJs(a)
+    bytesDecode[WsMsgServer](middleDataInJs) match {
+      case Right(r) =>
+        r
+      case Left(e) =>
+        println(e.message)
+        DecodeError()
+    }
+  }
 
-  def setup(name:String, id:String, accessCode: String):Unit = {
+
+  def setup(url: String):Unit = {
     println("set up")
 
-    val webSocketStream = new WebSocket(getWebSocketUri(name, id, accessCode))
+    val webSocketStream = new WebSocket(getWebSocketUri(url))
     websocketStreamOpt = Some(webSocketStream)
     webSocketStream.onopen = { (event: Event) =>
       wsSetup = true
@@ -56,8 +71,21 @@ class WebSocketClient(
 
     webSocketStream.onmessage = { (event: MessageEvent) =>
 //        println(s"recv msg:${event.data.toString}")
-      messageHandler(event)
-    }
+      event.data match {
+        case blobMsg:Blob =>
+          val fr = new FileReader()
+          fr.readAsArrayBuffer(blobMsg)
+          fr.onloadend = { _: Event =>
+            val buf = fr.result.asInstanceOf[ArrayBuffer]
+            messageHandler(wsByteDecode(buf))
+          }
+        case jsonStringMsg:String =>
+          import io.circe.generic.auto._
+          import io.circe.parser._
+          val data = decode[WsMsgServer](jsonStringMsg).right.get
+          messageHandler(data)
+        case unknow =>  println(s"recv unknow msg:${unknow}")
+      }    }
 
     webSocketStream.onclose = { (event: Event) =>
       wsSetup = false
@@ -67,5 +95,10 @@ class WebSocketClient(
 
   }
 
+  def closeWs = {
+    wsSetup = false
+    websocketStreamOpt.foreach(_.close())
+    websocketStreamOpt = None
+  }
 
 }

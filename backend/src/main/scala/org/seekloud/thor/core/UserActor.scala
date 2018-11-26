@@ -193,13 +193,13 @@ object UserActor {
           watchInit(playerId, info, roomId, watchedPlayerId, frontActor)
 
         case JoinRoomSuccess4Watch(watchedPlayerId, config, roomActor, state) =>
-          log.debug(s"${ctx.self.path} first sync gameContainerState")
+          log.debug(s"join room 4 watch success")
           frontActor ! Wrap(YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! Wrap(state.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayerId, frontActor, roomActor))
 
         case JoinRoomFail4Watch(error) =>
-          log.debug(s"${ctx.self.path} recv a msg=${msg}")
+          log.debug(s"join room 4 watch failed ${msg}")
           frontActor ! Wrap(WsMsgErrorRsp(1, error).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! CompleteMsgServer
           Behaviors.stopped

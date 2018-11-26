@@ -106,7 +106,13 @@ abstract class GameHolder(canvasName: String) {
     e
   }
 
-  protected def wsMessageHandler(e: MessageEvent)
+  protected def wsMessageHandler(e: WsMsgServer)
+
+  def closeHolder={
+    dom.window.cancelAnimationFrame(nextFrame)
+    Shortcut.cancelSchedule(timer)
+    websocketClient.closeWs
+  }
 
 
   protected def sendMsg2Server(msg:ThorGame.WsMsgFront):Unit ={
