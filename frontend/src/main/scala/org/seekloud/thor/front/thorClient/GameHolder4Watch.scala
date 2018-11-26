@@ -57,8 +57,20 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
 
       case e: BeAttacked =>
-        killer = e.name
-        thorSchemaOpt.foreach(_.drawGameStop(killer))
+        killer = e.killerName
+        var killNum = 0
+        var score = 0
+        var level = 1
+        thorSchemaOpt match {
+          case Some(thorSchema: ThorSchemaClientImpl)=>
+            if (thorSchema.adventurerMap.contains(myId)){
+              killNum = thorSchema.adventurerMap(myId).killNum
+              score = thorSchema.adventurerMap(myId).energy
+              level = thorSchema.adventurerMap(myId).level
+            }
+          case None =>
+        }
+        thorSchemaOpt.foreach(_.drawGameStop(e.name,killNum,score,level,killer))
         dom.window.cancelAnimationFrame(nextFrame)
 
       case RebuildWebSocket=>

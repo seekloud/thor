@@ -1,19 +1,19 @@
 package org.seekloud.thor.front.thorClient
 
 import org.seekloud.thor.front.common.Routes
-import org.seekloud.thor.front.utils.byteObject.MiddleBufferInJs
+//import org.seekloud.thor.front.utils.byteObject.MiddleBufferInJs
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{DecodeError, WsMsgFront, WsMsgServer}
 import org.scalajs.dom
 import org.scalajs.dom.raw._
 
 import scala.scalajs.js.typedarray.ArrayBuffer
 
-//import org.seekloud.byteobject.MiddleBufferInJs
+import org.seekloud.byteobject.MiddleBufferInJs
 
 class WebSocketClient(
                        connectSuccessCallback: Event => Unit,
                        connectErrorCallback:Event => Unit,
-                       messageHandler:MessageEvent => Unit,
+                       messageHandler:WsMsgServer => Unit,
                        closeCallback:Event => Unit
                      ) {
 
@@ -31,17 +31,17 @@ class WebSocketClient(
   }
 
   private val sendBuffer:MiddleBufferInJs = new MiddleBufferInJs(2048)
-
+  import org.seekloud.byteobject.ByteObject._
+  import org.seekloud.byteobject.MiddleBufferInJs
+  import scala.scalajs.js.typedarray.ArrayBuffer
   def sendMsg(msg:WsMsgFront) = {
-    import org.seekloud.thor.front.utils.byteObject.ByteObject._
+//    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     websocketStreamOpt.foreach{s =>
       s.send(msg.fillMiddleBuffer(sendBuffer).result())
     }
   }
 
-  import org.seekloud.byteobject.ByteObject._
-  import org.seekloud.byteobject.MiddleBufferInJs
-  import scala.scalajs.js.typedarray.ArrayBuffer
+
   private def wsByteDecode(a:ArrayBuffer):WsMsgServer={
     val middleDataInJs = new MiddleBufferInJs(a)
     bytesDecode[WsMsgServer](middleDataInJs) match {

@@ -126,7 +126,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   var testEndTime = System.currentTimeMillis()
   var startTime = System.currentTimeMillis()
 
-  def gameLoop(): Unit = {
+  protected def gameLoop(): Unit = {
     logicFrameTime = System.currentTimeMillis()
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
