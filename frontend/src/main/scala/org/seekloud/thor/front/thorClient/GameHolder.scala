@@ -31,7 +31,7 @@ import scala.language.implicitConversions
 /**
   * Created by Jingyi on 2018/11/9
   */
-abstract class GameHolder(canvasName: String) {
+abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   println("GameHolder ...")
 
@@ -123,7 +123,9 @@ abstract class GameHolder(canvasName: String) {
   def gameLoop(): Unit = {
     logicFrameTime = System.currentTimeMillis()
     thorSchemaOpt match{
-      case Some(thorSchema: ThorSchemaClientImpl) => thorSchema.update()
+      case Some(thorSchema: ThorSchemaClientImpl) =>
+        thorSchema.update()
+        ping()
       case None =>
     }
   }
@@ -137,6 +139,7 @@ abstract class GameHolder(canvasName: String) {
           thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
           thorSchema.drawRank(historyRank,false,myId)
           thorSchema.drawRank(currentRank,true,myId)
+          thorSchema.drawNetInfo(getNetworkLatency)
           if (barrageTime > 0){
             thorSchema.drawBarrage(barrage,canvasBoundary.x*0.5,canvasBoundary.y*0.17)
             barrageTime -= 1

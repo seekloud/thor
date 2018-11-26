@@ -1,6 +1,6 @@
 package org.seekloud.thor.front.thorClient
 
-import org.seekloud.thor.front.thorClient.draw.{AdventurerClient, BackgroundClient, DrawOtherClient, FoodClient}
+import org.seekloud.thor.front.thorClient.draw._
 import org.seekloud.thor.shared.ptcl
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
@@ -24,7 +24,8 @@ case class ThorSchemaClientImpl (
 with AdventurerClient
 with FoodClient
 with BackgroundClient
-with DrawOtherClient{
+with DrawOtherClient
+with FpsRender{
 
   def drawGame(offSetTime:Long, canvasUnit: Int, canvasBounds: Point): Unit ={
     if(!waitSyncData){
