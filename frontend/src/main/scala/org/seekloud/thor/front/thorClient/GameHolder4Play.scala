@@ -80,11 +80,23 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
                   barrageTime = 300
                   killer = killerName
                   println(s"be attacked by $killerName")
+                  var killNum = 0
+                  var score = 0
+                  var level = 1
+                  thorSchemaOpt match {
+                    case Some(thorSchema: ThorSchemaClientImpl)=>
+                      if (thorSchema.adventurerMap.contains(myId)){
+                        killNum = thorSchema.adventurerMap(myId).killNum
+                        score = thorSchema.adventurerMap(myId).energy
+                        level = thorSchema.adventurerMap(myId).level
+                      }
+                    case None =>
+                  }
                   dom.window.cancelAnimationFrame(nextFrame)
                   dom.window.clearInterval(timer)
                   thorSchemaOpt.foreach{grid =>
                     grid.adventurerMap.remove(userId)
-                    grid.drawGameStop(killerName)
+                    grid.drawGameStop(myName,killNum,score,level,killerName)
                   }
 
                 case Ranks(current, history) =>

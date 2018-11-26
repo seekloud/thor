@@ -9,6 +9,7 @@ import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 
 trait BackgroundClient { this: ThorSchemaClientImpl =>
 
+  val window = Point((dom.window.innerWidth - 12).toFloat,(dom.window.innerHeight - 12).toFloat)
   private val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
   mapImg.setAttribute("src", s"${Routes.base}/static/img/map.jpg")
   private val rankImg = dom.document.createElement("img").asInstanceOf[html.Image]
@@ -31,7 +32,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.restore()
   }
 
-  def drawTextLine(str: String, x: Int, lineNum: Int, lineBegin: Int = 0) = {
+  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0) = {
     ctx.save()
     ctx.textBaseline = "top"
     ctx.font = "16px Comic Sans MS"
@@ -44,10 +45,10 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     var index = 0
     var yourRank = 100
     var yourNameIn = false
-    val begin = if (CurrentOrNot) 10 else dom.document.documentElement.clientWidth - 260
+    val begin = if (CurrentOrNot) 10 else window.x * 0.82
 
     ctx.save()
-    ctx.drawImage(rankImg, begin,0,250,250)
+    ctx.drawImage(rankImg, begin,0,window.x * 0.18,window.x * 0.18)
     ctx.fillStyle="#ffffff"
     ctx.globalAlpha = 0.6
     Rank.foreach { score =>
@@ -55,7 +56,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
       if (score.id == id) yourRank = index
       if (index<6){
         if (score.id == id) yourNameIn = true
-        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", begin+10, index*2, RankBaseLine)
+        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", begin + window.x * 0.08, index*2, RankBaseLine)
       }
     }
     index+=1
@@ -70,16 +71,49 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.restore()
   }
 
-  def drawGameStop(killer: String): Unit = {
+
+  private val logo = dom.document.createElement("img").asInstanceOf[html.Image]
+  logo.setAttribute("src",s"${Routes.base}/static/img/logo.png")
+  private val deadBlank = dom.document.createElement("img").asInstanceOf[html.Image]
+  deadBlank.setAttribute("src",s"${Routes.base}/static/img/dead-blank.png")
+  private val userName = dom.document.createElement("img").asInstanceOf[html.Image]
+  userName.setAttribute("src",s"${Routes.base}/static/img/user-name.png")
+  private val playAgain = dom.document.createElement("img").asInstanceOf[html.Image]
+  playAgain.setAttribute("src",s"${Routes.base}/static/img/play-again.png")
+
+  def drawGameStop(name:String,kill:Int,score:Int,level:Int,killer: String): Unit = {
     ctx.save()
     ctx.fillStyle = Color.Black.toString()
     ctx.fillRect(0, 0, dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+    ctx.drawImage(logo,window.x * 0.375,20,window.x * 0.25,window.y * 0.25)
+    ctx.drawImage(deadBlank,window.x * 0.35,window.y * 0.3,window.x * 0.3,window.y / 3)
     ctx.fillStyle = "rgb(250, 250, 250)"
     ctx.textAlign = "left"
     ctx.textBaseline = "top"
-    ctx.font = "36px Helvetica"
-    ctx.fillText(s"您已经死亡,被玩家 ${killer} 所杀", 150, 180)
-    ctx.fillText(s"Press space to restart", 150, 300)
+    ctx.font = "26px Helvetica"
+    ctx.fillText("kills",window.x * 0.38, window.y * 0.32, window.x * 0.15)
+    ctx.fillText("score",window.x * 0.475, window.y * 0.32, window.x * 0.15)
+    ctx.fillText("time",window.x * 0.58, window.y * 0.32, window.x * 0.15)
+    ctx.font = "22px Helvetica"
+    ctx.fillText(kill.toString,window.x * 0.39, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(score.toString,window.x * 0.49, window.y * 0.4, window.x * 0.15)
+    ctx.fillText("0",window.x * 0.59, window.y * 0.4, window.x * 0.15)
+    ctx.save()
+    ctx.strokeStyle = Color.Yellow.toString()
+    ctx.moveTo(window.x * 0.36,window.y * 0.45)
+    ctx.lineTo(window.x * 0.64,window.y * 0.45)
+    ctx.stroke()
+    ctx.restore()
+    ctx.font = "26px Comic Sans Ms"
+    ctx.fillStyle = "orange"
+    ctx.fillText(s"You Dead,Killer is ${killer} ", window.x * 0.4, window.y * 0.45)
+    ctx.fillText(s"Your Final level is ${level} / 9",window.x * 0.4, window.y * 0.5)
+    ctx.fillText(s"Press space to restart", window.x * 0.4, window.y * 0.55)
+
+    ctx.drawImage(userName,window.x * 0.4, window.y * 0.7, window.x * 0.2, window.y * 0.1)
+    ctx.fillStyle = Color.Black.toString()
+    ctx.fillText(name,window.x * 0.45, window.y * 0.72, window.x * 0.15)
+//    ctx.drawImage(playAgain,window.x * 0.4,window.y * 0.85,window.x * 0.2,window.y * 0.1)
     ctx.restore()
   }
 
