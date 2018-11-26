@@ -74,4 +74,13 @@ object ESheepProtocol {
                                         msg: String
                                         ) extends ESheepResponse
   val ErrorGetPlayerByAccessCodeRsp = GetPlayerByAccessCodeRsp(None, 200001, "accessCode error")
+
+  final case class RoomList(roomList: List[Long])
+
+  final case class GetRoomListRsp(
+                                 data: Option[RoomList],
+                                 errCode: Int = 0,
+                                 msg: String = "ok"
+                                 ) extends ESheepResponse
+  val ErrorGetRoomList = GetRoomListRsp(None, 200002, "getRoomList error in Service")
 }

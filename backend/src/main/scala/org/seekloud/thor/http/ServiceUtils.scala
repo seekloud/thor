@@ -135,9 +135,10 @@ trait ServiceUtils extends CirceSupport with SessionBase{
           }
         } else {
           dealFutureResult {
-
-            log.error(s"json parse detail type error")
-            Future.successful(complete(parseJsonError))
+            log.debug("authCheck is false")
+            f
+//            log.error(s"json parse detail type error")
+//            Future.successful(complete(parseJsonError))
           }
         }
 

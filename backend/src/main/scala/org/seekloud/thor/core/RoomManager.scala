@@ -7,6 +7,7 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import org.seekloud.thor.core.UserActor.JoinRoom
 import org.slf4j.LoggerFactory
 import org.seekloud.thor.common.AppSettings.personLimit
+import org.seekloud.thor.protocol.ESheepProtocol.{GetRoomListRsp, RoomList}
 
 import scala.collection.mutable
 
@@ -22,6 +23,8 @@ object RoomManager {
   trait Command
   private case class TimeOut(msg:String) extends Command
   private case class ChildDead[U](name:String,childRef:ActorRef[U]) extends Command
+
+  case class GetRoomList(replyTo: ActorRef[GetRoomListRsp]) extends Command
 
   case class LeftRoom(playerId: String, name:String) extends Command
 
@@ -83,6 +86,12 @@ object RoomManager {
               log.debug(s"roomManager 不再监管room:$child,$childRef")
               ctx.unwatch(childRef)
               Behaviors.same
+
+            case GetRoomList(replyTo) =>
+              val roomList = roomInUse.keys.toList
+              replyTo ! GetRoomListRsp(Some(RoomList(roomList)))
+              Behaviors.same
+
 
             case unknow =>
               Behaviors.same

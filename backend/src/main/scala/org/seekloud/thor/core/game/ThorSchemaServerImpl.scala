@@ -63,7 +63,7 @@ case class ThorSchemaServerImpl(
       a.killing += adventurer.killNum
       a.score += adventurer.energy
     }
-    println(RecordMap)
+//    println(RecordMap)
     dispatchTo(adventurer.playerId, event)
   }
 
@@ -206,7 +206,7 @@ case class ThorSchemaServerImpl(
         dispatch(event)
         addGameEvent(event)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef, config.getThorGameConfigImpl())
-        RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0)) //TODO 进入房间添加战绩空位,检测重复
+        RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
     }

@@ -21,7 +21,8 @@ import org.seekloud.thor.Boot.userManager
 trait HttpService
   extends ResourceService
   with ServiceUtils
-  with PlatService{
+  with PlatService
+  with RoomInfoService{
 
   import akka.actor.typed.scaladsl.AskPattern._
   import org.seekloud.utils.CirceSupport._
@@ -45,7 +46,7 @@ trait HttpService
 
 
   lazy val routes: Route = pathPrefix(AppSettings.rootPath) {
-    resourceRoutes ~ platEnterRoute ~
+    resourceRoutes ~ platEnterRoute ~ roomInfoRoutes ~
       (pathPrefix("game") & get){
         pathEndOrSingleSlash{
           getFromResource("html/admin.html")
