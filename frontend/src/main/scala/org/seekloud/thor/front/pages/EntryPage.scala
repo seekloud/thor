@@ -38,7 +38,8 @@ object EntryPage extends Page{
       </div>
 
     case 1 =>
-      new ThorRender(dom.document.getElementById("userName").asInstanceOf[Input].value).render
+      val pName = dom.document.getElementById("userName").asInstanceOf[Input].value
+      new ThorRender(List(pName)).render
   }
 
   def joinGame(): Unit = {

@@ -101,4 +101,14 @@ object ThorGame {
 
   final case class DecodeError() extends WsMsgServer
 
+  //解析url
+  final case class ThorGameInfo(
+                             name: String,
+                             pId: Option[String] = None,
+                             rId: Option[Long] = None,
+                             userAccessCode: Option[String] = None,
+                             frame: Option[Long] = None,
+                             recId: Option[Long] = None
+                           )
+
 }

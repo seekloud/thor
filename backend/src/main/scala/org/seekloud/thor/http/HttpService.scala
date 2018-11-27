@@ -92,7 +92,7 @@ trait HttpService
       'roomId.as[Long].?
     ) {
       case (playerId, playerName, accessCode, roomIdOpt) =>
-        redirect(s"/thor/game/#/thor/playGame/$playerId/${URLEncoder.encode(playerName, "utf-8")}" + roomIdOpt.map(s => s"/$s").getOrElse("") + s"/$accessCode",
+        redirect(s"/thor/game/#/playGame/$playerId/${URLEncoder.encode(playerName, "utf-8")}" + roomIdOpt.map(s => s"/$s").getOrElse("") + s"/$accessCode",
           StatusCodes.SeeOther
         )
 

@@ -25,14 +25,14 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
 
   //游戏启动
-  def start(name: String, id: String, accessCode: String): Unit = {
+  def start(name: String, id: Option[String], accessCode: Option[String], roomId: Option[Long]): Unit = {
     println(s"start $name")
     myName = name
     canvas.focus()
     if (firstCome) {
       drawGameLoading()
       addActionListenEvent()
-      val url = if(id == "1") Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id, name, accessCode)
+      val url = if(id.isEmpty) Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id.get, name, accessCode.getOrElse("?"), roomId)
       websocketClient.setup(url)
       gameLoop()
     }
@@ -182,7 +182,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             if (e.keyCode == KeyCode.Space){
               println("restart!!!!")
               firstCome = true
-              start(myName, "1", "1") // FIXME 重启没有验证accessCode
+              start(myName, None, None, None) //重启没有验证accessCode
               websocketClient.sendMsg(RestartGame(myName))
               e.preventDefault()
             }
