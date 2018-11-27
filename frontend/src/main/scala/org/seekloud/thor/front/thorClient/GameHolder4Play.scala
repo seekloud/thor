@@ -58,6 +58,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     data match {
       case YourInfo(config, id, name) =>
         dom.console.log(s"get YourInfo ${config} ${id} ${name}")
+        startTime = System.currentTimeMillis()
         myId = id
         myName = name
         gameConfig = Some(config)
@@ -79,7 +80,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         barrage = s"${killerName}杀死了${name}"
         barrageTime = 300
         killer = killerName
+        endTime = System.currentTimeMillis()
         println(s"be attacked by $killerName")
+        val time = duringTime(endTime - startTime)
         var killNum = 0
         var score = 0
         var level = 1
@@ -96,7 +99,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         dom.window.clearInterval(timer)
         thorSchemaOpt.foreach{grid =>
           grid.adventurerMap.remove(userId)
-          grid.drawGameStop(myName,killNum,score,level,killerName)
+          grid.drawGameStop(myName,killNum,score,level,killerName,time)
         }
 
       case Ranks(current, history) =>
@@ -166,7 +169,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           else {
             val x = e.clientX
             val y = e.clientY
-            println(s"x = ${window.x * 0.4} y = ${window.y * 0.8} clientX = $x clientY = $y")
+//            println(s"x = ${window.x * 0.4} y = ${window.y * 0.8} clientX = $x clientY = $y")
             if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
               reStart()
             e.preventDefault()

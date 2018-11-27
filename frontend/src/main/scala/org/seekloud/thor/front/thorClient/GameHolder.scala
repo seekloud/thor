@@ -55,6 +55,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var myId = "test"
   protected var myName = "testName"
   protected var killer = "someone"
+  protected var startTime = 0l
+  protected var endTime = 0l
   protected var gameConfig: Option[ThorGameConfigImpl] = None
   protected var firstCome = true
   protected var currentRank = List.empty[Score]
@@ -122,9 +124,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
   var tickCount = 0L
-  var testStartTime = System.currentTimeMillis()
-  var testEndTime = System.currentTimeMillis()
-  var startTime = System.currentTimeMillis()
+//  var testStartTime = System.currentTimeMillis()
+//  var testEndTime = System.currentTimeMillis()
+//  var startTime = System.currentTimeMillis()
 
   protected def gameLoop(): Unit = {
     logicFrameTime = System.currentTimeMillis()
@@ -167,5 +169,15 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     ctx.textBaseline = "top"
     ctx.font = "36px Helvetica"
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
+  }
+
+  def duringTime(time:Long) = {
+    var remain = time / 1000 % 86400
+    val hour = remain / 3600
+    remain = remain % 3600
+    val min = remain / 60
+    val sec = remain % 60
+    val timeString = s"$hour : $min : $sec"
+    timeString
   }
 }

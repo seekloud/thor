@@ -24,7 +24,7 @@ trait FpsRender {
     ctx.font = "25px Helvetica"
     ctx.textAlign = "start"
     ctx.fillStyle = "white"
-    val fpsStr =  s"fps  : $lastRenderTimes"
+    val fpsStr =  s"fps   : $lastRenderTimes"
     val pingStr = s"ping : ${networkLatency}ms"
     ctx.fillText(pingStr,300,10)
     ctx.fillText(fpsStr,300,40)

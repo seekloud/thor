@@ -82,7 +82,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
   playAgain.setAttribute("src",s"${Routes.base}/static/img/play-again.png")
 
 
-  def drawGameStop(name:String,kill:Int,score:Int,level:Int,killer: String): Unit = {
+  def drawGameStop(name:String,kill:Int,score:Int,level:Int,killer: String,time: String): Unit = {
     ctx.save()
     ctx.fillStyle = Color.Black.toString()
     ctx.fillRect(0, 0, dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
@@ -98,7 +98,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.font = "22px Helvetica"
     ctx.fillText(kill.toString,window.x * 0.39, window.y * 0.4, window.x * 0.15)
     ctx.fillText(score.toString,window.x * 0.49, window.y * 0.4, window.x * 0.15)
-    ctx.fillText("0",window.x * 0.59, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(time,window.x * 0.57, window.y * 0.4, window.x * 0.15)
     ctx.save()
     ctx.strokeStyle = Color.Yellow.toString()
     ctx.moveTo(window.x * 0.36,window.y * 0.45)
