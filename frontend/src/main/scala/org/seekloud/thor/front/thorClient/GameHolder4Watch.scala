@@ -17,7 +17,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
     logicFrameTime = System.currentTimeMillis()
   }
 
-  def watchGame() = {
+  def watch() = {
     websocketClient.setup(Routes.wsWatchGameUrl(roomId, playerId, accessCode))
   }
 
@@ -25,7 +25,6 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
     //    println(data.getClass)
     data match {
       case e:YourInfo =>
-        //        setGameState(Constants.GameState.loadingPlay)
         thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration / e.config.frameDuration)
