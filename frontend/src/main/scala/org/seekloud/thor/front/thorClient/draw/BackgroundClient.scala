@@ -81,6 +81,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
   private val playAgain = dom.document.createElement("img").asInstanceOf[html.Image]
   playAgain.setAttribute("src",s"${Routes.base}/static/img/play-again.png")
 
+
   def drawGameStop(name:String,kill:Int,score:Int,level:Int,killer: String): Unit = {
     ctx.save()
     ctx.fillStyle = Color.Black.toString()
@@ -114,7 +115,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.font = "24px Comic Sans Ms"
     ctx.fillStyle = Color.Black.toString()
     ctx.fillText("Press space to restart",window.x * 0.42, window.y * 0.72, window.x * 0.15)
-//    ctx.drawImage(playAgain,window.x * 0.4,window.y * 0.85,window.x * 0.2,window.y * 0.1)
+    ctx.drawImage(playAgain,window.x * 0.4,window.y * 0.85,window.x * 0.2,window.y * 0.1)
     ctx.restore()
   }
 
