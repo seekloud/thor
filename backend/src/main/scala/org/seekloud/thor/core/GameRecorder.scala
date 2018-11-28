@@ -8,7 +8,7 @@ import org.seekloud.essf.io.FrameOutputStream
 import org.seekloud.thor.common.AppSettings
 import org.seekloud.thor.protocol.ReplayProtocol.{EssfMapJoinLeftInfo, EssfMapKey}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameInformation, ThorSnapshot}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameInformation, ThorSnapshot, UserEnterRoom, UserLeftRoom}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -23,7 +23,7 @@ import scala.concurrent.duration._
 object GameRecorder {
 
   private final val log = LoggerFactory.getLogger(this.getClass)
-
+  private final val maxRecordNum = 100
 
   import org.seekloud.byteobject.ByteObject._
   import org.seekloud.utils.ESSFSupport.initFileRecorder
@@ -72,7 +72,6 @@ object GameRecorder {
     behaviorName: String, behavior: Behavior[Command], durationOpt: Option[FiniteDuration] = None, timeOut: TimeOut = TimeOut("busy time error"))
     (implicit stashBuffer: StashBuffer[Command],
       timer: TimerScheduler[Command]) = {
-    //log.debug(s"${ctx.self.path} becomes $behaviorName behavior.")
     timer.cancel(BehaviorChangeKey)
     durationOpt.foreach(timer.startSingleTimer(BehaviorChangeKey, timeOut, _))
     stashBuffer.unstashAll(ctx, behavior)
@@ -81,8 +80,8 @@ object GameRecorder {
   def create(fileName: String, gameInformation: GameInformation, initStateOpt: Option[ThorGame.GameSnapshot] = None, roomId: Long): Behavior[Command] = {
     Behaviors.setup { ctx =>
       log.info(s"${ctx.self.path} is starting..")
-      implicit val stashBuffer = StashBuffer[Command](Int.MaxValue)
-      implicit val middleBuffer = new MiddleBufferInJvm(10 * 4096)
+      implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
+      implicit val middleBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(10 * 4096)
       Behaviors.withTimers[Command] { implicit timer =>
         val fileRecorder = initFileRecorder(fileName, 0, gameInformation, initStateOpt)
         val gameRecordBuffer: List[GameRecord] = List[GameRecord]()
@@ -110,6 +109,39 @@ object GameRecorder {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
           //TODO
+        case msg: GameRecord =>
+          val wsMsg = msg.event._1
+          wsMsg.foreach {
+            case UserEnterRoom(playerId, name, adventurer, frame) =>
+            case UserLeftRoom(playerId, name, frame) =>
+            case _ =>
+          }
+          gameRecordBuffer = msg :: gameRecordBuffer
+          val newEndF = msg.event._2.get match {
+            case thor: ThorSnapshot =>
+              thor.state.f
+          }
+
+          if (gameRecordBuffer.size > maxRecordNum) {
+            val buffer = gameRecordBuffer.reverse
+            buffer.headOption.foreach { e =>
+              recorder.writeFrame(e.event._1.fillMiddleBuffer(middleBuffer).result(), e.event._2.map(_.fillMiddleBuffer(middleBuffer).result()))
+              buffer.tail.foreach { e =>
+                if (e.event._1.nonEmpty) {
+                  recorder.writeFrame(e.event._1.fillMiddleBuffer(middleBuffer).result())
+                } else {
+                  recorder.writeEmptyFrame()
+                }
+              }
+            }
+            gameRecordBuffer = List[GameRecord]()
+            switchBehavior(ctx, "work", work(gameRecordData, essfMap, userAllMap, userMap, startF, newEndF))
+          } else {
+            switchBehavior(ctx, "work", work(gameRecordData, essfMap, userAllMap, userMap, startF, newEndF))
+          }
+
+
+
         case unknown =>
           log.warn(s"unknown msg:$unknown")
           Behaviors.unhandled
