@@ -40,11 +40,14 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   protected val canvas = dom.document.getElementById(canvasName).asInstanceOf[Canvas]
   protected val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+  protected var canvasWidth = dom.window.innerWidth.toFloat
+  protected var canvasHeight = dom.window.innerHeight.toFloat
 
 //  protected val bounds = Point(Boundary.w,Boundary.h)
 
   protected val canvasUnit = 10
   protected val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+
 
   protected val canvasBounds = canvasBoundary / canvasUnit
   println(canvasBounds)
@@ -61,6 +64,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var firstCome = true
   protected var currentRank = List.empty[Score]
   protected var historyRank = List.empty[Score]
+
+
 
   protected val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
 
@@ -90,6 +95,26 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   }
 
+  protected def checkScreenSize={
+    val newWidth=dom.window.innerWidth.toFloat
+    val newHeight=dom.window.innerHeight.toFloat
+    if(newWidth!=canvasWidth||newHeight!=canvasHeight){
+      println("the screen size is change")
+      canvasWidth = newWidth
+      canvasHeight = newHeight
+//      canvasUnit = getCanvasUnit(canvasWidth)
+//      canvasBounds = Point(canvasWidth, canvasHeight)/canvasUnit
+      println(s"update screen=${canvasUnit},=${(canvasWidth,canvasHeight)}")
+      canvas.width = canvasWidth.toInt
+      canvas.height = canvasHeight.toInt
+      thorSchemaOpt.foreach{r=>
+        r.updateClientSize(canvasBounds, canvasUnit)
+      }
+    }
+
+
+  }
+
 
   protected def wsConnectSuccess(e: Event) = {
     println(s"连接服务器成功")
@@ -109,6 +134,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   }
 
   protected def wsMessageHandler(e: WsMsgServer)
+
 
   def closeHolder={
     dom.window.cancelAnimationFrame(nextFrame)

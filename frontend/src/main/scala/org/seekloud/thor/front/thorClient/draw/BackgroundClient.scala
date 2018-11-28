@@ -7,8 +7,12 @@ import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 
+import scala.collection.mutable
+
 trait BackgroundClient { this: ThorSchemaClientImpl =>
 
+
+  private val cacheCanvasMap = mutable.HashMap.empty[String, html.Canvas]
   val window = Point((dom.window.innerWidth - 12).toFloat,(dom.window.innerHeight - 12).toFloat)
   private val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
   mapImg.setAttribute("src", s"${Routes.base}/static/img/map.jpg")
@@ -31,6 +35,9 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.fillText(s,x,y)
     ctx.restore()
   }
+
+
+
 
   def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0) = {
     ctx.save()

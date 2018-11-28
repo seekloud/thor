@@ -27,7 +27,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
       case e:YourInfo =>
         //        setGameState(Constants.GameState.loadingPlay)
         startTime = System.currentTimeMillis()
-        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name,canvasBounds,canvasUnit))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration / e.config.frameDuration)
 
