@@ -15,6 +15,7 @@ import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions
 import org.seekloud.byteobject.ByteObject._
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 /**
   * @author Jingyi
@@ -141,6 +142,19 @@ object RoomActor {
 
     val isKillMsg = msg.isInstanceOf[BeAttacked]
     subscribers.get(id).foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
+  }
+
+  private def getGameRecorder(ctx: ActorContext[Command], thorSchema: ThorSchemaServerImpl, roomId: Long, frame: Long): ActorRef[GameRecorder.Command] = {
+    val childName = s"gameRecorder-$roomId"
+    ctx.child(childName).getOrElse {
+      val curTime = System.currentTimeMillis()
+      val fileName = s"thorGame_$curTime"
+      val gameInformation = ThorGame.GameInformation(curTime, AppSettings.thorGameConfig.getThorGameConfigImpl())
+      val initStateOpt = Some(thorSchema.getCurGameSnapshot)
+      val actor = ctx.spawn(GameRecorder.create(fileName, gameInformation, initStateOpt, roomId), childName)
+      ctx.watchWith(actor, ChildDead(childName, actor))
+      actor
+    }.upcast[GameRecorder.Command]
   }
 
 }
