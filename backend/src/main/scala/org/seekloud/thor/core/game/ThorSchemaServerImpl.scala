@@ -68,7 +68,8 @@ case class ThorSchemaServerImpl(
       a.score += adventurer.energy
     }
 //    println(RecordMap)
-    dispatchTo(adventurer.playerId, event)
+    val actor = getUserActor4WatchGameList(adventurer.playerId)
+    dispatchTo(adventurer.playerId, event, actor)
   }
 
   implicit val scoreOrdering = new Ordering[Score] {

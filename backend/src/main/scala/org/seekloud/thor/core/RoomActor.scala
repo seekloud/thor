@@ -145,9 +145,9 @@ object RoomActor {
             newPlayer.foreach {
               //为新用户分发全量数据
               player =>
-                val watchList = thorSchema.getUserActor4WatchGameList(player._1)
+                val actor = thorSchema.getUserActor4WatchGameList(player._1)
                 subscribersMap.put(player._1, player._2)
-                dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), watchList)
+                dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)
             }
             idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
 
