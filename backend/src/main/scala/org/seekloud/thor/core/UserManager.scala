@@ -67,7 +67,7 @@ object UserManager {
             }
             val userActor = getUserActor(ctx, watchingId, playerInfo)
             replyTo ! getWebSocketFlow(userActor)
-//            userActor ! ChangeUserInfo(playerInfo)
+            userActor ! ChangeUserInfo(playerInfo)
             //发送用户观战命令
             userActor ! UserActor.StartWatching(roomId, watchedPlayerId)
             Behaviors.same
