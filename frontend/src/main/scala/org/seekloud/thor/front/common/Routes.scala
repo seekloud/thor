@@ -1,5 +1,8 @@
 package org.seekloud.thor.front.common
 
+import org.scalajs.dom
+import org.seekloud.thor.front.model.ReplayInfo
+
 /**
   * User: Taoz
   * Date: 2/24/2017
@@ -16,6 +19,14 @@ object Routes {
     base + s"/game/playGame/userJoin?playerId=$id&playerName=$name&accessCode=$accessCode" + roomId.getOrElse("")
 
   def wsWatchGameUrl(roomId: Long, id: String, accessCode: String) = base + s"/game/watchGame?roomId=$roomId&playerId=$id&accessCode=$accessCode"
+
+  def wsReplayGameUrl(info:ReplayInfo) = base + s"/game/replay?rid=${info.recordId}&wid=${info.playerId}&f=${info.frame}&accessCode=${info.accessCode}"
+
+
+  def getReplaySocketUri(info:ReplayInfo): String = {
+    val wsProtocol = if (dom.document.location.protocol == "https:") "wss" else "ws"
+    s"$wsProtocol://${dom.document.location.host}${Routes.wsReplayGameUrl(info)}"
+  }
 
 
 
