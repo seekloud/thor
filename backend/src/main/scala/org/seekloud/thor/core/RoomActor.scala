@@ -56,8 +56,11 @@ object RoomActor {
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             val watchingMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建thorSchema
-            implicit val sendBuffer = new MiddleBufferInJvm(81920)
+            implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
+            if (AppSettings.gameRecordIsWork) {
+              getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
+            }
             timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
             idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, 0L)
         }
@@ -108,9 +111,22 @@ object RoomActor {
             Behavior.same
 
           case GameLoop =>
-            //            println("game loop")
+            val startTime = System.currentTimeMillis()
+            val snapShotOpt = thorSchema.getCurSnapshot
+
             //thorSchema定时更新
             thorSchema.update()
+
+            val gameEvents = thorSchema.getLastGameEvent
+            if (AppSettings.gameRecordIsWork) {
+              if (tickCount % 20 == 1) {
+                //排行榜
+                val rankEvent = Ranks(thorSchema.currentRankList,thorSchema.historyRank)
+                getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(rankEvent :: gameEvents, snapShotOpt)
+              } else {
+                getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(gameEvents, snapShotOpt)
+              }
+            }
 
             val thorSchemaData = thorSchema.getThorSchemaState()
             if (tickCount % 40 == 5) {

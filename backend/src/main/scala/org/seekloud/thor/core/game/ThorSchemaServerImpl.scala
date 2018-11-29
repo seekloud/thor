@@ -205,6 +205,15 @@ case class ThorSchemaServerImpl(
     ThorGame.ThorSnapshot(getThorSchemaState())
   }
 
+  def getLastGameEvent: List[ThorGame.WsMsgServer] = {
+    (gameEventMap.getOrElse(this.systemFrame - 1, Nil) ::: actionEventMap.getOrElse(this.systemFrame - 1, Nil))
+      .filter(_.isInstanceOf[ThorGame.WsMsgServer]).map(_.asInstanceOf[ThorGame.WsMsgServer])
+  }
+
+  def getCurSnapshot: Option[ThorGame.GameSnapshot] = {
+    Some(getCurGameSnapshot)
+  }
+
   override def handleUserEnterRoomNow() = {
 
     def generateAdventurer(playerId: String, name: String) = {
