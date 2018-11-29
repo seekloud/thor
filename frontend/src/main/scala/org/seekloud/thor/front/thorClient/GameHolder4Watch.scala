@@ -25,7 +25,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
     //    println(data.getClass)
     data match {
       case e:YourInfo =>
-        dom.console.log(s"YourInfo!!!!!!!!!! $e")
+        dom.console.log(s"$e")
         myId = e.id
         myName = e.name
         gameConfig = Some(e.config)
@@ -41,7 +41,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 //        thorSchemaOpt.foreach(_.drawDeadImg(s"玩家已经离开了房间，请重新选择观战对象"))
 
       case e: GridSyncState =>
-        dom.console.log(s"SYNC!!!!!$e")
+        dom.console.log(s"$e")
         thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
 
       case e:Ranks =>
