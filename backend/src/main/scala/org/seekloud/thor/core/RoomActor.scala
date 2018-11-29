@@ -15,6 +15,7 @@ import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions
 import org.seekloud.byteobject.ByteObject._
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 /**
   * @author Jingyi
@@ -55,8 +56,11 @@ object RoomActor {
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             val watchingMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建thorSchema
-            implicit val sendBuffer = new MiddleBufferInJvm(81920)
+            implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
+            if (AppSettings.gameRecordIsWork) {
+              getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
+            }
             timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
             idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, 0L)
         }
@@ -107,9 +111,22 @@ object RoomActor {
             Behavior.same
 
           case GameLoop =>
-            //            println("game loop")
+            val startTime = System.currentTimeMillis()
+            val snapShotOpt = thorSchema.getCurSnapshot
+
             //thorSchema定时更新
             thorSchema.update()
+
+            val gameEvents = thorSchema.getLastGameEvent
+            if (AppSettings.gameRecordIsWork) {
+              if (tickCount % 20 == 1) {
+                //排行榜
+                val rankEvent = Ranks(thorSchema.currentRankList,thorSchema.historyRank)
+                getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(rankEvent :: gameEvents, snapShotOpt)
+              } else {
+                getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(gameEvents, snapShotOpt)
+              }
+            }
 
             val thorSchemaData = thorSchema.getThorSchemaState()
             if (tickCount % 40 == 5) {
@@ -158,6 +175,19 @@ object RoomActor {
 
     val isKillMsg = msg.isInstanceOf[BeAttacked]
     subscribers.get(id).foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
+  }
+
+  private def getGameRecorder(ctx: ActorContext[Command], thorSchema: ThorSchemaServerImpl, roomId: Long, frame: Long): ActorRef[GameRecorder.Command] = {
+    val childName = s"gameRecorder-$roomId"
+    ctx.child(childName).getOrElse {
+      val curTime = System.currentTimeMillis()
+      val fileName = s"thorGame_$curTime"
+      val gameInformation = ThorGame.GameInformation(curTime, AppSettings.thorGameConfig.getThorGameConfigImpl())
+      val initStateOpt = Some(thorSchema.getCurGameSnapshot)
+      val actor = ctx.spawn(GameRecorder.create(fileName, gameInformation, initStateOpt, roomId), childName)
+      ctx.watchWith(actor, ChildDead(childName, actor))
+      actor
+    }.upcast[GameRecorder.Command]
   }
 
 }

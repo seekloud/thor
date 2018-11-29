@@ -165,6 +165,7 @@ object AppSettings {
   }
 
 
+  val essfMapKeyName = "essfMap"
 
 
 

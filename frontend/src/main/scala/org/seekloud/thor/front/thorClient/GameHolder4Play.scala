@@ -23,6 +23,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
   private[this] val actionSerialNumGenerator = new AtomicInteger(0)
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
+  private val window = Point((dom.window.innerWidth - 12).toFloat,(dom.window.innerHeight - 12).toFloat)
 
   //游戏启动
   def start(name: String, id: Option[String], accessCode: Option[String], roomId: Option[Long]): Unit = {
@@ -43,6 +44,13 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     }
   }
 
+  def reStart() ={
+    println("restart!!!!")
+    firstCome = true
+    start(myName, None, None, None) //重启没有验证accessCode
+    websocketClient.sendMsg(RestartGame(myName))
+  }
+
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
 
   override protected def wsMessageHandler(data: WsMsgServer) = {
@@ -50,10 +58,11 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     data match {
       case YourInfo(config, id, name) =>
         dom.console.log(s"get YourInfo ${config} ${id} ${name}")
+        startTime = System.currentTimeMillis()
         myId = id
         myName = name
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, config, id, name))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, config, id, name,canvasBounds ,canvasUnit))
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
@@ -71,7 +80,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         barrage = s"${killerName}杀死了${name}"
         barrageTime = 300
         killer = killerName
+        endTime = System.currentTimeMillis()
         println(s"be attacked by $killerName")
+        val time = duringTime(endTime - startTime)
         var killNum = 0
         var score = 0
         var level = 1
@@ -88,7 +99,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         dom.window.clearInterval(timer)
         thorSchemaOpt.foreach{grid =>
           grid.adventurerMap.remove(userId)
-          grid.drawGameStop(myName,killNum,score,level,killerName)
+          grid.drawGameStop(myName,killNum,score,level,killerName,time)
         }
 
       case Ranks(current, history) =>
@@ -155,6 +166,14 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               e.preventDefault()
             }
             else ()
+          else {
+            val x = e.clientX
+            val y = e.clientY
+//            println(s"x = ${window.x * 0.4} y = ${window.y * 0.8} clientX = $x clientY = $y")
+            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+              reStart()
+            e.preventDefault()
+          }
         case None =>
       }
 
@@ -180,10 +199,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (!thorSchema.adventurerMap.contains(myId)){
             if (e.keyCode == KeyCode.Space){
-              println("restart!!!!")
-              firstCome = true
-              start(myName, None, None, None) //重启没有验证accessCode
-              websocketClient.sendMsg(RestartGame(myName))
+              reStart()
               e.preventDefault()
             }
           }

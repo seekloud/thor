@@ -40,11 +40,14 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   protected val canvas = dom.document.getElementById(canvasName).asInstanceOf[Canvas]
   protected val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+  protected var canvasWidth = dom.window.innerWidth.toFloat
+  protected var canvasHeight = dom.window.innerHeight.toFloat
 
 //  protected val bounds = Point(Boundary.w,Boundary.h)
 
   protected val canvasUnit = 10
   protected val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+
 
   protected val canvasBounds = canvasBoundary / canvasUnit
   println(canvasBounds)
@@ -55,10 +58,14 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var myId = "test"
   protected var myName = "testName"
   protected var killer = "someone"
+  protected var startTime = 0l
+  protected var endTime = 0l
   protected var gameConfig: Option[ThorGameConfigImpl] = None
   protected var firstCome = true
   protected var currentRank = List.empty[Score]
   protected var historyRank = List.empty[Score]
+
+
 
   protected val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
 
@@ -88,6 +95,26 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   }
 
+  protected def checkScreenSize={
+    val newWidth=dom.window.innerWidth.toFloat
+    val newHeight=dom.window.innerHeight.toFloat
+    if(newWidth!=canvasWidth||newHeight!=canvasHeight){
+      println("the screen size is change")
+      canvasWidth = newWidth
+      canvasHeight = newHeight
+//      canvasUnit = getCanvasUnit(canvasWidth)
+//      canvasBounds = Point(canvasWidth, canvasHeight)/canvasUnit
+      println(s"update screen=${canvasUnit},=${(canvasWidth,canvasHeight)}")
+      canvas.width = canvasWidth.toInt
+      canvas.height = canvasHeight.toInt
+      thorSchemaOpt.foreach{r=>
+        r.updateClientSize(canvasBounds, canvasUnit)
+      }
+    }
+
+
+  }
+
 
   protected def wsConnectSuccess(e: Event) = {
     println(s"连接服务器成功")
@@ -108,6 +135,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   protected def wsMessageHandler(e: WsMsgServer)
 
+
   def closeHolder={
     dom.window.cancelAnimationFrame(nextFrame)
     Shortcut.cancelSchedule(timer)
@@ -122,9 +150,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
   var tickCount = 0L
-  var testStartTime = System.currentTimeMillis()
-  var testEndTime = System.currentTimeMillis()
-  var startTime = System.currentTimeMillis()
+//  var testStartTime = System.currentTimeMillis()
+//  var testEndTime = System.currentTimeMillis()
+//  var startTime = System.currentTimeMillis()
 
   protected def gameLoop(): Unit = {
     logicFrameTime = System.currentTimeMillis()
@@ -167,5 +195,15 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     ctx.textBaseline = "top"
     ctx.font = "36px Helvetica"
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
+  }
+
+  def duringTime(time:Long) = {
+    var remain = time / 1000 % 86400
+    val hour = remain / 3600
+    remain = remain % 3600
+    val min = remain / 60
+    val sec = remain % 60
+    val timeString = s"$hour : $min : $sec"
+    timeString
   }
 }

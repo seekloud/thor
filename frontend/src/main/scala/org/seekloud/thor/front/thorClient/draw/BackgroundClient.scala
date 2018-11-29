@@ -7,8 +7,12 @@ import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 
+import scala.collection.mutable
+
 trait BackgroundClient { this: ThorSchemaClientImpl =>
 
+
+  private val cacheCanvasMap = mutable.HashMap.empty[String, html.Canvas]
   val window = Point((dom.window.innerWidth - 12).toFloat,(dom.window.innerHeight - 12).toFloat)
   private val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
   mapImg.setAttribute("src", s"${Routes.base}/static/img/map.jpg")
@@ -31,6 +35,9 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.fillText(s,x,y)
     ctx.restore()
   }
+
+
+
 
   def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0) = {
     ctx.save()
@@ -81,7 +88,8 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
   private val playAgain = dom.document.createElement("img").asInstanceOf[html.Image]
   playAgain.setAttribute("src",s"${Routes.base}/static/img/play-again.png")
 
-  def drawGameStop(name:String,kill:Int,score:Int,level:Int,killer: String): Unit = {
+
+  def drawGameStop(name:String,kill:Int,score:Int,level:Int,killer: String,time: String): Unit = {
     ctx.save()
     ctx.fillStyle = Color.Black.toString()
     ctx.fillRect(0, 0, dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
@@ -97,7 +105,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.font = "22px Helvetica"
     ctx.fillText(kill.toString,window.x * 0.39, window.y * 0.4, window.x * 0.15)
     ctx.fillText(score.toString,window.x * 0.49, window.y * 0.4, window.x * 0.15)
-    ctx.fillText("0",window.x * 0.59, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(time,window.x * 0.57, window.y * 0.4, window.x * 0.15)
     ctx.save()
     ctx.strokeStyle = Color.Yellow.toString()
     ctx.moveTo(window.x * 0.36,window.y * 0.45)
@@ -114,7 +122,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.font = "24px Comic Sans Ms"
     ctx.fillStyle = Color.Black.toString()
     ctx.fillText("Press space to restart",window.x * 0.42, window.y * 0.72, window.x * 0.15)
-//    ctx.drawImage(playAgain,window.x * 0.4,window.y * 0.85,window.x * 0.2,window.y * 0.1)
+    ctx.drawImage(playAgain,window.x * 0.4,window.y * 0.85,window.x * 0.2,window.y * 0.1)
     ctx.restore()
   }
 

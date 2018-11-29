@@ -19,7 +19,9 @@ case class ThorSchemaClientImpl (
                              protected val ctx:dom.CanvasRenderingContext2D,
                              override val config: ThorGameConfig,
                              myId: String,
-                             myName: String
+                             myName: String,
+                             canvasSize:Point,
+                             var canvasUnit:Int
                            ) extends ThorSchemaImpl(config, myId, myName)
 with AdventurerClient
 with FoodClient
@@ -42,5 +44,11 @@ with FpsRender{
         case None =>()
       }
     }
+  }
+  private var canvasBounds=canvasSize
+  def updateClientSize(canvasSize:Point,cUnit:Int)={
+    canvasBounds=canvasSize
+    canvasUnit = cUnit
+
   }
 }

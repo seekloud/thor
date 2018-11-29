@@ -13,6 +13,7 @@ import org.seekloud.thor.shared.ptcl.model._
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchema
 import org.seekloud.thor.Boot.eSheepLinkClient
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 import scala.collection.mutable
 
@@ -198,6 +199,19 @@ case class ThorSchemaServerImpl(
 
     addUserAction(act)
     dispatch(act)
+  }
+
+  def getCurGameSnapshot: ThorGame.ThorSnapshot = {
+    ThorGame.ThorSnapshot(getThorSchemaState())
+  }
+
+  def getLastGameEvent: List[ThorGame.WsMsgServer] = {
+    (gameEventMap.getOrElse(this.systemFrame - 1, Nil) ::: actionEventMap.getOrElse(this.systemFrame - 1, Nil))
+      .filter(_.isInstanceOf[ThorGame.WsMsgServer]).map(_.asInstanceOf[ThorGame.WsMsgServer])
+  }
+
+  def getCurSnapshot: Option[ThorGame.GameSnapshot] = {
+    Some(getCurGameSnapshot)
   }
 
   override def handleUserEnterRoomNow() = {

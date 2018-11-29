@@ -25,7 +25,8 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
     //    println(data.getClass)
     data match {
       case e:YourInfo =>
-        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name))
+        startTime = System.currentTimeMillis()
+        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name,canvasBounds,canvasUnit))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration / e.config.frameDuration)
 
@@ -57,6 +58,8 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
       case e: BeAttacked =>
         killer = e.killerName
+        endTime = System.currentTimeMillis()
+        val time = duringTime(endTime - startTime)
         var killNum = 0
         var score = 0
         var level = 1
@@ -69,7 +72,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
             }
           case None =>
         }
-        thorSchemaOpt.foreach(_.drawGameStop(e.name,killNum,score,level,killer))
+        thorSchemaOpt.foreach(_.drawGameStop(e.name,killNum,score,level,killer,time))
         dom.window.cancelAnimationFrame(nextFrame)
 
       case RebuildWebSocket=>
