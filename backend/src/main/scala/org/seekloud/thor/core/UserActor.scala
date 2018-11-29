@@ -153,6 +153,7 @@ object UserActor {
             switchBehavior(ctx, "play", play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
 
           case StartWatching(roomId, watchedUserId) =>
+            log.debug(s"start watching $watchedUserId")
             roomManager ! RoomActor.JoinRoom4Watch(playerId,roomId,watchedUserId,ctx.self)
             switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedUserId, frontActor))
 
@@ -193,7 +194,7 @@ object UserActor {
           watchInit(playerId, info, roomId, watchedPlayerId, frontActor)
 
         case JoinRoomSuccess4Watch(watchedPlayerId, config, roomActor, state) =>
-          log.debug(s"join room 4 watch success")
+          log.debug(s"$playerId join room 4 watch success")
           frontActor ! Wrap(YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! Wrap(state.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayerId, frontActor, roomActor))

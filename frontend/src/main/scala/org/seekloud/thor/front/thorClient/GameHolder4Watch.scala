@@ -23,6 +23,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
   override protected def wsMessageHandler(data:WsMsgServer):Unit = {
     //    println(data.getClass)
+    dom.console.log(data.toString)
     data match {
       case e:YourInfo =>
         startTime = System.currentTimeMillis()
