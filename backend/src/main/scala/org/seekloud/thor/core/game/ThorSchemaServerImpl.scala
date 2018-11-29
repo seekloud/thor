@@ -28,7 +28,7 @@ case class ThorSchemaServerImpl(
   timer: TimerScheduler[RoomActor.Command],
   log: Logger,
   dispatch: WsMsgServer => Unit,
-  dispatchTo: (String, WsMsgServer) => Unit) extends ThorSchema {
+  dispatchTo: (String, WsMsgServer, Option[mutable.HashMap[String, ActorRef[UserActor.Command]]]) => Unit) extends ThorSchema {
 
   import scala.language.implicitConversions
 
@@ -44,6 +44,8 @@ case class ThorSchemaServerImpl(
   private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
 
   private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，)
+
+  def getUserActor4WatchGameList(uId: String) = watchingMap.get(uId)
 
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
     new AdventurerImpl(config, adventurer)
