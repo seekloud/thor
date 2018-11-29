@@ -10,7 +10,7 @@ import com.typesafe.config.Config
   * Date: 2018/11/15
   * Time: 16:38
   */
-case class wThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
+case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   import collection.JavaConverters._
   import Helpers.Requiring
 
