@@ -13,6 +13,7 @@ import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameInformation, ReplayFrameData, YourInfo}
 import org.seekloud.utils.ESSFSupport.{initFileReader, initStateDecode, metaDataDecode, userMapDecode}
+import org.seekloud.thor.Boot.executor
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._

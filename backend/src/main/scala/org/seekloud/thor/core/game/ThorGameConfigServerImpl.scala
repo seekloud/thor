@@ -23,10 +23,10 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val gameFameDuration = config.getLong("thorGame.frameDuration")
     .requiring(t => t >= 1l,"minimum game frame duration is 1 ms")
 
-  private[this] val playRate = config.getInt("thorGame.playRate")
+  private[this] val gamePlayRate = config.getInt("thorGame.playRate")
     .requiring(t => t >= 1,"minimum game play rate is 1 ms")
 
-  private[this] val replayRate = config.getInt("thorGame.replayRate")
+  private[this] val gameReplayRate = config.getInt("thorGame.replayRate")
     .requiring(t => t >= 1,"minimum game replay rate is 1 ms")
 
   private[this] val adventurerRadiusLevel = config.getDoubleList("thorGame.adventurer.radius")
@@ -87,13 +87,17 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private[this] val weaponParams = WeaponParams(weaponLengthLevel)
 
-  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, replayRate, adventurerParams, foodParams, weaponParams)
+  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, gamePlayRate, gameReplayRate, adventurerParams, foodParams, weaponParams)
 
   def getThorGameConfigImpl: ThorGameConfigImpl = thorGameConfig
 
   def boundary:Point = thorGameConfig.boundary
 
   def frameDuration:Long = thorGameConfig.frameDuration
+
+  def playRate: Int = thorGameConfig.playRate
+
+  def replayRate: Int = thorGameConfig.replayRate
 
   def facePalstance: Float = thorGameConfig.facePalstance
 

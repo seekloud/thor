@@ -14,6 +14,7 @@ import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameInformation, ThorSnapshot, UserEnterRoom, UserLeftRoom}
 import org.seekloud.utils.ESSFSupport.userMapEncode
 import org.seekloud.thor.models.DAO.recordDao
+import org.seekloud.thor.Boot.executor
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable

@@ -54,6 +54,11 @@ object ESheepProtocol {
     val msg: String
   }
 
+  final case class EsheepCommonRsp(
+                             errCode: Int,
+                             msg: String
+                             ) extends ESheepResponse
+
   final case class GsToken(
     token: String,
     expireTime: Long

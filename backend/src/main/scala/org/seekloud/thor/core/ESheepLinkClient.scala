@@ -3,7 +3,7 @@ package org.seekloud.thor.core
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.{ActorContext, StashBuffer, TimerScheduler}
-import org.seekloud.thor.protocol.ESheepProtocol.{CommonRsp, ESheepRecord, ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
+import org.seekloud.thor.protocol.ESheepProtocol.{EsheepCommonRsp, ESheepRecord, ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
 import org.seekloud.utils.ESheepClient
 import org.slf4j.{Logger, LoggerFactory}
 

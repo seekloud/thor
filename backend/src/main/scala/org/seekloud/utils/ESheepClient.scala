@@ -49,14 +49,14 @@ object ESheepClient extends HttpUtil {
     }
   }
 
-  def addRecord2ESheep(record: ESheepRecord, token: String): Future[Either[Throwable, CommonRsp]] ={
+  def addRecord2ESheep(record: ESheepRecord, token: String): Future[Either[Throwable, EsheepCommonRsp]] ={
     val methodName = "test_name_addRecord2ESheep"
     val url = s"http://10.1.29.250:30374/esheep/api/gameServer/addPlayerRecord?token=$token"//FIXME 修改url
     val jsonStr = AddESheepRecordRsp(record).asJson.noSpaces
 
     postJsonRequestSend(methodName, url, Nil, jsonStr).map{
       case Right(jsonRsp) =>
-        decode[CommonRsp](jsonRsp)
+        decode[EsheepCommonRsp](jsonRsp)
       case Left(e) =>
         log.debug(s"addRecord2ESheepError: $e")
         Left(e)
