@@ -12,6 +12,7 @@ import org.seekloud.thor.core.game.{AdventurerServer, ThorGameConfigServerImpl, 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
+import org.seekloud.thor.shared.ptcl.component.Adventurer
 
 import scala.language.implicitConversions
 import scala.concurrent.duration._
@@ -43,7 +44,7 @@ object UserActor {
 
   case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl) extends Command
 
-  final case class JoinRoomSuccess4Watch(watchedPlayerId: String, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
+  final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
 
   case class JoinRoomFail4Watch(msg:String) extends Command
 
@@ -193,11 +194,11 @@ object UserActor {
         case ChangeUserInfo(info) =>
           watchInit(playerId, info, roomId, watchedPlayerId, frontActor)
 
-        case JoinRoomSuccess4Watch(watchedPlayerId, config, roomActor, state) =>
+        case JoinRoomSuccess4Watch(watchedPlayer, config, roomActor, state) =>
           log.debug(s"$playerId join room 4 watch success")
-          frontActor ! Wrap(YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          frontActor ! Wrap(YourInfo(config, watchedPlayer.playerId, watchedPlayer.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! Wrap(state.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
-          switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayerId, frontActor, roomActor))
+          switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayer.playerId, frontActor, roomActor))
 
         case JoinRoomFail4Watch(error) =>
           log.debug(s"join room 4 watch failed ${msg}")

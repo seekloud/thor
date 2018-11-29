@@ -166,7 +166,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
   def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
-    println("drawGameByTime")
+//    println("drawGameByTime")
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if(thorSchema.adventurerMap.contains(myId)){
