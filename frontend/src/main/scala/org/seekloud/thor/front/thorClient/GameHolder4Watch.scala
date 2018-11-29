@@ -26,6 +26,9 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
     data match {
       case e:YourInfo =>
         dom.console.log(s"YourInfo!!!!!!!!!! $e")
+        myId = e.id
+        myName = e.name
+        gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()
         thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name,canvasBounds,canvasUnit))
         Shortcut.cancelSchedule(timer)
