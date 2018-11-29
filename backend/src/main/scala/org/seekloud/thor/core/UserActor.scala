@@ -12,6 +12,7 @@ import org.seekloud.thor.core.game.{AdventurerServer, ThorGameConfigServerImpl, 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
+import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.protocol.ReplayProtocol.{ChangeRecordMsg, GetRecordFrameMsg, GetUserInRecordMsg}
 import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
@@ -46,7 +47,7 @@ object UserActor {
 
   case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl) extends Command
 
-  final case class JoinRoomSuccess4Watch(watchedPlayerId: String, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
+  final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
 
   case class JoinRoomFail4Watch(msg: String) extends Command
 
@@ -165,7 +166,8 @@ object UserActor {
             switchBehavior(ctx, "play", play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
 
           case StartWatching(roomId, watchedUserId) =>
-            roomManager ! RoomActor.JoinRoom4Watch(playerId, roomId, watchedUserId, ctx.self)
+            log.debug(s"start watching $watchedUserId")
+            roomManager ! RoomActor.JoinRoom4Watch(playerId,roomId,watchedUserId,ctx.self)
             switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedUserId, frontActor))
 
           case LeftRoom(actor) =>
@@ -249,21 +251,21 @@ object UserActor {
       }
     }
 
-  private def watchInit(playerId: String, userInfo: UserInfo, roomId: Long, watchedPlayerId: String, frontActor: ActorRef[WsMsgSource])(
-    implicit stashBuffer: StashBuffer[Command],
-    timer: TimerScheduler[Command],
-    sendBuffer: MiddleBufferInJvm
+  private def watchInit(playerId:String, userInfo: UserInfo, roomId:Long, watchedPlayerId: String, frontActor:ActorRef[WsMsgSource])(
+    implicit stashBuffer:StashBuffer[Command],
+    timer:TimerScheduler[Command],
+    sendBuffer:MiddleBufferInJvm
   ): Behavior[Command] =
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case ChangeUserInfo(info) =>
           watchInit(playerId, info, roomId, watchedPlayerId, frontActor)
 
-        case JoinRoomSuccess4Watch(watchedPlayerId, config, roomActor, state) =>
-          log.debug(s"join room 4 watch success")
-          frontActor ! Wrap(YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+        case JoinRoomSuccess4Watch(watchedPlayer, config, roomActor, state) =>
+          log.debug(s"$playerId join room 4 watch success")
+          frontActor ! Wrap(YourInfo(config, watchedPlayer.playerId, watchedPlayer.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! Wrap(state.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
-          switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayerId, frontActor, roomActor))
+          switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayer.playerId, frontActor, roomActor))
 
         case JoinRoomFail4Watch(error) =>
           log.debug(s"join room 4 watch failed ${msg}")

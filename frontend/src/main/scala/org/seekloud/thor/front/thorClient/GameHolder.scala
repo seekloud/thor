@@ -92,7 +92,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     val offsetTime = curTime - logicFrameTime
     drawGameByTime(offsetTime, canvasUnit, canvasBounds)
     nextFrame = dom.window.requestAnimationFrame(gameRender())
-
   }
 
   protected def checkScreenSize={
@@ -167,6 +166,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
   def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
+//    println("drawGameByTime")
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if(thorSchema.adventurerMap.contains(myId)){

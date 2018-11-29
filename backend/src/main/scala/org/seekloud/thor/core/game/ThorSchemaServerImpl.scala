@@ -28,7 +28,7 @@ case class ThorSchemaServerImpl(
   timer: TimerScheduler[RoomActor.Command],
   log: Logger,
   dispatch: WsMsgServer => Unit,
-  dispatchTo: (String, WsMsgServer) => Unit) extends ThorSchema {
+  dispatchTo: (String, WsMsgServer, Option[mutable.HashMap[String, ActorRef[UserActor.Command]]]) => Unit) extends ThorSchema {
 
   import scala.language.implicitConversions
 
@@ -44,6 +44,8 @@ case class ThorSchemaServerImpl(
   private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
 
   private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，)
+
+  def getUserActor4WatchGameList(uId: String) = watchingMap.get(uId)
 
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
     new AdventurerImpl(config, adventurer)
@@ -66,7 +68,8 @@ case class ThorSchemaServerImpl(
       a.score += adventurer.energy
     }
 //    println(RecordMap)
-    dispatchTo(adventurer.playerId, event)
+    val actor = getUserActor4WatchGameList(adventurer.playerId)
+    dispatchTo(adventurer.playerId, event, actor)
   }
 
   implicit val scoreOrdering = new Ordering[Score] {
@@ -153,7 +156,7 @@ case class ThorSchemaServerImpl(
         playerObserversMap.put(uid, userActor4WatchGame)
         watchingMap.put(playerId, playerObserversMap)
         log.debug(s"当前的watchingMaps是${watchingMap}")
-        userActor4WatchGame ! UserActor.JoinRoomSuccess4Watch(adventurer.playerId, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()))
+        userActor4WatchGame ! UserActor.JoinRoomSuccess4Watch(adventurer, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()))
 
       case None =>
         userActor4WatchGame ! UserActor.JoinRoomFail4Watch(s"观战的用户${playerId}不存在")

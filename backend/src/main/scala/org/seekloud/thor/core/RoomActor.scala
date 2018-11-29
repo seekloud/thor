@@ -57,7 +57,7 @@ object RoomActor {
             val watchingMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建thorSchema
             implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
-            val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap), dispatchTo(subscribersMap))
+            val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
             }
@@ -96,7 +96,7 @@ object RoomActor {
             log.debug(s"roomactor - ${userId} left room")
             thorSchema.leftGame(userId, name)
             subscribersMap.remove(userId)
-            dispatch(subscribersMap)(UserLeftRoom(userId, name))
+            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
@@ -136,17 +136,18 @@ object RoomActor {
               val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
               else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
 
-              dispatch(subscribersMap)(GridSyncState(data))
+              dispatch(subscribersMap, watchingMap)(GridSyncState(data))
             }
             if (tickCount % 20 == 1) {
               //排行榜
-              dispatch(subscribersMap)(Ranks(thorSchema.currentRankList,thorSchema.historyRank))
+              dispatch(subscribersMap, watchingMap)(Ranks(thorSchema.currentRankList,thorSchema.historyRank))
             }
             newPlayer.foreach {
               //为新用户分发全量数据
               player =>
+                val actor = thorSchema.getUserActor4WatchGameList(player._1)
                 subscribersMap.put(player._1, player._2)
-                dispatchTo(subscribersMap)(player._1, GridSyncState(thorSchemaData))
+                dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)
             }
             idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
 
@@ -163,18 +164,23 @@ object RoomActor {
 
 
   //向所有用户发数据
-  def dispatch(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {
+  def dispatch(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]], observers: mutable.HashMap[String, ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {
     //    println(subscribers)
     //    subscribers.values.foreach( _ ! UserActor.DispatchMsg(msg))
     val isKillMsg = msg.isInstanceOf[BeAttacked]
     subscribers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
+    observers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
   }
 
   //向特定用户发数据
-  def dispatchTo(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]])(id: String, msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {
+  def dispatchTo(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]], observers: mutable.HashMap[String, ActorRef[UserActor.Command]])(id: String, msg: WsMsgServer,observersByUserId:Option[mutable.HashMap[String,ActorRef[UserActor.Command]]])(implicit sendBuffer: MiddleBufferInJvm) = {
 
     val isKillMsg = msg.isInstanceOf[BeAttacked]
     subscribers.get(id).foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
+    observersByUserId match{
+      case Some(ls) => ls.keys.foreach(playerId => observers.get(playerId).foreach(t => t ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(),isKillMsg))))
+      case None =>
+    }
   }
 
   private def getGameRecorder(ctx: ActorContext[Command], thorSchema: ThorSchemaServerImpl, roomId: Long, frame: Long): ActorRef[GameRecorder.Command] = {

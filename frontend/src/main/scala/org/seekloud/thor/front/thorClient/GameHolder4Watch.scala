@@ -25,10 +25,15 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
     //    println(data.getClass)
     data match {
       case e:YourInfo =>
+        dom.console.log(s"$e")
+        myId = e.id
+        myName = e.name
+        gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()
         thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name,canvasBounds,canvasUnit))
         Shortcut.cancelSchedule(timer)
-        timer = Shortcut.schedule(gameLoop, e.config.frameDuration / e.config.frameDuration)
+        timer = Shortcut.schedule(gameLoop, e.config.frameDuration)
+        nextFrame = dom.window.requestAnimationFrame(gameRender())
 
 
       case e: UserLeftRoom =>
@@ -36,9 +41,8 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 //        thorSchemaOpt.foreach(_.drawDeadImg(s"玩家已经离开了房间，请重新选择观战对象"))
 
       case e: GridSyncState =>
+        dom.console.log(s"$e")
         thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
-        dom.window.cancelAnimationFrame(nextFrame)
-        nextFrame = dom.window.requestAnimationFrame(gameRender())
 
       case e:Ranks =>
         /**
