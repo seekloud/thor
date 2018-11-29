@@ -94,12 +94,21 @@ object ThorGame {
     thorGameConfig: ThorGameConfigImpl
   )
 
-  /*replay*/
+  /* replay-frame-msg*/
+  final case class ReplayFrameData(ws:Array[Byte]) extends WsMsgSource
+  final case class InitReplayError(msg:String) extends WsMsgServer
+  final case class ReplayFinish() extends WsMsgServer
+  final case object StartReplay extends WsMsgServer
+
+  /*replay in front*/
   final case class ReplayInfo(playerId: String, name: String, f: Long, config: ThorGameConfigImpl) extends WsMsgServer
 
   final case class EventData(list: List[WsMsgServer]) extends WsMsgServer
 
   final case class DecodeError() extends WsMsgServer
+
+
+
 
   //解析url
   final case class ThorGameInfo(

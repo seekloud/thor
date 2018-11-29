@@ -44,6 +44,10 @@ trait ThorGameConfig {
 
   def frameDuration: Long
 
+  def playRate: Int
+
+  def replayRate: Int
+
   def boundary: Point
 
   def facePalstance: Float
@@ -84,6 +88,8 @@ trait ThorGameConfig {
 case class ThorGameConfigImpl(
   gridBoundary: GridBoundary,
   frameDuration: Long,
+  playRate: Int,
+  replayRate: Int,
   adventurerParams: AdventurerParams,
   foodParams: FoodParams,
   weaponParams: WeaponParams

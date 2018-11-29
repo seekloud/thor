@@ -23,6 +23,12 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val gameFameDuration = config.getLong("thorGame.frameDuration")
     .requiring(t => t >= 1l,"minimum game frame duration is 1 ms")
 
+  private[this] val playRate = config.getInt("thorGame.playRate")
+    .requiring(t => t >= 1,"minimum game play rate is 1 ms")
+
+  private[this] val replayRate = config.getInt("thorGame.replayRate")
+    .requiring(t => t >= 1,"minimum game replay rate is 1 ms")
+
   private[this] val adventurerRadiusLevel = config.getDoubleList("thorGame.adventurer.radius")
     .requiring(_.size() >= 1,"minimum supported adventurer radius size is 1").asScala.map(_.toFloat).toList
 
@@ -69,6 +75,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
 
 
+
+
 //  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
 //    .requiring(_ > 0, "minimum supported adventurer radius is 1").toFloat
 
@@ -79,7 +87,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private[this] val weaponParams = WeaponParams(weaponLengthLevel)
 
-  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, adventurerParams, foodParams, weaponParams)
+  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, replayRate, adventurerParams, foodParams, weaponParams)
 
   def getThorGameConfigImpl: ThorGameConfigImpl = thorGameConfig
 

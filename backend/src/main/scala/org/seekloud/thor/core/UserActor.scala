@@ -12,6 +12,9 @@ import org.seekloud.thor.core.game.{AdventurerServer, ThorGameConfigServerImpl, 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
+import org.seekloud.thor.protocol.ReplayProtocol.{ChangeRecordMsg, GetRecordFrameMsg, GetUserInRecordMsg}
+import org.seekloud.thor.shared.ptcl.ErrorRsp
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 import scala.language.implicitConversions
 import scala.concurrent.duration._
@@ -25,7 +28,7 @@ object UserActor {
   private val log = LoggerFactory.getLogger(this.getClass)
   private final val InitTime = Some(5.minutes)
 
-  sealed trait Command
+  trait Command
 
   case class WsMessage(msg: Option[WsMsgFront]) extends Command
 
@@ -45,15 +48,15 @@ object UserActor {
 
   final case class JoinRoomSuccess4Watch(watchedPlayerId: String, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
 
-  case class JoinRoomFail4Watch(msg:String) extends Command
+  case class JoinRoomFail4Watch(msg: String) extends Command
 
   case class UserFrontActor(actor: ActorRef[WsMsgSource]) extends Command
 
   case class ChangeUserInfo(info: UserInfo) extends Command
 
-  final case class StartWatching(roomId:Long, watchedPlayerId:String) extends Command
+  final case class StartWatching(roomId: Long, watchedPlayerId: String) extends Command
 
-  case class ChangeWatchedPlayerId(playerInfo:UserInfo,watchedPlayerId: String) extends Command with UserManager.Command
+  case class ChangeWatchedPlayerId(playerInfo: UserInfo, watchedPlayerId: String) extends Command with UserManager.Command
 
 
   case object ChangeBehaviorToInit extends Command
@@ -61,6 +64,10 @@ object UserActor {
   private final case object BehaviorChangeKey
 
   case class TimeOut(msg: String) extends Command
+
+  /*replay*/
+  case class StartReplay(recordId: Long, playerId: String, frame: Int) extends Command
+
 
   private[this] def switchBehavior(ctx: ActorContext[Command],
     behaviorName: String, behavior: Behavior[Command], durationOpt: Option[FiniteDuration] = None, timeOut: TimeOut = TimeOut("busy time error"))
@@ -128,8 +135,8 @@ object UserActor {
             log.debug(s"${ctx.self.path} is time out when busy,msg=${m}")
             Behaviors.stopped
 
-          case unknowMsg =>
-            stashBuffer.stash(unknowMsg)
+          case unknown =>
+            stashBuffer.stash(unknown)
             Behavior.same
         }
     }
@@ -147,13 +154,18 @@ object UserActor {
             roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, roomIdOpt)
             Behaviors.same
 
+
+          case StartReplay(rid, uid, f) =>
+            getGameReplay(ctx, rid) ! GameReplay.InitReplay(frontActor, uid, f)
+            switchBehavior(ctx, "replay", replay(uid, rid, userInfo, startTime, frontActor))
+
           case JoinRoomSuccess(adventurer, playerId, roomActor, config) =>
             val ws = YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             switchBehavior(ctx, "play", play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
 
           case StartWatching(roomId, watchedUserId) =>
-            roomManager ! RoomActor.JoinRoom4Watch(playerId,roomId,watchedUserId,ctx.self)
+            roomManager ! RoomActor.JoinRoom4Watch(playerId, roomId, watchedUserId, ctx.self)
             switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedUserId, frontActor))
 
           case LeftRoom(actor) =>
@@ -162,10 +174,10 @@ object UserActor {
 
           case WsMessage(reqOpt) =>
             reqOpt match {
-              case Some(t:RestartGame) =>
+              case Some(t: RestartGame) =>
                 log.debug(s"restart$t")
                 roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
-                idle(userInfo.playerId,userInfo.copy(name = t.name),startTime,frontActor)
+                idle(userInfo.playerId, userInfo.copy(name = t.name), startTime, frontActor)
 
               case _ =>
                 Behaviors.same
@@ -174,18 +186,73 @@ object UserActor {
           case ChangeBehaviorToInit =>
             dispatchTo(frontActor, RebuildWebSocket)
             ctx.unwatch(frontActor)
-            switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+            switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
-          case unknowMsg =>
-            Behavior.same
+          case unknownMsg =>
+            log.warn(s"unknown msg: $unknownMsg")
+            Behavior.unhandled
         }
     }
   }
 
-  private def watchInit(playerId:String, userInfo: UserInfo, roomId:Long, watchedPlayerId: String, frontActor:ActorRef[WsMsgSource])(
-    implicit stashBuffer:StashBuffer[Command],
-    timer:TimerScheduler[Command],
-    sendBuffer:MiddleBufferInJvm
+  private def replay(uId: String,
+    recordId: Long,
+    userInfo: UserInfo,
+    startTime: Long,
+    frontActor: ActorRef[ThorGame.WsMsgSource])(
+    implicit stashBuffer: StashBuffer[Command],
+    timer: TimerScheduler[Command],
+    sendBuffer: MiddleBufferInJvm
+  ): Behavior[Command] =
+    Behaviors.receive[Command] { (ctx, msg) =>
+      msg match {
+        /**
+          * 本消息内转换为初始状态并给前端发送异地登录消息*/
+        case ChangeBehaviorToInit =>
+          dispatchTo(frontActor, ThorGame.RebuildWebSocket)
+          ctx.unwatch(frontActor)
+          switchBehavior(ctx, "init", init(uId, userInfo), InitTime, TimeOut("init"))
+
+        case ChangeUserInfo(info) =>
+          replay(uId, recordId, info, startTime, frontActor)
+
+        case LeftRoom(actor) =>
+          ctx.unwatch(actor)
+          switchBehavior(ctx, "init", init(uId, userInfo), InitTime, TimeOut("init"))
+
+        case msg: GetUserInRecordMsg =>
+          log.debug(s"${ctx.self.path} receives a msg=$msg")
+          if (msg.recordId != recordId) {
+            msg.replyTo ! ErrorRsp(10002, "you are watching the other record")
+          } else {
+            getGameReplay(ctx, msg.recordId) ! msg
+          }
+
+          Behaviors.same
+
+        case msg: ChangeRecordMsg =>
+          ctx.self ! UserActor.StartReplay(msg.rid, msg.playerId, msg.f)
+          switchBehavior(ctx, "idle", idle(uId, userInfo, startTime, frontActor))
+
+        case msg: GetRecordFrameMsg =>
+          log.debug(s"${ctx.self.path} receives a msg=$msg")
+          if (msg.recordId != recordId) {
+            msg.replyTo ! ErrorRsp(10002, "you are watching the other record")
+          } else {
+            getGameReplay(ctx, msg.recordId) ! msg
+          }
+          Behaviors.same
+
+        case unknown =>
+          log.warn(s"unknown msg: $unknown")
+          Behavior.same
+      }
+    }
+
+  private def watchInit(playerId: String, userInfo: UserInfo, roomId: Long, watchedPlayerId: String, frontActor: ActorRef[WsMsgSource])(
+    implicit stashBuffer: StashBuffer[Command],
+    timer: TimerScheduler[Command],
+    sendBuffer: MiddleBufferInJvm
   ): Behavior[Command] =
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
@@ -208,50 +275,50 @@ object UserActor {
           frontActor ! m
           Behaviors.same
 
-        case ChangeBehaviorToInit=>
+        case ChangeBehaviorToInit =>
           frontActor ! Wrap(RebuildWebSocket.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           ctx.unwatch(frontActor)
-          switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+          switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
         case LeftRoom(actor) =>
           ctx.unwatch(actor)
-          switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+          switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
-        case unknowMsg =>
-          stashBuffer.stash(unknowMsg)
+        case unknown =>
+          stashBuffer.stash(unknown)
           Behavior.same
       }
 
     }
 
   private def watch(
-                       playerId:String,
-                       userInfo: UserInfo,
-                       roomId:Long,
-                       watchedPlayerId: String,
-                       frontActor:ActorRef[WsMsgSource],
-                       roomActor: ActorRef[RoomActor.Command])(
-                       implicit stashBuffer:StashBuffer[Command],
-                       timer:TimerScheduler[Command],
-                       sendBuffer:MiddleBufferInJvm
-                     ): Behavior[Command] =
+    playerId: String,
+    userInfo: UserInfo,
+    roomId: Long,
+    watchedPlayerId: String,
+    frontActor: ActorRef[WsMsgSource],
+    roomActor: ActorRef[RoomActor.Command])(
+    implicit stashBuffer: StashBuffer[Command],
+    timer: TimerScheduler[Command],
+    sendBuffer: MiddleBufferInJvm
+  ): Behavior[Command] =
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case ChangeUserInfo(info) =>
           watch(playerId, info, roomId, watchedPlayerId, frontActor, roomActor)
 
         case DispatchMsg(m) =>
-          if(m.asInstanceOf[Wrap].isKillMsg) {
+          if (m.asInstanceOf[Wrap].isKillMsg) {
             frontActor ! m
-            switchBehavior(ctx,"watchInit",watchInit(playerId, userInfo, roomId, watchedPlayerId, frontActor))
-          }else{
+            switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedPlayerId, frontActor))
+          } else {
             frontActor ! m
             Behaviors.same
           }
 
         case WsMessage(reqOpt) =>
           reqOpt match {
-            case Some(t:UserActionEvent) =>
+            case Some(t: UserActionEvent) =>
               roomActor ! RoomActor.WsMessage(playerId, t)
             case Some(t: PingPackage) =>
               frontActor ! Wrap(t.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
@@ -260,14 +327,14 @@ object UserActor {
           Behaviors.same
 
         case msg: ChangeWatchedPlayerId =>
-          ctx.self ! StartWatching(roomId,msg.watchedPlayerId)
-          switchBehavior(ctx,"idle",idle(playerId,userInfo, System.currentTimeMillis(),frontActor))
+          ctx.self ! StartWatching(roomId, msg.watchedPlayerId)
+          switchBehavior(ctx, "idle", idle(playerId, userInfo, System.currentTimeMillis(), frontActor))
 
-        case ChangeBehaviorToInit=>
+        case ChangeBehaviorToInit =>
           frontActor ! Wrap(RebuildWebSocket.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           roomActor ! RoomActor.LeftRoom4Watch(playerId, watchedPlayerId)
           ctx.unwatch(frontActor)
-          switchBehavior(ctx,"init",init(playerId, userInfo),InitTime,TimeOut("init"))
+          switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
         case LeftRoom(actor) =>
           ctx.unwatch(actor)
@@ -303,7 +370,7 @@ object UserActor {
                 roomActor ! RoomActor.WsMessage(playerId, event)
               case Some(event: RestartGame) =>
                 log.debug(s"restartGame $event")
-                JoinRoom(userInfo.playerId, userInfo.name, ctx.self )
+                JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
               case Some(event: PingPackage) =>
                 frontActor ! Wrap(event.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
               case _ =>
@@ -314,7 +381,7 @@ object UserActor {
             if (m.asInstanceOf[Wrap].isKillMsg) { //玩家死亡
               log.debug(s"deadmsg $m")
               frontActor ! m
-//              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
+              //              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
               Behaviors.same
             } else {
               frontActor ! m
@@ -333,7 +400,18 @@ object UserActor {
   }
 
   import org.seekloud.byteobject.ByteObject._
-  private def dispatchTo(subscriber: ActorRef[WsMsgSource],msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm)= {
+
+  private def dispatchTo(subscriber: ActorRef[WsMsgSource], msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {
     subscriber ! WsData(List(msg).fillMiddleBuffer(sendBuffer).result())
   }
+
+  private def getGameReplay(ctx: ActorContext[Command], recordId: Long): ActorRef[GameReplay.Command] = {
+    val childName = s"gameReplay--$recordId"
+    ctx.child(childName).getOrElse {
+      val actor = ctx.spawn(GameReplay.create(recordId), childName)
+      actor
+    }.upcast[GameReplay.Command]
+  }
+
+
 }
