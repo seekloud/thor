@@ -23,13 +23,14 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
   override protected def wsMessageHandler(data:WsMsgServer):Unit = {
     //    println(data.getClass)
-    dom.console.log(data.toString)
     data match {
       case e:YourInfo =>
+        dom.console.log(s"YourInfo $e")
         startTime = System.currentTimeMillis()
         thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name,canvasBounds,canvasUnit))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration / e.config.frameDuration)
+        nextFrame = dom.window.requestAnimationFrame(gameRender())
 
 
       case e: UserLeftRoom =>
@@ -39,7 +40,6 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
       case e: GridSyncState =>
         thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
         dom.window.cancelAnimationFrame(nextFrame)
-        nextFrame = dom.window.requestAnimationFrame(gameRender())
 
       case e:Ranks =>
         /**
