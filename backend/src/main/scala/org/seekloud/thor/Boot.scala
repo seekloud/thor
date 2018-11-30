@@ -18,7 +18,7 @@ import akka.stream.scaladsl._
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.actor.typed.scaladsl.adapter._
-import org.seekloud.thor.core.{RoomManager, UserManager, ESheepLinkClient}
+import org.seekloud.thor.core.{RoomManager, UserManager, ESheepLinkClient, GameRecordGetter}
 
 import scala.concurrent.duration._
 
@@ -48,8 +48,10 @@ object Boot extends HttpService {
 
   val eSheepLinkClient: ActorRef[ESheepLinkClient.Command] = system.spawn(ESheepLinkClient.create(),"ESheepLinkClient")
 
+  val gameRecordGetter: ActorRef[GameRecordGetter.Command] = system.spawn(GameRecordGetter.idle(),"GameRecordGetter")
 
-//  var testTime = System.currentTimeMillis()
+
+  //  var testTime = System.currentTimeMillis()
 //  scheduler.schedule(0.millis,120.millis){
 //    val startTime = System.currentTimeMillis()
 //    println(s"test time delay =${startTime - testTime}")

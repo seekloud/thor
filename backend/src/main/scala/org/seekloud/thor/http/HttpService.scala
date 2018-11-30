@@ -22,7 +22,8 @@ trait HttpService
   extends ResourceService
   with ServiceUtils
   with PlatService
-  with RoomInfoService{
+  with RoomInfoService
+  with ReplayService{
 
   import akka.actor.typed.scaladsl.AskPattern._
   import org.seekloud.utils.CirceSupport._
@@ -46,7 +47,7 @@ trait HttpService
 
 
   lazy val routes: Route = pathPrefix(AppSettings.rootPath) {
-    resourceRoutes ~ platEnterRoute ~ roomInfoRoutes ~
+    resourceRoutes ~ platEnterRoute ~ roomInfoRoutes ~ replayRoutes ~
       (pathPrefix("game") & get){
         pathEndOrSingleSlash{
           getFromResource("html/admin.html")
@@ -79,7 +80,29 @@ trait HttpService
                   }
                 }
             }
-        } ~ platGameRoutes
+        } ~
+          (path("watchRecord") & get & pathEndOrSingleSlash){
+            parameter(
+              'recordId.as[Long],
+              'accessCode.as[String],
+              'frame.as[Long],
+              'playerId.as[String]
+            ){
+              case (recordId, accessCode, frame,  playerId) =>
+                val VerifyAccessCode: Future[GetPlayerByAccessCodeRsp] = eSheepLinkClient ? (ESheepLinkClient.VerifyAccessCode(accessCode, _))
+                dealFutureResult {
+                  VerifyAccessCode.flatMap {
+                    case GetPlayerByAccessCodeRsp(data, 0, "ok") =>
+                      println("ws and access ok")
+                      val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow4Replay(recordId, frame, playerId, _, data.get.playerId, data.get.nickname))
+                      flowFuture.map(t => handleWebSocketMessages(t))
+                    case GetPlayerByAccessCodeRsp(data, _, _) =>
+                      println("ws and accessCode error")
+                      Future(complete(ErrorGetPlayerByAccessCodeRsp))
+                  }
+                }
+            }
+          } ~ platGameRoutes
 
       }
   }
@@ -105,6 +128,19 @@ trait HttpService
     ) {
       case (roomId, accessCode, playerIdOpt) =>
         redirect(s"/thor/game/#/watchGame/$roomId" + playerIdOpt.map(s => s"/$s").getOrElse("") + s"/$accessCode",
+          StatusCodes.SeeOther
+        )
+
+    }
+  } ~ path("watchRecord") {
+    parameter(
+      'recordId.as[Long],
+      'accessCode.as[String],
+      'frame.as[Long],
+      'playerId.as[String]
+    ) {
+      case (recordId, accessCode, frame,  playerId) =>
+        redirect(s"/thor/game/#/watchRecord/$recordId" + s"/$playerId" + s"/$frame" + s"/$accessCode",
           StatusCodes.SeeOther
         )
 

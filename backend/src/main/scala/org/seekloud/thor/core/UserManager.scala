@@ -9,6 +9,7 @@ import akka.stream.{ActorAttributes, Supervision}
 import akka.stream.scaladsl.Flow
 import akka.util.ByteString
 import org.seekloud.thor.core.UserActor.{ChangeUserInfo, ChangeWatchedPlayerId}
+import org.seekloud.thor.protocol.ReplayProtocol._
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.utils.byteObject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
@@ -27,6 +28,7 @@ object UserManager {
 
   final case class GetWebSocketFlow(id: String, name:String,replyTo:ActorRef[Flow[Message,Message,Any]], roomId:Option[Long] = None) extends Command
   final case class GetWebSocketFlow4Watch(roomId: Long, watchedPlayerId:String,replyTo:ActorRef[Flow[Message,Message,Any]], watchingId: String, name: String) extends Command
+  final case class GetWebSocketFlow4Replay(recordId: Long, frame: Long, watchedPlayerId:String,replyTo:ActorRef[Flow[Message,Message,Any]], watchingId: String, name: String) extends Command
 
   def create(): Behavior[Command] = {
     log.debug(s"UserManager start...")
@@ -72,8 +74,31 @@ object UserManager {
             userActor ! UserActor.StartWatching(roomId, watchedPlayerId)
             Behaviors.same
 
+          case GetWebSocketFlow4Replay(recordId, frame, watchedPlayerId, replyTo, watchingId, name) =>
+            log.debug(s"$watchingId GetWebSocketFlow4Replay")
+            val playerInfo = UserInfo(watchingId, name)
+            getUserActorOpt(ctx, watchingId) match {
+              case Some(userActor) =>
+                userActor ! UserActor.ChangeBehaviorToInit
+              case None =>
+            }
+            val userActor = getUserActor(ctx, watchingId, playerInfo)
+            replyTo ! getWebSocketFlow(userActor)
+            userActor ! ChangeUserInfo(playerInfo)
+            //发送用户看录像命令
+            userActor ! UserActor.StartReplay(recordId, watchedPlayerId, frame.toInt)
+            Behaviors.same
+
           case msg:ChangeWatchedPlayerId =>
             getUserActor(ctx,msg.playerInfo.playerId,msg.playerInfo) ! msg
+            Behaviors.same
+
+          case msg:GetUserInRecordMsg=>
+            getUserActor(ctx, msg.watchId, UserInfo(msg.watchId, msg.watchId)) ! msg
+            Behaviors.same
+
+          case msg:GetRecordFrameMsg=>
+            getUserActor(ctx, msg.watchId, UserInfo(msg.watchId, msg.watchId)) ! msg
             Behaviors.same
 
           case ChildDead(child, childRef) =>

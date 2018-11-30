@@ -1,5 +1,7 @@
 package org.seekloud.thor.protocol
 
+import org.seekloud.thor.shared.ptcl.ErrorRsp
+
 /**
   * User: XuSiRan
   * Date: 2018/11/22
@@ -42,6 +44,36 @@ object ESheepProtocol {
     gameId: Long,
     accessCode: String
   ) extends ESheepRequest
+
+  final case class GetRecordListReq(
+                                     lastRecordId: Long,
+                                     count:  Int
+                                   ) extends ESheepRequest
+
+  final case class GetRecordListByTimeReq(
+                                           startTime: Long,
+                                           endTime: Long,
+                                           lastRecordId: Long,
+                                           count:  Int
+                                         ) extends ESheepRequest
+
+  final case class GetRecordListByPlayerReq(
+                                             playerId: String,
+                                             lastRecordId: Long,
+                                             count:  Int
+                                           ) extends ESheepRequest
+
+  final case class GetRecordPlayerListReq(
+                                        recordId: Long,
+                                        playerId: String
+                                      ) extends  ESheepRequest
+
+  final case class GetRecordFrameReq(
+                                      recordId: Long,
+                                      playerId: String  //观看玩家的id
+                                    )
+
+
 
   trait RequestFromESheep
 
@@ -116,12 +148,12 @@ object ESheepProtocol {
 
   val ErrorGetRoomPlayerList = GetRoomPlayerListRsp(None, 200006, "getRoomId error in Service")
 
-  /** 获取录像内玩家列表 */
-  case class GetUserInRecordReq(
-    recordId: Long,
-    playerId: String
-  )
-
+//  /** 获取录像内玩家列表 */
+//  case class GetUserInRecordReq(
+//    recordId: Long,
+//    playerId: String
+//  )
+//
   case class GetUserInRecordRsp(
     data: RecordPlayerList,
     errCode: Int = 0,
@@ -142,14 +174,17 @@ object ESheepProtocol {
   case class RecordPlayerList(
     totalFrame: Int,
     playerList: List[PlayerInRecordInfo])
+  val ErrorGetReplayPlayerList1 = ErrorRsp(300002, "error")
+  val ErrorGetReplayPlayerList2 = ErrorRsp(300003, "error")
 
-
-  /** 获取录像播放进度 */
-  case class GetRecordFrameReq(
-    recordId: Long,
-    playerId: String //观看者
-  )
-
+  //
+//
+//  /** 获取录像播放进度 */
+//  case class GetRecordFrameReq(
+//    recordId: Long,
+//    playerId: String //观看者
+//  )
+//
   case class GetRecordFrameRsp(
     data: RecordFrameInfo,
     errCode: Int = 0,
@@ -157,5 +192,51 @@ object ESheepProtocol {
   ) extends CommonRsp
 
   case class RecordFrameInfo(frame: Int, frameNum: Long)
+  val ErrorGetRecordFrame1 = ErrorRsp(300004, "error")
+  val ErrorGetRecordFrame2 = ErrorRsp(300005, "error")
 
+  final case class ESheepRePlayInfo(
+                                     recordId: Long,
+                                     roomId: Long,
+                                     startTime: Long,
+                                     endTime: Long,
+                                     userCounts: Int,
+                                     userList: Seq[(String, String)]
+                                   )
+
+  final case class GetReplyRecordRsp(
+                               data: List[ESheepRePlayInfo],
+                               errCode: Int = 0,
+                               msg: String = "ok"
+                               ) extends ESheepResponse
+  val ErrorGetReplyRecord = GetReplyRecordRsp(Nil, 300001, "GetReplyRecordRsp in Service")
+//
+//  final case class ExistTime(
+//                              startFrame: Long,
+//                              endFrame: Long
+//                            )
+//  final case class ReplyPlayerInfo(
+//                                    playerId: String,
+//                                    nickname: String,
+//                                    existTime: List[ExistTime]
+//                                  )
+//  final case class ReplyPlayerList(
+//                                    totalFrame: Long,
+//                                    playerList: List[ReplyPlayerInfo]
+//                                  )
+//  final case class GetReplayPlayerListRsp(
+//                                        data: Option[ReplyPlayerList],
+//                                        errCode: Int = 0,
+//                                        msg: String = "ok"
+//                                      ) extends ESheepResponse
+//
+//  final case class PlayerFrameInfo(
+//                                    frame: Long,
+//                                    frameNum: Long //录像总帧数
+//                                  )
+//  final case class GetRecordFrameRsp(
+//                                      data: Option[PlayerFrameInfo],
+//                                      errCode: Int = 0,
+//                                      msg: String = "ok"
+//                                    ) extends ESheepResponse
 }

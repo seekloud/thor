@@ -16,6 +16,7 @@ object MainPage extends PageSwitcher {
     case "playGame" :: playerInfoList => new ThorRender(playerInfoList).render
     case "play" :: playerInfoList => new ThorRender(playerInfoList).render
     case "watchGame" :: roomId :: playerId :: accessCode :: Nil => new WatchRender(roomId.toLong, playerId, accessCode).render
+    case "watchRecord" :: recordId :: playerId :: frame :: accessCode :: Nil => new ReplayRender(recordId.toLong, playerId, frame.toInt, accessCode).render
     case "entry" :: Nil => EntryPage.render
     case _ => println("error in switch"); EntryPage.render
   }
