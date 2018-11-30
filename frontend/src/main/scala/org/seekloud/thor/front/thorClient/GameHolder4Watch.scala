@@ -13,6 +13,7 @@ import org.scalajs.dom.raw.{Event, FileReader, MessageEvent, MouseEvent}
 class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:String) extends GameHolder(name){
 
   override protected def gameLoop(): Unit = {
+    handleResize
     thorSchemaOpt.foreach(_.update())
     logicFrameTime = System.currentTimeMillis()
   }

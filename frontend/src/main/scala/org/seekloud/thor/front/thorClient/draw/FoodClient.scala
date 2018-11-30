@@ -18,9 +18,9 @@ trait FoodClient { this: ThorSchemaClientImpl =>
 
   //绘制食物
 
-  def drawFood(offset: Point, canvasUnit: Int, canvasBoundary: Point): Unit = {
+  def drawFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
-    def drawAFood(food:Food, offset:Point, canvasUnit: Int, canvasBoundary: Point): Unit = {
+    def drawAFood(food:Food, offset:Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
       val img = dom.document.createElement("img").asInstanceOf[html.Image]
       img.setAttribute("src", s"/thor/static/img/food-sheet0-${food.getFoodState.color}.png")

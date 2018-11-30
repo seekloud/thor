@@ -39,7 +39,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     moveDistance
   }
 
-  def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Int): Unit ={
+  def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Float): Unit ={
     //fixme 垃圾代码
     def drawAnAdventurer(adventurer: Adventurer) = {
 
@@ -94,7 +94,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     }
   }
 
-  def drawDying(offset: Point, offsetTime:Long, canvasUnit: Int): Unit = {
+  def drawDying(offset: Point, offsetTime:Long, canvasUnit: Float): Unit = {
 
     def drawADying(adventurer: Adventurer, step: Int): Unit = {
 
@@ -119,7 +119,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     }
   }
 
-  def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset:Point, canvasUnit: Int) = {
+  def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset:Point, canvasUnit: Float) = {
     if(adventurer.getAdventurerState.isUpdateLevel){
       val img = dom.document.createElement("img").asInstanceOf[html.Image]
       img.setAttribute("src", s"/thor/static/img/level-up.png")
@@ -142,7 +142,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   }
 
 
-  def drawAdventurers(offSetTime: Long, offset: Point, canvasUnit: Int): Unit ={
+  def drawAdventurers(offSetTime: Long, offset: Point, canvasUnit: Float): Unit ={
 
     drawAdventurer(offSetTime, offset, canvasUnit)
     drawDying(offset, offSetTime, canvasUnit)

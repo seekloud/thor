@@ -20,7 +20,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
   private val rankImg = dom.document.createElement("img").asInstanceOf[html.Image]
   rankImg.setAttribute("src",s"${Routes.base}/static/img/rank.png")
 
-  def drawBackground(offset: Point, canvasUnit: Int, canvasBoundary: Point):Unit = {
+  def drawBackground(offset: Point, canvasUnit: Float, canvasBoundary: Point):Unit = {
     ctx.save()
     ctx.fillStyle = "#171b1f"
     ctx.fillRect(0, 0, canvasBoundary.x * canvasUnit, canvasBoundary.y * canvasUnit)

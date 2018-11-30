@@ -20,5 +20,7 @@ object Constants {
 
   val fakeRender = false
 
+  val canvasUnitPerLine = 160 //可视窗口每行显示多少个canvasUnit
+
 
 }

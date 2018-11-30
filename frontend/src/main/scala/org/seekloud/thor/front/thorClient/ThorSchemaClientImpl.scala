@@ -21,7 +21,7 @@ case class ThorSchemaClientImpl (
                              myId: String,
                              myName: String,
                              canvasSize:Point,
-                             var canvasUnit:Int
+                             var canvasUnit:Float
                            ) extends ThorSchemaImpl(config, myId, myName)
 with AdventurerClient
 with FoodClient
@@ -29,7 +29,7 @@ with BackgroundClient
 with DrawOtherClient
 with FpsRender{
 
-  def drawGame(offSetTime:Long, canvasUnit: Int, canvasBounds: Point): Unit ={
+  def drawGame(offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
     if(!waitSyncData){
       adventurerMap.get(myId) match{
         case Some(adventurer) =>
@@ -41,14 +41,9 @@ with FpsRender{
           drawFood(offset, canvasUnit, canvasBounds)
           drawAdventurers(offSetTime, offset, canvasUnit)
           drawEnergyBar(adventurer)
-        case None =>()
+        case None => ()
       }
     }
   }
-  private var canvasBounds=canvasSize
-  def updateClientSize(canvasSize:Point,cUnit:Int)={
-    canvasBounds=canvasSize
-    canvasUnit = cUnit
 
-  }
 }

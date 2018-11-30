@@ -3,6 +3,7 @@ package org.seekloud.thor.front.thorClient
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
+import org.seekloud.thor.shared.ptcl.model.Constants
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 
 //import org.seekloud.thor.front.utils.byteObject.MiddleBufferInJs
@@ -45,12 +46,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 //  protected val bounds = Point(Boundary.w,Boundary.h)
 
-  protected val canvasUnit = 10
-  protected val canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
-
-
-  protected val canvasBounds = canvasBoundary / canvasUnit
-  println(canvasBounds)
+  protected var canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
+  protected var canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+  protected var canvasBounds = canvasBoundary / canvasUnit
 
   var thorSchemaOpt : Option[ThorSchemaClientImpl] = None
 
@@ -94,24 +92,16 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     nextFrame = dom.window.requestAnimationFrame(gameRender())
   }
 
-  protected def checkScreenSize={
-    val newWidth=dom.window.innerWidth.toFloat
-    val newHeight=dom.window.innerHeight.toFloat
-    if(newWidth!=canvasWidth||newHeight!=canvasHeight){
-      println("the screen size is change")
-      canvasWidth = newWidth
-      canvasHeight = newHeight
-//      canvasUnit = getCanvasUnit(canvasWidth)
-//      canvasBounds = Point(canvasWidth, canvasHeight)/canvasUnit
-      println(s"update screen=${canvasUnit},=${(canvasWidth,canvasHeight)}")
-      canvas.width = canvasWidth.toInt
-      canvas.height = canvasHeight.toInt
-      thorSchemaOpt.foreach{r=>
-        r.updateClientSize(canvasBounds, canvasUnit)
-      }
+  protected def handleResize = {
+    val width = dom.window.innerWidth.toFloat
+    val height = dom.window.innerHeight.toFloat
+    if(width != canvasWidth || height != canvasHeight){
+      canvasWidth = width
+      canvasHeight = height
+      canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+      canvasBoundary = Point(canvasWidth, canvasHeight)
+      canvasBounds = canvasBoundary / canvasUnit
     }
-
-
   }
 
 
@@ -154,6 +144,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 //  var startTime = System.currentTimeMillis()
 
   protected def gameLoop(): Unit = {
+    handleResize
     logicFrameTime = System.currentTimeMillis()
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
@@ -165,7 +156,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
 
-  def drawGameByTime(offsetTime: Long, canvasUnit: Int, canvasBounds: Point): Unit = {
+  def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasBounds: Point): Unit = {
 //    println("drawGameByTime")
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
