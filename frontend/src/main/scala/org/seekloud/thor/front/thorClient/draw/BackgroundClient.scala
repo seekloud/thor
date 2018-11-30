@@ -14,6 +14,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
 
   private val cacheCanvasMap = mutable.HashMap.empty[String, html.Canvas]
   val window = Point((dom.window.innerWidth - 12).toFloat,(dom.window.innerHeight - 12).toFloat)
+  val baseFont = window.x / 1440
   private val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
   mapImg.setAttribute("src", s"${Routes.base}/static/img/map.jpg")
   private val rankImg = dom.document.createElement("img").asInstanceOf[html.Image]
@@ -42,7 +43,7 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
   def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0) = {
     ctx.save()
     ctx.textBaseline = "top"
-    ctx.font = "16px Comic Sans MS"
+    ctx.font = s"${baseFont * 16}px Comic Sans MS"
     ctx.fillText(str, x, (lineNum + lineBegin - 1) * 14)
     ctx.restore()
   }
@@ -98,11 +99,11 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.fillStyle = "rgb(250, 250, 250)"
     ctx.textAlign = "left"
     ctx.textBaseline = "top"
-    ctx.font = "26px Helvetica"
+    ctx.font = s"${baseFont * 26}px Helvetica"
     ctx.fillText("kills",window.x * 0.38, window.y * 0.32, window.x * 0.15)
     ctx.fillText("score",window.x * 0.475, window.y * 0.32, window.x * 0.15)
     ctx.fillText("time",window.x * 0.58, window.y * 0.32, window.x * 0.15)
-    ctx.font = "22px Helvetica"
+    ctx.font = s"${baseFont * 22}px Helvetica"
     ctx.fillText(kill.toString,window.x * 0.39, window.y * 0.4, window.x * 0.15)
     ctx.fillText(score.toString,window.x * 0.49, window.y * 0.4, window.x * 0.15)
     ctx.fillText(time,window.x * 0.57, window.y * 0.4, window.x * 0.15)
@@ -112,14 +113,14 @@ trait BackgroundClient { this: ThorSchemaClientImpl =>
     ctx.lineTo(window.x * 0.64,window.y * 0.45)
     ctx.stroke()
     ctx.restore()
-    ctx.font = "26px Comic Sans Ms"
+    ctx.font = s"${baseFont * 26}px Comic Sans Ms"
     ctx.fillStyle = "orange"
     ctx.fillText(s"You Dead,Killer is ${killer} ", window.x * 0.4, window.y * 0.48)
     ctx.fillText(s"Your Final level is ${level} / 9",window.x * 0.4, window.y * 0.55)
 
 
     ctx.drawImage(userName,window.x * 0.4, window.y * 0.7, window.x * 0.2, window.y * 0.1)
-    ctx.font = "24px Comic Sans Ms"
+    ctx.font = s"${baseFont * 24}px Comic Sans Ms"
     ctx.fillStyle = Color.Black.toString()
     ctx.fillText("Press space to restart",window.x * 0.42, window.y * 0.72, window.x * 0.15)
     ctx.drawImage(playAgain,window.x * 0.4,window.y * 0.85,window.x * 0.2,window.y * 0.1)
