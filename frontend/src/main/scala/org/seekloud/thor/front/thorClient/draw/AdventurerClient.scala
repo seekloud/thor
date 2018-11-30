@@ -66,10 +66,10 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       //画武器
       var step = 3
       var isAttacking = false
-      attackingAdventureMap.get(adventurer.playerId) match{
+      attackingAdventureMap.filterNot(_._2 < 0).get(adventurer.playerId) match{
         case Some(s) =>
           step = s
-          if(s!=0) isAttacking = true
+          if(s != 0) isAttacking = true
         case _ =>
       }
       val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)

@@ -23,7 +23,7 @@ case class ThorSchemaState(
   isIncrement: Boolean = false
 )
 
-trait ThorSchema extends KillInformation{
+trait ThorSchema extends KillInformation {
 
   import scala.language.implicitConversions
 
@@ -46,16 +46,17 @@ trait ThorSchema extends KillInformation{
   /*事件*/
   protected val gameEventMap = mutable.HashMap[Long, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
   protected val actionEventMap = mutable.HashMap[Long, List[UserActionEvent]]() //frame -> List[UserActionEvent]
-  protected val myAdventurerAction = mutable.HashMap[Long,List[UserActionEvent]]()
+  protected val myAdventurerAction = mutable.HashMap[Long, List[UserActionEvent]]()
 
-  protected val attackingAdventureMap = mutable.HashMap[String, Int]()//playerId -> 攻击执行程度
+  protected val attackingAdventureMap = mutable.HashMap[String, Int]()
+  //playerId -> 攻击执行程度
   protected val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
 
   /*排行榜*/
   var currentRankList = List.empty[Score]
   var historyRankMap = Map.empty[String, Score]
   var historyRank = historyRankMap.values.toList.sortBy(_.e).reverse
-  var historyRankThreshold =if (historyRank.isEmpty)-1 else historyRank.map(_.e).min
+  var historyRankThreshold = if (historyRank.isEmpty) -1 else historyRank.map(_.e).min
   val historyRankLength = 5
 
   protected val quadTree: QuadTree = new QuadTree(Rectangle(Point(0, 0), boundary))
@@ -134,7 +135,7 @@ trait ThorSchema extends KillInformation{
     }
   }
 
-  protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit ={
+  protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
     //重写，后台dispatch
     killer.attacking(adventurer.level) // 干掉对面加能量
     val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
@@ -185,27 +186,29 @@ trait ThorSchema extends KillInformation{
   }
 
 
-//  def handleAdventurerMove(): Unit = {
-//
-//
-//
-//  }
+  //  def handleAdventurerMove(): Unit = {
+  //
+  //
+  //
+  //  }
 
-  protected final def handleAdventurerAttackingNow(): Unit={
-    attackingAdventureMap.foreach{ attacking =>
-      adventurerMap.filter(_._1 == attacking._1).values.foreach{adventurer =>
+  protected final def handleAdventurerAttackingNow(): Unit = {
+    attackingAdventureMap.foreach { attacking =>
+      adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
         val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
-        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p,attacking._2,adventurerAttackedCallback(killer = adventurer))(config))
+        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer))(config))
       }
-      if(attacking._2 <= 0){
+
+      if (attacking._2 <= 0) {
         adventurerMap.filter(_._1 == attacking._1).values.foreach {
           adventurer =>
-            adventurer.isMove = true
+            if (!adventurer.mouseStop) {
+              adventurer.isMove = true
+            }
         }
         attackingAdventureMap.remove(attacking._1)
       }
       else attackingAdventureMap.update(attacking._1, attacking._2 - 1)
-//      println(attacking._1+" : "+attacking._2)
     }
   }
 
@@ -214,7 +217,7 @@ trait ThorSchema extends KillInformation{
       if (dying._2._2 <= 0) {
         dyingAdventurerMap.remove(dying._1)
       } else {
-        dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 -1))
+        dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 - 1))
       }
     }
   }
@@ -256,9 +259,9 @@ trait ThorSchema extends KillInformation{
 
   final protected def handleAdventurerEatFoodNow(): Unit = {
     //判断是否吃到食物，吃到事件添加到当前systemFrame的gameEventMap之中
-    adventurerMap.values.foreach{ adventurer =>
+    adventurerMap.values.foreach { adventurer =>
       val adventurerMaybeEatFood = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Food]).map(_.asInstanceOf[Food])
-      adventurerMaybeEatFood.foreach(adventurer.checkEatFood(_,adventurerEatFoodCallback(adventurer)))
+      adventurerMaybeEatFood.foreach(adventurer.checkEatFood(_, adventurerEatFoodCallback(adventurer)))
     }
     //以上判断判断可以放在adventurer移动中以提前1帧处理
     gameEventMap.get(systemFrame).foreach { events =>
@@ -267,7 +270,7 @@ trait ThorSchema extends KillInformation{
   }
 
   //后台单独重写
-  protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food):Unit = {
+  protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food): Unit = {
     val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
     addGameEvent(event)
   }
@@ -310,8 +313,8 @@ trait ThorSchema extends KillInformation{
     }
   }
 
-  def leftGame(userId:String,name:String) = {
-    val event = UserLeftRoom(userId,name,systemFrame)
+  def leftGame(userId: String, name: String) = {
+    val event = UserLeftRoom(userId, name, systemFrame)
     addGameEvent(event)
     //    dispatch(event)
   }
@@ -321,11 +324,11 @@ trait ThorSchema extends KillInformation{
     handleUserLeftRoomNow()
     handleUserActionEventNow()
 
-    if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
+    if (org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
       handleMyActionNow()
     }
 
-//    handleAdventurerMove()
+    //    handleAdventurerMove()
     handleAdventurerAttackingNow()
     handleAdventurerAttackedNow()
     handleAdventurerDyingNow()
