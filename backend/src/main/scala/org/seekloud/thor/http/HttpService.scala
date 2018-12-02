@@ -81,7 +81,7 @@ trait HttpService
                 }
             }
         } ~
-          (path("watchRecord") & get & pathEndOrSingleSlash){
+          (path("replay") & get & pathEndOrSingleSlash){
             parameter(
               'recordId.as[Long],
               'accessCode.as[String],

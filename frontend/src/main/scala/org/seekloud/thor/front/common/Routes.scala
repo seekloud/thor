@@ -20,7 +20,7 @@ object Routes {
 
   def wsWatchGameUrl(roomId: Long, id: String, accessCode: String) = base + s"/game/watchGame?roomId=$roomId&playerId=$id&accessCode=$accessCode"
 
-  def wsReplayGameUrl(info:ReplayInfo) = base + s"/game/replay?rid=${info.recordId}&wid=${info.playerId}&f=${info.frame}&accessCode=${info.accessCode}"
+  def wsReplayGameUrl(info:ReplayInfo) = base + s"/game/replay?recordId=${info.recordId}&playerId=${info.playerId}&frame=${info.frame}&accessCode=${info.accessCode}"
 
 
   def getReplaySocketUri(info:ReplayInfo): String = {
