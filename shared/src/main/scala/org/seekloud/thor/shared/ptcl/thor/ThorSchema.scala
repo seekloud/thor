@@ -291,11 +291,7 @@ trait ThorSchema extends KillInformation {
     }
   }
 
-  protected def clearEventWhenUpdate(): Unit = {
-    gameEventMap -= systemFrame
-    actionEventMap -= systemFrame
-    systemFrame += 1
-  }
+  protected def clearEventWhenUpdate(): Unit = {}
 
   def getThorSchemaState(): ThorSchemaState = {
     ThorSchemaState(
