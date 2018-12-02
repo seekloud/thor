@@ -17,7 +17,7 @@ class ReplayRender(replayInfo: ReplayInfo)extends Page{
   private val canvas = <canvas id ="GameView" tabindex="1"></canvas>
 
   def init() = {
-    val gameHolder = new GameHolder4Replay("GameReplay")
+    val gameHolder = new GameHolder4Replay("GameView")
     gameHolder.startReplay(Some(replayInfo))
   }
 
