@@ -10,7 +10,7 @@ import org.seekloud.thor.Boot.executor
   * Date: 2018/11/29
   * Time: 11:23
   */
-object recordDao {
+object RecordDao {
   def getRecordById(id:Long)={
     db.run(tGameRecord.filter(_.recordId===id).result.headOption)
   }
