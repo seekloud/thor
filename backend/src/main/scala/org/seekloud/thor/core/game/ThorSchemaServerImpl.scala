@@ -104,11 +104,12 @@ case class ThorSchemaServerImpl(
     }
   }
 
-//  override def clearEventWhenUpdate(): Unit = {
-//    gameEventMap -= systemFrame - 1
-//    actionEventMap -= systemFrame - 1
-//    systemFrame += 1
-//  }
+  override def clearEventWhenUpdate(): Unit = {
+    super.clearEventWhenUpdate()
+    gameEventMap -= systemFrame - 1
+    actionEventMap -= systemFrame - 1
+    systemFrame += 1
+  }
 
   override def update(): Unit = {
     super.update()

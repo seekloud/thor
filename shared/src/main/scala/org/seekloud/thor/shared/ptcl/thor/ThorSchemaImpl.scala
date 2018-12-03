@@ -172,6 +172,7 @@ class ThorSchemaImpl(
 
 
   override protected def clearEventWhenUpdate(): Unit = {
+    super.clearEventWhenUpdate()
     if (esRecoverSupport) {
       addEventHistory(systemFrame, gameEventMap.getOrElse(systemFrame, Nil), actionEventMap.getOrElse(systemFrame, Nil))
     }

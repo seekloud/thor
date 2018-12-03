@@ -13,7 +13,7 @@ import org.seekloud.thor.protocol.ReplayProtocol.{EssfMapJoinLeftInfo, EssfMapKe
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameInformation, ThorSnapshot, UserEnterRoom, UserLeftRoom}
 import org.seekloud.utils.ESSFSupport.userMapEncode
-import org.seekloud.thor.models.DAO.recordDao
+import org.seekloud.thor.models.DAO.RecordDao
 import org.seekloud.thor.Boot.executor
 import org.slf4j.LoggerFactory
 
@@ -212,14 +212,14 @@ object GameRecorder {
         val endTime = System.currentTimeMillis()
         val filePath = AppSettings.gameDataDirectoryPath + fileName + s"_$fileIndex"
         val recordInfo = SlickTables.rGameRecord(-1L, gameRecordData.roomId, gameRecordData.gameInformation.gameStartTime, endTime, filePath)
-        val recordId = Await.result(recordDao.insertGameRecord(recordInfo), 1.minute)
+        val recordId = Await.result(RecordDao.insertGameRecord(recordInfo), 1.minute)
         val list = ListBuffer[SlickTables.rUserRecordMap]()
         userAllMap.foreach {
           userRecord =>
             list.append(SlickTables.rUserRecordMap(userRecord._1, recordId, roomId, userRecord._2))
 
         }
-        Await.result(recordDao.insertUserRecordList(list.toList), 2.minute)
+        Await.result(RecordDao.insertUserRecordList(list.toList), 2.minute)
         Behaviors.stopped
     }
   }
@@ -270,14 +270,14 @@ object GameRecorder {
           val endTime = System.currentTimeMillis()
           val filePath = AppSettings.gameDataDirectoryPath + fileName + s"_$fileIndex"
           val recordInfo = SlickTables.rGameRecord(-1L, gameRecordData.roomId, gameRecordData.gameInformation.gameStartTime, endTime, filePath)
-          recordDao.insertGameRecord(recordInfo).onComplete {
+          RecordDao.insertGameRecord(recordInfo).onComplete {
             case Success(recordId) =>
               val list = ListBuffer[SlickTables.rUserRecordMap]()
               userAllMap.foreach {
                 userRecord =>
                   list.append(SlickTables.rUserRecordMap(userRecord._1, recordId, roomId, userRecord._2))
               }
-              recordDao.insertUserRecordList(list.toList).onComplete {
+              RecordDao.insertUserRecordList(list.toList).onComplete {
                 case Success(_) =>
                   log.info(s"insert user record success")
                   ctx.self ! SwitchBehavior("initRecorder", initRecorder(roomId, gameRecordData.fileName, fileIndex, gameInformation, userMap))

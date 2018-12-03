@@ -6,7 +6,7 @@ import akka.actor.typed.scaladsl.{ActorContext, StashBuffer, TimerScheduler}
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.essf.io.{FrameData, FrameInputStream}
 import org.seekloud.thor.common.AppSettings
-import org.seekloud.thor.models.DAO.recordDao
+import org.seekloud.thor.models.DAO.RecordDao
 import org.seekloud.thor.protocol.ESheepProtocol._
 import org.seekloud.thor.protocol.ReplayProtocol.{EssfMapJoinLeftInfo, EssfMapKey, GetRecordFrameMsg, GetUserInRecordMsg}
 import org.seekloud.thor.shared.ptcl.ErrorRsp
@@ -67,7 +67,7 @@ object GameReplay {
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
       Behaviors.withTimers[Command] { implicit timer =>
-        recordDao.getRecordById(recordId).map {
+        RecordDao.getRecordById(recordId).map {
           case Some(r) =>
             try {
               val replay = initFileReader(r.filePath)

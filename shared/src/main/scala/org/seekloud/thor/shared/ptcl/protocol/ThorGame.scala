@@ -101,7 +101,7 @@ object ThorGame {
   final case object StartReplay extends WsMsgServer
 
   /*replay in front*/
-  final case class ReplayInfo(playerId: String, name: String, f: Long, config: ThorGameConfigImpl) extends WsMsgServer
+//  final case class ReplayInfo(playerId: String, name: String, f: Long, config: ThorGameConfigImpl) extends WsMsgServer
 
   final case class EventData(list: List[WsMsgServer]) extends WsMsgServer
 
