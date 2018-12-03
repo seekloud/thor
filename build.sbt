@@ -14,6 +14,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 
 val projectMainClass = "org.seekloud.thor.Boot"
+val clientMainClass = "org.seekloud.thor.App"
 
 def commonSettings = Seq(
   version := projectVersion,
@@ -120,6 +121,22 @@ lazy val backend = (project in file("backend")).enablePlugins(PackPlugin)
   )
   .dependsOn(sharedJvm)
 
+lazy val client = project.in(file("client")).enablePlugins(PackPlugin)
+  .settings(commonSettings: _*)
+  .settings(name := "client")
+  .settings(
+    mainClass in reStart := Some(clientMainClass),
+    javaOptions in reStart += "-Xmx2g"
+  )
+  .settings(
+    packMain := Map("tank" -> clientMainClass),
+    packJvmOpts := Map("tank" -> Seq("-Xmx512m", "-Xms64m")),
+    packExtraClasspath := Map("tank" -> Seq("."))
+  )
+  .settings(
+    libraryDependencies ++= Dependencies.clientDependencies
+  )
+  .dependsOn(sharedJvm)
 
 lazy val root = (project in file("."))
   .aggregate(frontend,  backend)
