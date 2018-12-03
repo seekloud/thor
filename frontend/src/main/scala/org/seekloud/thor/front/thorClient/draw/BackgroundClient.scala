@@ -56,15 +56,14 @@ trait BackgroundClient {
 
     ctx.save()
     ctx.drawImage(rankImg, begin, 0, window.x * 0.18, window.x * 0.18)
-    ctx.fillStyle = "#ffffff"
-    ctx.globalAlpha = 0.6
-    ctx.textAlign = "left"
+    ctx.fillStyle = "#fdffff"
     Rank.foreach { score =>
       index += 1
       if (score.id == id) yourRank = index
       if (index < 6) {
         if (score.id == id) yourNameIn = true
-        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", begin + window.x * 0.08, index * 2, RankBaseLine)
+        ctx.textAlign = "left"
+        drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine)
       }
     }
     index += 1

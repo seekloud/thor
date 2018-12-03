@@ -10,6 +10,7 @@ import akka.stream.scaladsl.Flow
 import akka.util.ByteString
 import org.seekloud.thor.core.UserActor.{ChangeUserInfo, ChangeWatchedPlayerId}
 import org.seekloud.thor.protocol.ReplayProtocol._
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.utils.byteObject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
@@ -78,8 +79,8 @@ object UserManager {
             log.debug(s"$watchingId GetWebSocketFlow4Replay")
             val playerInfo = UserInfo(watchingId, name)
             getUserActorOpt(ctx, watchingId) match {
-              case Some(userActor) =>
-                userActor ! UserActor.ChangeBehaviorToInit
+              case Some(actor) =>
+                actor ! UserActor.ChangeBehaviorToInit
               case None =>
             }
             val userActor = getUserActor(ctx, watchingId, playerInfo)
@@ -147,6 +148,9 @@ object UserManager {
       }.via(UserActor.flow(userActor))
       .map {
         case t: Wrap =>
+          BinaryMessage.Strict(ByteString(t.ws))
+
+        case t: ThorGame.ReplayFrameData =>
           BinaryMessage.Strict(ByteString(t.ws))
 
         case x =>

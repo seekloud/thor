@@ -105,9 +105,9 @@ object UserActor {
   def create(playerId: String, userInfo: UserInfo): Behavior[Command] = {
     Behaviors.setup[Command] { ctx =>
       log.debug(s"${ctx.self.path} is starting...")
-      implicit val stashBuffer = StashBuffer[Command](Int.MaxValue)
+      implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] { implicit timer =>
-        implicit val sendBuffer = new MiddleBufferInJvm(8192)
+        implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(8192)
         switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
       }
     }
@@ -125,11 +125,23 @@ object UserActor {
             ctx.watchWith(frontActor, LeftRoom(frontActor))
             switchBehavior(ctx, "idle", idle(playerId, userInfo, System.currentTimeMillis(), frontActor))
 
+          case ChangeUserInfo(info) =>
+            init(playerId, info)
+
           case LeftRoom(actor) =>
             ctx.unwatch(actor)
             Behaviors.stopped
 
+          case msg: GetUserInRecordMsg =>
+            log.debug(s"--------------------$userInfo")
+            getGameReplay(ctx, msg.recordId) ! msg
+            Behaviors.same
+
           case ChangeBehaviorToInit =>
+            Behaviors.same
+
+          case msg: GetRecordFrameMsg =>
+            getGameReplay(ctx, msg.recordId) ! msg
             Behaviors.same
 
           case TimeOut(m) =>
@@ -155,8 +167,12 @@ object UserActor {
             roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, roomIdOpt)
             Behaviors.same
 
+          case ChangeUserInfo(info) =>
+            idle(playerId, info, startTime, frontActor)
 
-          case StartReplay(rid, uid, f) =>
+
+          case msg@StartReplay(rid, uid, f) =>
+            log.info(s"UserActor [$playerId] get msg $msg.")
             getGameReplay(ctx, rid) ! GameReplay.InitReplay(frontActor, uid, f)
             switchBehavior(ctx, "replay", replay(uid, rid, userInfo, startTime, frontActor))
 
@@ -167,7 +183,7 @@ object UserActor {
 
           case StartWatching(roomId, watchedUserId) =>
             log.debug(s"start watching $watchedUserId")
-            roomManager ! RoomActor.JoinRoom4Watch(playerId,roomId,watchedUserId,ctx.self)
+            roomManager ! RoomActor.JoinRoom4Watch(playerId, roomId, watchedUserId, ctx.self)
             switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedUserId, frontActor))
 
           case LeftRoom(actor) =>
@@ -251,10 +267,10 @@ object UserActor {
       }
     }
 
-  private def watchInit(playerId:String, userInfo: UserInfo, roomId:Long, watchedPlayerId: String, frontActor:ActorRef[WsMsgSource])(
-    implicit stashBuffer:StashBuffer[Command],
-    timer:TimerScheduler[Command],
-    sendBuffer:MiddleBufferInJvm
+  private def watchInit(playerId: String, userInfo: UserInfo, roomId: Long, watchedPlayerId: String, frontActor: ActorRef[WsMsgSource])(
+    implicit stashBuffer: StashBuffer[Command],
+    timer: TimerScheduler[Command],
+    sendBuffer: MiddleBufferInJvm
   ): Behavior[Command] =
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
