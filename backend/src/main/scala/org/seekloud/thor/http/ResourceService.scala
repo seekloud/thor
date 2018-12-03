@@ -52,7 +52,10 @@ trait ResourceService {
     } ~
     pathPrefix("img") {
       getFromResourceDirectory("img")
-    }
+    }~
+      pathPrefix("music") {
+        getFromResourceDirectory("music")
+      }
   }
 
   //cache code copied from zhaorui.

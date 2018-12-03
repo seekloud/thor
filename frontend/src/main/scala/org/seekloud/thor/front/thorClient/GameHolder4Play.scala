@@ -66,7 +66,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
-        Shortcut.playMusic("bgm-2")
+
         println(s"111111111111111111111111111")
       case UserEnterRoom(userId, name, _, _) =>
         barrage = s"${name}加入了游戏"
@@ -148,7 +148,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
         case None =>
       }
-      Shortcut.playMusic("sound-4")
+      Shortcut.playMusic("bgm-2")
 
       e.preventDefault()
     }
