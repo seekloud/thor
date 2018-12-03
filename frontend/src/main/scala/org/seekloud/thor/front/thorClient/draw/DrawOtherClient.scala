@@ -18,8 +18,8 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
 
   private val barLength = 500
   private val barHeight = barLength / 288 * 70 //这张图片的比例是288 * 70
-  private val barLeft = (dom.window.innerWidth - barLength)/2
-  private val barTop = dom.window.innerHeight - barHeight - 20
+  private def barLeft = (dom.window.innerWidth - barLength)/2
+  private def barTop = dom.window.innerHeight - barHeight - 20
   
   def drawEnergyBar(adventurer: Adventurer): Unit = {
     ctx.save()

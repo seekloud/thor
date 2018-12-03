@@ -14,7 +14,7 @@ trait BackgroundClient {
 
 
   private val cacheCanvasMap = mutable.HashMap.empty[String, html.Canvas]
-  val window = Point((dom.window.innerWidth - 12).toFloat, (dom.window.innerHeight - 12).toFloat)
+  def window = Point((dom.window.innerWidth - 12).toFloat, (dom.window.innerHeight - 12).toFloat)
   val baseFont = window.x / 1440
   private val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
   mapImg.setAttribute("src", s"${Routes.base}/static/img/map.jpg")
