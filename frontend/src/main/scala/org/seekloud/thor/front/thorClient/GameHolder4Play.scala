@@ -12,6 +12,7 @@ import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 import scala.scalajs.js.typedarray.ArrayBuffer
 
@@ -62,7 +63,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         myId = id
         myName = name
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, config, id, name,canvasBounds ,canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name,canvasBounds ,canvasUnit))
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false

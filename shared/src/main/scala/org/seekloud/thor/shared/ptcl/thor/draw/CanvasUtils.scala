@@ -1,9 +1,7 @@
-package org.seekloud.thor.front.thorClient.draw
+package org.seekloud.thor.shared.ptcl.thor.draw
 
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.scalajs.dom
-import org.scalajs.dom.html
-import org.scalajs.dom.html.Image
 
 /**
   * @author Jingyi

@@ -1,6 +1,6 @@
-package org.seekloud.thor.front.thorClient.draw
+package org.seekloud.thor.shared.ptcl.thor.draw
 
-import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 trait FpsRender {
   this:ThorSchemaClientImpl =>

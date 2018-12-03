@@ -5,7 +5,7 @@ import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.model.{PlayerInfo, ReplayInfo}
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
-import org.seekloud.thor.shared.ptcl.thor.ThorSchemaState
+import org.seekloud.thor.shared.ptcl.thor.{ThorSchemaClientImpl, ThorSchemaState}
 
 /**
   * @author Jingyi

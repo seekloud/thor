@@ -1,12 +1,12 @@
-package org.seekloud.thor.front.thorClient.draw
+package org.seekloud.thor.shared.ptcl.thor.draw
 import org.seekloud.thor.front.common.Routes
-import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.html
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.scalajs.dom.ext.Color
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 import scala.collection.mutable
 trait DrawOtherClient {this: ThorSchemaClientImpl =>

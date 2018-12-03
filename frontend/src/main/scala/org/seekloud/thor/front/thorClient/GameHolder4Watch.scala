@@ -5,6 +5,7 @@ import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.utils.Shortcut
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.scalajs.dom.raw.{Event, FileReader, MessageEvent, MouseEvent}
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 /**
   * @author Jingyi

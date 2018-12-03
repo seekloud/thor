@@ -1,13 +1,10 @@
-package org.seekloud.thor.front.thorClient.draw
+package org.seekloud.thor.shared.ptcl.thor.draw
 
-import org.seekloud.thor.front.common.Routes
-import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.html
 import org.seekloud.thor.shared.ptcl.model.Point
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 import scala.collection.mutable
 
@@ -21,6 +18,8 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
 //  private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
 //  mapImg.setAttribute("src", s"${Routes.base}/static/img/logo-sheet0.png")
+
+  private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
 
   def getMoveDistance(adventurer: Adventurer, offSetTime: Long): Point = {
     // 获取当前渲染帧与逻辑帧的偏移量
@@ -40,7 +39,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   }
 
   def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Float): Unit ={
-    //fixme 垃圾代码
+
     def drawAnAdventurer(adventurer: Adventurer) = {
 
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
@@ -82,35 +81,37 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
 
       //用户昵称
-      ctx.fillStyle = "#ffffff"
-      ctx.textAlign = "center"
-      ctx.font = "normal normal 20px 微软雅黑"
-      ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + dy) * canvasUnit + 20)
-      ctx.closePath()
-    }
+      ctx.setFill("#ffffff")
+      ctx.setTextAlign("center")
+      ctx.setFont("微软雅黑", 20)
+      ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + dy) * canvasUnit + 20)}
     adventurerMap.foreach{
       adventurer =>
         drawAnAdventurer(adventurer._2)
     }
   }
 
-  def drawDying(offset: Point, offsetTime:Long, canvasUnit: Float): Unit = {
+  def drawDying(offset: Point, offsetTime:Long, canvasUnit: Float): Any = {
 
-    def drawADying(adventurer: Adventurer, step: Int): Unit = {
-
-      val o = if(offsetTime.toFloat/config.frameDuration > 0.5) 1 else 0
-
-      //根据进度选取死亡动画 step -> 2,1,0 img -> 1~6
-      val img = dom.document.createElement("img").asInstanceOf[html.Image]
-      img.setAttribute("src", s"/thor/static/img/kill${5 - step*2 + o}.png")
+    def drawADying(adventurer: Adventurer, step: Int): Any = {
 
       val position = adventurer.getAdventurerState.position
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
 
+      val o = if(offsetTime.toFloat/config.frameDuration > 0.5) 1 else 0
+
+      //根据进度选取死亡动画 step -> 2,1,0 img -> 1~6
+
+      val img = drawFrame.createImage(s"/thor/static/img/kill${5 - step*2 + o}.png")
+
       val width = img.width
       val height = img.height
 
+//      val canvasCache = drawFrame.createCanvas(math.ceil(width * canvasUnit).toInt, math.ceil(height * canvasUnit).toInt)
+//      val ctxCache = canvasCache.getCtx
+
       ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width/2, (position.y + offset.y) * canvasUnit - height/2)
+//      canvasCache.change2Image()
     }
 
     dyingAdventurerMap.foreach{
@@ -120,9 +121,10 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   }
 
   def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset:Point, canvasUnit: Float) = {
+
     if(adventurer.getAdventurerState.isUpdateLevel){
-      val img = dom.document.createElement("img").asInstanceOf[html.Image]
-      img.setAttribute("src", s"/thor/static/img/level-up.png")
+
+      val img = drawFrame.createImage(s"/thor/static/img/level-up.png")
 
       val width = img.width
       val height = img.height
@@ -133,9 +135,9 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val movePerStep = 15 //每个逻辑帧的高度位移
       val offsetHeight =  - 200 + movePerStep * (step - offSetTime.toFloat/config.frameDuration) //每个渲染帧的高度偏移量
       val opacity = 0.1 * step //透明度逐渐增加
-      
+
       ctx.save()
-      ctx.globalAlpha = opacity
+      ctx.setGlobalAlpha(opacity)
       ctx.drawImage(img, (position.x + offset.x + moveDistance.x) * canvasUnit - width/2, (position.y + offset.y + moveDistance.y - r) * canvasUnit - height/2 + offsetHeight)
       ctx.restore()
     }
