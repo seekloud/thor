@@ -18,8 +18,8 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
   def startReplay(option: Option[ReplayInfo] = None) = {
     println(s"start replay...")
     if (firstCome) {
-      println(s"replay ws url: ${Routes.getReplaySocketUri(option.get)}")
-      websocketClient.setup(Routes.getReplaySocketUri(option.get))
+      println(s"replay ws url: ${Routes.wsReplayGameUrl(option.get)}")
+      websocketClient.setup(Routes.wsReplayGameUrl(option.get))
       gameLoop()
     } else if (websocketClient.getWsState) {
       firstCome = true

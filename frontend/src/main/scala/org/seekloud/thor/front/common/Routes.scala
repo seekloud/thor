@@ -23,10 +23,10 @@ object Routes {
   def wsReplayGameUrl(info:ReplayInfo) = base + s"/game/replay?recordId=${info.recordId}&playerId=${info.playerId}&frame=${info.frame}&accessCode=${info.accessCode}"
 
 
-  def getReplaySocketUri(info:ReplayInfo): String = {
-    val wsProtocol = if (dom.document.location.protocol == "https:") "wss" else "ws"
-    s"$wsProtocol://${dom.document.location.host}${Routes.wsReplayGameUrl(info)}"
-  }
+//  def getReplaySocketUri(info:ReplayInfo): String = {
+//    val wsProtocol = if (dom.document.location.protocol == "https:") "wss" else "ws"
+//    s"$wsProtocol://${dom.document.location.host}${Routes.wsReplayGameUrl(info)}"
+//  }
 
 
 
