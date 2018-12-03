@@ -98,7 +98,20 @@ object Dependencies {
         //      Dependencies.scalaFx
       )
 
-
+  val clientDependencies =
+    Dependencies.akkaSeq ++
+      Dependencies.akkaHttpSeq ++
+      Dependencies.circeSeq ++
+      Seq(
+        Dependencies.scalaXml,
+        Dependencies.nscalaTime,
+        Dependencies.codec,
+        Dependencies.logback,
+        Dependencies.asynchttpclient,
+        Dependencies.essf,
+        Dependencies.byteobject
+        //Dependencies.scalajs
+      )
 
 
 }
