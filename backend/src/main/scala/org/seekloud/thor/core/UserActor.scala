@@ -156,7 +156,8 @@ object UserActor {
             Behaviors.same
 
 
-          case StartReplay(rid, uid, f) =>
+          case msg@StartReplay(rid, uid, f) =>
+            log.info(s"UserActor [$playerId] get msg $msg.")
             getGameReplay(ctx, rid) ! GameReplay.InitReplay(frontActor, uid, f)
             switchBehavior(ctx, "replay", replay(uid, rid, userInfo, startTime, frontActor))
 
