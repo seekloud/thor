@@ -71,7 +71,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       case UserEnterRoom(userId, name, _, _) =>
         barrage = s"${name}加入了游戏"
         barrageTime = 300
-        Shortcut.playMusic("bgm-2")
         println(s"222222222222")
 
       case UserLeftRoom(userId, name, _) =>
@@ -161,6 +160,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
               //              thorSchema.addMyAction(event)
+              Shortcut.playMusic("sound-4")
               e.preventDefault()
             }
             else if(e.button == 2){ //右键
