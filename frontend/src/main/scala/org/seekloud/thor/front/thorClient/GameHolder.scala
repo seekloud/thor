@@ -93,9 +93,11 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   }
 
   protected def handleResize = {
+    println("handleResize")
     val width = dom.window.innerWidth.toFloat
     val height = dom.window.innerHeight.toFloat
     if(width != canvasWidth || height != canvasHeight){
+      println("reSize!!!!!!!!!!")
       canvasWidth = width
       canvasHeight = height
       canvasUnit = canvasWidth / Constants.canvasUnitPerLine
