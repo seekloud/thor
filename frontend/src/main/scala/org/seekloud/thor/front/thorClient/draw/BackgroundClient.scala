@@ -58,6 +58,7 @@ trait BackgroundClient {
     ctx.drawImage(rankImg, begin, 0, window.x * 0.18, window.x * 0.18)
     ctx.fillStyle = "#ffffff"
     ctx.globalAlpha = 0.6
+    ctx.textAlign = "left"
     Rank.foreach { score =>
       index += 1
       if (score.id == id) yourRank = index
@@ -114,7 +115,7 @@ trait BackgroundClient {
     ctx.restore()
     ctx.font = s"${baseFont * 26}px Comic Sans Ms"
     ctx.fillStyle = "orange"
-    ctx.fillText(s"You Dead,Killer is ${killer} ", window.x * 0.4, window.y * 0.48)
+    ctx.fillText(s"You Dead,Killer is ${killer.take(5)} ", window.x * 0.4, window.y * 0.48)
     ctx.fillText(s"Your Final level is ${level} / 9", window.x * 0.4, window.y * 0.55)
 
 
