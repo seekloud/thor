@@ -53,7 +53,7 @@ object GameRecordGetter {
                 val userList = l._2.map(t => (t._2.get.userId, t._2.get.userNickname))
                 ESheepRePlayInfo(record.recordId, record.roomId, record.startTime, record.endTime, l._2.length, userList)
               }
-            }
+            }.sortBy(_.recordId)
             replyTo ! GetReplyRecordRsp(rspData)
           }
           Behaviors.same
@@ -70,7 +70,7 @@ object GameRecordGetter {
                 val userList = l._2.map(t => (t._2.get.userId, t._2.get.userNickname))
                 ESheepRePlayInfo(record.recordId, record.roomId, record.startTime, record.endTime, l._2.length, userList)
               }
-            }
+            }.sortBy(_.recordId)
             replyTo ! GetReplyRecordRsp(rspData)
           }
           Behaviors.same
@@ -87,7 +87,7 @@ object GameRecordGetter {
                 val userList = l._2.map(t => (t._2.get.userId, t._2.get.userNickname))
                 ESheepRePlayInfo(record.recordId, record.roomId, record.startTime, record.endTime, l._2.length, userList)
               }
-            }
+            }.sortBy(_.recordId)
             replyTo ! GetReplyRecordRsp(rspData)
           }
           Behaviors.same
