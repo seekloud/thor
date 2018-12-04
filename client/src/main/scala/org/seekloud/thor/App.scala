@@ -6,6 +6,7 @@ import akka.dispatch.MessageDispatcher
 import akka.event.{Logging, LoggingAdapter}
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import akka.actor.typed.scaladsl.adapter._
 import javafx.animation.{Animation, AnimationTimer}
 import javafx.application.Application
 import javafx.scene.{Group, Scene}
@@ -15,6 +16,9 @@ import javafx.stage.Stage
 import concurrent.duration._
 import javafx.application.Platform
 import akka.actor.typed.ActorRef
+import org.seekloud.thor.actor.LoginActor
+import org.seekloud.thor.common.LoginPage
+import org.seekloud.thor.protocol.ESheepProtocol.LoginUrlRsp
 /**
   * @author Jingyi
   * @version 创建时间：2018/12/3
@@ -24,7 +28,7 @@ class  App extends Application{
   import App._
 
   override def start(primaryStage: Stage): Unit = {
-
+    val loginPage = new LoginPage(primaryStage) // 处理扫码登录的操作，扫码完成后调用LoginPage.infoScene
   }
 
 }
@@ -46,6 +50,8 @@ object App{
   implicit val timeout:Timeout = Timeout(20 seconds) // for actor asks
 
   val log: LoggingAdapter = Logging(system, getClass)
+
+  val loginActor: ActorRef[LoginActor.Command] = system.spawn(LoginActor.idle, "loginActor")
 
   def pushStack2AppThread(fun: => Unit) = {
     Platform.runLater(() => fun)
