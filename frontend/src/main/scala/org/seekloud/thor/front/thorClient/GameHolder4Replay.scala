@@ -54,10 +54,9 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         }
 
       case e: ThorGame.Ranks =>
-        thorSchemaOpt.foreach { t =>
-          t.currentRankList = e.currentRank
-          t.historyRank = e.historyRank
-        }
+        currentRank = e.currentRank
+        historyRank = e.historyRank
+
 
       case ThorGame.StartReplay =>
         println(s"start replay...")
