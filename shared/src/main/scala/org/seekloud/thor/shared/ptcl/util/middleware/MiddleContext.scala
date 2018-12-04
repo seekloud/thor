@@ -46,6 +46,10 @@ trait MiddleContext {
 
   def strokeText(text: String, x: Double, y: Double, maxWidth: Double): Unit
 
+  def rotate(d: Float): Unit
+
+  def translate(x: Float, y: Float): Unit
+
   def save(): Unit
 
   def restore(): Unit

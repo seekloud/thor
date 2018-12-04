@@ -2,6 +2,7 @@ package org.seekloud.thor.shared.ptcl.thor.draw
 
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.scalajs.dom
+import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleContext, MiddleFrame}
 
 /**
   * @author Jingyi
@@ -9,7 +10,7 @@ import org.scalajs.dom
   */
 object CanvasUtils {
   
-  def rotateImage(ctx:dom.CanvasRenderingContext2D, src:String, position: Point, offset:Point,
+  def rotateImage(drawFrame: MiddleFrame, ctx: MiddleContext, src:String, position: Point, offset:Point,
                   width: Float, height: Float, angle: Float) = {
     //position 旋转的中心点
     //offset 图片中心点距离旋转中心点的偏移量（以自身旋转则为Point(0,0)）
@@ -17,8 +18,7 @@ object CanvasUtils {
     //height 图片的渲染高度 如果为0 则根据宽度等比例缩放
     //angle 旋转角度
 
-    val img = dom.document.createElement("img").asInstanceOf[html.Image]
-    img.setAttribute("src", src)
+    val img = drawFrame.createImage(src)
     val imgWidth = img.width
     val imgHeight = img.height
     val drawHeight = if(height == 0) width / imgWidth * imgHeight else height
@@ -26,7 +26,7 @@ object CanvasUtils {
     ctx.save()
     ctx.translate(position.x, position.y)
     ctx.rotate(angle)
-    ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, width, drawHeight)
+    ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, Some(width, drawHeight))
     // 恢复设置
     ctx.rotate(-angle)
     ctx.translate(-position.x, -position.y)

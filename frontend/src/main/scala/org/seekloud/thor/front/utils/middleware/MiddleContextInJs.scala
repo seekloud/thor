@@ -70,6 +70,10 @@ class MiddleContextInJs extends MiddleContext {
 
   override def strokeText(text: String, x: Double, y: Double, maxWidth: Double) = context.strokeText(text, x, y, maxWidth)
 
+  override def translate(x: Float, y: Float): Unit = context.translate(x, y)
+
+  override def rotate(d: Float): Unit = context.rotate(d)
+
   override def save(): Unit = context.save()
 
   override def restore(): Unit = context.restore()
