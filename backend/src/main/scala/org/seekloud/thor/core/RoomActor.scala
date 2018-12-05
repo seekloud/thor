@@ -118,7 +118,6 @@ object RoomActor {
             thorSchema.update()
 
             val gameEvents = thorSchema.getLastGameEvent
-            log.debug(s"frame [${thorSchema.systemFrame}] game events: $gameEvents")
             if (AppSettings.gameRecordIsWork) {
               if (tickCount % 20 == 1) {
                 //排行榜

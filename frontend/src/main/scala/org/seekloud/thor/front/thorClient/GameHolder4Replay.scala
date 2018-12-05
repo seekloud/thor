@@ -54,6 +54,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         }
 
       case e: ThorGame.Ranks =>
+        println(s"replay get msg rank!")
         currentRank = e.currentRank
         historyRank = e.historyRank
 
@@ -66,7 +67,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.UserActionEvent =>
         //remind here only add preAction without rollback
         println(s"frame [${thorSchemaOpt.get.systemFrame}] user action event: $e")
-        thorSchemaOpt.get.preExecuteUserEvent(e)
+        thorSchemaOpt.foreach(_.preExecuteUserEvent(e))
 
       case e: ThorGame.GameEvent =>
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
