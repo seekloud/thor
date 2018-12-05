@@ -1,13 +1,14 @@
-package com.neo.sk.utils
+package org.seekloud.utils
 
-import com.neo.sk.tank.common.AppSettings
-import com.neo.sk.tank.model._
-import com.neo.sk.tank.shared.ptcl.ErrorRsp
+import org.seekloud.thor.common.AppSettings
+import org.seekloud.thor.model._
+import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.slf4j.LoggerFactory
-import com.neo.sk.tank.App.{executor}
+
 import scala.concurrent.Future
-import com.neo.sk.tank.App.executor
+import org.seekloud.thor.App.executor
 import com.neo.sk.utils.HttpUtil
+import org.seekloud.thor.protocol.ESheepProtocol.LoginUrlRsp
 /**
   * @author Jingyi
   * @version 创建时间：2018/12/3
@@ -22,6 +23,19 @@ object EsheepClient extends HttpUtil {
 
 //  private val baseUrl = s"${AppSettings.esheepProtocol}://${AppSettings.esheepHost}:${AppSettings.esheepPort}"
   private val baseUrl = s"http://flowdev.neoap.com"
+
+  def getLoginInfo: Future[Either[Throwable, LoginUrlRsp]] ={
+    val methodName = "ESheepLink: getLoginInfo"
+    val url = baseUrl + "/esheep/api/gameAgent/login"
+
+    getRequestSend(methodName, url, Nil).map{
+      case Right(rsp) =>
+        decode[LoginUrlRsp](rsp)
+      case Left(e) =>
+        log.debug(s"GetLoginInfo error: $e")
+        Left(e)
+    }
+  }
 
 
 }
