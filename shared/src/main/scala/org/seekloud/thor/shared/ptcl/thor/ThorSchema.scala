@@ -105,7 +105,6 @@ trait ThorSchema extends KillInformation {
 
   //处理本帧的动作信息
   protected final def handleUserActionEvent(actions: List[UserActionEvent]) = {
-    println(s"execute2")
     /**
       * 用户行为事件
       **/
@@ -145,7 +144,6 @@ trait ThorSchema extends KillInformation {
 
 
   final protected def handleUserActionEventNow(): Unit = {
-    println(s"execute1")
     actionEventMap.get(systemFrame).foreach { actionEvents =>
       handleUserActionEvent(actionEvents.reverse)
     }
