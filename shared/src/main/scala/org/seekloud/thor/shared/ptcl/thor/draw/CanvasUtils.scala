@@ -1,7 +1,6 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 
 import org.seekloud.thor.shared.ptcl.model.Point
-import org.scalajs.dom
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleContext, MiddleFrame}
 
 /**

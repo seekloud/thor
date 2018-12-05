@@ -1,5 +1,7 @@
 package org.seekloud.thor.front.utils.middleware
 
+import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleFrame, MiddleImage}
+
 /**
   * Created by sky
   * Date on 2018/11/17

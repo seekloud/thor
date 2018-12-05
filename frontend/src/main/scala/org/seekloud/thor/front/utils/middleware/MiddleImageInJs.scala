@@ -3,6 +3,7 @@ package org.seekloud.thor.front.utils.middleware
 import org.scalajs.dom
 import org.scalajs.dom.html
 import org.scalajs.dom.html.Image
+import org.seekloud.thor.shared.ptcl.util.middleware._
 
 /**
   * Created by sky
@@ -19,11 +20,15 @@ class MiddleImageInJs extends MiddleImage {
   def this(url: String) = {
     this()
     image = dom.document.createElement("img").asInstanceOf[html.Image]
-    image.setAttribute("src", Routes.base + "/static" + url)
+    image.setAttribute("src", "static" + url)
   }
 
   def getImage = image
 
   override def isComplete: Boolean = image.complete
+
+  override def width: Double = image.width
+
+  override def height: Double = image.height
 
 }

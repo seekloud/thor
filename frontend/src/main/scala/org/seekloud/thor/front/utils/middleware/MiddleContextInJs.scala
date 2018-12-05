@@ -33,19 +33,29 @@ class MiddleContextInJs extends MiddleContext {
 
   override def moveTo(x: Double, y: Double): Unit = context.moveTo(x, y)
 
-  override def drawImage(image: Any, offsetX: Double, offsetY: Double, size: Option[(Double, Double)]): Unit = {
+  override def drawImage(image: Any, offsetX: Double, offsetY: Double, size: Option[(Double, Double)] = None, imgOffsetX: Option[Double] = None, imgOffsetY: Option[Double] = None, imgSize: Option[(Double, Double)] = None): Unit = {
     image match {
       case js: MiddleImageInJs =>
+        if(imgOffsetX.isEmpty){
         if (size.isEmpty) {
           context.drawImage(js.getImage, offsetX, offsetY)
         } else {
           context.drawImage(js.getImage, offsetX, offsetY, size.get._1, size.get._2)
         }
+        }
+        else{
+          context.drawImage(js.getImage, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
+        }
       case js: Canvas =>
-        if (size.isEmpty) {
-          context.drawImage(js, offsetX, offsetY)
-        } else {
-          context.drawImage(js, offsetX, offsetY, size.get._1, size.get._2)
+        if(imgOffsetX.isEmpty){
+          if (size.isEmpty) {
+            context.drawImage(js, offsetX, offsetY)
+          } else {
+            context.drawImage(js, offsetX, offsetY, size.get._1, size.get._2)
+          }
+        }
+        else{
+          context.drawImage(js, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
     }
   }
@@ -65,6 +75,8 @@ class MiddleContextInJs extends MiddleContext {
   override def setFont(fontFamily: String, fontSize: Double) = context.font = s"${fontSize}px $fontFamily"
 
   override def setTextAlign(s: String) = context.textAlign = s
+
+  override def setTextBaseLine(s: String) = context.textBaseline = s
 
   override def rect(x: Double, y: Double, w: Double, h: Double) = context.rect(x, y, w, h)
 

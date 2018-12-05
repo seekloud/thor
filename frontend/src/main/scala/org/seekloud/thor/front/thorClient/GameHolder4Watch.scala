@@ -32,7 +32,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         myName = e.name
         gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()
-        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, name,canvasBounds,canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name,canvasBoundary,canvasUnit))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration)
         nextFrame = dom.window.requestAnimationFrame(gameRender())

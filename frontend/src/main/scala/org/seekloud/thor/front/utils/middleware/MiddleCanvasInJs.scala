@@ -3,6 +3,7 @@ package org.seekloud.thor.front.utils.middleware
 import org.scalajs.dom
 import org.scalajs.dom.html
 import org.scalajs.dom.html.Canvas
+import org.seekloud.thor.shared.ptcl.util.middleware.MiddleCanvas
 
 /**
   * Created by sky

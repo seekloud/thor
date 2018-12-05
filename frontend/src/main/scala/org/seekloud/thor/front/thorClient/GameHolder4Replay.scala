@@ -43,7 +43,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         myName = e.name
         gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()
-        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, e.name, canvasBounds, canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, e.name, canvasBoundary, canvasUnit))
 
       case e: ThorGame.GridSyncState =>
         if (firstCome) {

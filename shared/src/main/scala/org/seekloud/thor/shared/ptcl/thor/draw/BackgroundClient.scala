@@ -1,12 +1,9 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 
-import java.awt.Color
 
-import org.scalajs.dom
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
-import scala.collection.mutable
 
 trait BackgroundClient {
   this: ThorSchemaClientImpl =>
@@ -14,8 +11,8 @@ trait BackgroundClient {
 
   def window = Point((canvasSize.x - 12).toFloat, (canvasSize.y - 12).toFloat)
   val baseFont = window.x / 1440
-  private val mapImg = drawFrame.createImage(s"/thor/static/img/map.jpg")
-  private val rankImg = drawFrame.createImage(s"/thor/static/img/rank.jpg")
+  private val mapImg = drawFrame.createImage(s"/img/map.jpg")
+  private val rankImg = drawFrame.createImage(s"/img/rank.png")
 
   def drawBackground(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
     ctx.save()
@@ -29,6 +26,7 @@ trait BackgroundClient {
   def drawBarrage(s: String, x: Double, y: Double): Unit = {
     ctx.save()
     ctx.setFont("Comic Sans Ms", 30)
+    ctx.setTextBaseLine("top")
     ctx.setFill("#ffffff")
     ctx.fillText(s, x, y)
     ctx.restore()
@@ -37,6 +35,7 @@ trait BackgroundClient {
 
   def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0) = {
     ctx.save()
+    ctx.setTextBaseLine("top")
     ctx.setFont("Comic Sans MS", baseFont * 16)
     ctx.fillText(str, x, (lineNum + lineBegin - 1) * 14)
     ctx.restore()
@@ -74,10 +73,10 @@ trait BackgroundClient {
   }
 
 
-  private val logo = drawFrame.createImage("/thor/static/img/logo.png")
-  private val deadBlank = drawFrame.createImage("/thor/static/img/dead-blank.png")
-  private val userName = drawFrame.createImage("/thor/static/img/user-name.png")
-  private val playAgain = drawFrame.createImage("/thor/static/img/play-again.png")
+  private val logo = drawFrame.createImage("/img/logo.png")
+  private val deadBlank = drawFrame.createImage("/img/dead-blank.png")
+  private val userName = drawFrame.createImage("/img/user-name.png")
+  private val playAgain = drawFrame.createImage("/img/play-again.png")
 
 
   def drawGameStop(name: String, kill: Int, score: Int, level: Int, killer: String, time: String): Unit = {
@@ -102,8 +101,9 @@ trait BackgroundClient {
     ctx.lineTo(window.x * 0.64, window.y * 0.45)
     ctx.stroke()
     ctx.restore()
+    ctx.setTextBaseLine("top")
     ctx.setFont("Comic Sans Ms", baseFont * 26)
-    ctx.setFill() = "orange"
+    ctx.setFill("#ffa400")
     ctx.fillText(s"You Dead,Killer is ${killer.take(5)} ", window.x * 0.4, window.y * 0.48)
     ctx.fillText(s"Your Final level is ${level} / 9", window.x * 0.4, window.y * 0.55)
 
@@ -117,10 +117,11 @@ trait BackgroundClient {
   }
 
   def drawReplayMsg(m: String): Unit = {
-    ctx.setFill() = "rgb(0,0,0)"
+    ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasSize.x * canvasUnit, canvasSize.y * canvasUnit)
-    ctx.setFill() = "rgb(250, 250, 250)"
+    ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left")
+    ctx.setTextBaseLine("top")
     ctx.setFont("Helvetica", 3.6 * canvasUnit)
     ctx.fillText(m, 150, 180)
     println()

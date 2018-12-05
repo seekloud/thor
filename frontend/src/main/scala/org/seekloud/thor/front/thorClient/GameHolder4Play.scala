@@ -30,7 +30,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   def start(name: String, id: Option[String], accessCode: Option[String], roomId: Option[Long]): Unit = {
     println(s"start $name")
     myName = name
-    canvas.focus()
+    canvas.getCanvas.focus()
     if (firstCome) {
       drawGameLoading()
       addActionListenEvent()
@@ -63,7 +63,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         myId = id
         myName = name
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name,canvasBounds ,canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name,canvasBoundary ,canvasUnit))
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
@@ -128,9 +128,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   }
 
   def addActionListenEvent(): Unit = {
-    canvas.focus()
-    canvas.oncontextmenu = _=> false //取消右键弹出行为
-    canvas.onmousemove = { (e: dom.MouseEvent) =>
+    canvas.getCanvas.focus()
+    canvas.getCanvas.oncontextmenu = _=> false //取消右键弹出行为
+    canvas.getCanvas.onmousemove = { (e: dom.MouseEvent) =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
       thorSchemaOpt match{
@@ -152,7 +152,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
       e.preventDefault()
     }
-    canvas.onmousedown = {(e: dom.MouseEvent) =>
+    canvas.getCanvas.onmousedown = {(e: dom.MouseEvent) =>
       thorSchemaOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId))
@@ -184,7 +184,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       }
 
     }
-    canvas.onmouseup = {(e: dom.MouseEvent) =>
+    canvas.getCanvas.onmouseup = {(e: dom.MouseEvent) =>
       thorSchemaOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if(thorSchema.adventurerMap.contains(myId))
@@ -200,7 +200,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       }
 
     }
-    canvas.onkeydown = {(e : dom.KeyboardEvent) =>
+    canvas.getCanvas.onkeydown = {(e : dom.KeyboardEvent) =>
       thorSchemaOpt match{
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (!thorSchema.adventurerMap.contains(myId)){

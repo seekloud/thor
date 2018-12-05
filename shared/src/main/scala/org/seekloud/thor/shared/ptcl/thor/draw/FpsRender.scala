@@ -21,11 +21,12 @@ trait FpsRender {
 
   def drawNetInfo(networkLatency:Long) = {
     addFps()
-    ctx.font = "25px Helvetica"
-    ctx.textAlign = "start"
-    ctx.fillStyle = "white"
+    ctx.setFont("Helvetica", 25)
+    ctx.setTextAlign("start")
+    ctx.setFill("#ffffff")
     val fpsStr =  s"fps   : $lastRenderTimes"
     val pingStr = s"ping : ${networkLatency}ms"
+    ctx.setTextBaseLine("top")
     ctx.fillText(pingStr,300,10)
     ctx.fillText(fpsStr,300,40)
   }

@@ -1,11 +1,7 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 
-import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.shared.ptcl.component.Food
 import org.seekloud.thor.shared.ptcl.model.Point
-import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.html
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 import scala.collection.mutable
@@ -22,8 +18,7 @@ trait FoodClient { this: ThorSchemaClientImpl =>
 
     def drawAFood(food:Food, offset:Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
-      val img = dom.document.createElement("img").asInstanceOf[html.Image]
-      img.setAttribute("src", s"/thor/static/img/food-sheet0-${food.getFoodState.color}.png")
+      val img = drawFrame.createImage(s"/img/food-sheet0-${food.getFoodState.color}.png")
 
       val r = config.getRadiusByFoodLevel(food.getFoodState.level)
       val sx = food.getFoodState.position.x - r + offset.x
@@ -34,7 +29,7 @@ trait FoodClient { this: ThorSchemaClientImpl =>
       if(0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y){
         //只绘制视角窗口内的食物
         ctx.save()
-        ctx.drawImage(img, sx * canvasUnit, sy * canvasUnit, dx * canvasUnit, dy * canvasUnit)
+        ctx.drawImage(img, sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
         ctx.restore()
       }
 
