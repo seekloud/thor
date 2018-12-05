@@ -49,10 +49,8 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         /**
           * 游戏排行榜
           * */
-        thorSchemaOpt.foreach{ t =>
-          t.currentRankList = e.currentRank
-          t.historyRank = e.historyRank
-        }
+        currentRank = e.currentRank
+        historyRank = e.historyRank
 
       case e:UserActionEvent =>
         thorSchemaOpt.foreach(_.receiveUserEvent(e))
