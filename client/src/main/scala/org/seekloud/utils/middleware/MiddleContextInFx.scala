@@ -82,16 +82,26 @@ class MiddleContextInFx extends MiddleContext {
   override def drawImage(image: Any, offsetX: Double, offsetY: Double, size: Option[(Double, Double)] = None, imgOffsetX: Option[Double] = None, imgOffsetY: Option[Double] = None, imgSize: Option[(Double, Double)] = None): Unit = {
     image match {
       case js: MiddleImageInFx =>
-        if (size.isEmpty) {
-          context.drawImage(js.getImage, offsetX, offsetY)
-        } else {
-          context.drawImage(js.getImage, offsetX, offsetY, size.get._1, size.get._2)
+        if(imgOffsetX.isEmpty){
+          if (size.isEmpty) {
+            context.drawImage(js.getImage, offsetX, offsetY)
+          } else {
+            context.drawImage(js.getImage, offsetX, offsetY, size.get._1, size.get._2)
+          }
+        }
+        else{
+          context.drawImage(js.getImage, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
       case js: WritableImage =>
-        if (size.isEmpty) {
-          context.drawImage(js, offsetX, offsetY)
-        } else {
-          context.drawImage(js, offsetX, offsetY, size.get._1, size.get._2)
+        if(imgOffsetX.isEmpty) {
+          if (size.isEmpty) {
+            context.drawImage(js, offsetX, offsetY)
+          } else {
+            context.drawImage(js, offsetX, offsetY, size.get._1, size.get._2)
+          }
+        }
+        else{
+          context.drawImage(js, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
     }
   }
