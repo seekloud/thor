@@ -5,7 +5,7 @@ import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.model.{PlayerInfo, ReplayInfo}
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
-import org.seekloud.thor.shared.ptcl.thor.ThorSchemaState
+import org.seekloud.thor.shared.ptcl.thor.{ThorSchemaClientImpl, ThorSchemaState}
 
 /**
   * @author Jingyi
@@ -43,7 +43,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         myName = e.name
         gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()
-        thorSchemaOpt = Some(ThorSchemaClientImpl(ctx, e.config, e.id, e.name, canvasBounds, canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, e.name, canvasBoundary, canvasUnit))
 
       case e: ThorGame.GridSyncState =>
         if (firstCome) {

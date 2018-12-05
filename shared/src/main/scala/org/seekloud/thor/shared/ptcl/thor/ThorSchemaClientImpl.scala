@@ -1,14 +1,9 @@
-package org.seekloud.thor.front.thorClient
+package org.seekloud.thor.shared.ptcl.thor
 
-import org.seekloud.thor.front.thorClient.draw._
-import org.seekloud.thor.shared.ptcl
-import org.seekloud.thor.shared.ptcl.component.Adventurer
-import org.seekloud.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
+import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model.Point
-import org.seekloud.thor.shared.ptcl.thor.ThorSchemaImpl
-import org.scalajs.dom
-
-import scala.collection.mutable
+import org.seekloud.thor.shared.ptcl.thor.draw._
+import org.seekloud.thor.shared.ptcl.util.middleware._
 
 /**
   * User: TangYaruo
@@ -16,11 +11,12 @@ import scala.collection.mutable
   * Time: 16:17
   */
 case class ThorSchemaClientImpl (
-                             protected val ctx:dom.CanvasRenderingContext2D,
+                            drawFrame: MiddleFrame,
+                            ctx: MiddleContext,
                              override val config: ThorGameConfig,
                              myId: String,
                              myName: String,
-                             canvasSize:Point,
+                             var canvasSize:Point,
                              var canvasUnit:Float
                            ) extends ThorSchemaImpl(config, myId, myName)
 with AdventurerClient
@@ -44,6 +40,11 @@ with FpsRender{
         case None => ()
       }
     }
+  }
+
+  def updateSize(bounds: Point, unit: Float): Unit ={
+    canvasSize = bounds
+    canvasUnit = unit
   }
 
 }
