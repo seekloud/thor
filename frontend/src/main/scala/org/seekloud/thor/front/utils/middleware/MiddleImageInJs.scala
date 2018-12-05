@@ -18,7 +18,7 @@ class MiddleImageInJs extends MiddleImage {
   def this(url: String) = {
     this()
     image = dom.document.createElement("img").asInstanceOf[html.Image]
-    image.setAttribute("src", "static" + url)
+    image.setAttribute("src", "/thor/static" + url)
   }
 
   def getImage = image
