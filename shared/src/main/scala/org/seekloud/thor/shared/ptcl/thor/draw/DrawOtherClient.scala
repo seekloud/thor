@@ -1,35 +1,29 @@
-package org.seekloud.thor.front.thorClient.draw
-import org.seekloud.thor.front.common.Routes
-import org.seekloud.thor.front.thorClient.ThorSchemaClientImpl
+package org.seekloud.thor.shared.ptcl.thor.draw
 import org.seekloud.thor.shared.ptcl.component.Adventurer
-import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.html
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
-import org.scalajs.dom.ext.Color
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 import scala.collection.mutable
 trait DrawOtherClient {this: ThorSchemaClientImpl =>
 
-  private val bar = dom.document.createElement("img").asInstanceOf[html.Image]
-  bar.setAttribute("src", s"${Routes.base}/static/img/weaponlevelbar_bg-sheet0.png")
-  private val fillBar = dom.document.createElement("img").asInstanceOf[html.Image]
-  fillBar.setAttribute("src", s"${Routes.base}/static/img/weaponlevelbar_fg-sheet0.png")
+  private val bar = drawFrame.createImage("/img/weaponlevelbar_bg-sheet0.png")
+  private val fillBar = drawFrame.createImage("/img/weaponlevelbar_fg-sheet0.png")
 
   private val barLength = 500
   private val barHeight = barLength / 288 * 70 //这张图片的比例是288 * 70
-  private def barLeft = (dom.window.innerWidth - barLength)/2
-  private def barTop = dom.window.innerHeight - barHeight - 20
+  private def barLeft = (canvasSize.x - barLength)/2
+  private def barTop = canvasSize.y - barHeight - 20
   
   def drawEnergyBar(adventurer: Adventurer): Unit = {
     ctx.save()
     //画能量条背景
-    ctx.drawImage(bar, barLeft, barTop, barLength, barHeight )
+    ctx.drawImage(bar, barLeft, barTop, Some(barLength, barHeight) )
 
     //等级
-    ctx.fillStyle = "#ffffff"
-    ctx.textAlign = "center"
-    ctx.font = "36px Comic Sans Ms"
+    ctx.setFill("#ffffff")
+    ctx.setTextAlign("center")
+    ctx.setFont("Comic Sans Ms", 36)
+    ctx.setTextBaseLine("top")
     ctx.fillText(adventurer.level.toString, barLeft + 32, barTop + 8)
     ctx.restore()
 
@@ -44,6 +38,6 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     val nowLevel = config.getMaxEnergyByLevel(adventurer.level)
     val fillLength = math.min((adventurer.energy - preLevel).toFloat / (nowLevel - preLevel) * fillMax, fillMax)
 
-    ctx.drawImage(fillBar, (fillMax-fillLength)/rate,0, fillLength/rate, fillBar.height , barLeft+offsetLeft, barTop+offsetTop, fillLength, barHeight - offsetTop*2 - 1)
+    ctx.drawImage(fillBar , barLeft+offsetLeft, barTop+offsetTop, Some(fillLength, barHeight - offsetTop*2 - 1), Some((fillMax-fillLength)/rate), Some(0), Some(fillLength/rate, fillBar.height))
   }
 }

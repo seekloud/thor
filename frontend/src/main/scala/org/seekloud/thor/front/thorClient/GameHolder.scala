@@ -2,9 +2,11 @@ package org.seekloud.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import org.seekloud.thor.front.utils.middleware.MiddleFrameInJs
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 //import org.seekloud.thor.front.utils.byteObject.MiddleBufferInJs
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
@@ -38,11 +40,12 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   import io.circe._, io.circe.generic.auto.exportDecoder, io.circe.parser._, io.circe.syntax._
 
+  val drawFrame = new MiddleFrameInJs
 
-  protected val canvas = dom.document.getElementById(canvasName).asInstanceOf[Canvas]
-  protected val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
   protected var canvasWidth = dom.window.innerWidth.toFloat
   protected var canvasHeight = dom.window.innerHeight.toFloat
+  protected val canvas = drawFrame.createCanvas(canvasName, canvasWidth, canvasHeight)
+  protected val ctx = canvas.getCtx
 
 //  protected val bounds = Point(Boundary.w,Boundary.h)
 
@@ -70,8 +73,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   var justSynced = false
 
 
-  canvas.width = canvasBoundary.x.toInt
-  canvas.height = canvasBoundary.y.toInt
+//  canvas.width = canvasBoundary.x.toInt
+//  canvas.height = canvasBoundary.y.toInt
 
 
   protected var timer: Int = 0
@@ -101,7 +104,10 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
       canvasUnit = canvasWidth / Constants.canvasUnitPerLine
       canvasBoundary = Point(canvasWidth, canvasHeight)
       canvasBounds = canvasBoundary / canvasUnit
+      canvas.setWidth(canvasWidth)
+      canvas.setHeight(canvasHeight)
       println(s"reSize!!!!!!!!!! canvasUnit:$canvasUnit")
+      thorSchemaOpt.foreach(_.updateSize(canvasBoundary, canvasUnit))
     }
   }
 
@@ -180,12 +186,11 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   def drawGameLoading(): Unit = {
     println("loading")
-    ctx.fillStyle = Color.Black.toString()
-    ctx.fillRect(0, 0, dom.window.innerWidth, dom.window.innerHeight)
-    ctx.fillStyle = "rgb(250, 250, 250)"
-    ctx.textAlign = "left"
-    ctx.textBaseline = "top"
-    ctx.font = "36px Helvetica"
+    ctx.setFill("#000000")
+    ctx.fillRec(0, 0, dom.window.innerWidth, dom.window.innerHeight)
+    ctx.setFill("rgb(250, 250, 250)")
+    ctx.setTextAlign("left")
+    ctx.setFont("Helvetica", 36)
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
