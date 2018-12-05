@@ -4,13 +4,15 @@ import java.io.ByteArrayInputStream
 
 import javafx.scene.{Group, Scene}
 import javafx.stage.Stage
-import org.seekloud.thor.App.{executor, scheduler, timeout, system}
+import org.seekloud.thor.App.{executor, scheduler, system, timeout}
 import org.seekloud.thor.App.loginActor
 import org.seekloud.thor.actor.LoginActor
 import akka.actor.typed.scaladsl.AskPattern._
+import javafx.collections.{FXCollections, ObservableList}
+import javafx.scene.control.{Button, ListView}
 import javafx.scene.image.{Image, ImageView}
 import javafx.scene.paint.Color
-import javafx.scene.text.{Text, Font}
+import javafx.scene.text.{Font, Text}
 import org.seekloud.thor.protocol.ESheepProtocol._
 import sun.misc.BASE64Decoder
 
@@ -45,20 +47,27 @@ class LoginPage(stage: Stage){
 
   //一个临时的Scene
   def infoSence(data: WsPlayerInfoRsp): Unit ={
-    val NameText = new Text(100, 50, data.data.nickname)
-    val TokenText = new Text(100, 100, "Token: " + data.data.token)
-    val TimeText = new Text(100, 150, "ExpireTime: " + data.data.tokenExpireTime.toString)
-    val GenderText = new Text(100, 200, "Gender: " + data.data.gender.toString)
-    NameText.setFont(Font.font(32))
-    TokenText.setFont(Font.font(17))
-    TimeText.setFont(Font.font(17))
-    GenderText.setFont(Font.font(17))
+    val NameText = new Text(200, 50, "连接中")
+    NameText.setFont(Font.font(48))
     val group = new Group()
-    group.getChildren.removeAll()
     group.getChildren.add(NameText)
-    group.getChildren.add(TokenText)
-    group.getChildren.add(TimeText)
-    group.getChildren.add(GenderText)
+    val scene = new Scene(group, 900, 500)
+    stage.setScene(scene)
+    stage.sizeToScene()
+    stage.centerOnScreen()
+    stage.show()
+  }
+
+  def roomScene(roomList: List[Long]) ={
+    val confirmBtn = new Button("确定")
+
+    val observableList:ObservableList[String] = FXCollections.observableArrayList()
+    val listView = new ListView[String](observableList)
+
+    roomList.foreach(t => observableList.add(t.toString))
+    val group = new Group()
+    group.getChildren.add(listView)
+    group.getChildren.add(confirmBtn)
     val scene = new Scene(group, 900, 500)
     stage.setScene(scene)
     stage.sizeToScene()

@@ -7,6 +7,17 @@ package org.seekloud.thor.protocol
   */
 object ESheepProtocol {
 
+  trait ESheepReq
+
+  final case class JoinGameReq(
+    gameId: Long,
+    playerId: String
+  ) extends ESheepReq
+
+  final case class RefreshTokenReq(
+    playerId: String
+  ) extends ESheepReq
+
   trait ESheepRsp {
     val errCode: Int
     val msg: String
@@ -39,5 +50,41 @@ object ESheepProtocol {
   ) extends ESheepRsp
 
   final case class Ws4AgentRsp(Ws4AgentRsp: WsPlayerInfoRsp)
+
+  final case class GameServerInfo(
+    ip: String,
+    port: Int,
+    domain: String
+  )
+
+  final case class JoinGameInfo(
+    accessCode: String,
+    gsPrimaryInfo: GameServerInfo,
+  )
+
+  final case class ClientJoinGameRsp(
+    data: JoinGameInfo,
+    errCode: Int = 0,
+    msg: String = "ok"
+  ) extends ESheepRsp
+
+  final case class TokenInfo(
+    token: String,
+    expireTime: Int
+  )
+
+  final case class RefreshTokenRsp(
+    data: TokenInfo,
+    errCode: Int = 0,
+    msg: String = "ok"
+  ) extends ESheepRsp
+
+  final case class RoomList(roomList: List[Long])
+
+  final case class GetRoomListRsp(
+    data: RoomList,
+    errCode: Int = 0,
+    msg: String = "ok"
+  ) extends ESheepRsp
 
 }

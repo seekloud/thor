@@ -51,7 +51,7 @@ object App{
 
   val log: LoggingAdapter = Logging(system, getClass)
 
-  val loginActor: ActorRef[LoginActor.Command] = system.spawn(LoginActor.idle, "loginActor")
+  val loginActor: ActorRef[LoginActor.Command] = system.spawn(LoginActor.init, "loginActor")
 
   def pushStack2AppThread(fun: => Unit) = {
     Platform.runLater(() => fun)
