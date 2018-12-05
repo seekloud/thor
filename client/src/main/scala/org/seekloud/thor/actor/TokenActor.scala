@@ -37,6 +37,8 @@ object TokenActor {
 
   case class TimeOut(msg: String) extends Command
 
+  case class StartInit(token: String, playerId: String) extends Command
+
   case object InitError extends Command
 
   case object UpdateToken extends Command
@@ -77,11 +79,17 @@ object TokenActor {
     }
   }
 
-  def create(token: String, playerId: String): Behavior[Command]  ={
+  def create(): Behavior[Command]  ={
     Behaviors.setup[Command]{ ctx =>
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command]{ implicit timer =>
-        init(token, playerId)
+        Behaviors.receiveMessage[Command] {
+          case StartInit(token, playerId) =>
+            switchBehavior(ctx, "init", init(token, playerId))
+          case _ =>
+            log.debug("not init")
+            Behaviors.same
+        }
       }
     }
   }
@@ -95,7 +103,7 @@ object TokenActor {
           log.info(s"init GameInfo success: | $rsp")
           EsheepClient.getRoomList(rsp.data.gsPrimaryInfo.ip, rsp.data.gsPrimaryInfo.port, rsp.data.gsPrimaryInfo.domain).map{
             case Right(info) =>
-              loginActor ! LoginActor.LoginSuccess(info.data.roomList)
+              loginActor ! LoginActor.LoginSuccess(ctx.self, info.data.roomList)
               timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, 500 .seconds)
             case Left(error) =>
               log.debug(s"getRoomList error: $error")
@@ -130,6 +138,7 @@ object TokenActor {
               log.debug(s"UpdateToken error!!! $e")
           }
           switchBehavior(ctx, "busy", busy())
+
         case GetAccessCode(replyTo) =>
           replyTo ! "" // TODO 发送AccessCode
           Behaviors.same

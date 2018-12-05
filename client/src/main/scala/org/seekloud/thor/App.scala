@@ -16,8 +16,8 @@ import javafx.stage.Stage
 import concurrent.duration._
 import javafx.application.Platform
 import akka.actor.typed.ActorRef
-import org.seekloud.thor.actor.LoginActor
-import org.seekloud.thor.common.LoginPage
+import org.seekloud.thor.actor.{LoginActor, TokenActor}
+import org.seekloud.thor.common.ClientPage
 import org.seekloud.thor.protocol.ESheepProtocol.LoginUrlRsp
 /**
   * @author Jingyi
@@ -28,7 +28,7 @@ class  App extends Application{
   import App._
 
   override def start(primaryStage: Stage): Unit = {
-    val loginPage = new LoginPage(primaryStage) // 处理扫码登录的操作，扫码完成后调用LoginPage.infoScene
+    val loginPage = new ClientPage(primaryStage) // 处理扫码登录的操作
   }
 
 }
@@ -50,6 +50,8 @@ object App{
   implicit val timeout:Timeout = Timeout(20 seconds) // for actor asks
 
   val log: LoggingAdapter = Logging(system, getClass)
+
+  val tokenActor: ActorRef[TokenActor.Command] = system.spawn(TokenActor.create(), "tokenActor")
 
   val loginActor: ActorRef[LoginActor.Command] = system.spawn(LoginActor.init, "loginActor")
 
