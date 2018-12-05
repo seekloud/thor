@@ -5,9 +5,7 @@ import org.scalajs.dom.html.Canvas
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleContext
 
 /**
-  * Created by sky
-  * Date on 2018/11/19
-  * Time at 下午1:41
+  * copied from tank
   */
 object MiddleContextInJs {
   def apply(canvas: MiddleCanvasInJs): MiddleContextInJs = new MiddleContextInJs(canvas)

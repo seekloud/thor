@@ -1,9 +1,7 @@
 package org.seekloud.thor.shared.ptcl.util.middleware
 
 /**
-  * Created by sky
-  * Date on 2018/11/16
-  * Time at 下午1:56
+  * copied from tank
   * 合并框架中的canvas
   * 本文件中定义画图中使用的函数并在实例中重写
   */

@@ -3,9 +3,7 @@ package org.seekloud.thor.front.utils.middleware
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleFrame, MiddleImage}
 
 /**
-  * Created by sky
-  * Date on 2018/11/17
-  * Time at 上午11:23
+  * copied from tank
   */
 class MiddleFrameInJs extends MiddleFrame {
   override def createCanvas(width: Double, height: Double): MiddleCanvas = MiddleCanvasInJs(width, height)

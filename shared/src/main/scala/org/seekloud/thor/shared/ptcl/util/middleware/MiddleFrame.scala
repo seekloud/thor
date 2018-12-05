@@ -1,9 +1,7 @@
 package org.seekloud.thor.shared.ptcl.util.middleware
 
 /**
-  * Created by sky
-  * Date on 2018/11/17
-  * Time at 上午11:22
+  * copied from tank
   * 合并两个框架
   */
 trait MiddleFrame {

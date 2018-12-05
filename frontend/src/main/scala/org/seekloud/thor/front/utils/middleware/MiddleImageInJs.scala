@@ -6,9 +6,7 @@ import org.scalajs.dom.html.Image
 import org.seekloud.thor.shared.ptcl.util.middleware._
 
 /**
-  * Created by sky
-  * Date on 2018/11/16
-  * Time at 下午4:51
+  * copied from tank
   */
 object MiddleImageInJs {
   def apply(url: String): MiddleImageInJs = new MiddleImageInJs(url)

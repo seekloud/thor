@@ -6,9 +6,7 @@ import org.scalajs.dom.html.Canvas
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleCanvas
 
 /**
-  * Created by sky
-  * Date on 2018/11/16
-  * Time at 下午3:18
+  * copied from tank
   */
 object MiddleCanvasInJs {
   def apply(width: Double, height: Double): MiddleCanvasInJs = new MiddleCanvasInJs(width, height)
