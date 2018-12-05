@@ -96,6 +96,7 @@ object TokenActor {
           EsheepClient.getRoomList(rsp.data.gsPrimaryInfo.ip, rsp.data.gsPrimaryInfo.port, rsp.data.gsPrimaryInfo.domain).map{
             case Right(info) =>
               loginActor ! LoginActor.LoginSuccess(info.data.roomList)
+              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, 500 .seconds)
             case Left(error) =>
               log.debug(s"getRoomList error: $error")
           }
