@@ -1,3 +1,28 @@
+package org.seekloud.thor.actor
+
+import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
+import org.seekloud.thor.protocol.ESheepProtocol._
+import org.seekloud.utils.EsheepClient
+import org.seekloud.thor.App.{executor, materializer, pushStack2AppThread, system, tokenActor}
+import akka.{Done, NotUsed}
+import akka.http.scaladsl.Http
+import akka.stream.{ActorMaterializer, OverflowStrategy}
+import akka.stream.scaladsl._
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.ws._
+
+import scala.concurrent.Future
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.parser.decode
+import io.circe.syntax._
+import javafx.scene.Scene
+import org.seekloud.thor.view.ClientPage
+import org.slf4j.LoggerFactory
+
+
 /**
   * User: XuSiRan
   * Date: 2018/12/4
@@ -17,7 +42,7 @@ object LoginActor {
 
   case object CloseWs extends Command
 
-  case class LoginSuccess(replyTo: ActorRef[TokenActor.Command], roomList: List[Long]) extends Command
+  case class LoginSuccess(replyTo: ActorRef[TokenActor.Command], roomList: List[Long], playerInfo: ClientPlayerInfo) extends Command
 
   def init: Behavior[Command] ={
     Behaviors.receive[Command]{ (ctx, msg) =>
@@ -49,7 +74,7 @@ object LoginActor {
                 decode[Ws4AgentRsp](message.text) match {
                   case Right(rsp) =>
                     log.info("Ws4AgentRsp: " + message.text)
-                    tokenActor ! TokenActor.StartInit(rsp.Ws4AgentRsp.data.token, "user" + rsp.Ws4AgentRsp.data.userId)
+                    tokenActor ! TokenActor.StartInit(rsp.Ws4AgentRsp.data)
                     pushStack2AppThread(page.infoSence(rsp.Ws4AgentRsp))
                   case Left(e) =>
                     log.info("other textMessage：" + message.text)
@@ -105,8 +130,8 @@ object LoginActor {
 //          closed.foreach(_ => log.info("webSocket closed"))
           Behaviors.same
 
-        case LoginSuccess(replyTo, roomList) =>
-          pushStack2AppThread(page.roomScene(replyTo, roomList))
+        case LoginSuccess(replyTo, roomList, playerInfo) =>
+          pushStack2AppThread(page.roomScene(replyTo, roomList, playerInfo))
           Behaviors.same
       }
     }
