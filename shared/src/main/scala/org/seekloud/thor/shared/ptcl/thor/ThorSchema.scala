@@ -138,8 +138,8 @@ trait ThorSchema extends KillInformation {
   protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
     //重写，后台dispatch
     killer.attacking(adventurer.level) // 干掉对面加能量
-    val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
-    addGameEvent(event)
+//    val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
+//    addGameEvent(event)
   }
 
 
