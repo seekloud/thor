@@ -55,6 +55,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   var thorSchemaOpt : Option[ThorSchemaClientImpl] = None
 
+  var gameState: Int = GameState.firstCome
+
   //  var thorSchema = thorSchemaOpt.get
   protected var myId = "test"
   protected var myName = "testName"
@@ -153,11 +155,19 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected def gameLoop(): Unit = {
     handleResize
     logicFrameTime = System.currentTimeMillis()
-    thorSchemaOpt match{
-      case Some(thorSchema: ThorSchemaClientImpl) =>
-        thorSchema.update()
-        ping()
-      case None =>
+    gameState match{
+      case GameState.loadingPlay =>
+        thorSchemaOpt.foreach{ _.drawGameLoading()}
+      case GameState.stop =>
+        dom.window.clearInterval(timer)
+        thorSchemaOpt.foreach{ t => t.drawGameStop(); t.adventurerMap.remove(myId)}
+      case GameState.replayLoading =>
+        thorSchemaOpt.foreach{ _.drawReplayMsg("?")}
+      case GameState.play =>
+        thorSchemaOpt.foreach{ thorSchema =>
+          thorSchema.update()
+          ping()
+        }
     }
   }
 
@@ -179,19 +189,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         }
 
       case None =>
-          drawGameLoading()
+
     }
 
-  }
-
-  def drawGameLoading(): Unit = {
-    println("loading")
-    ctx.setFill("#000000")
-    ctx.fillRec(0, 0, dom.window.innerWidth, dom.window.innerHeight)
-    ctx.setFill("rgb(250, 250, 250)")
-    ctx.setTextAlign("left")
-    ctx.setFont("Helvetica", 36)
-    ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
   def duringTime(time:Long) = {

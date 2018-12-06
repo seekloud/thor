@@ -10,6 +10,7 @@ import org.seekloud.byteobject.ByteObject.bytesDecode
 import org.seekloud.byteobject.MiddleBufferInJs
 import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
@@ -32,8 +33,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     myName = name
     canvas.getCanvas.focus()
     if (firstCome) {
-      drawGameLoading()
       addActionListenEvent()
+      gameState = GameState.loadingPlay
       val url = if(id.isEmpty) Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id.get, name, accessCode.getOrElse("?"), roomId)
       websocketClient.setup(url)
       gameLoop()
@@ -65,6 +66,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name,canvasBoundary ,canvasUnit))
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
@@ -81,30 +83,22 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
       case BeAttacked(userId, name, killerId, killerName, _) =>
+        gameState = GameState.stop
         barrage = s"${killerName}杀死了${name}"
         barrageTime = 300
         killer = killerName
         endTime = System.currentTimeMillis()
         println(s"be attacked by $killerName")
         val time = duringTime(endTime - startTime)
-        var killNum = 0
-        var score = 0
-        var level = 1
         thorSchemaOpt match {
           case Some(thorSchema: ThorSchemaClientImpl)=>
             if (thorSchema.adventurerMap.contains(myId)){
-              killNum = thorSchema.adventurerMap(myId).killNum
-              score = thorSchema.adventurerMap(myId).energy
-              level = thorSchema.adventurerMap(myId).level
+              thorSchema.killerNew = killerName
+              thorSchema.duringTime = time
             }
           case None =>
         }
         dom.window.cancelAnimationFrame(nextFrame)
-        dom.window.clearInterval(timer)
-        thorSchemaOpt.foreach{grid =>
-          grid.adventurerMap.remove(userId)
-          grid.drawGameStop(myName,killNum,score,level,killerName,time)
-        }
 
       case Ranks(current, history) =>
         currentRank = current

@@ -19,7 +19,7 @@ import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
 import javafx.scene.Scene
-import org.seekloud.thor.view.ClientPage
+import org.seekloud.thor.view.LoginView
 import org.slf4j.LoggerFactory
 
 
@@ -36,9 +36,9 @@ object LoginActor {
 
   trait Command
 
-  case class GetLoginImg(page: ClientPage) extends Command
+  case class GetLoginImg(page: LoginView) extends Command
 
-  case class CreateWs(url: String, page: ClientPage) extends Command
+  case class CreateWs(url: String, page: LoginView) extends Command
 
   case object CloseWs extends Command
 
@@ -64,7 +64,7 @@ object LoginActor {
     }
   }
 
-  def idle(page: ClientPage): Behavior[Command] = {
+  def idle(page: LoginView): Behavior[Command] = {
     Behaviors.receive[Command]{ (ctx, msg) =>
       msg match {
         case CreateWs(url, page) =>

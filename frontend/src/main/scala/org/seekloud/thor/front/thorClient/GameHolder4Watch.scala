@@ -5,6 +5,7 @@ import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.utils.Shortcut
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.scalajs.dom.raw.{Event, FileReader, MessageEvent, MouseEvent}
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 /**
@@ -13,13 +14,14 @@ import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
   */
 class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:String) extends GameHolder(name){
 
-  override protected def gameLoop(): Unit = {
-    handleResize
-    thorSchemaOpt.foreach(_.update())
-    logicFrameTime = System.currentTimeMillis()
-  }
+//  override protected def gameLoop(): Unit = {
+//    handleResize
+//    thorSchemaOpt.foreach(_.update())
+//    logicFrameTime = System.currentTimeMillis()
+//  }
 
   def watch() = {
+    gameState = GameState.loadingPlay
     websocketClient.setup(Routes.wsWatchGameUrl(roomId, playerId, accessCode))
   }
 
@@ -35,6 +37,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name,canvasBoundary,canvasUnit))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration)
+        gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
 
 
@@ -63,19 +66,15 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         killer = e.killerName
         endTime = System.currentTimeMillis()
         val time = duringTime(endTime - startTime)
-        var killNum = 0
-        var score = 0
-        var level = 1
         thorSchemaOpt match {
           case Some(thorSchema: ThorSchemaClientImpl)=>
             if (thorSchema.adventurerMap.contains(myId)){
-              killNum = thorSchema.adventurerMap(myId).killNum
-              score = thorSchema.adventurerMap(myId).energy
-              level = thorSchema.adventurerMap(myId).level
+              thorSchema.killerNew = e.killerName
+              thorSchema.duringTime = time
             }
           case None =>
         }
-        thorSchemaOpt.foreach(_.drawGameStop(e.name,killNum,score,level,killer,time))
+        gameState = GameState.stop
         dom.window.cancelAnimationFrame(nextFrame)
 
       case RebuildWebSocket=>
