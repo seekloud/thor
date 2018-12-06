@@ -20,10 +20,10 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
     if (firstCome) {
       println(s"replay ws url: ${Routes.wsReplayGameUrl(option.get)}")
       websocketClient.setup(Routes.wsReplayGameUrl(option.get))
-      gameLoop()
+//      gameLoop()
     } else if (websocketClient.getWsState) {
       firstCome = true
-      gameLoop()
+//      gameLoop()
     } else {
       JsFunc.alert("网络连接失败，请重新刷新")
     }
@@ -66,7 +66,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.UserActionEvent =>
         //remind here only add preAction without rollback
         println(s"frame [${thorSchemaOpt.get.systemFrame}] user action event: $e")
-        thorSchemaOpt.foreach(_.receiveUserEvent(e))
+        thorSchemaOpt.foreach(_.preExecuteUserEvent(e))
 
       case e: ThorGame.GameEvent =>
         thorSchemaOpt.foreach(_.receiveGameEvent(e))

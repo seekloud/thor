@@ -166,7 +166,7 @@ trait ThorSchema extends KillInformation {
       case None => actionEventMap.put(action.frame, List(action))
     }
   }
-
+e
   protected final def addGameEvent(event: GameEvent): Unit = {
     gameEventMap.get(event.frame) match {
       case Some(events) => gameEventMap.put(event.frame, event :: events)
