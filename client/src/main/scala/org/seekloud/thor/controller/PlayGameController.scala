@@ -43,7 +43,7 @@ class PlayGameController(
         case e:ThorGame.YourInfo =>
           println("start----------")
           try {
-            thorSchemaOpt = Some(ThorSchemaClientImpl(playGameView.drawFrame, playGameView.canvas,e.config,e.id,e.name,playGameView.canvasBoundary,playGameView.canvasUnit))
+            thorSchemaOpt = Some(ThorSchemaClientImpl(playGameView.drawFrame, playGameView.getCanvasContext,e.config,e.id,e.name,playGameView.canvasBoundary,playGameView.canvasUnit))
 
           }
       }
