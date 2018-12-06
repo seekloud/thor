@@ -21,7 +21,7 @@ object ReplayProtocol {
     leftF: Long
   )
 
-  final case class EssfMapInfo(m:List[(EssfMapKey,EssfMapJoinLeftInfo)])
+  final case class EssfMapInfo(m: List[(EssfMapKey, EssfMapJoinLeftInfo)])
 
   /** Actor间信息 */
   final case class GetUserInRecordMsg(recordId: Long, watchId: String, replyTo: ActorRef[CommonRsp]) extends UserManager.Command with UserActor.Command with GameReplay.Command

@@ -27,9 +27,11 @@ object UserManager {
 
   final case class ChildDead[U](name: String, childRef: ActorRef[U]) extends Command
 
-  final case class GetWebSocketFlow(id: String, name:String,replyTo:ActorRef[Flow[Message,Message,Any]], roomId:Option[Long] = None) extends Command
-  final case class GetWebSocketFlow4Watch(roomId: Long, watchedPlayerId:String,replyTo:ActorRef[Flow[Message,Message,Any]], watchingId: String, name: String) extends Command
-  final case class GetWebSocketFlow4Replay(recordId: Long, frame: Long, watchedPlayerId:String,replyTo:ActorRef[Flow[Message,Message,Any]], watchingId: String, name: String) extends Command
+  final case class GetWebSocketFlow(id: String, name: String, replyTo: ActorRef[Flow[Message, Message, Any]], roomId: Option[Long] = None) extends Command
+
+  final case class GetWebSocketFlow4Watch(roomId: Long, watchedPlayerId: String, replyTo: ActorRef[Flow[Message, Message, Any]], watchingId: String, name: String) extends Command
+
+  final case class GetWebSocketFlow4Replay(recordId: Long, frame: Long, watchedPlayerId: String, replyTo: ActorRef[Flow[Message, Message, Any]], watchingId: String, name: String) extends Command
 
   def create(): Behavior[Command] = {
     log.debug(s"UserManager start...")
@@ -44,16 +46,16 @@ object UserManager {
   }
 
   private def idle(uidGenerator: AtomicLong)
-                  (
-                    implicit timer: TimerScheduler[Command]
-                  ): Behavior[Command] = {
-    Behaviors.receive[Command]{
+    (
+      implicit timer: TimerScheduler[Command]
+    ): Behavior[Command] = {
+    Behaviors.receive[Command] {
       (ctx, msg) =>
         msg match {
-          case GetWebSocketFlow(id, name,replyTo, roomIdOpt) =>
+          case GetWebSocketFlow(id, name, replyTo, roomIdOpt) =>
 
-//              val playerInfo = UserInfo(uidGenerator.getAndIncrement().toString, name)
-            val playerInfo = UserInfo(if(id.equals("test")) uidGenerator.getAndIncrement().toString else id, name)
+            //              val playerInfo = UserInfo(uidGenerator.getAndIncrement().toString, name)
+            val playerInfo = UserInfo(if (id.equals("test")) uidGenerator.getAndIncrement().toString else id, name)
 
             val userActor = getUserActor(ctx, playerInfo.playerId, playerInfo)
             replyTo ! getWebSocketFlow(userActor)
@@ -90,15 +92,15 @@ object UserManager {
             userActor ! UserActor.StartReplay(recordId, watchedPlayerId, frame.toInt)
             Behaviors.same
 
-          case msg:ChangeWatchedPlayerId =>
-            getUserActor(ctx,msg.playerInfo.playerId,msg.playerInfo) ! msg
+          case msg: ChangeWatchedPlayerId =>
+            getUserActor(ctx, msg.playerInfo.playerId, msg.playerInfo) ! msg
             Behaviors.same
 
-          case msg:GetUserInRecordMsg=>
+          case msg: GetUserInRecordMsg =>
             getUserActor(ctx, msg.watchId, UserInfo(msg.watchId, msg.watchId)) ! msg
             Behaviors.same
 
-          case msg:GetRecordFrameMsg=>
+          case msg: GetRecordFrameMsg =>
             getUserActor(ctx, msg.watchId, UserInfo(msg.watchId, msg.watchId)) ! msg
             Behaviors.same
 
@@ -166,17 +168,17 @@ object UserManager {
       Supervision.Resume
   }
 
-  private def getUserActor(ctx: ActorContext[Command],id: String, userInfo: UserInfo):ActorRef[UserActor.Command] = {
-    val childName = s"UserActor-${id}"
-    ctx.child(childName).getOrElse{
-      val actor = ctx.spawn(UserActor.create(id, userInfo),childName)
-      ctx.watchWith(actor,ChildDead(childName,actor))
+  private def getUserActor(ctx: ActorContext[Command], id: String, userInfo: UserInfo): ActorRef[UserActor.Command] = {
+    val childName = s"UserActor-$id"
+    ctx.child(childName).getOrElse {
+      val actor = ctx.spawn(UserActor.create(id, userInfo), childName)
+      ctx.watchWith(actor, ChildDead(childName, actor))
       actor
     }.upcast[UserActor.Command]
   }
 
-  private def getUserActorOpt(ctx: ActorContext[Command],id:String):Option[ActorRef[UserActor.Command]] = {
-    val childName = s"UserActor-${id}"
+  private def getUserActorOpt(ctx: ActorContext[Command], id: String): Option[ActorRef[UserActor.Command]] = {
+    val childName = s"UserActor-$id"
     ctx.child(childName).map(_.upcast[UserActor.Command])
   }
 
