@@ -1,28 +1,3 @@
-package org.seekloud.thor.actor
-
-import akka.actor.typed.{ActorRef, Behavior}
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import org.seekloud.thor.protocol.ESheepProtocol._
-import org.seekloud.utils.EsheepClient
-import org.seekloud.thor.App.{executor, materializer, pushStack2AppThread, system, tokenActor}
-import org.seekloud.thor.common.ClientPage
-import akka.{Done, NotUsed}
-import akka.http.scaladsl.Http
-import akka.stream.{ActorMaterializer, OverflowStrategy}
-import akka.stream.scaladsl._
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.ws._
-
-import scala.concurrent.Future
-import io.circe._
-import io.circe.generic.auto._
-import io.circe.parser.decode
-import io.circe.syntax._
-import javafx.scene.Scene
-import org.slf4j.LoggerFactory
-
-
 /**
   * User: XuSiRan
   * Date: 2018/12/4

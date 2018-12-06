@@ -1,13 +1,3 @@
-package org.seekloud.thor.actor
-
-import akka.actor.typed.{ActorRef, Behavior}
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
-import org.seekloud.utils.EsheepClient
-import org.slf4j.{Logger, LoggerFactory}
-import org.seekloud.thor.App.{executor, pushStack2AppThread, loginActor}
-
-import scala.concurrent.duration._
-
 /**
   * User: XuSiRan
   * Date: 2018/12/5
