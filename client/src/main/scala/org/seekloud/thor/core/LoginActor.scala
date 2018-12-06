@@ -97,37 +97,6 @@ object LoginActor {
           }
           connected.onComplete(_ => ())
           closed.foreach{_ => log.info("webSocket closed")}
-
-
-//          val incoming: Sink[Message, Future[Done]] =
-//            Sink.foreach[Message] {
-//              case message: TextMessage.Strict =>
-//                decode[Ws4AgentRsp](message.text) match {
-//                  case Right(rsp) =>
-////                    log.info("Ws4AgentRsp: " + message.text)
-//                    pushStack2AppThread(page.infoSence(rsp.Ws4AgentRsp))
-//                  case Left(e) =>
-//                    log.info("other textMessage：" + message.text)
-//                }
-//              case _ =>
-//                log.debug("???none???")
-//            }
-//          val outgoing = Source.maybe[Message]
-//          val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
-//          val (upgradeResponse, closed) =
-//            outgoing
-//              .viaMat(webSocketFlow)(Keep.right)
-//              .toMat(incoming)(Keep.both)
-//              .run()
-//          val connected = upgradeResponse.flatMap { upgrade =>
-//            if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
-//              Future.successful(Done)
-//            } else {
-//              throw new RuntimeException(s"Connection failed: ${upgrade.response.status}")
-//            }
-//          }
-//          connected.onComplete(_ => ())
-//          closed.foreach(_ => log.info("webSocket closed"))
           Behaviors.same
 
         case LoginSuccess(replyTo, roomList, playerInfo) =>
