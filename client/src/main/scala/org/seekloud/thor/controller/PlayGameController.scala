@@ -13,7 +13,7 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.scaladsl.AskPattern._
 import org.slf4j.LoggerFactory
 import javafx.util.Duration
-import org.seekloud.thor.actor.PlayGameActor
+import org.seekloud.thor.core.PlayGameActor
 import org.seekloud.thor.game.NetworkInfo
 
 import scala.collection.mutable
