@@ -79,7 +79,7 @@ trait BackgroundClient {
   private val playAgain = drawFrame.createImage("/img/play-again.png")
 
 
-  def drawGameStop(name: String, kill: Int, score: Int, level: Int, killer: String, time: String): Unit = {
+  def drawGameStop(): Unit = {
     ctx.save()
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)
@@ -92,9 +92,9 @@ trait BackgroundClient {
     ctx.fillText("score", window.x * 0.475, window.y * 0.32, window.x * 0.15)
     ctx.fillText("time", window.x * 0.58, window.y * 0.32, window.x * 0.15)
     ctx.setFont("Helvetica", baseFont * 22)
-    ctx.fillText(kill.toString, window.x * 0.39, window.y * 0.4, window.x * 0.15)
-    ctx.fillText(score.toString, window.x * 0.49, window.y * 0.4, window.x * 0.15)
-    ctx.fillText(time, window.x * 0.57, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(this.adventurerMap(myId).killNum.toString, window.x * 0.39, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(this.adventurerMap(myId).energy.toString, window.x * 0.49, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(this.duringTime, window.x * 0.57, window.y * 0.4, window.x * 0.15)
     ctx.save()
     ctx.setStrokeStyle("#ffff00")
     ctx.moveTo(window.x * 0.36, window.y * 0.45)
@@ -104,8 +104,8 @@ trait BackgroundClient {
     ctx.setTextBaseLine("top")
     ctx.setFont("Comic Sans Ms", baseFont * 26)
     ctx.setFill("#ffa400")
-    ctx.fillText(s"You Dead,Killer is ${killer.take(5)} ", window.x * 0.4, window.y * 0.48)
-    ctx.fillText(s"Your Final level is ${level} / 9", window.x * 0.4, window.y * 0.55)
+    ctx.fillText(s"You Dead,Killer is ${this.killerNew} ", window.x * 0.4, window.y * 0.48)
+    ctx.fillText(s"Your Final level is ${this.adventurerMap(myId).level} / 9", window.x * 0.4, window.y * 0.55)
 
 
     ctx.drawImage(userName, window.x * 0.4, window.y * 0.7, Some(window.x * 0.2, window.y * 0.1))
@@ -125,6 +125,16 @@ trait BackgroundClient {
     ctx.setFont("Helvetica", 3.6 * canvasUnit)
     ctx.fillText(m, 150, 180)
     println()
+  }
+
+  def drawGameLoading(): Unit = {
+    println("loading")
+    ctx.setFill("#000000")
+    ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)
+    ctx.setFill("rgb(250, 250, 250)")
+    ctx.setTextAlign("left")
+    ctx.setFont("Helvetica", 36)
+    ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
 }

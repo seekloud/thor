@@ -4,6 +4,7 @@ import org.scalajs.dom
 import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.model.{PlayerInfo, ReplayInfo}
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.thor.{ThorSchemaClientImpl, ThorSchemaState}
 
@@ -18,6 +19,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
   def startReplay(option: Option[ReplayInfo] = None) = {
     println(s"start replay...")
     if (firstCome) {
+      gameState = GameState.loadingPlay
       println(s"replay ws url: ${Routes.wsReplayGameUrl(option.get)}")
       websocketClient.setup(Routes.wsReplayGameUrl(option.get))
 //      gameLoop()
@@ -61,6 +63,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case ThorGame.StartReplay =>
         println(s"start replay...")
         timer = Shortcut.schedule(gameLoop, thorSchemaOpt.get.config.frameDuration / thorSchemaOpt.get.config.playRate)
+        gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
 
       case e: ThorGame.UserActionEvent =>
