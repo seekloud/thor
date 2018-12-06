@@ -17,8 +17,9 @@ import concurrent.duration._
 import javafx.application.Platform
 import akka.actor.typed.ActorRef
 import org.seekloud.thor.actor.{LoginActor, TokenActor}
-import org.seekloud.thor.common.ClientPage
+import org.seekloud.thor.common.Context
 import org.seekloud.thor.protocol.ESheepProtocol.LoginUrlRsp
+import org.seekloud.thor.view.LoginView
 /**
   * @author Jingyi
   * @version 创建时间：2018/12/3
@@ -28,7 +29,9 @@ class  App extends Application{
   import App._
 
   override def start(primaryStage: Stage): Unit = {
-    val loginPage = new ClientPage(primaryStage) // 处理扫码登录的操作
+    val context = new Context(primaryStage)
+    val loginPage = new LoginView(context)
+//    val loginPage = new ClientPage(primaryStage) // 处理扫码登录的操作
   }
 
 }

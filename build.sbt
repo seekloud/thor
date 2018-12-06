@@ -129,9 +129,9 @@ lazy val client = project.in(file("client")).enablePlugins(PackPlugin)
     javaOptions in reStart += "-Xmx2g"
   )
   .settings(
-    packMain := Map("tank" -> clientMainClass),
-    packJvmOpts := Map("tank" -> Seq("-Xmx512m", "-Xms64m")),
-    packExtraClasspath := Map("tank" -> Seq("."))
+    packMain := Map("thor" -> clientMainClass),
+    packJvmOpts := Map("thor" -> Seq("-Xmx512m", "-Xms64m")),
+    packExtraClasspath := Map("thor" -> Seq("."))
   )
   .settings(
     libraryDependencies ++= Dependencies.clientDependencies
