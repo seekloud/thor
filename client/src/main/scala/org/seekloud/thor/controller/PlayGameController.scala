@@ -5,7 +5,7 @@ import org.seekloud.thor.App
 import org.seekloud.thor.model.PlayerInfo
 import org.seekloud.thor.protocol.ESheepProtocol.GameServerInfo
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
-import org.seekloud.thor.shared.ptcl.thor.{NetworkInfo, ThorSchemaClientImpl}
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.common.Context
 import org.seekloud.thor.view.PlayGameView
 import org.seekloud.utils.middleware.MiddleFrameInFx
@@ -14,6 +14,7 @@ import akka.actor.typed.scaladsl.AskPattern._
 import org.slf4j.LoggerFactory
 import javafx.util.Duration
 import org.seekloud.thor.actor.PlayGameActor
+import org.seekloud.thor.game.NetworkInfo
 
 import scala.collection.mutable
 import scala.concurrent.Future

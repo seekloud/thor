@@ -103,13 +103,20 @@ object PlayGameActor {
 
           val connected = response.flatMap { upgrade =>
             if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
-              //todo  play
+              ctx.self ! SwitchBehavior("play", play(stream,control))
               Future.successful(s"${ctx.self.path} connect success.")
             } else {
               throw new RuntimeException(s"${ctx.self.path} connection failed: ${upgrade.response.status}")
             }
           } //链接建立时
-
+          connected.onComplete { i => println(i.toString) }
+          closed.onComplete { i =>
+            println(s"${ctx.self.path} connect closed! try again 1 minutes later")
+            //remind 此处存在失败重试
+            ctx.self ! SwitchBehavior("init", init(control), InitTime)
+            timer.startSingleTimer(ConnectTimerKey, msg, 1.minutes)
+          } //链接断开时
+          switchBehavior(ctx, "busy", busy(), InitTime)
           //todo  connected.onComplete  closed.onComplete
 
         case x =>
@@ -118,6 +125,37 @@ object PlayGameActor {
       }
     }
   }
+
+  def play(frontActor: ActorRef[ThorGame.WsMsgFront],
+           control: PlayGameController)(implicit stashBuffer: StashBuffer[Command],
+                                          timer: TimerScheduler[Command]) = {
+    Behaviors.receive[Command] { (ctx, msg) =>
+      msg match {
+
+        case x =>
+          //todo
+      }
+    }
+  }
+
+  private def busy()(
+    implicit stashBuffer: StashBuffer[Command],
+    timer: TimerScheduler[Command]
+  ): Behavior[Command] =
+    Behaviors.receive[Command] { (ctx, msg) =>
+      msg match {
+        case SwitchBehavior(name, behavior, durationOpt, timeOut) =>
+          switchBehavior(ctx, name, behavior, durationOpt, timeOut)
+
+        case TimeOut(m) =>
+          println(s"${ctx.self.path} is time out when busy,msg=${m}")
+          Behaviors.stopped
+
+        case unknowMsg =>
+          stashBuffer.stash(unknowMsg)
+          Behavior.same
+      }
+    }
 
   def getWebSocketUri(info:ConnectGame): String = {
     val host = "10.1.29.250:30376"
