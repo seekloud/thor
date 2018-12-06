@@ -25,6 +25,9 @@ with BackgroundClient
 with DrawOtherClient
 with FpsRender{
 
+  var killerNew : String = "?"
+  var duringTime : String = "0"
+
   def drawGame(offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
     if(!waitSyncData){
       adventurerMap.get(myId) match{
