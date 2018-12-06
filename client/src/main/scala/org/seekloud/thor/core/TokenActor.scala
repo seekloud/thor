@@ -1,3 +1,14 @@
+package org.seekloud.thor.actor
+
+import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
+import org.seekloud.utils.EsheepClient
+import org.slf4j.{Logger, LoggerFactory}
+import org.seekloud.thor.App.{executor, loginActor, pushStack2AppThread}
+import org.seekloud.thor.protocol.ESheepProtocol.ClientPlayerInfo
+
+import scala.concurrent.duration._
+
 /**
   * User: XuSiRan
   * Date: 2018/12/5
@@ -27,7 +38,7 @@ object TokenActor {
 
   case class TimeOut(msg: String) extends Command
 
-  case class StartInit(token: String, playerId: String) extends Command
+  case class StartInit(playerInfo: ClientPlayerInfo) extends Command
 
   case object InitError extends Command
 
@@ -74,8 +85,8 @@ object TokenActor {
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command]{ implicit timer =>
         Behaviors.receiveMessage[Command] {
-          case StartInit(token, playerId) =>
-            switchBehavior(ctx, "init", init(token, playerId))
+          case StartInit(playerInfo) =>
+            switchBehavior(ctx, "init", init(playerInfo))
           case _ =>
             log.debug("not init")
             Behaviors.same
@@ -84,21 +95,21 @@ object TokenActor {
     }
   }
 
-  def init(token: String, playerId: String)(
+  def init(playerInfo: ClientPlayerInfo)(
     implicit timer: TimerScheduler[Command],
     stashBuffer: StashBuffer[Command]): Behavior[Command] ={
     Behaviors.setup{ ctx =>
-      EsheepClient.linkGame(token, playerId).map{
+      EsheepClient.linkGame(playerInfo.token, "user" + playerInfo.userId).map{
         case Right(rsp) =>
           log.info(s"init GameInfo success: | $rsp")
           EsheepClient.getRoomList(rsp.data.gsPrimaryInfo.ip, rsp.data.gsPrimaryInfo.port, rsp.data.gsPrimaryInfo.domain).map{
             case Right(info) =>
-              loginActor ! LoginActor.LoginSuccess(ctx.self, info.data.roomList)
+              loginActor ! LoginActor.LoginSuccess(ctx.self, info.data.roomList, playerInfo)
               timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, 500 .seconds)
             case Left(error) =>
               log.debug(s"getRoomList error: $error")
           }
-          ctx.self ! SwitchBehavior("idle", idle(playerId, token, rsp.data.accessCode, rsp.data.gsPrimaryInfo.ip, rsp.data.gsPrimaryInfo.port, rsp.data.gsPrimaryInfo.domain))
+          ctx.self ! SwitchBehavior("idle", idle(playerInfo, "user" + playerInfo.userId, playerInfo.token, rsp.data.accessCode, rsp.data.gsPrimaryInfo.ip, rsp.data.gsPrimaryInfo.port, rsp.data.gsPrimaryInfo.domain))
         case Left(e) =>
           log.info(s"init GameInfo fail: $e")
           ctx.self ! InitError
@@ -108,6 +119,7 @@ object TokenActor {
   }
 
   def idle(
+    playerInfo: ClientPlayerInfo,//Info里面的token没有设置更新，所以token用下面的
     playerId: String,
     token: String,
     accessCode: String,
@@ -123,7 +135,7 @@ object TokenActor {
           EsheepClient.refreshToken(token, playerId).map{
             case Right(rsp) =>
               timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, (rsp.data.expireTime - 200) .seconds)
-              ctx.self ! SwitchBehavior("idle", idle(playerId, rsp.data.token, accessCode, ip, port, domain))
+              ctx.self ! SwitchBehavior("idle", idle(playerInfo, playerId, rsp.data.token, accessCode, ip, port, domain))
             case Left(e) =>
               log.debug(s"UpdateToken error!!! $e")
           }
