@@ -112,7 +112,6 @@ object PlayGameActor {
             timer.startSingleTimer(ConnectTimerKey, msg, 1.minutes)
           } //链接断开时
           switchBehavior(ctx, "busy", busy(), InitTime)
-          //todo  connected.onComplete  closed.onComplete
 
         case x =>
           println(s"get unKnow msg $x")
@@ -126,9 +125,26 @@ object PlayGameActor {
                                           timer: TimerScheduler[Command]) = {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
+        case msg: DispatchMsg =>
+          frontActor ! msg.msg
+          Behaviors.same
+
+        case StartGameLoop =>
+          timer.startPeriodicTimer(GameLoopKey,GameLoopTimeOut,100.millis)
+          Behaviors.same
+
+        case StopGameLoop =>
+          timer.cancel(GameLoopKey)
+          Behaviors.same
+
+        case GameLoopTimeOut =>
+          // todo playGameCroller.logicLoop
+
+        case StopGameActor =>
+          Behaviors.stopped
 
         case x =>
-          //todo
+          Behaviors.unhandled
       }
     }
   }
