@@ -82,23 +82,29 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         println(s"user left $name")
         thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
-      case BeAttacked(userId, name, killerId, killerName, _) =>
-        gameState = GameState.stop
-        barrage = s"${killerName}杀死了${name}"
+      case e:BeAttacked =>
+        barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
-        killer = killerName
-        endTime = System.currentTimeMillis()
-        println(s"be attacked by $killerName")
-        val time = duringTime(endTime - startTime)
-        thorSchemaOpt match {
-          case Some(thorSchema: ThorSchemaClientImpl)=>
-            if (thorSchema.adventurerMap.contains(myId)){
-              thorSchema.killerNew = killerName
-              thorSchema.duringTime = time
-            }
-          case None =>
+        if(e.playerId == myId){
+          gameState = GameState.stop
+          killer = e.killerName
+          endTime = System.currentTimeMillis()
+          println(s"be attacked by ${e.killerName}")
+          val time = duringTime(endTime - startTime)
+          thorSchemaOpt match {
+            case Some(thorSchema: ThorSchemaClientImpl)=>
+              if (thorSchema.adventurerMap.contains(myId)){
+                thorSchema.killerNew = e.killerName
+                thorSchema.duringTime = time
+              }
+            case None =>
+          }
+          dom.window.cancelAnimationFrame(nextFrame)
         }
-        dom.window.cancelAnimationFrame(nextFrame)
+        else{
+          thorSchemaOpt.foreach(_.receiveGameEvent(e))
+        }
+
 
       case Ranks(current, history) =>
         currentRank = current

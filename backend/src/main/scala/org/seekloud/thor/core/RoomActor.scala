@@ -168,17 +168,19 @@ object RoomActor {
     //    println(subscribers)
     //    subscribers.values.foreach( _ ! UserActor.DispatchMsg(msg))
     val isKillMsg = msg.isInstanceOf[BeAttacked]
-    subscribers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
-    observers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
+    val deadId = if(isKillMsg) msg.asInstanceOf[BeAttacked].playerId else ""
+    subscribers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
+    observers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
   }
 
   //向特定用户发数据
   def dispatchTo(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]], observers: mutable.HashMap[String, ActorRef[UserActor.Command]])(id: String, msg: WsMsgServer,observersByUserId:Option[mutable.HashMap[String,ActorRef[UserActor.Command]]])(implicit sendBuffer: MiddleBufferInJvm) = {
 
     val isKillMsg = msg.isInstanceOf[BeAttacked]
-    subscribers.get(id).foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg)))
+    val deadId = if(isKillMsg) msg.asInstanceOf[BeAttacked].playerId else ""
+    subscribers.get(id).foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
     observersByUserId match{
-      case Some(ls) => ls.keys.foreach(playerId => observers.get(playerId).foreach(t => t ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(),isKillMsg))))
+      case Some(ls) => ls.keys.foreach(playerId => observers.get(playerId).foreach(t => t ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(),isKillMsg, deadId))))
       case None =>
     }
   }

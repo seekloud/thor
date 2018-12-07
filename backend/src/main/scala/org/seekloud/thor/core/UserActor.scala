@@ -326,7 +326,7 @@ object UserActor {
           watch(playerId, info, roomId, watchedPlayerId, frontActor, roomActor)
 
         case DispatchMsg(m) =>
-          if (m.asInstanceOf[Wrap].isKillMsg) {
+          if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) {
             frontActor ! m
             switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedPlayerId, frontActor))
           } else {
@@ -396,7 +396,7 @@ object UserActor {
             Behaviors.same
 
           case DispatchMsg(m) =>
-            if (m.asInstanceOf[Wrap].isKillMsg) { //玩家死亡
+            if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) { //玩家死亡
               log.debug(s"deadmsg $m")
               frontActor ! m
               //              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)

@@ -40,7 +40,7 @@ object ThorGame {
 
   case class FailMsgServer(ex: Exception) extends WsMsgSource
 
-  final case class Wrap(ws: Array[Byte], isKillMsg: Boolean = false) extends WsMsgSource
+  final case class Wrap(ws: Array[Byte], isKillMsg: Boolean = false, deadId: String = "") extends WsMsgSource
 
   final case class PingPackage(sendTime:Long) extends WsMsgServer with WsMsgFront
 
