@@ -6,6 +6,7 @@ import javafx.animation.{Animation, AnimationTimer, KeyFrame, Timeline}
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
 import javafx.util.Duration
 import akka.actor.typed.scaladsl.adapter._
+import javafx.scene.input.KeyCode
 import org.seekloud.thor.App
 import org.seekloud.thor.game.NetWorkInfo
 import org.seekloud.thor.App.system
@@ -16,7 +17,7 @@ import org.seekloud.thor.model.{GameServerInfo, PlayerInfo}
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.MouseMove
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{MouseClickDownLeft, MouseClickDownRight, MouseClickUpRight, MouseMove}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.view.PlayGameView
 import org.slf4j.LoggerFactory
@@ -48,7 +49,7 @@ class PlayGameController(
   private var recvSyncGameState: Option[ThorGame.GridSyncState] = None
 
   protected var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
-
+  private val window = Point((playGameScreen.canvasBoundary.x - 12),(playGameScreen.canvasBoundary.y - 12.toFloat))
   private var gameState = GameState.loadingPlay
   private var logicFrameTime = System.currentTimeMillis()
 
@@ -83,6 +84,17 @@ class PlayGameController(
         setGameState(GameState.loadingPlay)
         playGameActor ! PlayGameActor.StartGameLoop
       }
+    }
+  }
+
+  def reStart() ={
+    println("restart!!!!")
+    firstCome = true
+    start
+    thorSchemaOpt.foreach { r =>
+      playGameActor ! DispatchMsg(ThorGame.RestartGame(r.myName))
+      setGameState(GameState.loadingPlay)
+      playGameActor ! PlayGameActor.StartGameLoop
     }
   }
 
@@ -144,18 +156,61 @@ class PlayGameController(
     }
 
     /*鼠标点击事件*/
-    playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
+    playGameScreen.canvas.getCanvas.setOnMouseClicked { e =>
+      thorSchemaOpt match {
+        case Some(thorSchema:ThorSchemaClientImpl) =>
+          if (thorSchema.adventurerMap.contains(playerInfo.playerId) && gameState == GameState.play){
+            if (e.isPrimaryButtonDown){
+              val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              playGameActor ! DispatchMsg(preExecuteAction)
+            }
+            else if (e.isSecondaryButtonDown){
+              val preExecuteAction = MouseClickDownRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              playGameActor ! DispatchMsg(preExecuteAction)
+            }
+            else ()
+          }
+          else {
+            val x = e.getX
+            val y = e.getY
+            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+              reStart()
+          }
+        case None =>
+      }
+
+
 
     }
 
     /*鼠标释放事件*/
     playGameScreen.canvas.getCanvas.setOnMouseDragReleased { e =>
-
+      thorSchemaOpt match{
+        case Some(thorSchema: ThorSchemaClientImpl) =>
+          if(thorSchema.adventurerMap.contains(playerInfo.playerId) && gameState == GameState.play)
+            if(e.isSecondaryButtonDown){ //右键
+              val preExecuteAction = MouseClickUpRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              playGameActor ! DispatchMsg(preExecuteAction)
+            }
+            else ()
+        case None =>
+      }
     }
 
     /*键盘事件*/
     playGameScreen.canvas.getCanvas.setOnKeyPressed { e =>
-
+      thorSchemaOpt match{
+        case Some(thorSchema: ThorSchemaClientImpl) =>
+          if (!thorSchema.adventurerMap.contains(playerInfo.playerId)){
+            if (e.getCode == KeyCode.SPACE){
+              reStart()
+            }
+          }
+        case None =>
+      }
     }
 
   }
