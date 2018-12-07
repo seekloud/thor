@@ -139,12 +139,16 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           if(thorSchema.adventurerMap.contains(myId)){
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             //            println(s"mouseDistance: $mouseDistance")
-            val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            websocketClient.sendMsg(data)
-            //            if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
-            //              thorSchema.addMyAction(data)
-            //            }
-            thorSchema.preExecuteUserEvent(data)
+            val direction = thorSchema.adventurerMap.get(myId).get.direction
+            if(math.abs(theta - direction) > 0.3){ //角度差大于0.3才执行
+              val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              websocketClient.sendMsg(data)
+              //            if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
+              //              thorSchema.addMyAction(data)
+              //            }
+              thorSchema.preExecuteUserEvent(data)
+            }
+
           }
 
         case None =>
