@@ -70,6 +70,7 @@ case class ThorSchemaServerImpl(
 //    println(RecordMap)
 //    val actor = getUserActor4WatchGameList(adventurer.playerId)
 //    dispatchTo(adventurer.playerId, event, actor)
+    addGameEvent(event)
     dispatch(event)
   }
 

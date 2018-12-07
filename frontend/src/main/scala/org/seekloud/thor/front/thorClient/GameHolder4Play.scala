@@ -83,6 +83,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
       case e:BeAttacked =>
+        println("attack!!!!!!!!!!!!!"+e)
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
         if(e.playerId == myId){
