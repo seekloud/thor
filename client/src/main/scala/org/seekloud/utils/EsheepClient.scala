@@ -1,6 +1,5 @@
 package org.seekloud.utils
 
-import org.seekloud.thor.common.AppSettings
 import org.seekloud.thor.model._
 import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.slf4j.LoggerFactory

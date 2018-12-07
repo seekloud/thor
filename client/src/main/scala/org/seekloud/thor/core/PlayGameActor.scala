@@ -171,7 +171,7 @@ object PlayGameActor {
 
   def getWebSocketUri(info:ConnectGame): String = {
     val host = "10.1.29.250:30376"
-    Routes.getJoinGameWebSocektUri(info.playerInfo.nickName,info.gameInfo.domain,info.roomInfo)
+    Routes.getJoinGameWebSocketUri(info.playerInfo.nickName,info.gameInfo.domain,info.roomInfo)
   }
 
   import org.seekloud.byteobject.ByteObject._
