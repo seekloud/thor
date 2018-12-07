@@ -1,5 +1,6 @@
 package org.seekloud.thor.view
 
+import com.neo.sk.utils.JavaFxUtil
 import javafx.scene.canvas.GraphicsContext
 import org.seekloud.thor.common.Context
 import javafx.scene.canvas.GraphicsContext
@@ -23,10 +24,26 @@ class PlayGameView (context: Context){
   val drawFrame = new MiddleFrameInFx
   protected var canvasWidth = screen.getMaxX.toFloat
   protected var canvasHeight = screen.getMaxY.toFloat
-  val canvasBoundary = Point(canvasWidth,canvasHeight)
-  val canvasUnit = canvasWidth / Constants.canvasUnitPerLine
-  val canvas = drawFrame.createCanvas(canvasWidth,canvasHeight).getCtx
+  var canvasBoundary = Point(canvasWidth,canvasHeight)
+  var canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+  var canvasBounds = canvasBoundary / canvasUnit
+  val canvas = drawFrame.createCanvas(canvasWidth,canvasHeight)
   //todo  init
+
+  def handleResize = {
+    val width = context.getStageWidth.toFloat
+    val height = context.getStageHeight.toFloat
+    if(width != canvasWidth || height != canvasHeight){
+      canvasWidth = width
+      canvasHeight = height
+      canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+      canvasBoundary = Point(canvasWidth, canvasHeight)
+      canvasBounds = canvasBoundary / canvasUnit
+      canvas.setWidth(canvasWidth)
+      canvas.setHeight(canvasHeight)
+      (canvasBoundary, canvasUnit)
+    } else (Point(0,0), 0.toFloat)
+  }
 
 
 
