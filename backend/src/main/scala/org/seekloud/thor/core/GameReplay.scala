@@ -160,7 +160,7 @@ object GameReplay {
           }
 
         case msg: GetRecordFrameMsg =>
-          msg.replyTo ! GetRecordFrameRsp(RecordFrameInfo(fileReader.getFramePosition, frameCount))
+          msg.replyTo ! GetRecordFrameRsp(RecordFrameInfo(fileReader.getFramePosition, frameCount, metaData.thorGameConfig.frameDuration))
           Behaviors.same
 
         case msg: GetUserInRecordMsg =>

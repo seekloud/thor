@@ -191,7 +191,7 @@ object ESheepProtocol {
     msg: String = "ok"
   ) extends CommonRsp
 
-  case class RecordFrameInfo(frame: Int, frameNum: Long)
+  case class RecordFrameInfo(frame: Int, frameNum: Long, frameDuration: Long)
   val ErrorGetRecordFrame1 = ErrorRsp(300004, "error")
   val ErrorGetRecordFrame2 = ErrorRsp(300005, "error")
 
