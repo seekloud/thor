@@ -138,7 +138,8 @@ object PlayGameActor {
           Behaviors.same
 
         case GameLoopTimeOut =>
-          // todo playGameCroller.logicLoop
+          control.logicLoop()
+          Behaviors.same
 
         case StopGameActor =>
           Behaviors.stopped
@@ -170,7 +171,7 @@ object PlayGameActor {
 
   def getWebSocketUri(info:ConnectGame): String = {
     val host = "10.1.29.250:30376"
-    Routes.getJoinGameWebSocektUri(info.playerInfo.nickName,info.gameInfo.domain,info.roomInfo)
+    Routes.getJoinGameWebSocketUri(info.playerInfo.nickName,info.gameInfo.domain,info.roomInfo)
   }
 
   import org.seekloud.byteobject.ByteObject._
@@ -193,16 +194,16 @@ object PlayGameActor {
 
     Sink.foreach[Message] {
       case TextMessage.Strict(m) =>
-        control.wsMessageHandler(m)
+        control.wsMessageHandle(m)
 
       case BinaryMessage.Strict(m) =>
         val buffer = new MiddleBufferInJvm(m.asByteBuffer)
         bytesDecode[ThorGame.WsMsgServer](buffer) match {
           case Right(req) =>
-            control.wsMessageHandler(req)
+            control.wsMessageHandle(req)
           case Left(e) =>
             println(s"decode binaryMessage failed,error:${e.message}")
-            control.wsMessageHandler(ThorGame.DecodeError())
+            control.wsMessageHandle(ThorGame.DecodeError())
         }
 
       case msg: BinaryMessage.Streamed =>
@@ -214,10 +215,10 @@ object PlayGameActor {
           val buffer = new MiddleBufferInJvm(m.asByteBuffer)
           bytesDecode[ThorGame.WsMsgServer](buffer) match {
             case Right(req) =>
-              control.wsMessageHandler(req)
+              control.wsMessageHandle(req)
             case Left(e) =>
               println(s"decode binaryMessage failed,error:${e.message}")
-              control.wsMessageHandler(ThorGame.DecodeError())
+              control.wsMessageHandle(ThorGame.DecodeError())
           }
         }
 

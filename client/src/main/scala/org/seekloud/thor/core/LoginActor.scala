@@ -19,6 +19,7 @@ import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
 import javafx.scene.Scene
+import org.seekloud.thor.model.{GameServerInfo, PlayerInfo}
 import org.seekloud.thor.view.LoginView
 import org.slf4j.LoggerFactory
 
@@ -42,7 +43,12 @@ object LoginActor {
 
   case object CloseWs extends Command
 
-  case class LoginSuccess(replyTo: ActorRef[TokenActor.Command], roomList: List[Long], playerInfo: ClientPlayerInfo) extends Command
+  case class LoginSuccess(
+    replyTo: ActorRef[TokenActor.Command],
+    roomList: List[Long],
+    playerInfo: PlayerInfo,
+    gameServerInfo: GameServerInfo
+  ) extends Command
 
   def init: Behavior[Command] ={
     Behaviors.receive[Command]{ (ctx, msg) =>
@@ -99,8 +105,8 @@ object LoginActor {
           closed.foreach{_ => log.info("webSocket closed")}
           Behaviors.same
 
-        case LoginSuccess(replyTo, roomList, playerInfo) =>
-          pushStack2AppThread(page.roomScene(replyTo, roomList, playerInfo))
+        case LoginSuccess(replyTo, roomList, playerInfo, gameServerInfo) =>
+          pushStack2AppThread(page.roomScene(replyTo, roomList, playerInfo, gameServerInfo))
           Behaviors.same
       }
     }

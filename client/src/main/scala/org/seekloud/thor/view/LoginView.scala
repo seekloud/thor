@@ -14,9 +14,12 @@ import javafx.scene.layout.VBox
 import javafx.scene.text.{Font, Text}
 import javafx.scene.{Group, Scene}
 import javafx.stage.Stage
+import org.seekloud.thor.App
 import org.seekloud.thor.App.loginActor
 import org.seekloud.thor.actor.{LoginActor, TokenActor}
 import org.seekloud.thor.common.Context
+import org.seekloud.thor.controller.PlayGameController
+import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, UserInfo}
 import org.seekloud.thor.protocol.ESheepProtocol._
 import sun.misc.BASE64Decoder
 
@@ -67,7 +70,7 @@ class LoginView(context: Context){
     context.switchScene(scene)
   }
 
-  def roomScene(replyTo: ActorRef[TokenActor.Command], roomList: List[Long], playerInfo: ClientPlayerInfo) ={
+  def roomScene(replyTo: ActorRef[TokenActor.Command], roomList: List[Long], playerInfo: PlayerInfo, gameServerInfo: GameServerInfo) ={
 
     val group = new Group()
     val scene = new Scene(group)
@@ -76,15 +79,19 @@ class LoginView(context: Context){
     roomList.foreach{t =>
       val oneRoomInfo = RoomInfo(new SimpleStringProperty(t.toString), new SimpleStringProperty("一般房间"))
       oneRoomInfo.edit.get().setOnAction{e =>
+        App.pushStack2AppThread{
+          val playGameView = new PlayGameView(context)
+          new PlayGameController(playerInfo, gameServerInfo, context, playGameView, Some(t.toString))
+          context.switchScene(playGameView.getScene, resize = true)
+        }
         println("okok")
-        //TODO 进入游戏按钮操作
       }
       observableList.add(oneRoomInfo)
     }
 
     val tableView = new TableView[RoomInfo]()
 
-    val nameLabel = new Label("用户名：" + playerInfo.nickname)
+    val nameLabel = new Label("用户名：" + playerInfo.nickName)
     nameLabel.setFont(Font.font(17))
 //    val label = new Label("房间列表")
 //    label.setFont(Font.font(20))
