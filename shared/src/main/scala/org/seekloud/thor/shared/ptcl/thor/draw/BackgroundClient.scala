@@ -118,7 +118,7 @@ trait BackgroundClient {
 
   def drawReplayMsg(m: String): Unit = {
     ctx.setFill("#000000")
-    ctx.fillRec(0, 0, canvasSize.x * canvasUnit, canvasSize.y * canvasUnit)
+    ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)
     ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left")
     ctx.setTextBaseLine("top")

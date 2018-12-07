@@ -56,15 +56,34 @@ class PlayGameView (context: Context){
     }else (Point(0,0),0.toFloat)
   }
 
-  def drawGameLoading() = {
-    getCanvasContext.setFill("#006699")
-    getCanvasContext.fillRec(0,0,canvasBoundary.x,canvasBoundary.y)
-    getCanvasContext.getContext.setTextAlign(TextAlignment.CENTER)
-    getCanvasContext.setFont("楷体", 5 * canvasUnit)
-    getCanvasContext.setFill("black")
-    getCanvasContext.fillText("请稍等，正在连接服务器", 300, 180)
+
+  def drawGameLoading(): Unit = {
+    val ctx = getCanvasContext
+    println("loading")
+    ctx.setFill("#000000")
+    ctx.fillRec(0, 0, canvasBoundary.x, canvasBoundary.y)
+    ctx.setFill("rgb(250, 250, 250)")
+    ctx.setTextAlign("left")
+    ctx.setFont("Helvetica", 36)
+    ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
+  def drawReplayMsg(m: String): Unit = {
+    val ctx = getCanvasContext
+    ctx.setFill("#000000")
+    ctx.fillRec(0, 0, canvasBoundary.x, canvasBoundary.y)
+    ctx.setFill("rgb(250, 250, 250)")
+    ctx.setTextAlign("left")
+    ctx.setTextBaseLine("top")
+    ctx.setFont("Helvetica", 3.6 * canvasUnit)
+    ctx.fillText(m, 150, 180)
+    println()
+  }
+
+  private val logo = drawFrame.createImage("/img/logo.png")
+  private val deadBlank = drawFrame.createImage("/img/dead-blank.png")
+  private val userName = drawFrame.createImage("/img/user-name.png")
+  private val playAgain = drawFrame.createImage("/img/play-again.png")
 
 
   abstract class CanvasListener{

@@ -35,7 +35,7 @@ trait NetworkInfo {
   protected def receivePingPackage(p: ThorGame.PingPackage): Unit = {
     receiveNetworkLatencyList = NetworkLatency(System.currentTimeMillis() - p.sendTime) :: receiveNetworkLatencyList
     if (receiveNetworkLatencyList.size < PingTimes) {
-      Shortcut.scheduleOnce(() => startPing(), 10)
+//      Shortcut.scheduleOnce(() => startPing(), 10)
     } else {
       latency = receiveNetworkLatencyList.map(_.latency).sum / receiveNetworkLatencyList.size
       receiveNetworkLatencyList = Nil

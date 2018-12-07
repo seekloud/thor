@@ -37,6 +37,8 @@ with FpsRender{
           val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
 
           drawBackground(offset, canvasUnit, canvasBounds)
+//          drawRank(historyRank,false,myId)
+//          drawRank(currentRankList,true,myId)
           drawFood(offset, canvasUnit, canvasBounds)
           drawAdventurers(offSetTime, offset, canvasUnit)
           drawEnergyBar(adventurer)
