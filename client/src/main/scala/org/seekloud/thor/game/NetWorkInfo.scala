@@ -7,22 +7,22 @@ import org.seekloud.thor.view.PlayGameView
 
 /**
   * User: TangYaruo
-  * Date: 2018/11/25
-  * Time: 17:52
+  * Date: 2018/12/6
+  * Time: 15:43
   */
+
 final case class NetworkLatency(latency: Long)
 
-trait NetworkInfo {
-  this: PlayGameController =>
+trait NetWorkInfo { this: PlayGameController =>
 
   private var lastPingTime = System.currentTimeMillis()
   private val PingTimes = 10
-  private var latency: Long = 0L
-  private var receiveNetworkLatencyList: List[NetworkLatency] = Nil
+  private var latency : Long = 0L
+  private var receiveNetworkLatencyList : List[NetworkLatency] = Nil
 
-  def ping(): Unit = {
+  def ping():Unit = {
     val curTime = System.currentTimeMillis()
-    if (curTime - lastPingTime > 1000) {
+    if(curTime - lastPingTime > 1000){
       startPing()
       lastPingTime = curTime
     }

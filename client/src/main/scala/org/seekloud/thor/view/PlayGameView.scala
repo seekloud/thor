@@ -1,5 +1,7 @@
 package org.seekloud.thor.view
 
+import com.neo.sk.utils.JavaFxUtil
+import javafx.scene.canvas.GraphicsContext
 import org.seekloud.thor.App
 import org.seekloud.thor.common.Context
 import org.seekloud.thor.shared.ptcl.model.{Constants, Point}
@@ -26,6 +28,7 @@ class PlayGameView (context: Context){
   protected var canvasHeight = screen.getMaxY.toFloat
   var canvasBoundary = Point(canvasWidth,canvasHeight)
   var canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+  var canvasBounds = canvasBoundary / canvasUnit
   val canvas = drawFrame.createCanvas(canvasWidth,canvasHeight)
 
   val group = new Group()
@@ -66,6 +69,21 @@ class PlayGameView (context: Context){
     ctx.setTextAlign("left")
     ctx.setFont("Helvetica", 36)
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
+  }
+
+  def handleResize = {
+    val width = context.getStageWidth.toFloat
+    val height = context.getStageHeight.toFloat
+    if(width != canvasWidth || height != canvasHeight){
+      canvasWidth = width
+      canvasHeight = height
+      canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+      canvasBoundary = Point(canvasWidth, canvasHeight)
+      canvasBounds = canvasBoundary / canvasUnit
+      canvas.setWidth(canvasWidth)
+      canvas.setHeight(canvasHeight)
+      (canvasBoundary, canvasUnit)
+    } else (Point(0,0), 0.toFloat)
   }
 
   def drawReplayMsg(m: String): Unit = {
