@@ -1,6 +1,6 @@
 package org.seekloud.utils
 
-import org.seekloud.thor.model._
+import org.seekloud.thor.common.AppSettings
 import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.slf4j.LoggerFactory
 
@@ -79,7 +79,7 @@ object EsheepClient extends HttpUtil {
     }
   }
 
-  def getRoomList(ip: String, port: Int, domain: String) = {
+  def getRoomList(ip: String, port: Long, domain: String) = {
     val methodName = s"getRoomList-$gameName"
     val url = baseUrl + "/" + gameName + "/" + "getRoomList"
     //    val url = baseUrl + "/" + gameName + "/" + "getRoomList"

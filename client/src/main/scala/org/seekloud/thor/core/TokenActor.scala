@@ -5,6 +5,7 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import org.seekloud.utils.EsheepClient
 import org.slf4j.{Logger, LoggerFactory}
 import org.seekloud.thor.App.{executor, loginActor, pushStack2AppThread}
+import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, UserInfo}
 import org.seekloud.thor.protocol.ESheepProtocol.ClientPlayerInfo
 
 import scala.concurrent.duration._
@@ -104,7 +105,10 @@ object TokenActor {
           log.info(s"init GameInfo success: | $rsp")
           EsheepClient.getRoomList(rsp.data.gsPrimaryInfo.ip, rsp.data.gsPrimaryInfo.port, rsp.data.gsPrimaryInfo.domain).map{
             case Right(info) =>
-              loginActor ! LoginActor.LoginSuccess(ctx.self, info.data.roomList, playerInfo)
+              val playerInfoInModel = PlayerInfo(UserInfo(playerInfo.userId, playerInfo.nickname, playerInfo.token, playerInfo.tokenExpireTime),"user" + playerInfo.userId ,playerInfo.nickname ,rsp.data.accessCode )
+              val gameServerInfo = GameServerInfo(rsp.data.gsPrimaryInfo.ip, rsp.data.gsPrimaryInfo.port, rsp.data.gsPrimaryInfo.domain)
+
+              loginActor ! LoginActor.LoginSuccess(ctx.self, info.data.roomList, playerInfoInModel, gameServerInfo)
               timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, 500 .seconds)
             case Left(error) =>
               log.debug(s"getRoomList error: $error")
@@ -124,7 +128,7 @@ object TokenActor {
     token: String,
     accessCode: String,
     ip: String,
-    port: Int,
+    port: Long,
     domain: String
   )(
     implicit timer: TimerScheduler[Command],

@@ -1,5 +1,7 @@
 package org.seekloud.thor.protocol
 
+import org.seekloud.thor.model.GameServerInfo
+
 /**
   * User: XuSiRan
   * Date: 2018/12/4
@@ -50,12 +52,6 @@ object ESheepProtocol {
   ) extends ESheepRsp
 
   final case class Ws4AgentRsp(Ws4AgentRsp: WsPlayerInfoRsp)
-
-  final case class GameServerInfo(
-    ip: String,
-    port: Int,
-    domain: String
-  )
 
   final case class JoinGameInfo(
     accessCode: String,
