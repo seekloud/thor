@@ -19,6 +19,7 @@ object MainPage extends PageSwitcher {
     case "watchGame" :: roomId :: playerId :: accessCode :: Nil => new WatchRender(roomId.toLong, playerId, accessCode).render
     case "watchRecord" :: recordId :: playerId :: frame :: accessCode :: Nil => new ReplayRender(ReplayInfo(recordId.toLong, playerId, frame.toInt, accessCode)).render
     case "entry" :: Nil => EntryPage.render
+    case "test" :: Nil => TestRender.render
     case _ => println("error in switch"); EntryPage.render
   }
 
