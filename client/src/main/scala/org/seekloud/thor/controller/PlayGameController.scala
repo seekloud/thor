@@ -179,18 +179,16 @@ class PlayGameController(
     }
 
     /*鼠标点击事件*/
-    playGameScreen.canvas.getCanvas.setOnMouseClicked { e =>
+    playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
       println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play) {
           if (e.isPrimaryButtonDown) {
-            println(s"点击左键")
             val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             playGameActor ! DispatchMsg(preExecuteAction)
           }
           else if (e.isSecondaryButtonDown) {
-            println(s"点击右键")
             val preExecuteAction = MouseClickDownRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             playGameActor ! DispatchMsg(preExecuteAction)
