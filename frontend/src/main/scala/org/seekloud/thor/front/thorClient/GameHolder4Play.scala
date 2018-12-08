@@ -70,17 +70,16 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
-        println(s"111111111111111111111111111")
-      case UserEnterRoom(userId, name, _, _) =>
-        barrage = s"${name}加入了游戏"
-        barrageTime = 300
-        println(s"222222222222")
-
-      case UserLeftRoom(userId, name, _) =>
-        barrage = s"${name}离开了游戏"
-        barrageTime = 300
-        println(s"user left $name")
-        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
+//      case UserEnterRoom(userId, name, _, _) =>
+//        barrage = s"${name}加入了游戏"
+//        barrageTime = 300
+//        println(s"222222222222")
+//
+//      case UserLeftRoom(userId, name, _) =>
+//        barrage = s"${name}离开了游戏"
+//        barrageTime = 300
+//        println(s"user left $name")
+//        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
       case e:BeAttacked =>
         println("attack!!!!!!!!!!!!!"+e)
@@ -122,7 +121,16 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
       case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
-      case e: GameEvent => thorSchemaOpt.foreach(_.receiveGameEvent(e))
+      case e: GameEvent =>
+        if (e.isInstanceOf[UserEnterRoom]) {
+          barrage = s"${myName}加入了游戏"
+          barrageTime = 300
+        }
+        if (e.isInstanceOf[UserLeftRoom]) {
+          barrage = s"${myName}离开了游戏"
+          barrageTime = 300
+        }
+        thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
       case x => dom.window.console.log(s"接收到无效消息$x")
     }

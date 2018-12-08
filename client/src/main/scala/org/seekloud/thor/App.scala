@@ -16,13 +16,13 @@ import javafx.stage.Stage
 import concurrent.duration._
 import javafx.application.Platform
 import akka.actor.typed.ActorRef
-import org.seekloud.thor.actor.{LoginActor, TokenActor}
 import org.seekloud.thor.common.Context
+import org.seekloud.thor.core.{LoginActor, TokenActor}
 import org.seekloud.thor.protocol.ESheepProtocol.LoginUrlRsp
 import org.seekloud.thor.view.LoginView
 /**
   * @author Jingyi
-  * @version 创建时间：2018/12/3
+  * @version 创建时间：2018/12/3T
   */
 class  App extends Application{
 

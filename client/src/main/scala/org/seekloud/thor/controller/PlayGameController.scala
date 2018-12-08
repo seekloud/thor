@@ -17,8 +17,7 @@ import org.seekloud.thor.model.{GameServerInfo, PlayerInfo}
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{MouseClickDownLeft, MouseClickDownRight, MouseClickUpRight, MouseMove}
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{MouseMove, PingPackage}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.view.PlayGameView
 import org.slf4j.LoggerFactory
@@ -46,11 +45,11 @@ class PlayGameController(
 
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
 
-//  private var recYourInfo: Boolean = false
-//  private var recSyncGameState: Option[ThorGame.GridSyncState] = None
+  //  private var recYourInfo: Boolean = false
+  //  private var recSyncGameState: Option[ThorGame.GridSyncState] = None
 
   protected var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
-  private val window = Point((playGameScreen.canvasBoundary.x - 12),(playGameScreen.canvasBoundary.y - 12.toFloat))
+  private val window = Point((playGameScreen.canvasBoundary.x - 12), (playGameScreen.canvasBoundary.y - 12.toFloat))
   private var gameState = GameState.loadingPlay
   private var logicFrameTime = System.currentTimeMillis()
 
@@ -66,8 +65,6 @@ class PlayGameController(
   var justSynced = false
 
 
-
-
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
       drawGameByTime(System.currentTimeMillis() - logicFrameTime)
@@ -76,15 +73,13 @@ class PlayGameController(
 
   private def drawGameByTime(offsetTime: Long): Unit = {
     thorSchemaOpt.foreach { thorSchema =>
-      if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-        thorSchema.drawGame(offsetTime, playGameScreen.canvasUnit, playGameScreen.canvasBounds)
-        thorSchema.drawRank(historyRank, CurrentOrNot = false, playerInfo.playerId)
-        thorSchema.drawRank(currentRank, CurrentOrNot = true, playerInfo.playerId)
-        thorSchema.drawNetInfo(getNetworkLatency)
-        if (barrageTime > 0) {
-          thorSchema.drawBarrage(barrage, playGameScreen.canvasBoundary.x * 0.5, playGameScreen.canvasBoundary.y * 0.17)
-          barrageTime -= 1
-        }
+      thorSchema.drawGame(offsetTime, playGameScreen.canvasUnit, playGameScreen.canvasBounds)
+      thorSchema.drawRank(historyRank, CurrentOrNot = false, playerInfo.playerId)
+      thorSchema.drawRank(currentRank, CurrentOrNot = true, playerInfo.playerId)
+      thorSchema.drawNetInfo(getNetworkLatency)
+      if (barrageTime > 0) {
+        thorSchema.drawBarrage(barrage, playGameScreen.canvasBoundary.x * 0.5, playGameScreen.canvasBoundary.y * 0.17)
+        barrageTime -= 1
       }
     }
   }
@@ -112,7 +107,7 @@ class PlayGameController(
     }
   }
 
-  def reStart() ={
+  def reStart() = {
     println("restart!!!!")
     firstCome = true
     start
@@ -169,11 +164,14 @@ class PlayGameController(
       val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
       if (thorSchemaOpt.nonEmpty && gameState == GameState.play) {
         thorSchemaOpt.foreach { thorSchema =>
-          if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-            val mouseDistance = math.sqrt(math.pow(e.getX - playGameScreen.screen.getWidth / 2.0, 2) + math.pow(e.getY - playGameScreen.screen.getHeight / 2.0, 2))
-            val preExecuteAction = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            playGameActor ! DispatchMsg(preExecuteAction)
+          val mouseDistance = math.sqrt(math.pow(e.getX - playGameScreen.screen.getWidth / 2.0, 2) + math.pow(e.getY - playGameScreen.screen.getHeight / 2.0, 2))
+          if (thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+            val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+            if (math.abs(theta - direction) > 0.3) {
+              val preExecuteAction = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              playGameActor ! DispatchMsg(preExecuteAction)
+            }
           }
         }
       }
@@ -182,59 +180,53 @@ class PlayGameController(
 
     /*鼠标点击事件*/
     playGameScreen.canvas.getCanvas.setOnMouseClicked { e =>
-      thorSchemaOpt match {
-        case Some(thorSchema:ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(playerInfo.playerId) && gameState == GameState.play){
-            if (e.isPrimaryButtonDown){
-              val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-              thorSchema.preExecuteUserEvent(preExecuteAction)
-              playGameActor ! DispatchMsg(preExecuteAction)
-            }
-            else if (e.isSecondaryButtonDown){
-              val preExecuteAction = MouseClickDownRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-              thorSchema.preExecuteUserEvent(preExecuteAction)
-              playGameActor ! DispatchMsg(preExecuteAction)
-            }
-            else ()
+      println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+      thorSchemaOpt.foreach { thorSchema =>
+        if (gameState == GameState.play) {
+          if (e.isPrimaryButtonDown) {
+            println(s"点击左键")
+            val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+            thorSchema.preExecuteUserEvent(preExecuteAction)
+            playGameActor ! DispatchMsg(preExecuteAction)
           }
-          else {
-            val x = e.getX
-            val y = e.getY
-            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
-              reStart()
+          else if (e.isSecondaryButtonDown) {
+            println(s"点击右键")
+            val preExecuteAction = MouseClickDownRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+            thorSchema.preExecuteUserEvent(preExecuteAction)
+            playGameActor ! DispatchMsg(preExecuteAction)
           }
-        case None =>
+          else ()
+        } else {
+          val x = e.getX
+          val y = e.getY
+          if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+            reStart()
+        }
       }
-
-
-
     }
 
     /*鼠标释放事件*/
     playGameScreen.canvas.getCanvas.setOnMouseDragReleased { e =>
-      thorSchemaOpt match{
-        case Some(thorSchema: ThorSchemaClientImpl) =>
-          if(thorSchema.adventurerMap.contains(playerInfo.playerId) && gameState == GameState.play)
-            if(e.isSecondaryButtonDown){ //右键
-              val preExecuteAction = MouseClickUpRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-              thorSchema.preExecuteUserEvent(preExecuteAction)
-              playGameActor ! DispatchMsg(preExecuteAction)
-            }
-            else ()
-        case None =>
+      thorSchemaOpt.foreach { thorSchema =>
+        if (gameState == GameState.play) {
+          if (e.isSecondaryButtonDown) { //右键
+            val preExecuteAction = MouseClickUpRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+            thorSchema.preExecuteUserEvent(preExecuteAction)
+            playGameActor ! DispatchMsg(preExecuteAction)
+          }
+          else ()
+        }
       }
     }
 
     /*键盘事件*/
     playGameScreen.canvas.getCanvas.setOnKeyPressed { e =>
-      thorSchemaOpt match{
-        case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (!thorSchema.adventurerMap.contains(playerInfo.playerId)){
-            if (e.getCode == KeyCode.SPACE){
-              reStart()
-            }
+      thorSchemaOpt.foreach { thorSchema =>
+        if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+          if (e.getCode == KeyCode.SPACE) {
+            reStart()
           }
-        case None =>
+        }
       }
     }
 
@@ -248,8 +240,8 @@ class PlayGameController(
           println(s"start---------")
           try {
             thorSchemaOpt = Some(ThorSchemaClientImpl(playGameScreen.drawFrame, playGameScreen.getCanvasContext, e.config, e.id, e.name, playGameScreen.canvasBoundary, playGameScreen.canvasUnit))
-//            recYourInfo = true
-//            recSyncGameState.foreach(t => wsMessageHandle(t))
+            //            recYourInfo = true
+            //            recSyncGameState.foreach(t => wsMessageHandle(t))
             animationTimer.start()
             playGameActor ! PlayGameActor.StartGameLoop
             gameState = GameState.play
@@ -260,14 +252,14 @@ class PlayGameController(
               println(e.getMessage)
               println("client is stop!!!")
           }
-        case e: ThorGame.UserEnterRoom =>
-          barrage = s"${playerInfo.nickName}加入了游戏"
-          barrageTime = 300
-
-        case e: ThorGame.UserLeftRoom =>
-          barrage = s"${playerInfo.nickName}离开了游戏"
-          barrageTime = 300
-          thorSchemaOpt.foreach( thorSchema => thorSchema.leftGame(playerInfo.playerId, playerInfo.nickName))
+        //        case e: ThorGame.UserEnterRoom =>
+        //          barrage = s"${playerInfo.nickName}加入了游戏"
+        //          barrageTime = 300
+        //
+        //        case e: ThorGame.UserLeftRoom =>
+        //          barrage = s"${playerInfo.nickName}离开了游戏"
+        //          barrageTime = 300
+        //          thorSchemaOpt.foreach( thorSchema => thorSchema.leftGame(playerInfo.playerId, playerInfo.nickName))
 
         case e: ThorGame.BeAttacked =>
           gameState = GameState.stop
@@ -277,7 +269,7 @@ class PlayGameController(
           println(s"be attacked by $e.killerName")
           val time = duringTime(endTime - startTime)
           thorSchemaOpt.foreach { thorSchema =>
-            if (thorSchema.adventurerMap.contains(playerInfo.playerId)){
+            if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
               thorSchema.killerNew = e.killerName
               thorSchema.duringTime = time
             }
@@ -300,6 +292,14 @@ class PlayGameController(
           thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
         case e: ThorGame.GameEvent =>
+          if (e.isInstanceOf[UserEnterRoom]) {
+            barrage = s"${playerInfo.nickName}加入了游戏"
+            barrageTime = 300
+          }
+          if (e.isInstanceOf[UserLeftRoom]) {
+            barrage = s"${playerInfo.nickName}离开了游戏"
+            barrageTime = 300
+          }
           thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
         case x => println(s"接收到无效消息$x")
@@ -309,7 +309,7 @@ class PlayGameController(
 
   }
 
-  def duringTime(time:Long) = {
+  def duringTime(time: Long) = {
     var remain = time / 1000 % 86400
     val hour = remain / 3600
     remain = remain % 3600
