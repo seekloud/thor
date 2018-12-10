@@ -91,6 +91,8 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
           thorSchemaOpt.foreach(_.receiveGameEvent(e))
         }
 
+        dom.window.setTimeout(() => reStart(), 2000)
+
 
       case Ranks(current, history) =>
         currentRank = current
