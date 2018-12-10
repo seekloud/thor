@@ -86,12 +86,12 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
           dom.window.cancelAnimationFrame(nextFrame)
           Shortcut.cancelSchedule(mousemoveTimer)
           Shortcut.cancelSchedule(clickTimer)
+          dom.window.setTimeout(() => reStart(), 2000)
         }
         else{
           thorSchemaOpt.foreach(_.receiveGameEvent(e))
         }
 
-        dom.window.setTimeout(() => reStart(), 2000)
 
 
       case Ranks(current, history) =>
