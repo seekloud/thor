@@ -15,8 +15,12 @@ object Routes {
 
   def wsJoinGameUrl(name:String) = base + s"/game/join?name=$name"
 
-  def wsJoinGameUrlESheep(id: String, name: String, accessCode: String, roomId: Option[Long]): String =
-    base + s"/game/playGame/userJoin?playerId=$id&playerName=$name&accessCode=$accessCode" + roomId.getOrElse("")
+  def wsJoinGameUrlESheep(id: String, name: String, accessCode: String, roomId: Option[Long]): String = {
+    if(roomId.isEmpty)
+      base + s"/game/playGame/userJoin?playerId=$id&playerName=$name&accessCode=$accessCode"
+    else
+      base + s"/game/playGame/userJoin?playerId=$id&playerName=$name&accessCode=$accessCode&roomId=${roomId.get}"
+  }
 
   def wsWatchGameUrl(roomId: Long, id: String, accessCode: String) = base + s"/game/watchGame?roomId=$roomId&playerId=$id&accessCode=$accessCode"
 

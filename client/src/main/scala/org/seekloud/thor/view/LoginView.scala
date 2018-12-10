@@ -84,7 +84,6 @@ class LoginView(context: Context){
           new PlayGameController(playerInfo, gameServerInfo, context, playGameView, Some(t.toString)).start
           context.switchScene(playGameView.getScene, resize = true, fullScreen = true)
         }
-        println("okok")
       }
       observableList.add(oneRoomInfo)
     }
