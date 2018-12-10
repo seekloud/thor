@@ -36,7 +36,7 @@ trait BackgroundClient {
   def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0) = {
     ctx.save()
     ctx.setTextBaseLine("top")
-    ctx.setFont("Comic Sans MS", baseFont * 16)
+    ctx.setFont("Comic Sans MS", 16)
     ctx.fillText(str, x, (lineNum + lineBegin - 1) * window.x * 0.01)
     ctx.restore()
   }
