@@ -78,7 +78,7 @@ class PlayGameController(
       thorSchema.drawRank(currentRank, CurrentOrNot = true, playerInfo.playerId)
       thorSchema.drawNetInfo(getNetworkLatency)
       if (barrageTime > 0) {
-        thorSchema.drawBarrage(barrage, playGameScreen.canvasBoundary.x * 0.5, playGameScreen.canvasBoundary.y * 0.17)
+        thorSchema.drawBarrage(barrage)
         barrageTime -= 1
       }
     }

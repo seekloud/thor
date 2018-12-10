@@ -23,12 +23,12 @@ trait BackgroundClient {
     ctx.restore()
   }
 
-  def drawBarrage(s: String, x: Double, y: Double): Unit = {
+  def drawBarrage(s: String): Unit = {
     ctx.save()
     ctx.setFont("Comic Sans Ms", 30)
     ctx.setTextBaseLine("top")
     ctx.setFill("#ffffff")
-    ctx.fillText(s, x, y)
+    ctx.fillText(s, window.x * 0.38, window.y * 0.17)
     ctx.restore()
   }
 
