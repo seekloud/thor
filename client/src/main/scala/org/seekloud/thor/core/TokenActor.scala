@@ -1,4 +1,4 @@
-package org.seekloud.thor.actor
+package org.seekloud.thor.core
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}

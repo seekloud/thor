@@ -128,7 +128,7 @@ class MiddleContextInFx extends MiddleContext {
 
   override def strokeText(text: String, x: Double, y: Double, maxWidth: Double) = context.strokeText(text, x, y, maxWidth)
 
-  override def rotate(d: Float): Unit = context.rotate(d)
+  override def rotate(d: Float): Unit = context.rotate(math.toDegrees(d))
 
   override def translate(x: Float, y: Float): Unit = context.translate(x, y)
 

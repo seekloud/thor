@@ -171,7 +171,7 @@ object PlayGameActor {
 
   def getWebSocketUri(info:ConnectGame): String = {
     val host = "10.1.29.250:30376"
-    Routes.getJoinGameWebSocketUri(info.playerInfo.nickName,info.gameInfo.domain,info.roomInfo)
+    Routes.getJoinGameWebSocketUri(info.playerInfo.playerId, info.playerInfo.nickName, info.playerInfo.accessCode, info.gameInfo.domain,info.roomInfo)
   }
 
   import org.seekloud.byteobject.ByteObject._
@@ -207,7 +207,7 @@ object PlayGameActor {
         }
 
       case msg: BinaryMessage.Streamed =>
-        println(s"ssssssssssss${msg}")
+//        println(s"ssssssssssss${msg}")
         val f = msg.dataStream.runFold(new ByteStringBuilder().result()) {
           case (s, str) => s.++(str)
         }

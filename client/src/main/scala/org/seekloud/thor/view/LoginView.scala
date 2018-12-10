@@ -16,9 +16,9 @@ import javafx.scene.{Group, Scene}
 import javafx.stage.Stage
 import org.seekloud.thor.App
 import org.seekloud.thor.App.loginActor
-import org.seekloud.thor.actor.{LoginActor, TokenActor}
 import org.seekloud.thor.common.Context
 import org.seekloud.thor.controller.PlayGameController
+import org.seekloud.thor.core.{TokenActor, LoginActor}
 import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, UserInfo}
 import org.seekloud.thor.protocol.ESheepProtocol._
 import sun.misc.BASE64Decoder
