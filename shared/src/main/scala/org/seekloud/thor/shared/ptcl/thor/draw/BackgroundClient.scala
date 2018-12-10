@@ -37,7 +37,7 @@ trait BackgroundClient {
     ctx.save()
     ctx.setTextBaseLine("top")
     ctx.setFont("Comic Sans MS", baseFont * 16)
-    ctx.fillText(str, x, (lineNum + lineBegin - 1) * 14)
+    ctx.fillText(str, x, (lineNum + lineBegin - 1) * window.x * 0.01)
     ctx.restore()
   }
 
@@ -47,7 +47,7 @@ trait BackgroundClient {
     var yourRank = 100
     var yourNameIn = false
     val begin = if (CurrentOrNot) 10 else window.x * 0.82
-
+    var last = ""
     ctx.save()
     ctx.drawImage(rankImg, begin, 0, Some(window.x * 0.18, window.x * 0.18))
     ctx.setFill("#fdffff")
@@ -59,6 +59,9 @@ trait BackgroundClient {
         ctx.setTextAlign("left")
         drawTextLine(s" $index:  ${score.n.take(5)}    score=${score.e}   kill=${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine)
       }
+      if (index == 6) {
+        last = s" 6 :  ${score.n.take(5)}    score=${score.e}   kill=${score.k}"
+      }
     }
     index += 1
     if (!yourNameIn) {
@@ -69,6 +72,8 @@ trait BackgroundClient {
         case None =>
       }
     }
+    else
+      drawTextLine(last, begin + 10, 12, RankBaseLine)
     ctx.restore()
   }
 
