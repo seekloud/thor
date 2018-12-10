@@ -131,7 +131,6 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         websocketClient.sendMsg(event)
         thorSchema.preExecuteUserEvent(event)
         Shortcut.playMusic("sound-4")
-        println(event)
       }
     }
   }
@@ -151,7 +150,6 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
           val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
           websocketClient.sendMsg(data)
           thorSchema.preExecuteUserEvent(data)
-          println(data)
         }
       }
     }
