@@ -183,7 +183,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           thorSchema.drawRank(currentRank,true,myId)
           thorSchema.drawNetInfo(getNetworkLatency)
           if (barrageTime > 0){
-            thorSchema.drawBarrage(barrage,canvasBoundary.x*0.5,canvasBoundary.y*0.17)
+            thorSchema.drawBarrage(barrage)
             barrageTime -= 1
           }
         }
