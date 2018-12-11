@@ -79,9 +79,13 @@ class WebSocketClient(
         case jsonStringMsg: String =>
           import io.circe.generic.auto._
           import io.circe.parser._
-          val data = decode[WsMsgServer](jsonStringMsg).right.get
-          messageHandler(data)
-        case unknow => println(s"recv unknow msg:${unknow}")
+          decode[WsMsgServer](jsonStringMsg) match {
+            case Right(data) =>
+              messageHandler(data)
+            case Left(e) =>
+              println(s"ws msg decode error: $e")
+          }
+        case unknown => println(s"receive unknown msg:$unknown")
       }
     }
 
