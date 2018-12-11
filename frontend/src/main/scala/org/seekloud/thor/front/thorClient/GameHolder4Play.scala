@@ -176,7 +176,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               thorSchema.preExecuteUserEvent(event)
               //              thorSchema.addMyAction(event)
               Shortcut.playMusic("sound-4")
-              e.preventDefault()
+//              e.preventDefault()
             }
             else if (e.button == 2) { //右键
               val event = MouseClickDownRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -219,6 +219,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (!thorSchema.adventurerMap.contains(myId)) {
             if (e.keyCode == KeyCode.Space) {
+              println("key space down")
               reStart()
               e.preventDefault()
             }
