@@ -19,12 +19,11 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
   def startReplay(option: Option[ReplayInfo] = None) = {
     println(s"start replay...")
     if (firstCome) {
-      gameState = GameState.loadingPlay
+      gameState = GameState.replayLoading
       println(s"replay ws url: ${Routes.wsReplayGameUrl(option.get)}")
       websocketClient.setup(Routes.wsReplayGameUrl(option.get))
       gameLoop()
     } else if (websocketClient.getWsState) {
-      firstCome = true
       gameLoop()
     } else {
       JsFunc.alert("网络连接失败，请重新刷新")
