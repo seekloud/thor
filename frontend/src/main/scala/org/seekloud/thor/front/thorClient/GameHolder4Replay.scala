@@ -19,12 +19,12 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
   def startReplay(option: Option[ReplayInfo] = None) = {
     println(s"start replay...")
     if (firstCome) {
-      println(s"set replay***********")
       gameState = GameState.replayLoading
       println(s"replay ws url: ${Routes.wsReplayGameUrl(option.get)}")
       websocketClient.setup(Routes.wsReplayGameUrl(option.get))
       gameLoop()
     } else if (websocketClient.getWsState) {
+      println(s"not first come but ws set.")
       firstCome = true
       gameLoop()
     } else {
@@ -51,10 +51,10 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.GridSyncState =>
         if (firstCome) {
           firstCome = false
-          println(s"set replay-------------------")
           gameState = GameState.replayLoading
           thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
         } else {
+          gameState = GameState.play
           thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
         }
 
