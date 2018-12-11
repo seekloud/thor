@@ -50,7 +50,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     println("restart!!!!")
     firstCome = true
     start(myName, None, None, None) //重启没有验证accessCode
-    websocketClient.sendMsg(RestartGame(myName))
+//    websocketClient.sendMsg(RestartGame(myName))
   }
 
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
