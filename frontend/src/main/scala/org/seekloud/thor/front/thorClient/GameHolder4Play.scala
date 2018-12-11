@@ -169,7 +169,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmousedown = { (e: dom.MouseEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId))
+          if (thorSchema.adventurerMap.contains(myId)){
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
@@ -185,14 +185,14 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               //              thorSchema.addMyAction(event) // myAdventurerAction
               e.preventDefault()
             }
-            else ()
+          }
           else {
             val x = e.clientX
             val y = e.clientY
             //            println(s"x = ${window.x * 0.4} y = ${window.y * 0.8} clientX = $x clientY = $y")
-            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+//            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
               reStart()
-            e.preventDefault()
+//            e.preventDefault()
           }
         case None =>
       }
