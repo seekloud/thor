@@ -10,7 +10,7 @@ import org.seekloud.thor.Boot.{executor, gameRecordGetter, userManager}
 import org.seekloud.thor.core.GameRecordGetter
 import org.seekloud.thor.protocol.ESheepProtocol._
 import org.seekloud.thor.protocol.ReplayProtocol._
-import org.seekloud.thor.shared.ptcl.CommonRsp
+import org.seekloud.thor.shared.ptcl.{CommonRsp, ErrorRsp}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -79,7 +79,7 @@ trait ReplayService extends ServiceUtils{
           complete(rsp)
         case error =>
           log.debug(s"error in getRecordPlayerList : $error")
-          complete(ErrorGetReplayPlayerList2)
+          complete(error)
       }.recover{
         case e: Exception =>
           log.debug(s"20181129 error $e")
@@ -95,7 +95,7 @@ trait ReplayService extends ServiceUtils{
           complete(rsp)
         case error =>
           log.debug(s"error in getRecordFrame : $error")
-          complete(ErrorGetRecordFrame2)
+          complete(error)
       }.recover{
         case e: Exception =>
           log.debug(s"20181129 error $e")
