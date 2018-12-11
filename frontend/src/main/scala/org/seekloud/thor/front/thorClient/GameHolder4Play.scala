@@ -170,6 +170,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId)){
+            println("mouse down")
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
@@ -187,6 +188,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             }
           }
           else {
+            println("on mouse down!!!!!")
             val x = e.clientX
             val y = e.clientY
             //            println(s"x = ${window.x * 0.4} y = ${window.y * 0.8} clientX = $x clientY = $y")
@@ -209,7 +211,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               //              thorSchema.addMyAction(event)
               e.preventDefault()
             }
-            else ()
         case None =>
       }
 
