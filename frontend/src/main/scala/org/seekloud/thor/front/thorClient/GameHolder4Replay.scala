@@ -19,13 +19,12 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
   def startReplay(option: Option[ReplayInfo] = None) = {
     println(s"start replay...")
     if (firstCome) {
-      gameState = GameState.loadingPlay
+      gameState = GameState.replayLoading
       println(s"replay ws url: ${Routes.wsReplayGameUrl(option.get)}")
       websocketClient.setup(Routes.wsReplayGameUrl(option.get))
-//      gameLoop()
+      gameLoop()
     } else if (websocketClient.getWsState) {
-      firstCome = true
-//      gameLoop()
+      gameLoop()
     } else {
       JsFunc.alert("网络连接失败，请重新刷新")
     }
@@ -50,6 +49,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.GridSyncState =>
         if (firstCome) {
           firstCome = false
+          gameState = GameState.replayLoading
           thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
         } else {
           thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
@@ -62,8 +62,8 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
 
       case ThorGame.StartReplay =>
         println(s"start replay...")
-        timer = Shortcut.schedule(gameLoop, thorSchemaOpt.get.config.frameDuration / thorSchemaOpt.get.config.playRate)
         gameState = GameState.play
+        timer = Shortcut.schedule(gameLoop, thorSchemaOpt.get.config.frameDuration / thorSchemaOpt.get.config.playRate)
         nextFrame = dom.window.requestAnimationFrame(gameRender())
 
       case e: ThorGame.UserActionEvent =>
@@ -78,11 +78,13 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
           case t: ThorGame.UserEnterRoom =>
             if (t.playerId == thorSchemaOpt.get.myId) {
               thorSchemaOpt.foreach(_.changeAdventurerId(t.playerId))
+              gameState = GameState.play
             }
 
           case t: ThorGame.UserLeftRoom =>
             if (t.playerId == thorSchemaOpt.get.myId) {
               println(s"receive userLeft=$t, set stop")
+              gameState = GameState.stop
             }
 
           case _ =>
@@ -91,7 +93,9 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.EventData =>
         e.list.foreach(r => wsMessageHandler(r))
         //remind 快速播放
-        thorSchemaOpt.foreach(_.update())
+        if (this.gameState == GameState.replayLoading) {
+          thorSchemaOpt.foreach(_.update())
+        }
 
       case e: ThorGame.PingPackage =>
         receivePingPackage(e)
