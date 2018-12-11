@@ -101,9 +101,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           }
           dom.window.cancelAnimationFrame(nextFrame)
         }
-        else{
-          thorSchemaOpt.foreach(_.receiveGameEvent(e))
-        }
+        thorSchemaOpt.foreach(_.receiveGameEvent(e))
+
 
 
       case Ranks(current, history) =>
@@ -169,14 +168,15 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmousedown = { (e: dom.MouseEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId))
+          if (thorSchema.adventurerMap.contains(myId)){
+            println("mouse down")
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
               //              thorSchema.addMyAction(event)
               Shortcut.playMusic("sound-4")
-              e.preventDefault()
+//              e.preventDefault()
             }
             else if (e.button == 2) { //右键
               val event = MouseClickDownRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -185,14 +185,15 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               //              thorSchema.addMyAction(event) // myAdventurerAction
               e.preventDefault()
             }
-            else ()
+          }
           else {
+            println("on mouse down!!!!!")
             val x = e.clientX
             val y = e.clientY
             //            println(s"x = ${window.x * 0.4} y = ${window.y * 0.8} clientX = $x clientY = $y")
-            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+//            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
               reStart()
-            e.preventDefault()
+//            e.preventDefault()
           }
         case None =>
       }
@@ -209,7 +210,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               //              thorSchema.addMyAction(event)
               e.preventDefault()
             }
-            else ()
         case None =>
       }
 
@@ -219,6 +219,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (!thorSchema.adventurerMap.contains(myId)) {
             if (e.keyCode == KeyCode.Space) {
+              println("key space down")
               reStart()
               e.preventDefault()
             }
