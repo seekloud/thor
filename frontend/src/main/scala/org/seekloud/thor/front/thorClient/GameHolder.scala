@@ -166,9 +166,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
       case GameState.loadingPlay =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.stop =>
-        thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
         thorSchemaOpt.foreach{ _.update()}
         logicFrameTime = System.currentTimeMillis()
+        thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
         dom.window.clearInterval(timer)
       case GameState.replayLoading =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
