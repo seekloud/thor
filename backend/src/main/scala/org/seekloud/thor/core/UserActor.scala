@@ -207,6 +207,10 @@ object UserActor {
             ctx.unwatch(frontActor)
             switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
+          case DispatchMsg(m) =>
+            log.debug(m.asInstanceOf[Wrap].toString)
+            Behaviors.same
+
           case unknownMsg =>
             log.warn(s"unknown msg: $unknownMsg")
             Behavior.unhandled
