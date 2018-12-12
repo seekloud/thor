@@ -213,12 +213,7 @@ object UserActor {
             import org.seekloud.byteobject.MiddleBufferInJvm
 
             val buffer = new MiddleBufferInJvm(m.asInstanceOf[Wrap].ws)
-            bytesDecode[WsMsgFront](buffer) match {
-              case Right(req) => log.debug(s"$req")
-              case Left(e) =>
-                log.error(s"decode binaryMessage failed,error:${e.message}")
-            }
-            bytesDecode[WsMsgServer](buffer) match {
+            bytesDecode[PingPackage](buffer) match {
               case Right(req) => log.debug(s"$req")
               case Left(e) =>
                 log.error(s"decode binaryMessage failed,error:${e.message}")
