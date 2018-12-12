@@ -208,16 +208,16 @@ object UserActor {
             switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
           case DispatchMsg(m) =>
-            import scala.language.implicitConversions
-            import org.seekloud.byteobject.ByteObject._
-            import org.seekloud.byteobject.MiddleBufferInJvm
-
-            val buffer = new MiddleBufferInJvm(m.asInstanceOf[Wrap].ws)
-            bytesDecode[PingPackage](buffer) match {
-              case Right(req) => log.debug(s"$req")
-              case Left(e) =>
-                log.error(s"decode binaryMessage failed,error:${e.message}")
-            }
+//            import scala.language.implicitConversions
+//            import org.seekloud.byteobject.ByteObject._
+//            import org.seekloud.byteobject.MiddleBufferInJvm
+//
+//            val buffer = new MiddleBufferInJvm(m.asInstanceOf[Wrap].ws)
+//            bytesDecode[PingPackage](buffer) match {
+//              case Right(req) => log.debug(s"$req")
+//              case Left(e) =>
+//                log.error(s"decode binaryMessage failed,error:${e.message}")
+//            }
 
             Behaviors.same
 
