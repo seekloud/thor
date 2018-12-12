@@ -156,13 +156,15 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     handleResize
     logicFrameTime = System.currentTimeMillis()
     gameState match{
+      case GameState.firstCome =>
+        drawGameLoading()
       case GameState.loadingPlay =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.stop =>
+        thorSchemaOpt.foreach(_.drawGameStop())
         thorSchemaOpt.foreach{ _.update()}
         logicFrameTime = System.currentTimeMillis()
         dom.window.clearInterval(timer)
-        thorSchemaOpt.foreach(_.drawGameStop())
       case GameState.replayLoading =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.play =>
@@ -204,5 +206,15 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     val sec = remain % 60
     val timeString = s"$hour : $min : $sec"
     timeString
+  }
+
+  def drawGameLoading(): Unit = {
+    println("loading")
+    ctx.setFill("#000000")
+    ctx.fillRec(0, 0, canvasWidth, canvasHeight)
+    ctx.setFill("rgb(250, 250, 250)")
+    ctx.setTextAlign("left")
+    ctx.setFont("Helvetica", 36)
+    ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 }

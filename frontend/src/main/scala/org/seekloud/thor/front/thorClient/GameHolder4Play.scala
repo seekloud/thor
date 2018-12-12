@@ -29,12 +29,11 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
   //游戏启动
   def start(name: String, id: Option[String], accessCode: Option[String], roomId: Option[Long]): Unit = {
-    println(s"start $name")
+    println(s"start $name; firstCome $firstCome")
     myName = name
     canvas.getCanvas.focus()
     if (firstCome) {
       addActionListenEvent()
-      gameState = GameState.loadingPlay
       val url = if (id.isEmpty) Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id.get, name, accessCode.getOrElse("?"), roomId)
       websocketClient.setup(url)
       gameLoop()
