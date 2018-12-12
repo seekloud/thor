@@ -88,13 +88,16 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           gameState = GameState.stop
           killer = e.killerName
           endTime = System.currentTimeMillis()
-          println(s"be attacked by ${e.killerName}")
           val time = duringTime(endTime - startTime)
           thorSchemaOpt match {
             case Some(thorSchema: ThorSchemaClientImpl)=>
-              if (thorSchema.adventurerMap.contains(myId)){
+              thorSchema.adventurerMap.get(myId).foreach{ my =>
                 thorSchema.killerNew = e.killerName
                 thorSchema.duringTime = time
+                killerName = e.killerName
+                killNum = my.killNum
+                energy = my.energy
+                level = my.level
               }
             case None =>
           }

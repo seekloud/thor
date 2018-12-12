@@ -68,9 +68,13 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         val time = duringTime(endTime - startTime)
         thorSchemaOpt match {
           case Some(thorSchema: ThorSchemaClientImpl)=>
-            if (thorSchema.adventurerMap.contains(myId)){
+            thorSchema.adventurerMap.get(myId).foreach{ my =>
               thorSchema.killerNew = e.killerName
               thorSchema.duringTime = time
+              killerName = e.killerName
+              killNum = my.killNum
+              energy = my.energy
+              level = my.level
             }
           case None =>
         }

@@ -84,7 +84,7 @@ trait BackgroundClient {
   private val playAgain = drawFrame.createImage("/img/play-again.png")
 
 
-  def drawGameStop(): Unit = {
+  def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit = {
     ctx.save()
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)
@@ -97,8 +97,8 @@ trait BackgroundClient {
     ctx.fillText("score", window.x * 0.475, window.y * 0.32, window.x * 0.15)
     ctx.fillText("time", window.x * 0.58, window.y * 0.32, window.x * 0.15)
     ctx.setFont("Helvetica", baseFont * 22)
-    ctx.fillText(this.adventurerMap(myId).killNum.toString, window.x * 0.39, window.y * 0.4, window.x * 0.15)
-    ctx.fillText(this.adventurerMap(myId).energy.toString, window.x * 0.49, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(killNum.toString, window.x * 0.39, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(energy.toString, window.x * 0.49, window.y * 0.4, window.x * 0.15)
     ctx.fillText(this.duringTime, window.x * 0.57, window.y * 0.4, window.x * 0.15)
     ctx.save()
     ctx.setStrokeStyle("#ffff00")
@@ -109,8 +109,8 @@ trait BackgroundClient {
     ctx.setTextBaseLine("top")
     ctx.setFont("Comic Sans Ms", baseFont * 26)
     ctx.setFill("#ffa400")
-    ctx.fillText(s"You Dead,Killer is ${this.killerNew.take(5)} ", window.x * 0.4, window.y * 0.48)
-    ctx.fillText(s"Your Final level is ${this.adventurerMap(myId).level} / 9", window.x * 0.4, window.y * 0.55)
+    ctx.fillText(s"You Dead,Killer is $killerName ", window.x * 0.4, window.y * 0.48)
+    ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
 
 
     ctx.drawImage(userName, window.x * 0.4, window.y * 0.7, Some(window.x * 0.2, window.y * 0.1))

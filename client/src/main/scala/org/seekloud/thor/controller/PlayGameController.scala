@@ -64,6 +64,10 @@ class PlayGameController(
 
   var justSynced = false
 
+  protected var killerName = ""
+  protected var killNum = 0
+  protected var energy = 0
+  protected var level = 0
 
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
@@ -139,7 +143,7 @@ class PlayGameController(
 
         case GameState.stop =>
           closeHolder
-          thorSchemaOpt.foreach(_.drawGameStop())
+          thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
         //          timeline.play()
 
 
@@ -267,11 +271,15 @@ class PlayGameController(
           println(s"be attacked by $e.killerName")
           val time = duringTime(endTime - startTime)
           thorSchemaOpt.foreach { thorSchema =>
-            if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+            thorSchema.adventurerMap.get(playerInfo.playerId).foreach{ my =>
               thorSchema.killerNew = e.killerName
               thorSchema.duringTime = time
+              killerName = e.killerName
+              killNum = my.killNum
+              energy = my.energy
+              level = my.level
             }
-            thorSchema.drawGameStop()
+//            thorSchema.drawGameStop(killerName, killNum, energy, level)
           }
           animationTimer.stop()
 

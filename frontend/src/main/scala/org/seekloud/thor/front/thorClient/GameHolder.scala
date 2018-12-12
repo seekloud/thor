@@ -86,6 +86,11 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   var barrage = ""
   var barrageTime = 0
 
+  protected var killerName = ""
+  protected var killNum = 0
+  protected var energy = 0
+  protected var level = 0
+
 
 
 
@@ -161,7 +166,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
       case GameState.loadingPlay =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.stop =>
-        thorSchemaOpt.foreach(_.drawGameStop())
+        thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
         thorSchemaOpt.foreach{ _.update()}
         logicFrameTime = System.currentTimeMillis()
         dom.window.clearInterval(timer)

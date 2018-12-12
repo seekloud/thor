@@ -77,9 +77,13 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
           val time = duringTime(endTime - startTime)
           thorSchemaOpt match {
             case Some(thorSchema: ThorSchemaClientImpl)=>
-              if (thorSchema.adventurerMap.contains(myId)){
+              thorSchema.adventurerMap.get(myId).foreach{ my =>
                 thorSchema.killerNew = e.killerName
                 thorSchema.duringTime = time
+                killerName = e.killerName
+                killNum = my.killNum
+                energy = my.energy
+                level = my.level
               }
             case None =>
           }
