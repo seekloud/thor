@@ -1,6 +1,7 @@
 package org.seekloud.thor.front.thorClient
 
 import org.seekloud.thor.front.utils.Shortcut
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 /**
@@ -27,8 +28,7 @@ trait NetworkInfo {
   }
 
   private def startPing(): Unit = {
-    println(s"${gameState} startPing")
-    this.sendMsg2Server(ThorGame.PingPackage(System.currentTimeMillis()))
+    if(gameState == GameState.play) this.sendMsg2Server(ThorGame.PingPackage(System.currentTimeMillis()))
   }
 
   protected def receivePingPackage(p: ThorGame.PingPackage): Unit = {
