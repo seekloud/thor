@@ -33,6 +33,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
       gameLoop()
     }
     else if (websocketClient.getWsState) {
+      println("~~~~~~restart!!!!")
       websocketClient.sendMsg(RestartGame(name))
     } else {
       JsFunc.alert("网络连接失败，请重新刷新")
@@ -40,8 +41,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
   }
 
   def reStart() = {
-    println("restart!!!!")
-    firstCome = true
+//    firstCome = true
     start(myName, None, None, None) //重启没有验证accessCode
 //    websocketClient.sendMsg(RestartGame(myName))
   }
