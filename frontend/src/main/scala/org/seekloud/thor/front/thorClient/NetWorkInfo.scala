@@ -27,6 +27,7 @@ trait NetworkInfo {
   }
 
   private def startPing(): Unit = {
+    println(s"${gameState} startPing")
     this.sendMsg2Server(ThorGame.PingPackage(System.currentTimeMillis()))
   }
 
