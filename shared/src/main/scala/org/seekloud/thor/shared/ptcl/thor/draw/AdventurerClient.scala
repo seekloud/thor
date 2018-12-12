@@ -59,7 +59,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
       //画人物
 //      val drawX = if(systemFrame%6 < 3) dx * 0.98.toFloat else dx
-      CanvasUtils.rotateImage(drawFrame, ctx, s"/img/Adventurer-${adventurer.level}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit, 0, adventurer.getAdventurerState.direction)
+      CanvasUtils.rotateImage(drawFrame, ctx, s"/img/Adventurer-${adventurer.level}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction)
 
       //画武器
       var step = 3
