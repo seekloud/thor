@@ -218,6 +218,11 @@ object UserActor {
               case Left(e) =>
                 log.error(s"decode binaryMessage failed,error:${e.message}")
             }
+            bytesDecode[WsMsgServer](buffer) match {
+              case Right(req) => log.debug(s"$req")
+              case Left(e) =>
+                log.error(s"decode binaryMessage failed,error:${e.message}")
+            }
 
             Behaviors.same
 
