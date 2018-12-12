@@ -177,6 +177,7 @@ object UserActor {
             switchBehavior(ctx, "replay", replay(uid, rid, userInfo, startTime, frontActor))
 
           case JoinRoomSuccess(adventurer, playerId, roomActor, config) =>
+            log.debug(s"$playerId join room success")
             val ws = YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             switchBehavior(ctx, "play", play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
