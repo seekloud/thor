@@ -94,11 +94,12 @@ class PlayGameController(
   def start = {
     if (firstCome) {
       firstCome = false
-      println("start!!!!!!!")
+      println("start...")
       playGameActor ! PlayGameActor.ConnectGame(playerInfo, gameServerInfo, roomInfo)
       addUserActionListenEvent
       logicFrameTime = System.currentTimeMillis()
     } else {
+      println(s"restart...")
       thorSchemaOpt.foreach { r =>
         playGameActor ! DispatchMsg(ThorGame.RestartGame(r.myName))
         setGameState(GameState.loadingPlay)
@@ -107,16 +108,16 @@ class PlayGameController(
     }
   }
 
-  def reStart() = {
-    println("restart!!!!")
-    firstCome = true
-    start
-    thorSchemaOpt.foreach { r =>
-      playGameActor ! DispatchMsg(ThorGame.RestartGame(r.myName))
-      setGameState(GameState.loadingPlay)
-      playGameActor ! PlayGameActor.StartGameLoop
-    }
-  }
+//  def reStart() = {
+//    println("restart!!!!")
+//    firstCome = true
+//    start
+//    thorSchemaOpt.foreach { r =>
+//      playGameActor ! DispatchMsg(ThorGame.RestartGame(r.myName))
+//      setGameState(GameState.loadingPlay)
+//      playGameActor ! PlayGameActor.StartGameLoop
+//    }
+//  }
 
 
   def logicLoop() = {
@@ -151,7 +152,7 @@ class PlayGameController(
   private def closeHolder = {
     animationTimer.stop()
     //remind 此处关闭WebSocket
-    playGameActor ! PlayGameActor.StopGameActor
+//    playGameActor ! PlayGameActor.StopGameActor
   }
 
 
@@ -180,9 +181,9 @@ class PlayGameController(
 
     /*鼠标点击事件*/
     playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
-      println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+//      println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
-        if (gameState == GameState.play) {
+        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
             val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
@@ -195,10 +196,11 @@ class PlayGameController(
           }
           else ()
         } else {
-          val x = e.getX
-          val y = e.getY
-          if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
-            reStart()
+          start
+//          val x = e.getX
+//          val y = e.getY
+//          if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+
         }
       }
     }
@@ -222,7 +224,8 @@ class PlayGameController(
       thorSchemaOpt.foreach { thorSchema =>
         if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.getCode == KeyCode.SPACE) {
-            reStart()
+//            reStart()
+            start
           }
         }
       }
