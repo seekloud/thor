@@ -77,12 +77,12 @@ trait ReplayService extends ServiceUtils{
       recordListRsp.map{
         case rsp:GetUserInRecordRsp =>
           complete(rsp)
-        case error =>
+        case error: ErrorRsp =>
           log.debug(s"error in getRecordPlayerList : $error")
           complete(error)
       }.recover{
         case e: Exception =>
-          log.debug(s"20181129 error $e")
+          log.debug(s"getRecordPlayerList error $e")
           complete(ErrorGetReplayPlayerList1)
       }
     }
@@ -93,7 +93,7 @@ trait ReplayService extends ServiceUtils{
       recordListRsp.map{
         case rsp:GetRecordFrameRsp =>
           complete(rsp)
-        case error =>
+        case error: ErrorRsp =>
           log.debug(s"error in getRecordFrame : $error")
           complete(error)
       }.recover{

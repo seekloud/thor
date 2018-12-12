@@ -116,6 +116,9 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录。。"))
         closeHolder
 
+      case x =>
+        println(s"unknown msg: $x")
+
     }
   }
 
