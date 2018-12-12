@@ -82,7 +82,7 @@ object RoomActor {
       (ctx, msg) =>
         msg match {
           case JoinRoom(roomId, userId, name, userActor) =>
-            println(s"user $userId join room $roomId")
+            log.debug(s"user $userId join room $roomId")
             thorSchema.joinGame(userId, name, userActor)
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 

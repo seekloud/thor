@@ -402,7 +402,8 @@ object UserActor {
               log.debug(s"deadmsg $m")
               frontActor ! m
               //              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
-              Behaviors.same
+//              Behaviors.same
+              switchBehavior(ctx, "idle", idle(playerId, userInfo, startTime, frontActor))
             } else {
               frontActor ! m
               Behaviors.same
