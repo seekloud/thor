@@ -285,7 +285,7 @@ object UserActor {
           switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayer.playerId, frontActor, roomActor))
 
         case JoinRoomFail4Watch(error) =>
-          log.debug(s"join room 4 watch failed ${msg}")
+          log.debug(s"join room 4 watch failed $msg")
           frontActor ! Wrap(WsMsgErrorRsp(1, error).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! CompleteMsgServer
           Behaviors.stopped
@@ -361,8 +361,8 @@ object UserActor {
           Behaviors.stopped
 
 
-        case unknowMsg =>
-          log.warn(s"${ctx.self.path} recv an unknown msg=${msg}")
+        case unknownMsg =>
+          log.warn(s"${ctx.self.path} receive an unknown msg=$unknownMsg")
           Behavior.same
 
       }
@@ -415,6 +415,7 @@ object UserActor {
             Behaviors.stopped
 
           case unknownMsg =>
+            log.debug(s"unknown msg: $unknownMsg")
             Behavior.same
         }
     }
