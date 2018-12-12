@@ -63,13 +63,11 @@ object RoomManager {
                   getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, userId, name, userActor)
 
                 case None => //随机分配room
-                  log.debug(s"随机分配房间 roomInUse $roomInUse")
                   roomInUse.find(p => p._2.length < personLimit).toList.sortBy(_._1).headOption match{
                     case Some(t) =>
                       roomInUse.put(t._1,(userId, name) :: t._2)
                       getRoomActor(ctx,t._1) ! RoomActor.JoinRoom(t._1, userId, name, userActor)
-                    case None =>  //
-                      log.debug(s"创建新房间！！！$roomInUse")
+                    case None =>  //创建新房间
                       var roomId = roomIdGenerator.getAndIncrement()
                       while(roomInUse.exists(_._1 == roomId))roomId = roomIdGenerator.getAndIncrement()
                       roomInUse.put(roomId,List((userId, name)))

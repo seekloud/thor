@@ -415,8 +415,7 @@ object UserActor {
             if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) { //玩家死亡
               log.debug(s"deadmsg $m")
               frontActor ! m
-              //              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
-//              Behaviors.same
+              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
               switchBehavior(ctx, "idle", idle(playerId, userInfo, startTime, frontActor))
             } else {
               frontActor ! m
