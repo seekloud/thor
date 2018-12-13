@@ -109,7 +109,7 @@ trait BackgroundClient {
     ctx.setTextBaseLine("top")
     ctx.setFont("Comic Sans Ms", baseFont * 26)
     ctx.setFill("#ffa400")
-    ctx.fillText(s"You Dead,Killer is $killerName ", window.x * 0.4, window.y * 0.48)
+    ctx.fillText(s"You Dead,Killer is ${killerName.take(5)} ", window.x * 0.4, window.y * 0.48)
     ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
 
 
