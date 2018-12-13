@@ -190,44 +190,44 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
 
-  def moveDistance(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Option[Point] = {
-    if (isMove) {
-      var moveDistance = if (isSpeedUp) {
-        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
-      } else {
-        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
-      }
-
-      val horizontalDistance = moveDistance.copy(y = 0)
-      val verticalDistance = moveDistance.copy(x = 0)
-      List(horizontalDistance, verticalDistance).foreach { d =>
-        if (d.x != 0 || d.y != 0) {
-          val originPosition = this.position
-          this.position = this.position + d
-          val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
-          if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
-            quadTree.updateObject(this)
-          }
-          if (movedRec.topLeft.x <= 0 || movedRec.topLeft.y <= 0) {
-            if (movedRec.topLeft.x <= 0) this.position = Point(radius, this.position.y)
-            moveDistance = moveDistance.copy(x = radius - originPosition.x)
-            if (movedRec.topLeft.y <= 0) this.position = Point(this.position.x, radius)
-            moveDistance = moveDistance.copy(y = radius - originPosition.y)
-            quadTree.updateObject(this)
-          }
-          if (movedRec.downRight.x >= boundary.x || movedRec.downRight.y >= boundary.y) {
-            if (movedRec.downRight.x >= boundary.x) this.position = Point(boundary.x - radius, this.position.y)
-            moveDistance = moveDistance.copy(x = boundary.x - radius - originPosition.x)
-            if (movedRec.downRight.y >= boundary.y) this.position = Point(this.position.x, boundary.y - radius)
-            moveDistance = moveDistance.copy(y = boundary.y - radius - originPosition.y)
-            quadTree.updateObject(this)
-          }
-          this.position = originPosition
-        }
-      }
-      Some(moveDistance)
-    } else None
-  }
+//  def moveDistance(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Option[Point] = {
+//    if (isMove) {
+//      var moveDistance = if (isSpeedUp) {
+//        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
+//      } else {
+//        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
+//      }
+//
+//      val horizontalDistance = moveDistance.copy(y = 0)
+//      val verticalDistance = moveDistance.copy(x = 0)
+//      List(horizontalDistance, verticalDistance).foreach { d =>
+//        if (d.x != 0 || d.y != 0) {
+//          val originPosition = this.position
+//          this.position = this.position + d
+//          val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
+//          if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
+//            quadTree.updateObject(this)
+//          }
+//          if (movedRec.topLeft.x <= 0 || movedRec.topLeft.y <= 0) {
+//            if (movedRec.topLeft.x <= 0) this.position = Point(radius, this.position.y)
+//            moveDistance = moveDistance.copy(x = radius - originPosition.x)
+//            if (movedRec.topLeft.y <= 0) this.position = Point(this.position.x, radius)
+//            moveDistance = moveDistance.copy(y = radius - originPosition.y)
+//            quadTree.updateObject(this)
+//          }
+//          if (movedRec.downRight.x >= boundary.x || movedRec.downRight.y >= boundary.y) {
+//            if (movedRec.downRight.x >= boundary.x) this.position = Point(boundary.x - radius, this.position.y)
+//            moveDistance = moveDistance.copy(x = boundary.x - radius - originPosition.x)
+//            if (movedRec.downRight.y >= boundary.y) this.position = Point(this.position.x, boundary.y - radius)
+//            moveDistance = moveDistance.copy(y = boundary.y - radius - originPosition.y)
+//            quadTree.updateObject(this)
+//          }
+//          this.position = originPosition
+//        }
+//      }
+//      Some(moveDistance)
+//    } else None
+//  }
 
 }
 
