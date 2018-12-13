@@ -116,27 +116,32 @@ class ThorSchemaImpl(
     }
     systemFrame = thorSchemaSate.f
     quadTree.clear()
-    adventurerMap.clear()
-    if (!thorSchemaSate.isIncrement) foodMap.clear()
+//    adventurerMap.clear()
+    tmpAdventurerMap.clear()
+    if (!thorSchemaSate.isIncrement) tmpFoodMap.clear()//foodMap.clear()
     thorSchemaSate.adventurer.foreach { a =>
       val adventurer = new AdventurerImpl(config, a)
       quadTree.insert(adventurer)
-      adventurerMap.put(a.playerId, adventurer)
+//      adventurerMap.put(a.playerId, adventurer)
+      tmpAdventurerMap.put(a.playerId, adventurer)
     }
     if (!thorSchemaSate.isIncrement) {
       thorSchemaSate.food.foreach { f =>
         val food = Food(f)
         quadTree.insert(food)
-        foodMap.put(f.fId, food)
+//        foodMap.put(f.fId, food)
+        tmpFoodMap.put(f.fId, food)
       }
     } else {
       thorSchemaSate.food.foreach { f =>
         val food = Food(f)
-        foodMap.put(f.fId, food)
+//        foodMap.put(f.fId, food)
+        tmpFoodMap.put(f.fId, food)
       }
-      foodMap.values.foreach {f => quadTree.insert(f)}
+      tmpFoodMap.values.foreach {f => quadTree.insert(f)}
     }
-
+    adventurerMap = tmpAdventurerMap
+    foodMap = tmpFoodMap
     waitSyncData = false
   }
 
