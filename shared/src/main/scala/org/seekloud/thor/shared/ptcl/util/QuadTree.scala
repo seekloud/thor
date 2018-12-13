@@ -196,9 +196,9 @@ class QuadTree(bounds: model.Rectangle, level: Int = 0) {
     }
   }
 
-  def updateObject(o: ObjectOfGame): Unit = {
-    remove(o)
-    insert(o)
+  def updateObject(old: ObjectOfGame, newOb: ObjectOfGame): Unit = {
+    remove(old)
+    insert(newOb)
   }
 
   def clear(): Unit = {

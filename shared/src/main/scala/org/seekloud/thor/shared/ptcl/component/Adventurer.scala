@@ -151,6 +151,7 @@ trait Adventurer extends CircleObjectOfGame {
 
   def move(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (isMove) {
+      val oldOb = this
       val moveDistance = if (isSpeedUp) {
         if (energy >= thorGameConfig.speedUpEnergyLoose) {
           energy -= thorGameConfig.speedUpEnergyLoose
@@ -171,17 +172,17 @@ trait Adventurer extends CircleObjectOfGame {
           this.position = this.position + d
           val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
           if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
-            quadTree.updateObject(this)
+            quadTree.updateObject(oldOb, this)
           }
           if (movedRec.topLeft.x <= 0 || movedRec.topLeft.y <= 0) {
             if (movedRec.topLeft.x <= 0) this.position = Point(radius, this.position.y)
             if (movedRec.topLeft.y <= 0) this.position = Point(this.position.x, radius)
-            quadTree.updateObject(this)
+            quadTree.updateObject(oldOb, this)
           }
           if (movedRec.downRight.x >= boundary.x || movedRec.downRight.y >= boundary.y) {
             if (movedRec.downRight.x >= boundary.x) this.position = Point(boundary.x - radius, this.position.y)
             if (movedRec.downRight.y >= boundary.y) this.position = Point(this.position.x, boundary.y - radius)
-            quadTree.updateObject(this)
+            quadTree.updateObject(oldOb, this)
           }
         }
       }
