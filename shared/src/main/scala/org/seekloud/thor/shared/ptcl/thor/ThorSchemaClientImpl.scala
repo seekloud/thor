@@ -42,7 +42,7 @@ with FpsRender{
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
           val end = System.currentTimeMillis()
-          if(end-start > 15)println(s"drawTime: ${end-start}")
+//          if(end-start > 15)println(s"drawTime: ${end-start}")
         case None => println("None!!!!!!")
       }
     }

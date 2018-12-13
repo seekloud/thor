@@ -69,6 +69,8 @@ class PlayGameController(
   protected var energy = 0
   protected var level = 0
 
+  private var mouseLeft = true
+
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
       drawGameByTime(System.currentTimeMillis() - logicFrameTime)
@@ -143,10 +145,10 @@ class PlayGameController(
           ping()
 
         case GameState.stop =>
-          closeHolder
+          thorSchemaOpt.foreach(_.update())
+          logicFrameTime = System.currentTimeMillis()
           thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
-        //          timeline.play()
-
+          closeHolder
 
         case _ => log.info(s"state=$gameState failed")
       }
@@ -189,11 +191,13 @@ class PlayGameController(
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
+            mouseLeft = true
             val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             playGameActor ! DispatchMsg(preExecuteAction)
           }
           else if (e.isSecondaryButtonDown) {
+            mouseLeft = false
             val preExecuteAction = MouseClickDownRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             playGameActor ! DispatchMsg(preExecuteAction)
@@ -210,10 +214,10 @@ class PlayGameController(
     }
 
     /*鼠标释放事件*/
-    playGameScreen.canvas.getCanvas.setOnMouseDragReleased { e =>
+    playGameScreen.canvas.getCanvas.setOnMouseReleased { e =>
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play) {
-          if (e.isSecondaryButtonDown) { //右键
+          if (!mouseLeft) { //右键
             val preExecuteAction = MouseClickUpRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             playGameActor ! DispatchMsg(preExecuteAction)
@@ -225,14 +229,9 @@ class PlayGameController(
 
     /*键盘事件*/
     playGameScreen.canvas.getCanvas.setOnKeyPressed { e =>
-      println(s"键盘事件")
       thorSchemaOpt.foreach { thorSchema =>
-        println(s"逻辑存在")
         if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
-          println(s"人物不在map中")
           if (e.getCode == KeyCode.SPACE) {
-            //            reStart()
-            println(s"空格事件")
             start
           }
         }
