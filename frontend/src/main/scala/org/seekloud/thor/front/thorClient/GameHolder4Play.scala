@@ -47,9 +47,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   }
 
   def reStart() = {
-//    firstCome = true
+    //    firstCome = true
     start(myName, None, None, None) //重启没有验证accessCode
-//    websocketClient.sendMsg(RestartGame(myName))
+    //    websocketClient.sendMsg(RestartGame(myName))
   }
 
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
@@ -64,34 +64,39 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         myName = name
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit))
-        thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        if (timer != 0) {
+          dom.window.clearInterval(timer)
+          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        } else {
+          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        }
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
-//      case UserEnterRoom(userId, name, _, _) =>
-//        barrage = s"${name}加入了游戏"
-//        barrageTime = 300
-//        println(s"222222222222")
-//
-//      case UserLeftRoom(userId, name, _) =>
-//        barrage = s"${name}离开了游戏"
-//        barrageTime = 300
-//        println(s"user left $name")
-//        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
+      //      case UserEnterRoom(userId, name, _, _) =>
+      //        barrage = s"${name}加入了游戏"
+      //        barrageTime = 300
+      //        println(s"222222222222")
+      //
+      //      case UserLeftRoom(userId, name, _) =>
+      //        barrage = s"${name}离开了游戏"
+      //        barrageTime = 300
+      //        println(s"user left $name")
+      //        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
-      case e:BeAttacked =>
-        println("attack!!!!!!!!!!!!!"+e)
+      case e: BeAttacked =>
+        println("attack!!!!!!!!!!!!!" + e)
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
-        if(e.playerId == myId){
+        if (e.playerId == myId) {
           gameState = GameState.stop
           killer = e.killerName
           endTime = System.currentTimeMillis()
           val time = duringTime(endTime - startTime)
           thorSchemaOpt match {
-            case Some(thorSchema: ThorSchemaClientImpl)=>
-              thorSchema.adventurerMap.get(myId).foreach{ my =>
+            case Some(thorSchema: ThorSchemaClientImpl) =>
+              thorSchema.adventurerMap.get(myId).foreach { my =>
                 thorSchema.killerNew = e.killerName
                 thorSchema.duringTime = time
                 killerName = e.killerName
@@ -104,7 +109,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           dom.window.cancelAnimationFrame(nextFrame)
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
-
 
 
       case Ranks(current, history) =>
@@ -154,8 +158,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             //            println(s"mouseDistance: $mouseDistance")
             val direction = thorSchema.adventurerMap.get(myId).get.direction
-            if(math.abs(theta - direction) > 0.3){ //角度差大于0.3才执行
-              val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+            if (math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+              val data = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(data)
               //            if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
               //              thorSchema.addMyAction(data)
@@ -174,7 +178,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmousedown = { (e: dom.MouseEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId)){
+          if (thorSchema.adventurerMap.contains(myId)) {
             println("mouse down")
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -182,7 +186,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               thorSchema.preExecuteUserEvent(event)
               //              thorSchema.addMyAction(event)
               Shortcut.playMusic("sound-4")
-//              e.preventDefault()
+              //              e.preventDefault()
             }
             else if (e.button == 2) { //右键
               val event = MouseClickDownRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -197,9 +201,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             val x = e.clientX
             val y = e.clientY
             //            println(s"x = ${window.x * 0.4} y = ${window.y * 0.8} clientX = $x clientY = $y")
-//            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
-              reStart()
-//            e.preventDefault()
+            //            if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+            reStart()
+            //            e.preventDefault()
           }
         case None =>
       }

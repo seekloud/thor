@@ -148,7 +148,11 @@ class ThorSchemaImpl(
       thorSchemaStateOpt = None
       handleThorSchemaState(thorSchemaState)
     } else {
-      info(s"收到同步数据，但未同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
+      info(s"收到同步数据，不完全同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
+      if (systemFrame - thorSchemaState.f < 10) {
+        thorSchemaStateOpt = None
+        handleThorSchemaState(thorSchemaState)
+      }
     }
 
   }
