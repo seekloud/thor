@@ -55,13 +55,6 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         currentRank = e.currentRank
         historyRank = e.historyRank
 
-      case e:UserActionEvent =>
-        thorSchemaOpt.foreach(_.receiveUserEvent(e))
-
-      case e:GameEvent =>
-        thorSchemaOpt.foreach(_.receiveGameEvent(e))
-
-
       case e: BeAttacked =>
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
@@ -85,6 +78,12 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
           dom.window.cancelAnimationFrame(nextFrame)
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
+
+      case e:GameEvent =>
+        thorSchemaOpt.foreach(_.receiveGameEvent(e))
+
+      case e:UserActionEvent =>
+        thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case RebuildWebSocket=>
         thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录。。"))
