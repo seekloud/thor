@@ -37,53 +37,55 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     moveDistance
   }
 
-  def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Float): Unit ={
+  def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit ={
 
     def drawAnAdventurer(adventurer: Adventurer) = {
 
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
       val position = adventurer.getAdventurerState.position
       val moveDistance = getMoveDistance(adventurer, offSetTime)
-      
+
       val sx = position.x + offset.x + moveDistance.x
       val sy = position.y + offset.y + moveDistance.y
       val dx = 2 * r
       val dy = 2 * r
-      
-      if(adventurer.isSpeedUp){ //加速特效
-        val height = config.getAdventurerRadiusByLevel(adventurer.level) * 2 * canvasUnit
-        val width = 3*height
+      if (0 < sx+r && sx-r < canvasBoundary.x && 0 < sy+r && sy-r < canvasBoundary.y) {
+        if (adventurer.isSpeedUp) { //加速特效
+          val height = config.getAdventurerRadiusByLevel(adventurer.level) * 2 * canvasUnit
+          val width = 3 * height
 
-        CanvasUtils.rotateImage(drawFrame, ctx, s"/img/speedparticles.png",Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction)
+          CanvasUtils.rotateImage(drawFrame, ctx, s"/img/speedparticles.png", Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction)
+        }
+
+        //画人物
+        //      val drawX = if(systemFrame%6 < 3) dx * 0.98.toFloat else dx
+        CanvasUtils.rotateImage(drawFrame, ctx, s"/img/Adventurer-${adventurer.level}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction)
+
+        //画武器
+        var step = 3
+        var isAttacking = false
+        attackingAdventureMap.filterNot(_._2 < 0).get(adventurer.playerId) match {
+          case Some(s) =>
+            step = s
+            if (s != 0) isAttacking = true
+          case _ =>
+        }
+        val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
+        val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 + 1 / 12 * math.Pi).toFloat //武器旋转角度
+        val gap: Float = 1 // 武器离人物的距离
+        val move: Float = if (isAttacking) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
+        val weaponPosition = Point(sx, sy) + Point(-r - gap.toFloat, gap + weaponLength / 2).rotate(angle + move - math.Pi.toFloat / 2)
+
+        CanvasUtils.rotateImage(drawFrame, ctx, s"/img/weapon-${adventurer.level}.png", weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move)
+
+
+        //用户昵称
+        ctx.setFill("#ffffff")
+        ctx.setTextAlign("center")
+        ctx.setFont("微软雅黑", 20)
+        ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + dy) * canvasUnit + 20)
       }
-
-      //画人物
-//      val drawX = if(systemFrame%6 < 3) dx * 0.98.toFloat else dx
-      CanvasUtils.rotateImage(drawFrame, ctx, s"/img/Adventurer-${adventurer.level}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction)
-
-      //画武器
-      var step = 3
-      var isAttacking = false
-      attackingAdventureMap.filterNot(_._2 < 0).get(adventurer.playerId) match{
-        case Some(s) =>
-          step = s
-          if(s != 0) isAttacking = true
-        case _ =>
-      }
-      val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
-      val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 + 1/12 * math.Pi).toFloat //武器旋转角度
-      val gap:Float = 1 // 武器离人物的距离
-      val move: Float = if(isAttacking) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
-      val weaponPosition = Point(sx, sy) + Point(-r - gap.toFloat, gap + weaponLength/2).rotate(angle + move - math.Pi.toFloat/2)
-
-      CanvasUtils.rotateImage(drawFrame, ctx, s"/img/weapon-${adventurer.level}.png", weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move)
-
-
-      //用户昵称
-      ctx.setFill("#ffffff")
-      ctx.setTextAlign("center")
-      ctx.setFont("微软雅黑", 20)
-      ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + dy) * canvasUnit + 20)}
+    }
     adventurerMap.foreach{
       adventurer =>
         drawAnAdventurer(adventurer._2)
@@ -143,9 +145,9 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   }
 
 
-  def drawAdventurers(offSetTime: Long, offset: Point, canvasUnit: Float): Unit ={
+  def drawAdventurers(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary:Point): Unit ={
 
-    drawAdventurer(offSetTime, offset, canvasUnit)
+    drawAdventurer(offSetTime, offset, canvasUnit, canvasBoundary)
     drawDying(offset, offSetTime, canvasUnit)
     adventurerMap.get(myId).foreach{
       adventurer =>
