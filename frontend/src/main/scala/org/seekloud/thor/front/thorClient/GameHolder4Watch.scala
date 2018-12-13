@@ -55,31 +55,35 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         currentRank = e.currentRank
         historyRank = e.historyRank
 
-      case e:UserActionEvent =>
-        thorSchemaOpt.foreach(_.receiveUserEvent(e))
+      case e: BeAttacked =>
+        barrage = s"${e.killerName}杀死了${e.name}"
+        barrageTime = 300
+        if (e.playerId == myId) {
+          gameState = GameState.stop
+          killer = e.killerName
+          endTime = System.currentTimeMillis()
+          val time = duringTime(endTime - startTime)
+          thorSchemaOpt match {
+            case Some(thorSchema: ThorSchemaClientImpl) =>
+              thorSchema.adventurerMap.get(myId).foreach { my =>
+                thorSchema.killerNew = e.killerName
+                thorSchema.duringTime = time
+                killerName = e.killerName
+                killNum = my.killNum
+                energy = my.energy
+                level = my.level
+              }
+            case None =>
+          }
+          dom.window.cancelAnimationFrame(nextFrame)
+        }
+        thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
       case e:GameEvent =>
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
-
-      case e: BeAttacked =>
-        killer = e.killerName
-        endTime = System.currentTimeMillis()
-        val time = duringTime(endTime - startTime)
-        thorSchemaOpt match {
-          case Some(thorSchema: ThorSchemaClientImpl)=>
-            thorSchema.adventurerMap.get(myId).foreach{ my =>
-              thorSchema.killerNew = e.killerName
-              thorSchema.duringTime = time
-              killerName = e.killerName
-              killNum = my.killNum
-              energy = my.energy
-              level = my.level
-            }
-          case None =>
-        }
-        gameState = GameState.stop
-        dom.window.cancelAnimationFrame(nextFrame)
+      case e:UserActionEvent =>
+        thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case RebuildWebSocket=>
         thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录。。"))

@@ -68,9 +68,6 @@ case class ThorSchemaServerImpl(
       a.killing += adventurer.killNum
       a.score += adventurer.energy
     }
-//    println(RecordMap)
-//    val actor = getUserActor4WatchGameList(adventurer.playerId)
-//    dispatchTo(adventurer.playerId, event, actor)
     addGameEvent(event)
     dispatch(event)
   }
