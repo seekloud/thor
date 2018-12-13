@@ -135,9 +135,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           case event: UserEnterRoom =>
             barrage = s"${event.name}加入了游戏"
             barrageTime = 300
-          case event: UserLeftRoom =>
-            barrage = s"${event.name}离开了游戏"
-            barrageTime = 300
+//          case event: UserLeftRoom =>
+//            barrage = s"${event.name}离开了游戏"
+//            barrageTime = 300
           case _ =>
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
