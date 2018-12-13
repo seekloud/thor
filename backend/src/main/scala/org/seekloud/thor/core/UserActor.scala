@@ -427,6 +427,12 @@ object UserActor {
             roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
             Behaviors.stopped
 
+          case ChangeBehaviorToInit =>
+            frontActor ! Wrap(RebuildWebSocket.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
+            ctx.unwatch(frontActor)
+            switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
+
           case unknownMsg =>
             log.debug(s"unknown msg: $unknownMsg")
             Behavior.same

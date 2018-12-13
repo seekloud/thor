@@ -119,6 +119,10 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       case e: PingPackage =>
         receivePingPackage(e)
 
+      case RebuildWebSocket =>
+        thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录"))
+        closeHolder
+
 
       case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
 

@@ -57,6 +57,11 @@ object UserManager {
             //              val playerInfo = UserInfo(uidGenerator.getAndIncrement().toString, name)
             val playerInfo = UserInfo(if (id.equals("test")) uidGenerator.getAndIncrement().toString else id, name)
 
+            getUserActorOpt(ctx, id) match {
+              case Some(actor) =>
+                actor ! UserActor.ChangeBehaviorToInit
+              case None =>
+            }
             val userActor = getUserActor(ctx, playerInfo.playerId, playerInfo)
             replyTo ! getWebSocketFlow(userActor)
             userActor ! UserActor.StartGame(roomIdOpt)
@@ -66,8 +71,8 @@ object UserManager {
             log.debug(s"$watchingId GetWebSocketFlow4Watch")
             val playerInfo = UserInfo(watchingId, name)
             getUserActorOpt(ctx, watchingId) match {
-              case Some(userActor) =>
-                userActor ! UserActor.ChangeBehaviorToInit
+              case Some(actor) =>
+                actor ! UserActor.ChangeBehaviorToInit
               case None =>
             }
             val userActor = getUserActor(ctx, watchingId, playerInfo)

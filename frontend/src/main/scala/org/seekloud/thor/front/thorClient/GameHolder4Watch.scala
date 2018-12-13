@@ -82,7 +82,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         dom.window.cancelAnimationFrame(nextFrame)
 
       case RebuildWebSocket=>
-//        thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录。。"))
+        thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录。。"))
         closeHolder
 
 
