@@ -415,8 +415,7 @@ object UserActor {
             if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) { //玩家死亡
               log.debug(s"deadmsg $m")
               frontActor ! m
-              //              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
-//              Behaviors.same
+              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
               switchBehavior(ctx, "idle", idle(playerId, userInfo, startTime, frontActor))
             } else {
               frontActor ! m
@@ -427,6 +426,12 @@ object UserActor {
             ctx.unwatch(actor)
             roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
             Behaviors.stopped
+
+          case ChangeBehaviorToInit =>
+            frontActor ! Wrap(RebuildWebSocket.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
+            ctx.unwatch(frontActor)
+            switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
           case unknownMsg =>
             log.debug(s"unknown msg: $unknownMsg")

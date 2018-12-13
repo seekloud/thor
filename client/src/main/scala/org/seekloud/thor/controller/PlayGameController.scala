@@ -112,16 +112,16 @@ class PlayGameController(
     }
   }
 
-//  def reStart() = {
-//    println("restart!!!!")
-//    firstCome = true
-//    start
-//    thorSchemaOpt.foreach { r =>
-//      playGameActor ! DispatchMsg(ThorGame.RestartGame(r.myName))
-//      setGameState(GameState.loadingPlay)
-//      playGameActor ! PlayGameActor.StartGameLoop
-//    }
-//  }
+  //  def reStart() = {
+  //    println("restart!!!!")
+  //    firstCome = true
+  //    start
+  //    thorSchemaOpt.foreach { r =>
+  //      playGameActor ! DispatchMsg(ThorGame.RestartGame(r.myName))
+  //      setGameState(GameState.loadingPlay)
+  //      playGameActor ! PlayGameActor.StartGameLoop
+  //    }
+  //  }
 
 
   def logicLoop() = {
@@ -156,7 +156,7 @@ class PlayGameController(
   private def closeHolder = {
     animationTimer.stop()
     //remind 此处关闭WebSocket
-//    playGameActor ! PlayGameActor.StopGameActor
+    //    playGameActor ! PlayGameActor.StopGameActor
   }
 
 
@@ -185,7 +185,7 @@ class PlayGameController(
 
     /*鼠标点击事件*/
     playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
-//      println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+      //      println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
@@ -201,9 +201,9 @@ class PlayGameController(
           else ()
         } else {
           start
-//          val x = e.getX
-//          val y = e.getY
-//          if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
+          //          val x = e.getX
+          //          val y = e.getY
+          //          if (x >= window.x * 0.4 && x <= window.x * 0.6 && y >= window.y * 0.85 && y <= window.y * 0.95)
 
         }
       }
@@ -225,10 +225,14 @@ class PlayGameController(
 
     /*键盘事件*/
     playGameScreen.canvas.getCanvas.setOnKeyPressed { e =>
+      println(s"键盘事件")
       thorSchemaOpt.foreach { thorSchema =>
+        println(s"逻辑存在")
         if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+          println(s"人物不在map中")
           if (e.getCode == KeyCode.SPACE) {
-//            reStart()
+            //            reStart()
+            println(s"空格事件")
             start
           }
         }
@@ -267,24 +271,32 @@ class PlayGameController(
         //          thorSchemaOpt.foreach( thorSchema => thorSchema.leftGame(playerInfo.playerId, playerInfo.nickName))
 
         case e: ThorGame.BeAttacked =>
-          gameState = GameState.stop
+          println(s"receive attacked msg:\n $e")
           barrage = s"${e.killerName}杀死了${e.name}"
           barrageTime = 300
-          endTime = System.currentTimeMillis()
           println(s"be attacked by $e.killerName")
-          val time = duringTime(endTime - startTime)
-          thorSchemaOpt.foreach { thorSchema =>
-            thorSchema.adventurerMap.get(playerInfo.playerId).foreach{ my =>
-              thorSchema.killerNew = e.killerName
-              thorSchema.duringTime = time
-              killerName = e.killerName
-              killNum = my.killNum
-              energy = my.energy
-              level = my.level
+          if (e.playerId == playerInfo.playerId) {
+            gameState = GameState.stop
+            endTime = System.currentTimeMillis()
+            val time = duringTime(endTime - startTime)
+            thorSchemaOpt.foreach { thorSchema =>
+              if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+                thorSchema.adventurerMap.get(playerInfo.playerId).foreach { my =>
+                  thorSchema.killerNew = e.killerName
+                  thorSchema.duringTime = time
+                  killerName = e.killerName
+                  killNum = my.killNum
+                  energy = my.energy
+                  level = my.level
+                }
+
+              }
             }
-//            thorSchema.drawGameStop(killerName, killNum, energy, level)
+            animationTimer.stop()
+
           }
-          animationTimer.stop()
+          thorSchemaOpt.foreach(_.receiveGameEvent(e))
+
 
         case e: ThorGame.Ranks =>
           currentRank = e.currentRank
@@ -301,13 +313,14 @@ class PlayGameController(
           thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
         case e: ThorGame.GameEvent =>
-          if (e.isInstanceOf[UserEnterRoom]) {
-            barrage = s"${playerInfo.nickName}加入了游戏"
-            barrageTime = 300
-          }
-          if (e.isInstanceOf[UserLeftRoom]) {
-            barrage = s"${playerInfo.nickName}离开了游戏"
-            barrageTime = 300
+          e match {
+            case event: UserEnterRoom =>
+              barrage = s"${event.name}加入了游戏"
+              barrageTime = 300
+            case event: UserLeftRoom =>
+              barrage = s"${event.name}离开了游戏"
+              barrageTime = 300
+            case _ =>
           }
           thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
