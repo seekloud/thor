@@ -45,6 +45,9 @@ with FpsRender{
         case None => ()
       }
     }
+    else{
+      println("waitSyncData!!!!")
+    }
   }
 
   def updateSize(bounds: Point, unit: Float): Unit ={
