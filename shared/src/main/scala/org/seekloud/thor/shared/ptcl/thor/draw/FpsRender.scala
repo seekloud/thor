@@ -27,7 +27,7 @@ trait FpsRender {
     val fpsStr =  s"fps   : $lastRenderTimes"
     val pingStr = s"ping : ${networkLatency}ms"
     ctx.setTextBaseLine("top")
-    ctx.fillText(pingStr,300,10)
-    ctx.fillText(fpsStr,300,40)
+    ctx.fillText(pingStr,500,10)
+    ctx.fillText(fpsStr,500,40)
   }
 }
