@@ -45,7 +45,7 @@ with FpsRender{
           drawEnergyBar(adventurer)
 
           if(ifTest)
-            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 2))
+            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
 
           val end = System.currentTimeMillis()
 //          if(end-start > 15)println(s"drawTime: ${end-start}")

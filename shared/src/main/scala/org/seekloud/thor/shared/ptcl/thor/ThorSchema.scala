@@ -121,7 +121,7 @@ trait ThorSchema extends KillInformation {
               attackingAdventureMap.get(a.playerId) match {
                 case Some(_) => ()
                 case None =>
-                  attackingAdventureMap.put(a.playerId, 3) //TODO 动画持续帧数 现在是3
+                  attackingAdventureMap.put(a.playerId, 4) //TODO 动画持续帧数 现在是3
                   adventurerMap.filter(_._1 == a.playerId).values.foreach {
                     adventurer =>
                       adventurer.isMove = false
