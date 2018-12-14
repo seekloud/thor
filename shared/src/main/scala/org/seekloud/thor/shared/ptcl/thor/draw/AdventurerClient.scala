@@ -40,7 +40,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
   def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit ={
 
     def drawAnAdventurer(adventurer: Adventurer) = {
-
+      if(adventurer.playerId == myId) println(s"position${adventurer.getAdventurerState.position}")
       val r = config.getAdventurerRadiusByLevel(adventurer.level)
       val position = adventurer.getAdventurerState.position
       val moveDistance = getMoveDistance(adventurer, offSetTime)
