@@ -317,7 +317,6 @@ trait ThorSchema extends KillInformation {
   }
 
   def update(): Unit = {
-    println(s"update-------------------------------")
     adventurerMove()
     handleUserLeftRoomNow()
     handleUserActionEventNow()

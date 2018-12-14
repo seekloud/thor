@@ -165,8 +165,7 @@ object RoomActor {
 
   //向所有用户发数据
   def dispatch(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]], observers: mutable.HashMap[String, ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {
-    //    println(subscribers)
-    //    subscribers.values.foreach( _ ! UserActor.DispatchMsg(msg))
+    log.debug(s"watching map: $observers")
     val isKillMsg = msg.isInstanceOf[BeAttacked]
     val deadId = if(isKillMsg) msg.asInstanceOf[BeAttacked].playerId else ""
     subscribers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
