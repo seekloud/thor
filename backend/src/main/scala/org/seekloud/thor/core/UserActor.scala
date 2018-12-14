@@ -305,6 +305,7 @@ object UserActor {
           Behaviors.stopped
 
         case DispatchMsg(m) =>
+          if(playerId == "user10004") log.debug(s"$m")
           frontActor ! m
           Behaviors.same
 
