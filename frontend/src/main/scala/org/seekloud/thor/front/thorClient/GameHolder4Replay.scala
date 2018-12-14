@@ -19,7 +19,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
   def startReplay(option: Option[ReplayInfo] = None) = {
     println(s"start replay...")
     if (firstCome) {
-      println(s"set loading---------1")
+//      println(s"set loading---------1")
       firstCome = false
       gameState = GameState.replayLoading
       println(s"replay ws url: ${Routes.wsReplayGameUrl(option.get)}")
@@ -53,7 +53,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.GridSyncState =>
         if (firstCome) {
           firstCome = false
-          println(s"set loading---------2")
+//          println(s"set loading---------2")
           gameState = GameState.replayLoading
           thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
         } else {

@@ -22,6 +22,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
   def watch() = {
     gameState = GameState.loadingPlay
+    canvas.getCanvas.focus()
     websocketClient.setup(Routes.wsWatchGameUrl(roomId, playerId, accessCode))
   }
 
@@ -43,7 +44,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
       case e: UserLeftRoom =>
         Shortcut.cancelSchedule(timer)
-//        thorSchemaOpt.foreach(_.drawDeadImg(s"玩家已经离开了房间，请重新选择观战对象"))
+        thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经离开了房间，请重新选择观战对象"))
 
       case e: GridSyncState =>
         thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
