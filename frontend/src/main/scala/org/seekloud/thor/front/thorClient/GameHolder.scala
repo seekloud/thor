@@ -140,6 +140,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
   def closeHolder={
+    println(s"close holder----------")
+    JsFunc.alert(s"close holder-----------")
     dom.window.cancelAnimationFrame(nextFrame)
     Shortcut.cancelSchedule(timer)
     websocketClient.closeWs
