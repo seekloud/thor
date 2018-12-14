@@ -305,7 +305,6 @@ object UserActor {
           Behaviors.stopped
 
         case DispatchMsg(m) =>
-          if(playerId == "user10004") log.debug(s"$m")
           frontActor ! m
           Behaviors.same
 
@@ -342,6 +341,7 @@ object UserActor {
           watch(playerId, info, roomId, watchedPlayerId, frontActor, roomActor)
 
         case DispatchMsg(m) =>
+          if(playerId == "user10004") log.debug(s"$m")
           if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) {
             frontActor ! m
             switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedPlayerId, frontActor))
