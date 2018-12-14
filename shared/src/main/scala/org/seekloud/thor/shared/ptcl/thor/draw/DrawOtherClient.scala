@@ -40,4 +40,21 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
 
     ctx.drawImage(fillBar , barLeft+offsetLeft, barTop+offsetTop, Some(fillLength, barHeight - offsetTop*2 - 1), Some((fillMax-fillLength)/rate), Some(0), Some(fillLength/rate, fillBar.height))
   }
+
+  def drawAttacking(offset: Point, adventurer: Adventurer, step: Int) = {
+//    println(adventurer.direction + "dudu")
+//    println("drawAttacking" + step)
+    val x = adventurer.getPosition.x + offset.x
+    val y = adventurer.getPosition.y + offset.y
+    val rx = adventurer.radius * canvasUnit * 0.85
+    val sA = adventurer.direction - scala.math.Pi * 2.0 / 9.0 * step - scala.math.Pi * 2.0 / 9.0
+    val eA = adventurer.direction - scala.math.Pi * 2.0 / 9.0 * step + scala.math.Pi * 2.0 / 9.0
+    ctx.save()
+    ctx.beginPath()
+    ctx.setStrokeStyle("#30B8E8")
+    ctx.lineWidth(config.getWeaponLengthByLevel(adventurer.weaponLevel) * canvasUnit * 0.85)
+    ctx.arc(x * canvasUnit, y * canvasUnit, rx + config.getWeaponLengthByLevel(adventurer.weaponLevel) / 2 * canvasUnit * 0.85, sA, eA, false)
+    ctx.stroke()
+    ctx.restore()
+  }
 }

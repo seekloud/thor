@@ -53,4 +53,8 @@ trait MiddleContext {
   def save(): Unit
 
   def restore(): Unit
+
+  def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean)
+
+  def lineWidth(width: Double) : Unit
 }

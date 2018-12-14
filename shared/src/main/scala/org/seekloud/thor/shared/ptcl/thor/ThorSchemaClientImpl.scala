@@ -1,5 +1,6 @@
 package org.seekloud.thor.shared.ptcl.thor
 
+import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.draw._
@@ -27,6 +28,7 @@ with FpsRender{
 
   var killerNew : String = "?"
   var duringTime : String = "0"
+  val ifTest: Boolean = true
 
   def drawGame(offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
     if(!waitSyncData){
@@ -41,6 +43,10 @@ with FpsRender{
           drawFood(offset, canvasUnit, canvasBounds)
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
+
+          if(ifTest)
+            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 2))
+
           val end = System.currentTimeMillis()
 //          if(end-start > 15)println(s"drawTime: ${end-start}")
         case None => println("None!!!!!!")

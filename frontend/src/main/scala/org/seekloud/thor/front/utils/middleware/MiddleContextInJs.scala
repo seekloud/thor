@@ -87,4 +87,8 @@ class MiddleContextInJs extends MiddleContext {
   override def save(): Unit = context.save()
 
   override def restore(): Unit = context.restore()
+
+  override def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean): Unit = context.arc(x, y, r, sAngle, eAngle, counterclockwise)
+
+  override def lineWidth(width: Double): Unit = context.lineWidth = width
 }
