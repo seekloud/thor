@@ -46,21 +46,22 @@ trait BackgroundClient {
     var index = 0
     var yourRank = 100
     var yourNameIn = false
-    val begin = if (CurrentOrNot) 10 else window.x * 0.82
+    val begin = if (CurrentOrNot) 10 else window.x * 0.78
     var last = ""
     ctx.save()
-    ctx.drawImage(rankImg, begin, 0, Some(window.x * 0.2, window.x * 0.18))
+    ctx.drawImage(rankImg, begin, 0, Some(window.x * 0.22, window.x * 0.18))
     ctx.setFill("#fdffff")
     Rank.foreach { score =>
       index += 1
       if (score.id == id) yourRank = index
+      val name = if (score.n.contains("guest")) score.n.take(13) else score.n.take(7)
       if (index < 6) {
         if (score.id == id) yourNameIn = true
         ctx.setTextAlign("left")
-        drawTextLine(s" $index:  ${score.n.take(5)}   score=${score.e}   kill=${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine)
+        drawTextLine(s" $index:  $name   score=${score.e}   kill=${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine)
       }
       if (index == 6) {
-        last = s" 6 :  ${score.n.take(5)}   score=${score.e}   kill=${score.k}"
+        last = s" 6 :  $name   score=${score.e}   kill=${score.k}"
       }
     }
     index += 1
@@ -68,7 +69,8 @@ trait BackgroundClient {
       ctx.setFill("#FFFF00")
       Rank.find(_.id == id) match {
         case Some(yourScore) =>
-          drawTextLine(s" $yourRank :  ${yourScore.n.take(5)}   score=${yourScore.e}   kill=${yourScore.k}", begin + window.x * 0.01, 12, RankBaseLine)
+          val name = if (yourScore.n.contains("guest")) yourScore.n.take(13) else yourScore.n.take(7)
+          drawTextLine(s" $yourRank :  $name   score=${yourScore.e}   kill=${yourScore.k}", begin + window.x * 0.01, 12, RankBaseLine)
         case None =>
       }
     }
