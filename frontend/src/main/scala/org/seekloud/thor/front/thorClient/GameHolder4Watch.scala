@@ -105,7 +105,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
 
-      case _ =>dom.window.console.log(s"接收到无效消息$x")
+      case x =>dom.window.console.log(s"接收到无效消息:$x")
     }
 
   }
