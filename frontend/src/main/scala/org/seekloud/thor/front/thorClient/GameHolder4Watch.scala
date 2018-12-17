@@ -38,6 +38,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name,canvasBoundary,canvasUnit))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration)
+        println(s"gameState change to play...")
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
 
@@ -61,6 +62,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
         if (e.playerId == myId) {
+          println(s"$myName is attacked, gameState change to stop.")
           gameState = GameState.stop
           killer = e.killerName
           endTime = System.currentTimeMillis()
