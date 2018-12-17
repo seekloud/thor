@@ -160,6 +160,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 //  var startTime = System.currentTimeMillis()
 
   protected def gameLoop(): Unit = {
+    println(s"current state: $gameState")
     handleResize
     logicFrameTime = System.currentTimeMillis()
     gameState match{
