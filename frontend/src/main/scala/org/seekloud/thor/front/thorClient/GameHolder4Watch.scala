@@ -38,13 +38,11 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name,canvasBoundary,canvasUnit))
         Shortcut.cancelSchedule(timer)
         timer = Shortcut.schedule(gameLoop, e.config.frameDuration)
-        println(s"gameState change to play...")
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
 
 
       case e: UserLeftRoom =>
-        println(s"是否是罪魁祸首！！！！！！！！！")
         Shortcut.cancelSchedule(timer)
         thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经离开了房间，请重新选择观战对象"))
 
@@ -63,7 +61,6 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
         if (e.playerId == myId) {
-          println(s"$myName is attacked, gameState change to stop.")
           gameState = GameState.stop
           killer = e.killerName
           endTime = System.currentTimeMillis()
