@@ -44,6 +44,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
 
       case e: UserLeftRoom =>
+        println(s"是否是罪魁祸首！！！！！！！！！")
         Shortcut.cancelSchedule(timer)
         thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经离开了房间，请重新选择观战对象"))
 
