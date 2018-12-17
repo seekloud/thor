@@ -43,8 +43,10 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
 
 
       case e: UserLeftRoom =>
-        Shortcut.cancelSchedule(timer)
-        thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经离开了房间，请重新选择观战对象"))
+        if (e.playerId == myId) {
+          Shortcut.cancelSchedule(timer)
+          thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经离开了房间，请重新选择观战对象"))
+        }
 
       case e: GridSyncState =>
 //        println(s"still sync.but thorSchema is: $thorSchemaOpt")
