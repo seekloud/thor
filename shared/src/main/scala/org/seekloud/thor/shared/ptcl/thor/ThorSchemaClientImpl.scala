@@ -28,7 +28,7 @@ with FpsRender{
 
   var killerNew : String = "?"
   var duringTime : String = "0"
-  val ifTest: Boolean = true
+  val ifTest: Boolean = false
 
   def drawGame(offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
     if(!waitSyncData){
