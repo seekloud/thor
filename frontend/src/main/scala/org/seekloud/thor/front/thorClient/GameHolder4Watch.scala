@@ -47,7 +47,7 @@ class GameHolder4Watch(name:String, roomId:Long, playerId: String, accessCode:St
         thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经离开了房间，请重新选择观战对象"))
 
       case e: GridSyncState =>
-        println(s"still sync.but thorSchema is: $thorSchemaOpt")
+//        println(s"still sync.but thorSchema is: $thorSchemaOpt")
         thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
 
       case e:Ranks =>
