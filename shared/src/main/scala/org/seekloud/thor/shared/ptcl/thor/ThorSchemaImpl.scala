@@ -147,6 +147,7 @@ class ThorSchemaImpl(
 
   def receiveThorSchemaState(thorSchemaState: ThorSchemaState): Unit = {
     if (thorSchemaState.f > systemFrame) {
+      println(s"renew state...")
       thorSchemaStateOpt = Some(thorSchemaState)
     }else if (thorSchemaState.f == systemFrame) {
       info(s"收到同步数据，立即同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
