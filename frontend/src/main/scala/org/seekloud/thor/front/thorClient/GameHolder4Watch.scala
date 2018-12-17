@@ -46,30 +46,6 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
-
-
-      //      case e: UserLeftRoom =>
-      //        if (e.playerId == myId) {
-      //          Shortcut.cancelSchedule(timer)
-      //          thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经离开了房间，请重新选择观战对象"))
-      //        }
-
-      case e: GridSyncState =>
-        //        println(s"still sync.but thorSchema is: $thorSchemaOpt")
-        thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
-        justSynced = true
-
-      case e: PingPackage =>
-        receivePingPackage(e)
-
-      case e: Ranks =>
-
-        /**
-          * 游戏排行榜
-          **/
-        currentRank = e.currentRank
-        historyRank = e.historyRank
-
       case e: BeAttacked =>
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
@@ -94,6 +70,29 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
+      case e: Ranks =>
+
+        /**
+          * 游戏排行榜
+          **/
+        currentRank = e.currentRank
+        historyRank = e.historyRank
+
+      case e: GridSyncState =>
+        //        println(s"still sync.but thorSchema is: $thorSchemaOpt")
+        thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
+        justSynced = true
+
+      case e: PingPackage =>
+        receivePingPackage(e)
+
+      case RebuildWebSocket =>
+        thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录。。"))
+        closeHolder
+
+      case e: UserActionEvent =>
+        thorSchemaOpt.foreach(_.receiveUserEvent(e))
+
       case e: GameEvent =>
         e match {
           case event: UserLeftRoom =>
@@ -105,15 +104,8 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
-      case e: UserActionEvent =>
-        thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
-      case RebuildWebSocket =>
-        thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录。。"))
-        closeHolder
-
-
-      case _ =>
+      case _ =>dom.window.console.log(s"接收到无效消息$x")
     }
 
   }
