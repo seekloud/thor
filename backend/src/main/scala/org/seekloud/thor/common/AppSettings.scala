@@ -154,16 +154,6 @@ object AppSettings {
 
   }
 
-  val adminAccount = {
-    import collection.JavaConverters._
-    val list = appConfig.getStringList("adminAccount").asScala
-    val admins = new ListBuffer[(Long,String,String)]
-    for(i <- list.indices){
-      val (account,pwd) = (list(i).split(":")(0),list(i).split(":")(1))
-      admins.append((i+1,account,pwd))
-    }
-    admins.toList
-  }
 
 
   val essfMapKeyName = "essfMap"
