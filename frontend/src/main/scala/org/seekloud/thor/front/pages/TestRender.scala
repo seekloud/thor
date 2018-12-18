@@ -10,8 +10,10 @@ import org.scalajs.dom
 import org.scalajs.dom.ext.Color
 import org.scalajs.dom.html.{Canvas, Input}
 import mhtml._
+import org.seekloud.thor.front.Main
 import org.seekloud.thor.shared.ptcl.TestPswRsp
 
+import scala.util.Random
 import scala.xml.Elem
 
 /**
@@ -19,13 +21,11 @@ import scala.xml.Elem
   */
 object TestRender extends Page{
 
-  private val gameInfo = ThorGameInfo(name = "AUTO_TEST")
-
+  private val random = new Random(System.currentTimeMillis())
+  private val gameInfo = ThorGameInfo(name = Main.guestName(random.nextInt(Main.guestName.length)))
   private val canvas = <canvas id ="GameView" tabindex="1"></canvas>
 
   def init() = {
-
-    println("ThorRender init")
 
     val gameHolder = new GameHolder4Test("GameView")
     gameHolder.start(gameInfo.name, gameInfo.pId, gameInfo.userAccessCode, gameInfo.rId)
