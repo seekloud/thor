@@ -167,19 +167,19 @@ case class ThorSchemaServerImpl(
   override def leftGame(userId: String, name: String) = {
     val event = UserLeftRoom(userId, name, systemFrame)
     addGameEvent(event)
-    RecordMap.get(userId).foreach { a =>
-      val record = ESheepRecord(
-        playerId = userId,
-        nickname = name,
-        killing = a.killing ,
-        killed = a.killed ,
-        score = a.score,
-        startTime = a.startTime,
-        endTime = System.currentTimeMillis())
-      eSheepLinkClient ! ESheepLinkClient.AddRecord2ESheep(record)
-    }
-
-    //    dispatch(event)
+    //只有平台用户才上传战绩（平台用户的id是guest.../user...）
+    if(userId.length > 5)
+      RecordMap.get(userId).foreach { a =>
+        val record = ESheepRecord(
+          playerId = userId,
+          nickname = name,
+          killing = a.killing ,
+          killed = a.killed ,
+          score = a.score,
+          startTime = a.startTime,
+          endTime = System.currentTimeMillis())
+        eSheepLinkClient ! ESheepLinkClient.AddRecord2ESheep(record)
+      }
   }
 
   def leftRoom4Watch(uId: String, playerId: String) = {
