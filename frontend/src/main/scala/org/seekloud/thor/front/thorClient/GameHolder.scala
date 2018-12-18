@@ -193,15 +193,23 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 //    println("drawGameByTime")
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
-        if(thorSchema.adventurerMap.contains(myId)){
-          thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
-          thorSchema.drawRank(historyRank,false,myId)
-          thorSchema.drawRank(currentRank,true,myId)
-          thorSchema.drawNetInfo(getNetworkLatency)
-          if (barrageTime > 0){
-            thorSchema.drawBarrage(barrage)
-            barrageTime -= 1
-          }
+//        if(thorSchema.adventurerMap.contains(myId)){
+//          thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
+//          thorSchema.drawRank(historyRank,false,myId)
+//          thorSchema.drawRank(currentRank,true,myId)
+//          thorSchema.drawNetInfo(getNetworkLatency)
+//          if (barrageTime > 0){
+//            thorSchema.drawBarrage(barrage)
+//            barrageTime -= 1
+//          }
+//        }
+        thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
+        thorSchema.drawRank(historyRank,false,myId)
+        thorSchema.drawRank(currentRank,true,myId)
+        thorSchema.drawNetInfo(getNetworkLatency)
+        if (barrageTime > 0){
+          thorSchema.drawBarrage(barrage)
+          barrageTime -= 1
         }
 
       case None =>
