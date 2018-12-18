@@ -106,7 +106,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               }
             case None =>
           }
-          dom.window.cancelAnimationFrame(nextFrame)
+//          dom.window.cancelAnimationFrame(nextFrame)
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
