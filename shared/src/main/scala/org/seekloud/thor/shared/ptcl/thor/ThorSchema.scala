@@ -216,8 +216,8 @@ trait ThorSchema extends KillInformation {
   final protected def handleAdventurerDyingNow(): Unit = {
     dyingAdventurerMap.foreach { dying =>
       if (dying._2._2 <= 0) {
-        adventurerMap.remove(dying._1)
         dyingAdventurerMap.remove(dying._1)
+        adventurerMap.remove(dying._1)
       } else {
         dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 - 1))
       }
