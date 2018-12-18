@@ -15,7 +15,8 @@ import org.seekloud.thor.shared.ptcl.TestPswRsp
 
 import scala.util.Random
 import scala.xml.Elem
-
+import io.circe.generic.auto._
+import io.circe.syntax._
 /**
   * Created by Jingyi on 2018/11/9
   */
@@ -40,7 +41,7 @@ object TestRender extends Page{
             <h1>TEST</h1>
           </div>
           <div class="text">
-            <input type="text" class="form-control" id="psw" placeholder="password" value=""></input>
+            <input type="text" class="form-control" id="psw" placeholder="password"></input>
           </div>
           <div class="button">
             <button type="button" class="btn" onclick={()=>joinGame()}>join</button>
