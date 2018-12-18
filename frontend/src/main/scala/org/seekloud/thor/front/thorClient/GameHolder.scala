@@ -170,8 +170,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         thorSchemaOpt.foreach{ _.update()}
         logicFrameTime = System.currentTimeMillis()
         dom.window.setTimeout(() => {
-          thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
           dom.window.cancelAnimationFrame(nextFrame)
+          thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
         }, 5000)
 
 //        dom.window.clearInterval(timer)
