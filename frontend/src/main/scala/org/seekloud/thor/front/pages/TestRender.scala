@@ -51,7 +51,6 @@ object TestRender extends Page{
       </div>
 
     case 1 =>
-      init()
       canvas
   }
 
@@ -60,7 +59,10 @@ object TestRender extends Page{
     Http.getAndParse[TestPswRsp](Routes.getPsw).map{
       rsp =>
         if(rsp.errCode == 0){
-          if(rsp.psw == psw) showGame := 1
+          if(rsp.psw == psw) {
+            showGame := 1
+            init()
+          }
           else JsFunc.alert("密码错误！")
         }
         else JsFunc.alert(s"报错啦$rsp")
