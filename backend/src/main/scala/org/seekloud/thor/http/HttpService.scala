@@ -16,6 +16,7 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 import org.seekloud.thor.Boot.{eSheepLinkClient, executor, scheduler, timeout, userManager}
 import org.seekloud.thor.core.{ESheepLinkClient, UserManager}
 import org.seekloud.thor.protocol.ESheepProtocol.{ErrorGetPlayerByAccessCodeRsp, GetPlayerByAccessCodeRsp}
+import org.seekloud.thor.shared.ptcl.{TestPswRsp}
 
 
 trait HttpService
@@ -43,11 +44,14 @@ trait HttpService
   import akka.actor.typed.scaladsl.adapter._
 
 
-
+  private val getTestPsw: Route = (path("getTestPsw") & get){
+    val psw = AppSettings.testPsw
+    complete(TestPswRsp(psw))
+  }
 
 
   lazy val routes: Route = pathPrefix(AppSettings.rootPath) {
-    resourceRoutes ~ platEnterRoute ~ roomInfoRoutes ~ replayRoutes ~
+    resourceRoutes ~ platEnterRoute ~ roomInfoRoutes ~ replayRoutes ~ getTestPsw ~
       (pathPrefix("game") & get){
         pathEndOrSingleSlash{
           getFromResource("html/admin.html")

@@ -13,6 +13,8 @@ object Routes {
 
   val base = "/thor"
 
+  val getPsw = base + "/getTestPsw"
+
   def wsJoinGameUrl(name:String) = base + s"/game/join?name=$name"
 
   def wsJoinGameUrlESheep(id: String, name: String, accessCode: String, roomId: Option[Long]): String = {

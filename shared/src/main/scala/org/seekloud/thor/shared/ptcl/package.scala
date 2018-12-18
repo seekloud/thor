@@ -35,6 +35,10 @@ package object ptcl {
                              ) extends CommonRsp
 
 
-
+  final case class TestPswRsp(
+     psw: String,
+     errCode: Int = 0,
+     msg: String = "ok"
+   ) extends CommonRsp
 
 }

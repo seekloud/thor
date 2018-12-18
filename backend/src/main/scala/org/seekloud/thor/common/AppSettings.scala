@@ -38,6 +38,7 @@ object AppSettings {
   val personLimit = appConfig.getInt("RoomConfig.personLimit")
   val thorGameConfig:ThorGameConfig = ThorGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
 
+  val testPsw = appConfig.getString("testPsw")
 //  val wxConfig = appConfig.getConfig("wx.config")
 //  val mpAppId = wxConfig.getString("mpAppId")
 //  val componentAppId = wxConfig.getString("componentAppid")

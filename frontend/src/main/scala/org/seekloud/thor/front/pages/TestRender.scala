@@ -1,15 +1,16 @@
 package org.seekloud.thor.front.pages
 
-import org.seekloud.thor.front.common.Page
+import org.seekloud.thor.front.common.{Page, Routes}
 import org.seekloud.thor.front.thorClient.{GameHolder, GameHolder4Play, GameHolder4Test}
-import org.seekloud.thor.front.utils.Shortcut
+import org.seekloud.thor.front.utils.{Http, JsFunc, Shortcut}
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame.ThorGameInfo
 import mhtml.Var
 import org.scalajs.dom
 import org.scalajs.dom.ext.Color
-import org.scalajs.dom.html.Canvas
+import org.scalajs.dom.html.{Canvas, Input}
 import mhtml._
+import org.seekloud.thor.shared.ptcl.TestPswRsp
 
 import scala.xml.Elem
 
@@ -30,11 +31,46 @@ object TestRender extends Page{
     gameHolder.start(gameInfo.name, gameInfo.pId, gameInfo.userAccessCode, gameInfo.rId)
   }
 
+  val showGame = Var(0)
+  val show = showGame.map{
+    case 0 =>
+      <div>
+        <div class="entry">
+          <div class="title">
+            <h1>TEST</h1>
+          </div>
+          <div class="text">
+            <input type="text" class="form-control" id="psw" placeholder="password" value=""></input>
+          </div>
+          <div class="button">
+            <button type="button" class="btn" onclick={()=>joinGame()}>join</button>
+          </div>
+        </div>
+      </div>
 
-
-  override def render: Elem ={
-    println("ThorRender render")
-    Shortcut.scheduleOnce(() =>init(),0)
-    <div>{canvas}</div>
+    case 1 =>
+      init()
+      canvas
   }
+
+  def joinGame(): Unit = {
+    val psw = dom.document.getElementById("psw").asInstanceOf[Input].value
+    Http.getAndParse[TestPswRsp](Routes.getPsw).map{
+      rsp =>
+        if(rsp.errCode == 0){
+          if(rsp.psw == psw) showGame := 1
+          else JsFunc.alert("密码错误！")
+        }
+        else JsFunc.alert(s"报错啦$rsp")
+    }
+  }
+
+  override def render: Elem =
+    <div>
+      {show}
+    </div>
+  
+
+
+
 }
