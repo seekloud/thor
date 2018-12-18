@@ -87,7 +87,9 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     }
     adventurerMap.foreach{
       adventurer =>
-        drawAnAdventurer(adventurer._2)
+        if (!dyingAdventurerMap.contains(adventurer._1)) {
+          drawAnAdventurer(adventurer._2)
+        }
     }
   }
 

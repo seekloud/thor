@@ -52,7 +52,7 @@ trait ThorSchema extends KillInformation {
 
   protected val attackingAdventureMap = mutable.HashMap[String, Int]()
   //playerId -> 攻击执行程度
-  protected val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
+  val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
 
   /*排行榜*/
   var currentRankList = List.empty[Score]
@@ -216,6 +216,7 @@ trait ThorSchema extends KillInformation {
   final protected def handleAdventurerDyingNow(): Unit = {
     dyingAdventurerMap.foreach { dying =>
       if (dying._2._2 <= 0) {
+        adventurerMap.remove(dying._1)
         dyingAdventurerMap.remove(dying._1)
       } else {
         dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 - 1))
@@ -229,7 +230,7 @@ trait ThorSchema extends KillInformation {
       println(s"handle ${e.playerId} attacked")
       killerOpt.foreach(_.killNum += 1)
       quadTree.remove(adventurer)
-      adventurerMap.remove(adventurer.playerId)
+//      adventurerMap.remove(adventurer.playerId)
       dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
       addKillInfo(e.killerName, adventurer.name)
     }
