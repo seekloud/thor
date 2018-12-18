@@ -42,7 +42,7 @@ object TestRender extends Page{
             <h1>TEST</h1>
           </div>
           <div class="text">
-            <input type="text" class="form-control" id="psw" placeholder="password"></input>
+            <input type="password" class="form-control" id="psw" placeholder="password"></input>
           </div>
           <div class="button">
             <button type="button" class="btn" onclick={()=>joinGame()}>join</button>
