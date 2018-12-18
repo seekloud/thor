@@ -90,7 +90,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
         if (e.playerId == myId) {
-          gameState = GameState.stop
+          dom.window.setTimeout(() => gameState = GameState.stop, 5000)
           killer = e.killerName
           endTime = System.currentTimeMillis()
           val time = duringTime(endTime - startTime)

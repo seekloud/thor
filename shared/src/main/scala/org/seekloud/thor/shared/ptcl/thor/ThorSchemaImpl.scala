@@ -163,6 +163,7 @@ class ThorSchemaImpl(
   }
 
   override def update(): Unit = {
+    println(s"前端还在update----------")
     if (thorSchemaStateOpt.nonEmpty) {
       val thorSchemaState = thorSchemaStateOpt.get
       info(s"立即同步所有数据，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
