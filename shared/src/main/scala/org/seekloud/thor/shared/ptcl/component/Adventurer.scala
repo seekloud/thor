@@ -58,9 +58,9 @@ trait Adventurer extends CircleObjectOfGame {
 
   //判断扇形区域碰撞,角度为刀的角度
   def isSectorDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig) = {
-//    println("###@@@###" + o.position.getTheta(this.position))
-//    println("###@@@###" + (this.direction - Theta))
-    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(weaponLevel) + o.radius) && scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) % (2 *math.Pi) < scala.math.Pi * (1.0 / 9.0)
+    val oTheta = scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) % (2 * math.Pi)
+    val tTheta = if(oTheta > math.Pi) 2 * math.Pi - oTheta else oTheta
+    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(weaponLevel) + o.radius) && tTheta < scala.math.Pi * (1.0 / 9.0)
   }
 
   //判断是否攻击到其他
