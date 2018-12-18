@@ -15,6 +15,7 @@ import org.seekloud.thor.shared.ptcl.TestPswRsp
 
 import scala.util.Random
 import scala.xml.Elem
+import scala.concurrent.ExecutionContext.Implicits.global
 import io.circe.generic.auto._
 import io.circe.syntax._
 /**
