@@ -105,6 +105,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       //根据进度选取死亡动画 step -> 2,1,0 img -> 1~6
 
       val img = drawFrame.createImage(s"/img/kill${5 - step*2 + o}.png")
+      println(s"dying img: $img")
 
       val width = img.width
       val height = img.height
