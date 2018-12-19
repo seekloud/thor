@@ -14,6 +14,7 @@ import org.seekloud.thor.App.{executor, materializer, system}
 import org.seekloud.thor.common.Routes
 import org.seekloud.thor.controller.PlayGameController
 import org.seekloud.thor.model._
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.slf4j.LoggerFactory
 
@@ -56,6 +57,12 @@ object PlayGameActor {
   case object GameLoopKey
 
   case object GameLoopTimeOut extends Command
+
+  case object StopGameLater extends Command
+
+  private case object TimerKey4StopGame
+
+  final case object StopGame extends Command
 
   private[this] def switchBehavior(ctx: ActorContext[Command], behaviorName: String,
                                    behavior:Behavior[Command], durationOpt: Option[FiniteDuration] = None,
@@ -143,6 +150,14 @@ object PlayGameActor {
 
         case StopGameActor =>
           Behaviors.stopped
+
+        case StopGameLater =>
+          timer.startSingleTimer(TimerKey4StopGame, StopGame, 400.millis)
+          Behaviors.same
+
+        case StopGame =>
+          control.gameState = GameState.stop
+          Behaviors.same
 
         case x =>
           Behaviors.unhandled

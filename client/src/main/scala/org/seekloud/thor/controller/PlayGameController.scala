@@ -49,8 +49,8 @@ class PlayGameController(
   //  private var recSyncGameState: Option[ThorGame.GridSyncState] = None
 
   protected var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
-  private val window = Point((playGameScreen.canvasBoundary.x - 12), (playGameScreen.canvasBoundary.y - 12.toFloat))
-  private var gameState = GameState.loadingPlay
+  private val window = Point(playGameScreen.canvasBoundary.x - 12, playGameScreen.canvasBoundary.y - 12.toFloat)
+  var gameState = GameState.loadingPlay
   private var logicFrameTime = System.currentTimeMillis()
 
   protected var currentRank = List.empty[Score]
@@ -172,7 +172,7 @@ class PlayGameController(
       if (thorSchemaOpt.nonEmpty && gameState == GameState.play) {
         thorSchemaOpt.foreach { thorSchema =>
           val mouseDistance = math.sqrt(math.pow(e.getX - playGameScreen.screen.getWidth / 2.0, 2) + math.pow(e.getY - playGameScreen.screen.getHeight / 2.0, 2))
-          if (thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+          if (thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
             val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
             if (math.abs(theta - direction) > 0.3) {
               val preExecuteAction = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -189,7 +189,7 @@ class PlayGameController(
     playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
       //      println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
-        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
             mouseLeft = true
             val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -216,7 +216,7 @@ class PlayGameController(
     /*鼠标释放事件*/
     playGameScreen.canvas.getCanvas.setOnMouseReleased { e =>
       thorSchemaOpt.foreach { thorSchema =>
-        if (gameState == GameState.play) {
+        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (!mouseLeft) { //右键
             val preExecuteAction = MouseClickUpRight(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
@@ -275,7 +275,8 @@ class PlayGameController(
           barrageTime = 300
           println(s"be attacked by $e.killerName")
           if (e.playerId == playerInfo.playerId) {
-            gameState = GameState.stop
+//            gameState = GameState.stop
+            playGameActor ! PlayGameActor.StopGameLater
             endTime = System.currentTimeMillis()
             val time = duringTime(endTime - startTime)
             thorSchemaOpt.foreach { thorSchema =>
@@ -291,7 +292,7 @@ class PlayGameController(
 
               }
             }
-            animationTimer.stop()
+//            animationTimer.stop()
 
           }
           thorSchemaOpt.foreach(_.receiveGameEvent(e))
