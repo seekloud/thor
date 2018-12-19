@@ -66,7 +66,7 @@ trait Adventurer extends CircleObjectOfGame {
   //判断是否攻击到其他
   def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit)(implicit config: ThorGameConfig): Unit = {
     //    println(s"attacking: ${p.playerId},$attackingStep")
-    if (isSectorDuang(scala.math.Pi * 2.0 / 9.0 * attackingStep - 0 , p)){
+    if (isSectorDuang(scala.math.Pi * 1.0 / 6.0 * attackingStep - 0 , p)){
       println(s"${p.playerId} is attacked")
       attackedCallback(p)
     }

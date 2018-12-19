@@ -71,6 +71,14 @@ class PlayGameController(
 
   private var mouseLeft = true
 
+  /*BGM*/
+  private val gameMusic = new Media(getClass.getResource("/music/bgm-2.mp3").toString)
+  private val gameMusicPlayer = new MediaPlayer(gameMusic)
+  gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE)
+  private val attackMusic = new AudioClip(getClass.getResource("/music/sound-4.mp3").toString)
+  private var needBgm = true
+
+
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
       drawGameByTime(System.currentTimeMillis() - logicFrameTime)
@@ -147,6 +155,7 @@ class PlayGameController(
         case GameState.stop =>
           thorSchemaOpt.foreach(_.update())
           logicFrameTime = System.currentTimeMillis()
+          gameMusicPlayer.pause()
           thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
           closeHolder
 
@@ -191,6 +200,7 @@ class PlayGameController(
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
+            attackMusic.play()
             mouseLeft = true
             val preExecuteAction = MouseClickDownLeft(thorSchema.myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
@@ -233,6 +243,14 @@ class PlayGameController(
         if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.getCode == KeyCode.SPACE) {
             start
+          } else if(e.getCode == KeyCode.M){
+            if(needBgm){
+              gameMusicPlayer.pause()
+              needBgm = false
+            }else{
+              gameMusicPlayer.play()
+              needBgm = true
+            }
           }
         }
       }
@@ -246,6 +264,7 @@ class PlayGameController(
       data match {
         case e: ThorGame.YourInfo =>
           println(s"start---------")
+          gameMusicPlayer.play()
           try {
             thorSchemaOpt = Some(ThorSchemaClientImpl(playGameScreen.drawFrame, playGameScreen.getCanvasContext, e.config, e.id, e.name, playGameScreen.canvasBoundary, playGameScreen.canvasUnit))
             //            recYourInfo = true
