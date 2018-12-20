@@ -1,7 +1,8 @@
 package org.seekloud.thor.shared.ptcl.thor
+
 import org.seekloud.thor.shared.ptcl.component.{AdventurerImpl, AdventurerState, Food}
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{BeAttacked, GameEvent, UserActionEvent}
 
 import scala.collection.mutable
 
@@ -26,13 +27,13 @@ class ThorSchemaImpl(
 
   override def info(msg: String): Unit = println(msg)
 
-  private val esRecoverSupport:Boolean = true
+  private val esRecoverSupport: Boolean = true
 
-  private val uncheckedActionMap = mutable.HashMap[Int,Long]() //serinum -> frame
+  private val uncheckedActionMap = mutable.HashMap[Int, Long]() //serinum -> frame
 
   private var thorSchemaStateOpt: Option[ThorSchemaState] = None
 
-  protected var waitSyncData:Boolean = true
+  protected var waitSyncData: Boolean = true
 
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
 
@@ -40,10 +41,16 @@ class ThorSchemaImpl(
     new AdventurerImpl(config, adventurer)
   }
 
-  def receiveGameEvent(e:GameEvent) = {
-    if(e.frame >= systemFrame){
+  def receiveGameEvent(e: GameEvent) = {
+    if (e.frame >= systemFrame) {
+      if (e.isInstanceOf[BeAttacked]) {
+        println(s"接收到死亡事件！！！")
+      }
       addGameEvent(e)
-    }else if(esRecoverSupport){
+    } else if (esRecoverSupport) {
+      if (e.isInstanceOf[BeAttacked]) {
+        println(s"接收到死亡事件，开始回滚！！！")
+      }
       println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=${e}")
       rollback4GameEvent(e)
     }
@@ -55,7 +62,7 @@ class ThorSchemaImpl(
       uncheckedActionMap.get(e.serialNum) match {
         case Some(preFrame) =>
           if (e.frame != preFrame) {
-//            println(s"preFrame=$preFrame eventFrame=${e.frame} curFrame=$systemFrame")
+            //            println(s"preFrame=$preFrame eventFrame=${e.frame} curFrame=$systemFrame")
             if (preFrame < e.frame && esRecoverSupport) {
               if (preFrame >= systemFrame) {
                 removePreEvent(preFrame, e.playerId, e.serialNum)
@@ -116,29 +123,29 @@ class ThorSchemaImpl(
     }
     systemFrame = thorSchemaSate.f
     quadTree.clear()
-//    adventurerMap.clear()
+    //    adventurerMap.clear()
     tmpAdventurerMap.clear()
-    if (!thorSchemaSate.isIncrement) tmpFoodMap.clear()//foodMap.clear()
+    if (!thorSchemaSate.isIncrement) tmpFoodMap.clear() //foodMap.clear()
     thorSchemaSate.adventurer.foreach { a =>
       val adventurer = new AdventurerImpl(config, a)
       quadTree.insert(adventurer)
-//      adventurerMap.put(a.playerId, adventurer)
+      //      adventurerMap.put(a.playerId, adventurer)
       tmpAdventurerMap.put(a.playerId, adventurer)
     }
     if (!thorSchemaSate.isIncrement) {
       thorSchemaSate.food.foreach { f =>
         val food = Food(f)
         quadTree.insert(food)
-//        foodMap.put(f.fId, food)
+        //        foodMap.put(f.fId, food)
         tmpFoodMap.put(f.fId, food)
       }
     } else {
       thorSchemaSate.food.foreach { f =>
         val food = Food(f)
-//        foodMap.put(f.fId, food)
+        //        foodMap.put(f.fId, food)
         tmpFoodMap.put(f.fId, food)
       }
-      tmpFoodMap.values.foreach {f => quadTree.insert(f)}
+      tmpFoodMap.values.foreach { f => quadTree.insert(f) }
     }
     adventurerMap = tmpAdventurerMap
     foodMap = tmpFoodMap
@@ -148,7 +155,7 @@ class ThorSchemaImpl(
   def receiveThorSchemaState(thorSchemaState: ThorSchemaState): Unit = {
     if (thorSchemaState.f > systemFrame) {
       thorSchemaStateOpt = Some(thorSchemaState)
-    }else if (thorSchemaState.f == systemFrame) {
+    } else if (thorSchemaState.f == systemFrame) {
       info(s"收到同步数据，立即同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
       thorSchemaStateOpt = None
       handleThorSchemaState(thorSchemaState)
