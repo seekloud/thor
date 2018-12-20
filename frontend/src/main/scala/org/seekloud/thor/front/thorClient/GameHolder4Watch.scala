@@ -45,6 +45,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
+        Shortcut.playMusic("bgm-2")
 
       case e: BeAttacked =>
         barrage = s"${e.killerName}杀死了${e.name}"
