@@ -91,7 +91,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         barrageTime = 300
         if (e.playerId == myId) {
           println(s"隔500ms设置gameState为Stop!!!")
-          dom.window.setTimeout(() => gameState = GameState.stop, 500)
+          dom.window.setTimeout(() => gameState = GameState.stop, 350)
           killer = e.killerName
           endTime = System.currentTimeMillis()
           val time = duringTime(endTime - startTime)
@@ -197,7 +197,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               e.preventDefault()
             }
           }
-          else {
+          else if (!thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)){
             println("on mouse down!!!!!")
             val x = e.clientX
             val y = e.clientY
