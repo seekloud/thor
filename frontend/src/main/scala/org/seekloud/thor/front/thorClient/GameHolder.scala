@@ -168,10 +168,10 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.stop =>
         println(s"GameState.stop------------")
+        thorSchemaOpt.foreach{ _.update()}
+        logicFrameTime = System.currentTimeMillis()
         if (thorSchemaOpt.nonEmpty) {
-          if (!thorSchemaOpt.get.adventurerMap.contains(myId)) {
-            thorSchemaOpt.foreach{ _.update()}
-            logicFrameTime = System.currentTimeMillis()
+          if (thorSchemaOpt.get.dyingAdventurerMap.contains(myId) || !thorSchemaOpt.get.adventurerMap.contains(myId)) {
             dom.window.cancelAnimationFrame(nextFrame)
             thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
           } else {
