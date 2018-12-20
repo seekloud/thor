@@ -6,6 +6,7 @@ import org.seekloud.thor.front.model.{PlayerInfo, ReplayInfo}
 import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.MouseClickDownLeft
 import org.seekloud.thor.shared.ptcl.thor.{ThorSchemaClientImpl, ThorSchemaState}
 
 /**
@@ -49,6 +50,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         myName = e.name
         gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()
+        Shortcut.playMusic("bgm-2")
 
       case e: ThorGame.GridSyncState =>
         if (firstCome) {
@@ -75,6 +77,9 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.UserActionEvent =>
         //remind here only add preAction without rollback
 //        println(s"frame [${thorSchemaOpt.get.systemFrame}] user action event: $e")
+        e match {
+          case MouseClickDownLeft => Shortcut.playMusic("sound-4")
+        }
         thorSchemaOpt.foreach(_.preExecuteUserEvent(e))
 
       case e: ThorGame.GameEvent =>

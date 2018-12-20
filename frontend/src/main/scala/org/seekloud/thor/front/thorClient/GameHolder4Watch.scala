@@ -91,6 +91,9 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         closeHolder
 
       case e: UserActionEvent =>
+        e match {
+          case MouseClickDownLeft => Shortcut.playMusic("sound-4")
+        }
         thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case e: GameEvent =>

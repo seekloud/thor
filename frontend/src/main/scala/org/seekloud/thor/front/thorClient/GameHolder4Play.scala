@@ -71,6 +71,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         }
         gameState = GameState.play
+        Shortcut.playMusic("bgm-2")
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
@@ -172,8 +173,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
         case None =>
       }
-      Shortcut.playMusic("bgm-2")
-
       e.preventDefault()
     }
     canvas.getCanvas.onmousedown = { (e: dom.MouseEvent) =>

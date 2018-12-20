@@ -15,8 +15,7 @@ import scala.xml.Elem
 class ReplayRender(replayInfo: ReplayInfo)extends Page{
 
   private val canvas = <canvas id ="GameView" tabindex="1"></canvas>
-  private val audio_1 = <audio id="bgm-2" src="/thor/static/music/bgm-2.mp3" preload="auto"></audio>
-  private val audio_2 = <audio id="sound-4" src="/thor/static/music/sound-4.mp3" preload="auto"></audio>
+
 
   def init() = {
     val gameHolder = new GameHolder4Replay("GameView")
@@ -30,8 +29,6 @@ class ReplayRender(replayInfo: ReplayInfo)extends Page{
     Shortcut.scheduleOnce(() =>init(),0)
     <div>
       {canvas}
-      {audio_1}
-      {audio_2}
     </div>
   }
 

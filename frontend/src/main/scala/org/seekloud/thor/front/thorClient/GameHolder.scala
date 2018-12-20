@@ -2,6 +2,7 @@ package org.seekloud.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import org.scalajs.dom.raw.HTMLAudioElement
 import org.seekloud.thor.front.utils.middleware.MiddleFrameInJs
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants
@@ -93,8 +94,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
 
-
-
   def gameRender(): Double => Unit = { d =>
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
@@ -172,6 +171,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         logicFrameTime = System.currentTimeMillis()
         if (thorSchemaOpt.nonEmpty) {
           if (thorSchemaOpt.get.dyingAdventurerMap.contains(myId) || !thorSchemaOpt.get.adventurerMap.contains(myId)) {
+            Shortcut.pauseMusic("bgm-2")
             dom.window.cancelAnimationFrame(nextFrame)
             thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
           } else {
