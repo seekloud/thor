@@ -118,7 +118,7 @@ case class ThorSchemaServerImpl(
 
   //↓↓↓只有后台执行的函数↓↓↓
 
-  private final def generateFood(level: Int = 1, position: Point, radius: Float = 2): FoodState = {
+  private final def generateFood(level: Byte = 1, position: Point, radius: Float = 2): FoodState = {
     //生成食物事件，被后台定时事件调用，前端不产生此事件，食物的属性暂且全部作为参数,color作为随机数
     val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius, random.nextInt(8))
     val event = GenerateFood(systemFrame, foodState)
@@ -138,7 +138,7 @@ case class ThorSchemaServerImpl(
     (1 to num).foreach {
       t =>
         if(foodMap.size < config.getFoodMax()){
-          val food = generateFood(random.nextInt(5), genPosition())
+          val food = generateFood(random.nextInt(5).toByte, genPosition())
           foodList = foodList :+ food
         }
     }

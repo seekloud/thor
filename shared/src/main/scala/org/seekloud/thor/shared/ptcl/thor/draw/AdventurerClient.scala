@@ -27,7 +27,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     var moveDistance = Point(0, 0)
 
     if(adventurer.isMove){
-      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.speedLevel).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
+      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
       //如果达到边界 则不再往外走
       val delay = 0.5
       if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)

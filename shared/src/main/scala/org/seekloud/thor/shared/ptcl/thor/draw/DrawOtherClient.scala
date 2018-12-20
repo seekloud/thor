@@ -34,7 +34,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     val rate = fillMax.toFloat/fillBar.width //缩放比例
 
     //当前能量值占该等级的比值
-    val preLevel = if(adventurer.level == 1) 0 else config.getMaxEnergyByLevel(adventurer.level - 1)
+    val preLevel = if(adventurer.level == 1) 0 else config.getMaxEnergyByLevel((adventurer.level - 1).toByte)
     val nowLevel = config.getMaxEnergyByLevel(adventurer.level)
     val fillLength = math.min((adventurer.energy - preLevel).toFloat / (nowLevel - preLevel) * fillMax, fillMax)
 
@@ -52,8 +52,8 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.save()
     ctx.beginPath()
     ctx.setStrokeStyle("#30B8E8")
-    ctx.lineWidth(config.getWeaponLengthByLevel(adventurer.weaponLevel) * canvasUnit * 0.85)
-    ctx.arc(x * canvasUnit, y * canvasUnit, rx + config.getWeaponLengthByLevel(adventurer.weaponLevel) / 2 * canvasUnit * 0.85, sA, eA, false)
+    ctx.lineWidth(config.getWeaponLengthByLevel(adventurer.level) * canvasUnit * 0.85)
+    ctx.arc(x * canvasUnit, y * canvasUnit, rx + config.getWeaponLengthByLevel(adventurer.level) / 2 * canvasUnit * 0.85, sA, eA, false)
     ctx.stroke()
     ctx.restore()
   }

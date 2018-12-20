@@ -52,27 +52,27 @@ trait ThorGameConfig {
 
   def facePalstance: Float
 
-  def getAdventurerRadiusByLevel(l: Int): Float
+  def getAdventurerRadiusByLevel(l: Byte): Float
 
   def getFoodMax(): Int
 
-  def getRadiusByFoodLevel(l: Int): Float
+  def getRadiusByFoodLevel(l: Byte): Float
 
-  def getEnergyByFoodLevel(l: Int): Int
+  def getEnergyByFoodLevel(l: Byte): Int
 
-  def getEnergyByKillingAdventurerLevel(l: Int): Int
+  def getEnergyByKillingAdventurerLevel(l: Byte): Int
 
-  def getMaxEnergyByLevel(l: Int): Int
+  def getMaxEnergyByLevel(l: Byte): Int
 
-  def getWeaponLevelByLevel(l: Int): Int
+//  def getWeaponLevelByLevel(l: Byte): Byte
 
-  def getWeaponLengthByLevel(l: Int): Float
+  def getWeaponLengthByLevel(l: Byte): Float
 
   def getThorGameConfigImpl(): ThorGameConfigImpl
 
-  def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false): Point
+  def getThorSpeedByLevel(l: Byte, isSpeedUp: Boolean = false): Point
 
-  def getMoveDistanceByFrame(l: Int, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
+  def getMoveDistanceByFrame(l: Byte, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
 
   def getAdventurerLevelSize: Int
 
@@ -101,7 +101,7 @@ case class ThorGameConfigImpl(
 
   def facePalstance: Float = adventurerParams.facePalstance
 
-  def getAdventurerRadiusByLevel(l: Int) = {
+  def getAdventurerRadiusByLevel(l: Byte) = {
     adventurerParams.radius(l - 1)
   }
 
@@ -110,31 +110,31 @@ case class ThorGameConfigImpl(
     foodParams.max
   }
 
-  override def getRadiusByFoodLevel(l: Int): Float = {
+  override def getRadiusByFoodLevel(l: Byte): Float = {
     foodParams.radiusList(l)
   }
 
-  override def getEnergyByFoodLevel(l: Int): Int = {
+  override def getEnergyByFoodLevel(l: Byte): Int = {
     foodParams.energyList(l)
   }
 
-  override def getEnergyByKillingAdventurerLevel(l: Int): Int = {
+  override def getEnergyByKillingAdventurerLevel(l: Byte): Int = {
     adventurerParams.containEnergyList(l - 1)
   }
 
-  override def getMaxEnergyByLevel(l: Int): Int = {
+  override def getMaxEnergyByLevel(l: Byte): Int = {
     adventurerParams.maxEnergyList(l - 1)
   }
 
-  override def getWeaponLevelByLevel(l: Int): Int = {
-    l
-  }
+//  override def getWeaponLevelByLevel(l: Byte): Byte = {
+//    l
+//  }
 
-  override def getWeaponLengthByLevel(l: Int): Float = {
+  override def getWeaponLengthByLevel(l: Byte): Float = {
     weaponParams.lengthList(l - 1)
   }
 
-  def getThorSpeedByLevel(l: Int, isSpeedUp: Boolean = false) = if (isSpeedUp) {
+  def getThorSpeedByLevel(l: Byte, isSpeedUp: Boolean = false) = if (isSpeedUp) {
     adventurerParams.speeds.getThorSpeedByLevel(l) * adventurerParams.speedUpRate
   } else adventurerParams.speeds.getThorSpeedByLevel(l)
 

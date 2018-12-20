@@ -13,14 +13,14 @@ import org.seekloud.thor.shared.ptcl.util.QuadTree
 case class AdventurerState(
   playerId: String,
   name: String,
-  level: Int,
+  level: Byte,
   energy: Int,
-  radiusLevel: Int,
+//  radiusLevel: Int,
   position: Point,
   direction: Float,
   faceDirection: Float,
-  weaponLevel: Int,
-  speedLevel: Int,
+//  weaponLevel: Int,
+//  speedLevel: Byte,
   isSpeedUp: Boolean,
   killNum: Int,
   isMove: Boolean,
@@ -32,14 +32,14 @@ case class AdventurerState(
 trait Adventurer extends CircleObjectOfGame {
   val playerId: String
   val name: String
-  var level: Int
+  var level: Byte
   var energy: Int
-  var radiusLevel: Int
-  //  var position: Point
+//  var radiusLevel: Int
+  var position: Point
   var direction: Float
   var faceDirection: Float
-  var weaponLevel: Int
-  var speedLevel: Int
+//  var weaponLevel: Int
+//  var speedLevel: Byte
   var isSpeedUp: Boolean
   var killNum: Int
   var isMove: Boolean
@@ -60,7 +60,7 @@ trait Adventurer extends CircleObjectOfGame {
   def isSectorDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig) = {
     val oTheta = scala.math.abs(o.position.getTheta(this.position) - this.direction + Theta) % (2 * math.Pi)
     val tTheta = if(oTheta > math.Pi) 2 * math.Pi - oTheta else oTheta
-    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(weaponLevel) + o.radius) && tTheta < scala.math.Pi * (1.0 / 9.0)
+    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(level) + o.radius) && tTheta < scala.math.Pi * (1.0 / 9.0)
   }
 
   //判断是否攻击到其他
@@ -73,10 +73,10 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, radiusLevel, position, direction, faceDirection, weaponLevel, speedLevel, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute, mouseStop)
+    AdventurerState(playerId, name, level, energy, position, direction, faceDirection, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute, mouseStop)
   }
 
-  def attacking(killedLevel: Int)(implicit config: ThorGameConfig): Unit ={
+  def attacking(killedLevel: Byte)(implicit config: ThorGameConfig): Unit ={
     println(s"killing $killedLevel Level adventurer")
     this.energy += config.getEnergyByKillingAdventurerLevel(killedLevel)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
@@ -119,9 +119,9 @@ trait Adventurer extends CircleObjectOfGame {
       if (level < thorGameConfig.getAdventurerLevelSize) {
         levelUpExecute = thorGameConfig.getAdventurerLevelUpAnimation
         isUpdateLevel = true
-        level += 1
-        speedLevel += 1
-        weaponLevel += 1
+        level = (level + 1).toByte
+//        speedLevel += 1
+//        weaponLevel += 1
       }
     } else {
       if (levelUpExecute > 0)
@@ -135,10 +135,10 @@ trait Adventurer extends CircleObjectOfGame {
 
   def reduceLevel(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (this.level > 1) {
-      if (this.energy <= thorGameConfig.getMaxEnergyByLevel(this.level - 1)) {
-        this.level -= 1
-        speedLevel -= 1
-        weaponLevel -= 1
+      if (this.energy <= thorGameConfig.getMaxEnergyByLevel((this.level - 1).toByte)) {
+        this.level = (level - 1).toByte
+//        speedLevel -= 1
+//        weaponLevel -= 1
       }
     }
   }
@@ -161,9 +161,9 @@ trait Adventurer extends CircleObjectOfGame {
         } else {
           cancleSpeedUp
         }
-        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
+        thorGameConfig.getMoveDistanceByFrame(this.level, isSpeedUp).rotate(direction)
       } else {
-        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
+        thorGameConfig.getMoveDistanceByFrame(this.level, isSpeedUp).rotate(direction)
       }
 
       val horizontalDistance = moveDistance.copy(y = 0)
@@ -191,60 +191,20 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-
-//  def moveDistance(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Option[Point] = {
-//    if (isMove) {
-//      var moveDistance = if (isSpeedUp) {
-//        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
-//      } else {
-//        thorGameConfig.getMoveDistanceByFrame(this.speedLevel, isSpeedUp).rotate(direction)
-//      }
-//
-//      val horizontalDistance = moveDistance.copy(y = 0)
-//      val verticalDistance = moveDistance.copy(x = 0)
-//      List(horizontalDistance, verticalDistance).foreach { d =>
-//        if (d.x != 0 || d.y != 0) {
-//          val originPosition = this.position
-//          this.position = this.position + d
-//          val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
-//          if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
-//            quadTree.updateObject(this)
-//          }
-//          if (movedRec.topLeft.x <= 0 || movedRec.topLeft.y <= 0) {
-//            if (movedRec.topLeft.x <= 0) this.position = Point(radius, this.position.y)
-//            moveDistance = moveDistance.copy(x = radius - originPosition.x)
-//            if (movedRec.topLeft.y <= 0) this.position = Point(this.position.x, radius)
-//            moveDistance = moveDistance.copy(y = radius - originPosition.y)
-//            quadTree.updateObject(this)
-//          }
-//          if (movedRec.downRight.x >= boundary.x || movedRec.downRight.y >= boundary.y) {
-//            if (movedRec.downRight.x >= boundary.x) this.position = Point(boundary.x - radius, this.position.y)
-//            moveDistance = moveDistance.copy(x = boundary.x - radius - originPosition.x)
-//            if (movedRec.downRight.y >= boundary.y) this.position = Point(this.position.x, boundary.y - radius)
-//            moveDistance = moveDistance.copy(y = boundary.y - radius - originPosition.y)
-//            quadTree.updateObject(this)
-//          }
-//          this.position = originPosition
-//        }
-//      }
-//      Some(moveDistance)
-//    } else None
-//  }
-
 }
 
 case class AdventurerImpl(
   config: ThorGameConfig,
   playerId: String,
   name: String,
-  var level: Int,
+  var level: Byte,
   var energy: Int,
-  var radiusLevel: Int,
+//  var radiusLevel: Int,
   var position: Point,
   var direction: Float,
   var faceDirection: Float,
-  var weaponLevel: Int,
-  var speedLevel: Int,
+//  var weaponLevel: Int,
+//  var speedLevel: Int,
   var isSpeedUp: Boolean,
   var killNum: Int,
   var isMove: Boolean,
@@ -253,11 +213,11 @@ case class AdventurerImpl(
   var mouseStop: Boolean
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
-    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.radiusLevel, adventurerState.position,
-      adventurerState.direction, adventurerState.faceDirection, adventurerState.weaponLevel, adventurerState.speedLevel, adventurerState.isSpeedUp,
-      adventurerState.killNum, adventurerState.isMove, adventurerState.isUpdateLevel, adventurerState.levelUpExecute, adventurerState.mouseStop)
+    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.position,
+      adventurerState.direction, adventurerState.faceDirection, adventurerState.isSpeedUp, adventurerState.killNum, adventurerState.isMove,
+      adventurerState.isUpdateLevel, adventurerState.levelUpExecute, adventurerState.mouseStop)
   }
 
-  override var radius: Float = config.getAdventurerRadiusByLevel(radiusLevel)
+  override var radius: Float = config.getAdventurerRadiusByLevel(level)
 
 }
