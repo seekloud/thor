@@ -98,5 +98,15 @@ object Shortcut {
     audio.pause()
   }
 
+  def refreshMusic(id: String) = {
+    val audio = dom.document.getElementById(id).asInstanceOf[HTMLAudioElement]
+    audio.currentTime = 0
+  }
+
+  def isPaused(id: String): Boolean = {
+    val audio = dom.document.getElementById(id).asInstanceOf[HTMLAudioElement]
+    audio.paused
+  }
+
 
 }
