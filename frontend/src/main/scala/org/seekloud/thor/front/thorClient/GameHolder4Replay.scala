@@ -78,7 +78,8 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         //remind here only add preAction without rollback
 //        println(s"frame [${thorSchemaOpt.get.systemFrame}] user action event: $e")
         e match {
-          case MouseClickDownLeft => Shortcut.playMusic("sound-4")
+          case _: MouseClickDownLeft => Shortcut.playMusic("sound-4")
+          case _ =>
         }
         thorSchemaOpt.foreach(_.preExecuteUserEvent(e))
 
