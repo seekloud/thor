@@ -1,5 +1,6 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 
+import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 trait FpsRender {
@@ -19,15 +20,16 @@ trait FpsRender {
     }
   }
 
+
   def drawNetInfo(networkLatency:Long) = {
     addFps()
-    ctx.setFont("Helvetica", 25)
+    ctx.setFont("Helvetica", baseFont * 25)
     ctx.setTextAlign("start")
     ctx.setFill("#ffffff")
     val fpsStr =  s"fps   : $lastRenderTimes"
     val pingStr = s"ping : ${networkLatency}ms"
     ctx.setTextBaseLine("top")
-    ctx.fillText(pingStr,500,10)
-    ctx.fillText(fpsStr,500,40)
+    ctx.fillText(pingStr,window.x * 0.24,10)
+    ctx.fillText(fpsStr,window.x * 0.24,40)
   }
 }
