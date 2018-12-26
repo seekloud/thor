@@ -55,18 +55,18 @@ class WebSocketClient(
 
     val webSocketStream = new WebSocket(getWebSocketUri(url))
     websocketStreamOpt = Some(webSocketStream)
-    webSocketStream.onopen = { (event: Event) =>
+    webSocketStream.onopen = { event: Event =>
       wsSetup = true
       connectSuccessCallback(event)
     }
-    webSocketStream.onerror = { (event: Event) =>
+    webSocketStream.onerror = { event: Event =>
       wsSetup = false
       websocketStreamOpt = None
       connectErrorCallback(event)
     }
 
-    webSocketStream.onmessage = { (event: MessageEvent) =>
-      //        println(s"recv msg:${event.data.toString}")
+    webSocketStream.onmessage = { event: MessageEvent =>
+      //        println(s"receive msg:${event.data.toString}")
       event.data match {
         case blobMsg: Blob =>
           val fr = new FileReader()
@@ -89,7 +89,7 @@ class WebSocketClient(
       }
     }
 
-    webSocketStream.onclose = { (event: Event) =>
+    webSocketStream.onclose = { event: Event =>
       wsSetup = false
       websocketStreamOpt = None
       closeCallback(event)
