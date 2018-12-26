@@ -3,6 +3,7 @@ package org.seekloud.thor.front.thorClient
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.scalajs.dom.raw.HTMLAudioElement
+import org.seekloud.thor.front.common.PreDraw
 import org.seekloud.thor.front.utils.middleware.MiddleFrameInJs
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants
@@ -47,6 +48,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var canvasHeight = dom.window.innerHeight.toFloat
   protected val canvas = drawFrame.createCanvas(canvasName, canvasWidth, canvasHeight)
   protected val ctx = canvas.getCtx
+
+  protected val preDrawFrame = new PreDraw
 
 //  protected val bounds = Point(Boundary.w,Boundary.h)
 

@@ -12,14 +12,15 @@ import org.seekloud.thor.shared.ptcl.util.middleware._
   * Time: 16:17
   */
 case class ThorSchemaClientImpl (
-                            drawFrame: MiddleFrame,
-                            ctx: MiddleContext,
-                             override val config: ThorGameConfig,
-                             myId: String,
-                             myName: String,
-                             var canvasSize:Point,
-                             var canvasUnit:Float
-                           ) extends ThorSchemaImpl(config, myId, myName)
+  drawFrame: MiddleFrame,
+  ctx: MiddleContext,
+  override val config: ThorGameConfig,
+  myId: String,
+  myName: String,
+  var canvasSize:Point,
+  var canvasUnit:Float,
+  preCanvas: List[MiddleCanvas] = Nil,
+) extends ThorSchemaImpl(config, myId, myName)
 with AdventurerClient
 with FoodClient
 with BackgroundClient
@@ -48,7 +49,7 @@ with FpsRender{
             drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
 
           val end = System.currentTimeMillis()
-//          if(end-start > 15)println(s"drawTime: ${end-start}")
+          if(end-start > 10)println(s"drawTime too Long: ${end-start}")
         case None => println("None!!!!!!")
       }
     }

@@ -3,6 +3,7 @@ package org.seekloud.thor.shared.ptcl.thor.draw
 import org.seekloud.thor.shared.ptcl.component.Food
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
+import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleContext, MiddleFrame}
 
 import scala.collection.mutable
 import scala.util.Random
@@ -11,32 +12,56 @@ import scala.util.Random
   * Created by Jingyi on 2018/11/9
   */
 trait FoodClient { this: ThorSchemaClientImpl =>
-
   //绘制食物
 
   def drawFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
-    def drawAFood(food:Food, offset:Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+    preCanvas match{
+      case Nil =>
+        foodMap.foreach{food=>
+          drawAFood(food._2, offset, canvasUnit,canvasBoundary)
+        }
+      case _ =>
+        foodMap.foreach{food=>
+          drawFoodByPre(food._2, offset, canvasUnit,canvasBoundary)
+        }
+    }
+  }
 
-      val img = drawFrame.createImage(s"/img/food-sheet0-${food.getFoodState.color}.png")
+  def drawAFood(food:Food, offset:Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
-      val r = config.getRadiusByFoodLevel(food.getFoodState.level)
-      val sx = food.getFoodState.position.x - r + offset.x
-      val sy = food.getFoodState.position.y - r + offset.y
-      val dx = 2 * r
-      val dy = 2 * r
+    val img = drawFrame.createImage(s"/img/food-sheet0-${food.getFoodState.color}.png")
 
-      if(0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y){
-        //只绘制视角窗口内的食物
-        ctx.save()
-        ctx.drawImage(img, sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
-        ctx.restore()
-      }
+    val r = config.getRadiusByFoodLevel(food.getFoodState.level)
+    val sx = food.getFoodState.position.x - r + offset.x
+    val sy = food.getFoodState.position.y - r + offset.y
+    val dx = 2 * r
+    val dy = 2 * r
 
+    if(0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y){
+      //只绘制视角窗口内的食物
+      ctx.save()
+      ctx.drawImage(img, sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
+      ctx.restore()
     }
 
-    foodMap.foreach{food=>
-      drawAFood(food._2, offset, canvasUnit,canvasBoundary)
+  }
+
+  def drawFoodByPre(food:Food, offset:Point, canvasUnit: Float, canvasBoundary: Point): Unit ={
+
+    val color = food.getFoodState.color
+
+    val r = config.getRadiusByFoodLevel(food.getFoodState.level)
+    val sx = food.getFoodState.position.x - r + offset.x
+    val sy = food.getFoodState.position.y - r + offset.y
+    val dx = 2 * r
+    val dy = 2 * r
+
+    if(0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y){
+      //只绘制视角窗口内的食物
+      ctx.save()
+      ctx.drawImage(preCanvas(color), sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
+      ctx.restore()
     }
   }
 }
