@@ -35,6 +35,8 @@ object RoomActor {
 
   case class LeftRoom(playerId: String, name: String, userList: List[(String, String)]) extends Command
 
+  case class CreateRobot(botId: String, name: String) extends Command
+
   case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
 
   //  case class GetKilled(playerId: String, name: String) extends Command with RoomManager.Command
@@ -56,8 +58,11 @@ object RoomActor {
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             val watchingMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建thorSchema
-            implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
+            implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(181920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
+
+//            ctx.self ! CreateRobot("robot1", "xusiran")
+
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
             }
@@ -81,6 +86,11 @@ object RoomActor {
     Behaviors.receive {
       (ctx, msg) =>
         msg match {
+          case CreateRobot(botId, name) =>
+            val robot = ctx.spawn(RobotActor.init(thorSchema, botId, name), botId)
+            thorSchema.robotJoinGame(botId, name, robot)
+            Behaviors.same
+
           case JoinRoom(roomId, userId, name, userActor) =>
             log.debug(s"user $userId join room $roomId")
             thorSchema.joinGame(userId, name, userActor)

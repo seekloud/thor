@@ -57,13 +57,13 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
-      case YourInfo(config, id, name) =>
-        dom.console.log(s"get YourInfo ${config} ${id} ${name}")
+      case YourInfo(config, id, yourName) =>
+        dom.console.log(s"get YourInfo $config $id $yourName")
         startTime = System.currentTimeMillis()
         myId = id
-        myName = name
+        myName = yourName
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas))
         if (timer != 0) {
           dom.window.clearInterval(timer)
           thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
@@ -151,14 +151,13 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   def addActionListenEvent(): Unit = {
     canvas.getCanvas.focus()
     canvas.getCanvas.oncontextmenu = _ => false //取消右键弹出行为
-    canvas.getCanvas.onmousemove = { (e: dom.MouseEvent) =>
+    canvas.getCanvas.onmousemove = { e: dom.MouseEvent =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
-            //            println(s"mouseDistance: $mouseDistance")
             val direction = thorSchema.adventurerMap(myId).direction
             if (math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
               val data = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)

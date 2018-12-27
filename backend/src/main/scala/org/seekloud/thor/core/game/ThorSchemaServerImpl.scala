@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
-import org.seekloud.thor.core.{ESheepLinkClient, RoomActor, UserActor}
+import org.seekloud.thor.core.{ESheepLinkClient, RobotActor, RoomActor, UserActor}
 import org.seekloud.thor.protocol.ESheepProtocol.{ESheepRecord, ESheepRecordSimple}
 import org.seekloud.thor.shared.ptcl.component._
 import org.slf4j.Logger
@@ -40,7 +40,9 @@ case class ThorSchemaServerImpl(
 
   private val foodIdGenerator = new AtomicInteger(100)
 
-  private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil
+  private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil // userId, name, Actor
+  private var justJoinBot: List[(String, String, ActorRef[RobotActor.Command])] = Nil // botId, name
+  private val robotMap: mutable.HashMap[String, ActorRef[RobotActor.Command]] = mutable.HashMap.empty
   private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
 
   private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，)
@@ -70,6 +72,16 @@ case class ThorSchemaServerImpl(
     }
     addGameEvent(event)
     dispatch(event)
+  }
+
+  override protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
+    if(e.playerId.take(5).equals("robot")){
+      if(robotMap.contains(e.playerId)){
+        robotMap(e.playerId) ! RobotActor.RobotDead
+      }
+      robotMap.remove(e.playerId)
+    }
+    super.handleAdventurerAttacked(e)
   }
 
   implicit val scoreOrdering = new Ordering[Score] {
@@ -147,6 +159,10 @@ case class ThorSchemaServerImpl(
 
   def joinGame(userId: String, name: String, userActor: ActorRef[UserActor.Command]): Unit = {
     justJoinUser = (userId, name, userActor) :: justJoinUser
+  }
+
+  def robotJoinGame(botId: String, name: String, ref: ActorRef[RobotActor.Command]): Unit ={
+    justJoinBot = (botId, name, ref) :: justJoinBot
   }
 
   def handleJoinRoom4Watch(userActor4WatchGame: ActorRef[UserActor.Command], uid: String, playerId: String) = {
@@ -253,8 +269,19 @@ case class ThorSchemaServerImpl(
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
     }
+    justJoinBot.foreach {
+      case (botId, name, ref) =>
+        val adventurer = generateAdventurer(botId, name)
+        val event = UserEnterRoom(botId, name, adventurer.getAdventurerState, systemFrame)
+        addGameEvent(event)
+//        RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
+        robotMap.put(botId, ref)
+        adventurerMap.put(botId, adventurer)
+        quadTree.insert(adventurer)
+    }
 
     justJoinUser = Nil
+    justJoinBot = Nil
   }
 
   private def init(): Unit = {
