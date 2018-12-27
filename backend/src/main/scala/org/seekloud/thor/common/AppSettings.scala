@@ -97,6 +97,18 @@ object AppSettings {
   val ramblerRootUrl = ramblerConfig.getString("rootUrl")
 
 
+  val dependenceConfig = config.getConfig("dependence")
+
+  private val eSheepConfig = dependenceConfig.getConfig("esheep.config")
+  val esheepAppId = eSheepConfig.getLong("appId")
+  val esheepSecureKey = eSheepConfig.getString("secureKey")
+  val esheepProtocol = eSheepConfig.getString("protocol")
+  val esheepHost = eSheepConfig.getString("host")
+  val esheepPort = eSheepConfig.getInt("port")
+  val esheepDomain = eSheepConfig.getString("domain")
+  val esheepUrl = eSheepConfig.getString("url")
+
+
 
 
   val sessionConfig = {
