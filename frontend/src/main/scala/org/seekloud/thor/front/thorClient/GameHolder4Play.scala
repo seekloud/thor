@@ -35,7 +35,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     if (firstCome) {
       addActionListenEvent()
       val url = if (id.isEmpty) Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id.get, name, accessCode.getOrElse("?"), roomId)
-      websocketClient.setup(url)
+      dom.window.setTimeout(()=>websocketClient.setup(url), 3000)
       gameLoop()
     }
     else if (websocketClient.getWsState) {
@@ -58,24 +58,22 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
       case YourInfo(config, id, yourName) =>
-        dom.window.setTimeout(()=>{
-          dom.console.log(s"get YourInfo $config $id $yourName")
-          startTime = System.currentTimeMillis()
-          myId = id
-          myName = yourName
-          gameConfig = Some(config)
-          thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas))
-          if (timer != 0) {
-            dom.window.clearInterval(timer)
-            thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
-          } else {
-            thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
-          }
-          gameState = GameState.play
-          Shortcut.playMusic("bgm-2")
-          nextFrame = dom.window.requestAnimationFrame(gameRender())
-          firstCome = false
-        }, 3500)
+        dom.console.log(s"get YourInfo $config $id $yourName")
+        startTime = System.currentTimeMillis()
+        myId = id
+        myName = yourName
+        gameConfig = Some(config)
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas))
+        if (timer != 0) {
+          dom.window.clearInterval(timer)
+          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        } else {
+          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        }
+        gameState = GameState.play
+        Shortcut.playMusic("bgm-2")
+        nextFrame = dom.window.requestAnimationFrame(gameRender())
+        firstCome = false
 
       //      case UserEnterRoom(userId, name, _, _) =>
       //        barrage = s"${name}加入了游戏"
