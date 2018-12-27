@@ -75,7 +75,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           Shortcut.playMusic("bgm-2")
           nextFrame = dom.window.requestAnimationFrame(gameRender())
           firstCome = false
-        }, 1500)
+        }, 3500)
 
       //      case UserEnterRoom(userId, name, _, _) =>
       //        barrage = s"${name}加入了游戏"
