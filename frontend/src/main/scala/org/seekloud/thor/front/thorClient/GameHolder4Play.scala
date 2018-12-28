@@ -49,8 +49,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
   def reStart() = {
     //    firstCome = true
-    start(myName, None, None, None) //重启没有验证accessCode
-    //    websocketClient.sendMsg(RestartGame(myName))
+//    start(myName, None, None, None) //重启没有验证accessCode
+        websocketClient.sendMsg(RestartGame(myName))
   }
 
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
@@ -62,6 +62,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         dom.console.log(s"get YourInfo $config $id $yourName")
         startTime = System.currentTimeMillis()
         myId = id
+        mainId = id
         myName = yourName
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas))
@@ -92,23 +93,24 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
         if (e.playerId == myId) {
-          println(s"隔500ms设置gameState为Stop!!!")
-          dom.window.setTimeout(() => gameState = GameState.stop, 350)
-          killer = e.killerName
-          endTime = System.currentTimeMillis()
-          val time = duringTime(endTime - startTime)
-          thorSchemaOpt match {
-            case Some(thorSchema: ThorSchemaClientImpl) =>
-              thorSchema.adventurerMap.get(myId).foreach { my =>
-                thorSchema.killerNew = e.killerName
-                thorSchema.duringTime = time
-                killerName = e.killerName
-                killNum = my.killNum
-                energy = my.energy
-                level = my.level
-              }
-            case None =>
-          }
+          mainId = e.killerId //跟随凶手视角
+//          println(s"隔500ms设置gameState为Stop!!!")
+//          dom.window.setTimeout(() => gameState = GameState.stop, 350)
+//          killer = e.killerName
+//          endTime = System.currentTimeMillis()
+//          val time = duringTime(endTime - startTime)
+//          thorSchemaOpt match {
+//            case Some(thorSchema: ThorSchemaClientImpl) =>
+//              thorSchema.adventurerMap.get(myId).foreach { my =>
+//                thorSchema.killerNew = e.killerName
+//                thorSchema.duringTime = time
+//                killerName = e.killerName
+//                killNum = my.killNum
+//                energy = my.energy
+//                level = my.level
+//              }
+//            case None =>
+//          }
 //          dom.window.cancelAnimationFrame(nextFrame)
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))

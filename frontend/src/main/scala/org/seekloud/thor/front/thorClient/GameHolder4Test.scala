@@ -55,6 +55,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         dom.console.log(s"get YourInfo ${config} ${id} ${name}")
         startTime = System.currentTimeMillis()
         myId = id
+        mainId = id
         myName = name
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas))

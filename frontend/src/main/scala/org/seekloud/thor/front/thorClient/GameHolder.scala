@@ -63,6 +63,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   //  var thorSchema = thorSchemaOpt.get
   protected var myId = "test"
+  protected var mainId = "test" //主视角ID（方便死亡跟随）
   protected var myName = "testName"
   protected var killer = "someone"
   protected var startTime = 0l
@@ -207,8 +208,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 //    println("drawGameByTime")
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
-        if(thorSchema.adventurerMap.contains(myId)){
-          thorSchema.drawGame(offsetTime, canvasUnit, canvasBounds)
+        if(thorSchema.adventurerMap.contains(mainId)){
+          thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
           thorSchema.drawRank(historyRank,false,myId)
           thorSchema.drawRank(currentRank,true,myId)
           thorSchema.drawNetInfo(getNetworkLatency)

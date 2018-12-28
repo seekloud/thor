@@ -32,9 +32,9 @@ with FpsRender{
   val ifTest: Boolean = false
   val preTime: Long = System.currentTimeMillis()
 
-  def drawGame(offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
+  def drawGame(mainId: String, offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
     if(!waitSyncData){
-      adventurerMap.get(myId) match{
+      adventurerMap.get(mainId) match{
         case Some(adventurer) =>
           //保持自己的adventurer在屏幕中央~
           val start = System.currentTimeMillis()

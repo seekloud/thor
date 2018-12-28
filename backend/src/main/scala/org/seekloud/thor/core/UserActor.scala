@@ -416,8 +416,10 @@ object UserActor {
             if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) { //玩家死亡
               log.debug(s"deadmsg $m")
               frontActor ! m
-              roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
-              switchBehavior(ctx, "idle", idle(playerId, userInfo, startTime, frontActor))
+              roomManager ! RoomManager.BeDead(playerId, userInfo.name)
+//              roomManager ! RoomManager.BeDead(playerId, userInfo.name)
+//              switchBehavior(ctx, "idle", idle(playerId, userInfo, startTime, frontActor))
+              Behaviors.same
             } else {
               frontActor ! m
               Behaviors.same
@@ -433,6 +435,12 @@ object UserActor {
             roomManager ! RoomManager.LeftRoom(playerId, userInfo.name)
             ctx.unwatch(frontActor)
             switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
+
+          case JoinRoomSuccess(adventurer, playerId, roomActor, config) =>
+            log.debug(s"$playerId join room success")
+            val ws = YourInfo(config, playerId, userInfo.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            frontActor ! Wrap(ws)
+            Behaviors.same
 
           case unknownMsg =>
             log.debug(s"unknown msg: $unknownMsg")

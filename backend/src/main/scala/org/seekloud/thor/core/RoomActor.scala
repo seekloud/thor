@@ -35,6 +35,8 @@ object RoomActor {
 
   case class LeftRoom(playerId: String, name: String, userList: List[(String, String)]) extends Command
 
+  case class BeDead(playerId: String, name: String, userList: List[(String, String)]) extends Command
+
   case class CreateRobot(botId: String, name: String) extends Command
 
   case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
@@ -107,6 +109,15 @@ object RoomActor {
             thorSchema.leftGame(userId, name)
             subscribersMap.remove(userId)
             dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
+
+            if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
+            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
+
+          case BeDead(userId, name, userList) =>
+            log.debug(s"roomactor - ${userId} die")
+            thorSchema.leftGame(userId, name)
+//            subscribersMap.remove(userId)
+//            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)

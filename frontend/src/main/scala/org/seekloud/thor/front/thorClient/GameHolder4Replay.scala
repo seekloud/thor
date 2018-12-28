@@ -47,6 +47,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         }
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, e.name, canvasBoundary, canvasUnit, preDrawFrame.canvas))
         myId = e.id
+        mainId = e.id
         myName = e.name
         gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()

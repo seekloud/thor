@@ -33,6 +33,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         dom.console.log(s"$e")
         startTime = System.currentTimeMillis()
         myId = e.id
+        mainId = e.id
         myName = e.name
         gameConfig = Some(e.config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas))
