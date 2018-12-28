@@ -45,7 +45,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
           Shortcut.cancelSchedule(timer)
           firstCome = true
         }
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, e.name, canvasBoundary, canvasUnit, preDrawFrame.canvas))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, e.name, canvasBoundary, canvasUnit))
         myId = e.id
         myName = e.name
         gameConfig = Some(e.config)

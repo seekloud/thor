@@ -57,7 +57,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         myId = id
         myName = name
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit))
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())

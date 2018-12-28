@@ -75,12 +75,12 @@ case class ThorSchemaServerImpl(
   }
 
   override protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
-    if(e.playerId.take(5).equals("robot")){
-      if(robotMap.contains(e.playerId)){
-        robotMap(e.playerId) ! RobotActor.RobotDead
-      }
-      robotMap.remove(e.playerId)
-    }
+//    if(e.playerId.take(5).equals("robot")){
+//      if(robotMap.contains(e.playerId)){
+//        robotMap(e.playerId) ! RobotActor.RobotDead
+//      }
+//      robotMap.remove(e.playerId)
+//    }
     super.handleAdventurerAttacked(e)
   }
 
