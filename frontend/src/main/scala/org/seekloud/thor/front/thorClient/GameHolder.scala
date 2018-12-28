@@ -49,7 +49,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected val canvas = drawFrame.createCanvas(canvasName, canvasWidth, canvasHeight)
   protected val ctx = canvas.getCtx
 
-  protected val preDrawFrame = new PreDraw
+//  protected val preDrawFrame = new PreDraw
 
 //  protected val bounds = Point(Boundary.w,Boundary.h)
 

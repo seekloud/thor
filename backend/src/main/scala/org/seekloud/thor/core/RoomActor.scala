@@ -58,7 +58,7 @@ object RoomActor {
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             val watchingMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             //为新房间创建thorSchema
-            implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(181920)
+            implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
 //            ctx.self ! CreateRobot("robot1", "xusiran")
