@@ -276,8 +276,8 @@ trait ThorSchema extends KillInformation {
 
   //后台单独重写
   protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food): Unit = {
-    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
-    addGameEvent(event)
+//    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
+//    addGameEvent(event)
   }
 
   protected def handleGenerateFood(e: GenerateFood): Unit = {

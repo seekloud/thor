@@ -3,7 +3,7 @@ package org.seekloud.thor.core.game
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
 import org.seekloud.thor.core.RoomActor
-import org.seekloud.thor.shared.ptcl.component.{Adventurer, AdventurerState}
+import org.seekloud.thor.shared.ptcl.component.{Adventurer, AdventurerState, Food}
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model.Point
 
@@ -40,5 +40,4 @@ case class AdventurerServer(
       adventurerState.faceDirection, adventurerState.isSpeedUp,adventurerState.killNum, adventurerState.isMove, adventurerState.isUpdateLevel, adventurerState.levelUpExecute,
       adventurerState.mouseStop)
   }
-
 }
