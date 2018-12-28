@@ -90,6 +90,7 @@ trait ThorSchema extends KillInformation {
 
   //处理本帧离开的用户
   protected final def handleUserLeftRoom(e: UserLeftRoom): Unit = {
+//    println(s"[[[${e.playerId} left room]]]")
     adventurerMap.get(e.playerId).foreach(quadTree.remove)
     adventurerMap.remove(e.playerId)
   }
@@ -121,7 +122,7 @@ trait ThorSchema extends KillInformation {
               attackingAdventureMap.get(a.playerId) match {
                 case Some(_) => ()
                 case None =>
-                  attackingAdventureMap.put(a.playerId, 4) //TODO 动画持续帧数 现在是3
+                  attackingAdventureMap.put(a.playerId, 4) //动画持续帧数 现在是3
                   adventurerMap.filter(_._1 == a.playerId).values.foreach {
                     adventurer =>
                       adventurer.isMove = false
