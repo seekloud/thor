@@ -87,7 +87,7 @@ object RoomActor {
       (ctx, msg) =>
         msg match {
           case CreateRobot(botId, name) =>
-            val robot = ctx.spawn(RobotActor.init(thorSchema, botId, name), botId)
+            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, name), botId)
             thorSchema.robotJoinGame(botId, name, robot)
             Behaviors.same
 

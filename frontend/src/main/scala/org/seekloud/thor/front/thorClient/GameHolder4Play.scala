@@ -35,7 +35,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     if (firstCome) {
       addActionListenEvent()
       val url = if (id.isEmpty) Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id.get, name, accessCode.getOrElse("?"), roomId)
-      dom.window.setTimeout(()=>websocketClient.setup(url), 3000)
+//      dom.window.setTimeout(()=>websocketClient.setup(url), 3000)
+      websocketClient.setup(url)
       gameLoop()
     }
     else if (websocketClient.getWsState) {
