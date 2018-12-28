@@ -122,7 +122,12 @@ object RobotActor {
           }
           val random = new Random(System.currentTimeMillis())
           val theta = random.nextFloat() * 2 * math.Pi - math.Pi
-          val direction = thorSchema.adventurerMap(botId).direction
+          val direction = {
+            val tmpDirection = thorSchema.adventurerMap(botId).direction
+            if(tmpDirection > math.Pi) tmpDirection - 2 * math.Pi
+            else if (tmpDirection < math.Pi) tmpDirection + 2 * math.Pi
+            else tmpDirection
+          }.toFloat
           if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
 
             val increment = (1 to (math.abs(theta - direction) / 0.2).toInt).map(_ => if(theta - direction > 0) 0.2f else -0.2f)
