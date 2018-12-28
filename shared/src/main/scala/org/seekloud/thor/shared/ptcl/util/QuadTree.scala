@@ -70,9 +70,6 @@ class QuadTree(bounds: model.Rectangle, level: Int = 0) {
   }
 
 
-  def getObjects: List[ObjectOfGame] = objects
-
-
   /**
     * 将该节点进行划分
     **/

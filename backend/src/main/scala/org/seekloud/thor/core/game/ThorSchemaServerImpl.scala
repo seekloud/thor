@@ -246,7 +246,7 @@ case class ThorSchemaServerImpl(
       def genAdventurer() = {
         val position = genPosition()
         var adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
-        var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
+        //var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
         //        while (adventurer.isIntersectsObject(objects)){
         //          val position = genPosition()
         //          adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
