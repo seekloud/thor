@@ -75,13 +75,13 @@ case class ThorSchemaServerImpl(
   }
 
   override protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
+    super.handleAdventurerAttacked(e)
     if(e.playerId.take(5).equals("robot")){
       if(robotMap.contains(e.playerId)){
         robotMap(e.playerId) ! RobotActor.RobotDead
       }
       robotMap.remove(e.playerId)
     }
-    super.handleAdventurerAttacked(e)
   }
 
   implicit val scoreOrdering = new Ordering[Score] {
@@ -184,7 +184,7 @@ case class ThorSchemaServerImpl(
     val event = UserLeftRoom(userId, name, systemFrame)
     addGameEvent(event)
     //只有平台用户才上传战绩（平台用户的id是guest.../user...）
-    if(userId.length > 5)
+    if(userId.take(5).equals("guest") || userId.take(4).equals("user"))
       RecordMap.get(userId).foreach { a =>
         val record = ESheepRecord(
           playerId = userId,

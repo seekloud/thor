@@ -231,7 +231,9 @@ trait ThorSchema extends KillInformation {
     adventurerMap.get(e.playerId).foreach { adventurer =>
 //      println(s"handle ${e.playerId} attacked")
       killerOpt.foreach(_.killNum += 1)
+      println("-----" + quadTree.getObjects)
       quadTree.remove(adventurer)
+      println("-----" + quadTree.getObjects)
 //      adventurerMap.remove(adventurer.playerId)
       dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
       addKillInfo(e.killerName, adventurer.name)

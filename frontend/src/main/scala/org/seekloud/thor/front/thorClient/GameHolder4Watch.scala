@@ -35,7 +35,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         myId = e.id
         myName = e.name
         gameConfig = Some(e.config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name, canvasBoundary, canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas))
         if (timer != 0) {
           dom.window.clearInterval(timer)
           thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }

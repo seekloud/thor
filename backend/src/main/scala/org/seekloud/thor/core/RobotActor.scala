@@ -153,7 +153,7 @@ object RobotActor {
           ctx.system.scheduler.scheduleOnce(2.seconds){
             thorSchema.robotJoinGame(botId, botName, ctx.self)
           }
-          ctx.system.scheduler.scheduleOnce(5.seconds){
+          ctx.system.scheduler.scheduleOnce(4.seconds){
             timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
             timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 2.seconds)
           }

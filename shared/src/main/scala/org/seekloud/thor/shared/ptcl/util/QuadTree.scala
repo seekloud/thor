@@ -41,6 +41,7 @@ class QuadTree(bounds: model.Rectangle, level: Int = 0) {
     * @param o 物体元素
     * @return 象限id，如果在边界的话，返回None
     **/
+
   def getIndex(o: ObjectOfGame): Option[Int] = {
     val rec = o.getObjectRect()
     val onTop = rec.downRight.y <= center.y
@@ -67,6 +68,9 @@ class QuadTree(bounds: model.Rectangle, level: Int = 0) {
       None
     }
   }
+
+
+  def getObjects: List[ObjectOfGame] = objects
 
 
   /**

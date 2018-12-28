@@ -138,7 +138,6 @@ object RoomActor {
               }
             }
 
-            val thorSchemaData = thorSchema.getThorSchemaState()
             if (tickCount % 40 == 5) {
               //生成食物+同步全量adventurer数据+新生成的食物
               val newFood = thorSchema.genFood(25)
@@ -155,6 +154,7 @@ object RoomActor {
             newPlayer.foreach {
               //为新用户分发全量数据
               player =>
+                val thorSchemaData = thorSchema.getThorSchemaState()
                 val actor = thorSchema.getUserActor4WatchGameList(player._1)
                 subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)
