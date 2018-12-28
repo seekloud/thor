@@ -91,7 +91,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
         if (e.playerId == myId) {
-          println(s"隔500ms设置gameState为Stop!!!")
+//          println(s"隔500ms设置gameState为Stop!!!")
           dom.window.setTimeout(() => gameState = GameState.stop, 350)
           killer = e.killerName
           endTime = System.currentTimeMillis()
