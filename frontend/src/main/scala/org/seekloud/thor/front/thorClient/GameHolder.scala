@@ -102,9 +102,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
     drawGameByTime(offsetTime, canvasUnit, canvasBounds)
-    if(gameState == GameState.stop && thorSchemaOpt.nonEmpty)
-      if (!thorSchemaOpt.get.adventurerMap.contains(myId)) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
-      else gameState = GameState.play
+    if(gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
     nextFrame = dom.window.requestAnimationFrame(gameRender())
   }
 
