@@ -274,9 +274,6 @@ case class ThorSchemaServerImpl(
     justJoinBot.foreach {
       case (botId, name, ref) =>
         val adventurer = generateAdventurer(botId, name)
-//        val event = UserEnterRoom(botId, name, adventurer.getAdventurerState, systemFrame)
-//        addGameEvent(event)
-//        RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
         robotMap.put(botId, ref)
         adventurerMap.put(botId, adventurer)
         quadTree.insert(adventurer)
