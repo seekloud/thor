@@ -68,6 +68,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas))
         if (timer != 0) dom.window.clearInterval(timer)
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        if (nextFrame != 0 ) dom.window.cancelAnimationFrame(nextFrame)
 
         gameState = GameState.play
         Shortcut.playMusic("bgm-2")
