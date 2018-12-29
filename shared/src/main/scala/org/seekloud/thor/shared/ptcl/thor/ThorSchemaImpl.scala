@@ -29,7 +29,7 @@ class ThorSchemaImpl(
 
   private val esRecoverSupport: Boolean = true
 
-  private val uncheckedActionMap = mutable.HashMap[Int, Long]() //serinum -> frame
+  private val uncheckedActionMap = mutable.HashMap[Int, Int]() //serinum -> frame
 
   private var thorSchemaStateOpt: Option[ThorSchemaState] = None
 

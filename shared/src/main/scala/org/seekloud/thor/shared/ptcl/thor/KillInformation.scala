@@ -6,7 +6,7 @@ package org.seekloud.thor.shared.ptcl.thor
   * Time: 11:58
   */
 trait KillInformation { this: ThorSchema =>
-  private var killInfoList = List[(String,String,Long)]() //killerName,killedName, startTimer
+  private var killInfoList = List[(String,String,Int)]() //killerName,killedName, startTimer
   private val maxDisplaySize = 5
   private val displayDuration = 3 //s
 
@@ -23,12 +23,12 @@ trait KillInformation { this: ThorSchema =>
     killInfoList = killInfoList.filterNot(_._3 + displayFrameNum < this.systemFrame)
   }
 
-  protected def getDisplayKillInfo():List[(String,String,Long)] = {
+  protected def getDisplayKillInfo():List[(String,String,Int)] = {
     val curDisplayNum = math.min(maxDisplaySize,killInfoList.size)
     killInfoList.take(curDisplayNum)
   }
 
-  protected def removeKillInfoByRollback(frame:Long) = {
+  protected def removeKillInfoByRollback(frame:Int) = {
     killInfoList = killInfoList.filterNot(_._3 >= frame)
   }
 

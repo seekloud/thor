@@ -17,7 +17,7 @@ import scala.collection.mutable
   * Time: 16:30
   */
 case class ThorSchemaState(
-  f: Long,
+  f: Int,
   adventurer: List[AdventurerState],
   food: List[FoodState],
   isIncrement: Boolean = false
@@ -37,18 +37,18 @@ trait ThorSchema extends KillInformation {
 
   var playerId = ""
 
-  var systemFrame: Long = 0L //系统帧数
+  var systemFrame: Int = 0 //系统帧数
 
   /*元素*/
   var adventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
   val tmpAdventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
-  var foodMap = mutable.HashMap[Long, Food]() // foodId -> food
-  val tmpFoodMap = mutable.HashMap[Long, Food]() // foodId -> food
+  var foodMap = mutable.HashMap[Int, Food]() // foodId -> food
+  val tmpFoodMap = mutable.HashMap[Int, Food]() // foodId -> food
 
   /*事件*/
-  protected val gameEventMap = mutable.HashMap[Long, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
-  protected val actionEventMap = mutable.HashMap[Long, List[UserActionEvent]]() //frame -> List[UserActionEvent]
-  protected val myAdventurerAction = mutable.HashMap[Long, List[UserActionEvent]]()
+  protected val gameEventMap = mutable.HashMap[Int, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
+  protected val actionEventMap = mutable.HashMap[Int, List[UserActionEvent]]() //frame -> List[UserActionEvent]
+  protected val myAdventurerAction = mutable.HashMap[Int, List[UserActionEvent]]()
 
   protected val attackingAdventureMap = mutable.HashMap[String, Int]()
   //playerId -> 攻击执行程度
@@ -176,12 +176,12 @@ trait ThorSchema extends KillInformation {
     }
   }
 
-  protected def addGameEvents(frame: Long, events: List[GameEvent], actionEvents: List[UserActionEvent]): Unit = {
+  protected def addGameEvents(frame: Int, events: List[GameEvent], actionEvents: List[UserActionEvent]): Unit = {
     gameEventMap.put(frame, events)
     actionEventMap.put(frame, actionEvents)
   }
 
-  def removePreEvent(frame: Long, playerId: String, serialNum: Int): Unit = {
+  def removePreEvent(frame: Int, playerId: String, serialNum: Int): Unit = {
     actionEventMap.get(frame).foreach { actions =>
       actionEventMap.put(frame, actions.filterNot(t => t.playerId == playerId && t.serialNum == serialNum))
     }
