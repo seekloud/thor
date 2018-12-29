@@ -87,7 +87,6 @@ trait BackgroundClient {
 
 
   def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit ={
-    println("drawGameStop")
     ctx.save()
     ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left")
@@ -111,7 +110,7 @@ trait BackgroundClient {
     ctx.fillText(s"You Dead,Killer is ${killerName.take(5)} ", window.x * 0.4, window.y * 0.48)
     ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
     ctx.setFont("Comic Sans Ms", baseFont * 24)
-    ctx.setFill("#000000")
+    ctx.setFill("#FFFFFF")
     ctx.fillText("Press space to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)
     ctx.restore()
   }
