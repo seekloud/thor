@@ -87,6 +87,7 @@ trait BackgroundClient {
 
 
   def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit ={
+    println("drawGameStop")
     ctx.save()
     ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left")
