@@ -117,7 +117,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
       canvasBounds = canvasBoundary / canvasUnit
       canvas.setWidth(canvasWidth)
       canvas.setHeight(canvasHeight)
-      println(s"reSize!!!!!!!!!! canvasUnit:$canvasUnit")
+//      println(s"reSize!!!!!!!!!! canvasUnit:$canvasUnit")
       thorSchemaOpt.foreach(_.updateSize(canvasBoundary, canvasUnit))
     }
   }
