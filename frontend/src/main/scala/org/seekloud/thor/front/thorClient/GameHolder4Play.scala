@@ -79,22 +79,24 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         println("attack!!!!!!!!!!!!!" + e)
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
-        if (e.playerId == myId) {
+        if (e.playerId == mainId) {
           mainId = e.killerId //跟随凶手视角
-          gameState = GameState.stop
-          killer = e.killerName
-          endTime = System.currentTimeMillis()
-          thorSchemaOpt match {
-            case Some(thorSchema: ThorSchemaClientImpl) =>
-              thorSchema.adventurerMap.get(myId).foreach { my =>
-                thorSchema.killerNew = e.killerName
-                thorSchema.duringTime = duringTime(endTime - startTime)
-                killerName = e.killerName
-                killNum = my.killNum
-                energy = my.energy
-                level = my.level
-              }
-            case None =>
+          if(e.playerId == myId){
+            gameState = GameState.stop
+            killer = e.killerName
+            endTime = System.currentTimeMillis()
+            thorSchemaOpt match {
+              case Some(thorSchema: ThorSchemaClientImpl) =>
+                thorSchema.adventurerMap.get(myId).foreach { my =>
+                  thorSchema.killerNew = e.killerName
+                  thorSchema.duringTime = duringTime(endTime - startTime)
+                  killerName = e.killerName
+                  killNum = my.killNum
+                  energy = my.energy
+                  level = my.level
+                }
+              case None =>
+            }
           }
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
