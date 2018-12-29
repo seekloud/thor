@@ -24,7 +24,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.setTextAlign("center")
     ctx.setFont("Comic Sans Ms", 36)
     ctx.setTextBaseLine("top")
-    ctx.fillText(adventurer.level.toString, barLeft + 32, barTop + 8)
+    ctx.fillText(adventurer.level.toString, barLeft + 32, barTop + 18)
     ctx.restore()
 
     //画能量条进度

@@ -66,27 +66,14 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         myName = yourName
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas))
-        if (timer != 0) {
-          dom.window.clearInterval(timer)
-          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
-        } else {
-          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
-        }
+        if (timer != 0) dom.window.clearInterval(timer)
+        thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+
         gameState = GameState.play
         Shortcut.playMusic("bgm-2")
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
-      //      case UserEnterRoom(userId, name, _, _) =>
-      //        barrage = s"${name}加入了游戏"
-      //        barrageTime = 300
-      //        println(s"222222222222")
-      //
-      //      case UserLeftRoom(userId, name, _) =>
-      //        barrage = s"${name}离开了游戏"
-      //        barrageTime = 300
-      //        println(s"user left $name")
-      //        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
       case e: BeAttacked =>
         println("attack!!!!!!!!!!!!!" + e)
@@ -94,24 +81,21 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         barrageTime = 300
         if (e.playerId == myId) {
           mainId = e.killerId //跟随凶手视角
-//          println(s"隔500ms设置gameState为Stop!!!")
-//          dom.window.setTimeout(() => gameState = GameState.stop, 350)
-//          killer = e.killerName
-//          endTime = System.currentTimeMillis()
-//          val time = duringTime(endTime - startTime)
-//          thorSchemaOpt match {
-//            case Some(thorSchema: ThorSchemaClientImpl) =>
-//              thorSchema.adventurerMap.get(myId).foreach { my =>
-//                thorSchema.killerNew = e.killerName
-//                thorSchema.duringTime = time
-//                killerName = e.killerName
-//                killNum = my.killNum
-//                energy = my.energy
-//                level = my.level
-//              }
-//            case None =>
-//          }
-//          dom.window.cancelAnimationFrame(nextFrame)
+          gameState = GameState.stop
+          killer = e.killerName
+          endTime = System.currentTimeMillis()
+          thorSchemaOpt match {
+            case Some(thorSchema: ThorSchemaClientImpl) =>
+              thorSchema.adventurerMap.get(myId).foreach { my =>
+                thorSchema.killerNew = e.killerName
+                thorSchema.duringTime = duringTime(endTime - startTime)
+                killerName = e.killerName
+                killNum = my.killNum
+                energy = my.energy
+                level = my.level
+              }
+            case None =>
+          }
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 

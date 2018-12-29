@@ -37,7 +37,7 @@ trait BackgroundClient {
     ctx.save()
     ctx.setTextBaseLine("top")
     ctx.setFont("Comic Sans MS", baseFont * 16)
-    ctx.fillText(str, x, (lineNum + lineBegin - 1) * window.x * 0.01)
+    ctx.fillText(str, x, (lineNum + lineBegin) * window.x * 0.01)
     ctx.restore()
   }
 
@@ -86,7 +86,36 @@ trait BackgroundClient {
   private val playAgain = drawFrame.createImage("/img/play-again.png")
 
 
-  def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit = {
+  def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit ={
+    ctx.save()
+    ctx.setFill("rgb(250, 250, 250)")
+    ctx.setTextAlign("left")
+    ctx.setFont("Helvetica", baseFont * 26)
+    ctx.fillText("kills", window.x * 0.38, window.y * 0.32, window.x * 0.15)
+    ctx.fillText("score", window.x * 0.475, window.y * 0.32, window.x * 0.15)
+    ctx.fillText("time", window.x * 0.58, window.y * 0.32, window.x * 0.15)
+    ctx.setFont("Helvetica", baseFont * 22)
+    ctx.fillText(killNum.toString, window.x * 0.39, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(energy.toString, window.x * 0.49, window.y * 0.4, window.x * 0.15)
+    ctx.fillText(this.duringTime, window.x * 0.57, window.y * 0.4, window.x * 0.15)
+    ctx.save()
+    ctx.setStrokeStyle("#ffff00")
+    ctx.moveTo(window.x * 0.36, window.y * 0.45)
+    ctx.lineTo(window.x * 0.64, window.y * 0.45)
+    ctx.stroke()
+    ctx.restore()
+    ctx.setTextBaseLine("top")
+    ctx.setFont("Comic Sans Ms", baseFont * 26)
+    ctx.setFill("#ffa400")
+    ctx.fillText(s"You Dead,Killer is ${killerName.take(5)} ", window.x * 0.4, window.y * 0.48)
+    ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
+    ctx.setFont("Comic Sans Ms", baseFont * 24)
+    ctx.setFill("#000000")
+    ctx.fillText("Press space to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)
+    ctx.restore()
+  }
+
+  def drawGameStop1(killerName: String, killNum: Int, energy: Int, level: Int): Unit = {
     ctx.save()
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)

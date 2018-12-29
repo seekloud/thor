@@ -102,6 +102,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
     drawGameByTime(offsetTime, canvasUnit, canvasBounds)
+    if(gameState == GameState.stop && thorSchemaOpt.nonEmpty)
+      if (!thorSchemaOpt.get.adventurerMap.contains(myId)) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
+      else gameState = GameState.play
     nextFrame = dom.window.requestAnimationFrame(gameRender())
   }
 
@@ -173,22 +176,17 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         println(s"GameState.stop------------")
         thorSchemaOpt.foreach{ _.update()}
         logicFrameTime = System.currentTimeMillis()
-        if (thorSchemaOpt.nonEmpty) {
-          if (thorSchemaOpt.get.dyingAdventurerMap.contains(myId) || !thorSchemaOpt.get.adventurerMap.contains(myId)) {
-            Shortcut.pauseMusic("bgm-2")
-            Shortcut.refreshMusic("bgm-2")
-            dom.window.cancelAnimationFrame(nextFrame)
-            thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
-          } else {
-            gameState = GameState.play
-          }
-        }
-//        dom.window.setTimeout(() => {
-//          dom.window.cancelAnimationFrame(nextFrame)
-//          thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
-//        }, 5000)
-
-//        dom.window.clearInterval(timer)
+        ping()
+//        if (thorSchemaOpt.nonEmpty) {
+//          if (!thorSchemaOpt.get.adventurerMap.contains(myId)) {
+//            Shortcut.pauseMusic("bgm-2")
+//            Shortcut.refreshMusic("bgm-2")
+////            dom.window.cancelAnimationFrame(nextFrame)
+//            thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
+//          } else {
+//            gameState = GameState.play
+//          }
+//        }
       case GameState.replayLoading =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.play =>
