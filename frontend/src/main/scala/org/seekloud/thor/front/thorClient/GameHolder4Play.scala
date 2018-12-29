@@ -165,7 +165,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
-            println("mouse down")
+//            println("mouse down")
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
@@ -215,7 +215,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (!thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
             if (e.keyCode == KeyCode.Space) {
-              println("key space down")
+//              println("key space down")
               reStart()
               e.preventDefault()
             }
