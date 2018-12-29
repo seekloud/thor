@@ -72,6 +72,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         } else {
           thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         }
+        if(nextFrame != 0) dom.window.cancelAnimationFrame(nextFrame) // TODO 停止上次的绘画
         gameState = GameState.play
         Shortcut.playMusic("bgm-2")
         nextFrame = dom.window.requestAnimationFrame(gameRender())
@@ -89,7 +90,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       //        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
       case e: BeAttacked =>
-        println("attack!!!!!!!!!!!!!" + e)
+//        println("attack!!!!!!!!!!!!!" + e)
         barrage = s"${e.killerName}杀死了${e.name}"
         barrageTime = 300
         if (e.playerId == myId) {
@@ -181,7 +182,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
-            println("mouse down")
+//            println("mouse down")
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
@@ -231,7 +232,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (!thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
             if (e.keyCode == KeyCode.Space) {
-              println("key space down")
+//              println("key space down")
               reStart()
               e.preventDefault()
             }
