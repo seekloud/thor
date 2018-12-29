@@ -219,7 +219,7 @@ trait ThorSchema extends KillInformation {
       if (dying._2._2 <= 0) {
         println(s"remove adventurer: ${dying._1}")
         dyingAdventurerMap.remove(dying._1)
-        adventurerMap.remove(dying._1)
+//        adventurerMap.remove(dying._1)
       } else {
 //        println(s"${dying._1} dying...")
         dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 - 1))
@@ -233,7 +233,7 @@ trait ThorSchema extends KillInformation {
 //      println(s"handle ${e.playerId} attacked")
       killerOpt.foreach(_.killNum += 1)
       quadTree.remove(adventurer)
-//      adventurerMap.remove(adventurer.playerId)
+      adventurerMap.remove(adventurer.playerId)
       dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
       addKillInfo(e.killerName, adventurer.name)
     }

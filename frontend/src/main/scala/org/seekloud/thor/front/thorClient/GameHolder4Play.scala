@@ -146,7 +146,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
+          if (thorSchema.adventurerMap.contains(myId)) {
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             val direction = thorSchema.adventurerMap(myId).direction
             if (math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
@@ -167,7 +167,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmousedown = { (e: dom.MouseEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
+          if (thorSchema.adventurerMap.contains(myId)) {
 //            println("mouse down")
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -201,7 +201,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmouseup = { (e: dom.MouseEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId))
+          if (thorSchema.adventurerMap.contains(myId))
             if (e.button == 2) { //右键
               val event = MouseClickUpRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
@@ -216,7 +216,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onkeydown = { (e: dom.KeyboardEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (!thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
+          if (!thorSchema.adventurerMap.contains(myId)) {
             if (e.keyCode == KeyCode.Space) {
 //              println("key space down")
               reStart()
