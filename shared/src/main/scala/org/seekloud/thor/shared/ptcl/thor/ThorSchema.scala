@@ -116,7 +116,7 @@ trait ThorSchema extends KillInformation {
         case Some(adventurer) =>
           action match {
             case a: MouseMove =>
-              adventurer.setMoveDirection(a.direction, a.mouseDistance)
+              adventurer.setMoveDirection(a.direction, a.mouseDistance, attackingAdventureMap.contains(a.playerId))
               adventurer.setFaceDirection(a.direction)
             case a: MouseClickDownLeft =>
               attackingAdventureMap.get(a.playerId) match {
