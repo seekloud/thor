@@ -112,26 +112,25 @@ object RobotActor {
       msg match {
         case AutoMouseMove =>
           def sendBackendMove(thetaList: List[Float], num: Int): Unit = {
-            val data = MouseMove(botId, thetaList(num), 64f, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
-//            thorSchema.receiveUserAction(data)
+            val data = MouseMove(botId, thetaList(num), 128f, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
             roomActor ! RoomActor.WsMessage(botId, data)
             if(num < thetaList.length - 1)
               ctx.system.scheduler.scheduleOnce(50.millis){
                 sendBackendMove(thetaList, num + 1)
               }
           }
-          val random = new Random(System.currentTimeMillis())
+          val random = new Random()
           val theta = random.nextFloat() * 2 * math.Pi - math.Pi
-          val direction = {
-            val tmpDirection = thorSchema.adventurerMap(botId).direction
-            if(tmpDirection > math.Pi) tmpDirection - 2 * math.Pi
-            else if (tmpDirection < math.Pi) tmpDirection + 2 * math.Pi
-            else tmpDirection
-          }.toFloat
+          val direction = thorSchema.adventurerMap(botId).direction
           if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
 
-            val increment = (1 to (math.abs(theta - direction) / 0.2).toInt).map(_ => if(theta - direction > 0) 0.2f else -0.2f)
-            val thetaList = increment.scanLeft(direction)(_ + _)
+            val tDirection = {
+              if(theta - direction > math.Pi) theta - direction - 2 * math.Pi
+              else if(theta - direction < -math.Pi) theta - direction + 2 * math.Pi
+              else theta - direction
+            }
+            val increment = (1 to (math.abs(tDirection) / 0.2).toInt).map(_ => if(tDirection > 0) 0.2f else -0.2f)
+            val thetaList = increment.scanLeft(direction)(_ + _).map(t => if(t > math.Pi) t - 2 * math.Pi.toFloat else if(t < -math.Pi) t + 2 * math.Pi.toFloat else t)
 
             sendBackendMove(thetaList.toList, 0)
 
