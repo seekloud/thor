@@ -75,6 +75,8 @@ class MiddleContextInJs extends MiddleContext {
 
   override def beginPath() = context.beginPath()
 
+  override def closePath() = context.closePath()
+
   override def lineTo(x1: Double, y1: Double) = context.lineTo(x1, y1)
 
   override def stroke() = context.stroke()

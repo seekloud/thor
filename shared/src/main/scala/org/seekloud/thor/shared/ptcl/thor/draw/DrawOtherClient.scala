@@ -55,6 +55,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.lineWidth(config.getWeaponLengthByLevel(adventurer.level) * canvasUnit * 0.85)
     ctx.arc(x * canvasUnit, y * canvasUnit, rx + config.getWeaponLengthByLevel(adventurer.level) / 2 * canvasUnit * 0.85, sA, eA, false)
     ctx.stroke()
+    ctx.closePath()
     ctx.restore()
   }
 }

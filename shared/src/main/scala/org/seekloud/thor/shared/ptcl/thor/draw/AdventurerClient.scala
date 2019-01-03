@@ -58,8 +58,17 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
         //画人物
         //      val drawX = if(systemFrame%6 < 3) dx * 0.98.toFloat else dx
+        if(ifTest){
+          ctx.save()
+          ctx.setFill("#FF0000")
+          ctx.beginPath()
+          ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit, 0, 2*Math.PI, false)
+          ctx.closePath()
+          ctx.fill()
+          ctx.restore()
+        }
         CanvasUtils.rotateImage(drawFrame, ctx, s"/img/Adventurer-${adventurer.level}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction)
-
+//        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
         //画武器
         var step = 3
         var isAttacking = false
@@ -70,10 +79,10 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
           case _ =>
         }
         val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
-        val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 + 1 / 12 * math.Pi).toFloat //武器旋转角度
+        val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 4 + 1/3 * math.Pi ).toFloat //武器旋转角度
         val gap: Float = 1 // 武器离人物的距离
         val move: Float = if (isAttacking) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
-        val weaponPosition = Point(sx, sy) + Point(-r - gap.toFloat, gap + weaponLength / 2).rotate(angle + move - math.Pi.toFloat / 2)
+        val weaponPosition = Point(sx, sy) + Point(-r - gap.toFloat, gap + weaponLength / 2).rotate(angle + move - math.Pi.toFloat * 5 / 8)
 
         CanvasUtils.rotateImage(drawFrame, ctx, s"/img/weapon-${adventurer.level}.png", weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move)
 
