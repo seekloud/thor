@@ -14,6 +14,7 @@ object Routes {
   val base = "/thor"
 
   val getPsw = base + "/getTestPsw"
+  val getVersion = base + "/getVersion"
 
   def wsJoinGameUrl(name:String) = base + s"/game/join?name=$name"
 

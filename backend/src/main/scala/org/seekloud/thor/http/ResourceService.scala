@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.headers.`Cache-Control`
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
+import org.seekloud.thor.common.AppSettings
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -29,13 +30,16 @@ trait ResourceService {
 
   val log: LoggingAdapter
 
-
-  private val resources = {
+  private val htmlResources = {
     pathPrefix("html") {
       extractUnmatchedPath { path =>
         getFromResourceDirectory("html")
       }
-    } ~ pathPrefix("css") {
+    }
+  }
+
+  private val resources = {
+    pathPrefix("css") {
       extractUnmatchedPath { path =>
         getFromResourceDirectory("css")
       }
@@ -45,7 +49,7 @@ trait ResourceService {
         getFromResourceDirectory("js")
       }
     } ~
-    pathPrefix("sjsout") {
+    pathPrefix(s"sjsout-${AppSettings.version}") {
       extractUnmatchedPath { path =>
         getFromResourceDirectory("sjsout")
       }
@@ -64,6 +68,8 @@ trait ResourceService {
   def resourceRoutes: Route = (pathPrefix("static") & get) {
     mapResponseHeaders { headers => `Cache-Control`(`public`, `max-age`(cacheSeconds)) +: headers } {
       encodeResponse(resources)
+    } ~ mapResponseHeaders { headers => `Cache-Control`(`public`, `max-age`(0)) +: headers } {
+      encodeResponse(htmlResources)
     }
   }
 
