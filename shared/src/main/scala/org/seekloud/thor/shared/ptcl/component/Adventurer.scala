@@ -63,14 +63,14 @@ trait Adventurer extends CircleObjectOfGame {
     val wTheta = {
       val myDir = this.direction
       if (myDir - Theta > math.Pi) myDir - Theta - 2 * math.Pi
-      else if(myDir - Theta < math.Pi) myDir - Theta + 2 * math.Pi
+      else if(myDir - Theta < -math.Pi) myDir - Theta + 2 * math.Pi
       else myDir - Theta
     }
     //OTheta: 对方(人)和刀的夹角
     val oTheta = {
       val otherDir = o.position.getTheta(this.position)
       if (otherDir - wTheta > math.Pi) otherDir - wTheta - 2 * math.Pi
-      else if(otherDir - wTheta < math.Pi) otherDir - wTheta + 2 * math.Pi
+      else if(otherDir - wTheta < -math.Pi) otherDir - wTheta + 2 * math.Pi
       else otherDir - wTheta
     }
     this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(level) + o.radius) && math.abs(oTheta) < scala.math.Pi * (1.0 / 9.0)
