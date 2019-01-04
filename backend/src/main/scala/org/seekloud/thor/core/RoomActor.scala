@@ -68,6 +68,7 @@ object RoomActor {
             ctx.self ! CreateRobot("robot3", "瞌睡虫")
             ctx.self ! CreateRobot("robot4", "开心果")
             ctx.self ! CreateRobot("robot5", "迷糊鬼")
+            ctx.self ! CreateRobot("robot6", "搞事精")
 
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
