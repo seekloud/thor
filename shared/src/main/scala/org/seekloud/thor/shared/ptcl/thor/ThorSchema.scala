@@ -197,7 +197,8 @@ trait ThorSchema extends KillInformation {
   protected final def handleAdventurerAttackingNow(): Unit = {
     attackingAdventureMap.foreach { attacking =>
       adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
-        val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
+        val adventurerMaybeAttacked = adventurerMap.filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < 80).values
+//        println(s"%%%%%${adventurerMaybeAttacked.map(_.name)}")
         adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer))(config))
       }
 

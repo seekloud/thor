@@ -73,6 +73,7 @@ trait Adventurer extends CircleObjectOfGame {
       else if(otherDir - wTheta < -math.Pi) otherDir - wTheta + 2 * math.Pi
       else otherDir - wTheta
     }
+//    println(s"+++++++$oTheta,+++${this.position.distance(o.position)},(${this.radius}, ${config.getWeaponLengthByLevel(level)}, ${o.radius})")
     this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(level) + o.radius) && math.abs(oTheta) < scala.math.Pi * (1.0 / 9.0)
   }
 

@@ -63,8 +63,11 @@ object RoomActor {
             implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
-            ctx.self ! CreateRobot("robot1", "robot 1st")
-            ctx.self ! CreateRobot("robot2", "robot 2nd")
+            ctx.self ! CreateRobot("robot1", "万事通")
+            ctx.self ! CreateRobot("robot2", "害羞鬼")
+            ctx.self ! CreateRobot("robot3", "瞌睡虫")
+            ctx.self ! CreateRobot("robot4", "开心果")
+            ctx.self ! CreateRobot("robot5", "迷糊鬼")
 
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
