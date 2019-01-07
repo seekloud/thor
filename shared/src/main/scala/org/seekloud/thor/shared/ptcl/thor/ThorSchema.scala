@@ -122,7 +122,7 @@ trait ThorSchema extends KillInformation {
               attackingAdventureMap.get(a.playerId) match {
                 case Some(_) => ()
                 case None =>
-                  attackingAdventureMap.put(a.playerId, 4) //动画持续帧数 现在是3
+                  attackingAdventureMap.put(a.playerId, 3) //动画持续帧数 现在是3
                   adventurerMap.filter(_._1 == a.playerId).values.foreach {
                     adventurer =>
                       adventurer.isMove = false
@@ -197,8 +197,8 @@ trait ThorSchema extends KillInformation {
   protected final def handleAdventurerAttackingNow(): Unit = {
     attackingAdventureMap.foreach { attacking =>
       adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
-        val adventurerMaybeAttacked = adventurerMap.filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < 80).values
-        println(s"潜在攻击列表${adventurerMaybeAttacked.map(_.name)}")
+        val adventurerMaybeAttacked = adventurerMap.filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < adventurer.radius + config.getWeaponLengthByLevel(adventurer.level) + a._2.radius).values
+//        println(s"潜在攻击列表${adventurerMaybeAttacked.map(_.name)}")
         adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer))(config))
       }
 
