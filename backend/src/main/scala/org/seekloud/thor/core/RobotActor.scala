@@ -92,7 +92,7 @@ object RobotActor {
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       val actionSerialNumGenerator = new AtomicInteger(0)
       Behaviors.withTimers[Command] { implicit timer =>
-        timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
+//        timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
 //        timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
         switchBehavior(ctx, "idle", idle(roomActor, thorSchema, botId, botName, actionSerialNumGenerator))
       }
@@ -165,7 +165,7 @@ object RobotActor {
           }
           ctx.system.scheduler.scheduleOnce(4.seconds){
 //            timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
-            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 2.seconds)
+//            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 2.seconds)
           }
           Behaviors.same
 

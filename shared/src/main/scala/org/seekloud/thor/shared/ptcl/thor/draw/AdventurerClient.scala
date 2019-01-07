@@ -70,22 +70,20 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
         CanvasUtils.rotateImage(drawFrame, ctx, s"/img/Adventurer-${adventurer.level}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction)
 //        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
         //画武器
-        var step = 3
+        var step:Float = 3
         var isAttacking = false
         attackingAdventureMap.filterNot(_._2 < 0).get(adventurer.playerId) match {
           case Some(s) =>
             step = s
-            if (s != 0) isAttacking = true
+            if(step != 0)isAttacking = true
           case _ =>
         }
         val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
-        val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 4 + 1/3 * math.Pi ).toFloat //武器旋转角度
-        val gap: Float = 1 // 武器离人物的距离
-        val move: Float = if (isAttacking) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
-        val weaponPosition = Point(sx, sy) + Point(-r - gap.toFloat, gap + weaponLength / 2).rotate(angle + move - math.Pi.toFloat * 5 / 8)
-
+        val angle = adventurer.getAdventurerState.direction - math.Pi.toFloat * (2*step + 3) / 9  //武器旋转角度
+        val gap: Float = 0 // 武器离人物的距离
+        val move: Float = if (isAttacking) math.Pi.toFloat * 2 / 9 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
+        val weaponPosition = Point(sx, sy) + Point(weaponLength / 2, r).rotate(angle + move)
         CanvasUtils.rotateImage(drawFrame, ctx, s"/img/weapon-${adventurer.level}.png", weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move)
-
 
         //用户昵称
         ctx.setFill("#ffffff")
