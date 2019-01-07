@@ -73,8 +73,10 @@ trait Adventurer extends CircleObjectOfGame {
       else if(otherDir - wTheta < -math.Pi) otherDir - wTheta + 2 * math.Pi
       else otherDir - wTheta
     }
-    println(s"相对角$oTheta,距离${this.position.distance(o.position)},(自己，刀，对方):(${this.radius}, ${config.getWeaponLengthByLevel(level)}, ${o.radius})")
-    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(level) + o.radius) && math.abs(oTheta) < scala.math.Pi * (1.0 / 9.0)
+//    println(s"相对角$oTheta,距离${this.position.distance(o.position)},(自己，刀，对方):(${this.radius}, ${config.getWeaponLengthByLevel(level)}, ${o.radius})")
+    println(s"相对角$oTheta,距离${this.position.distance(o.position)},(自己，刀，对方):(${config.getAdventurerRadiusByLevel(level)}, ${config.getWeaponLengthByLevel(level)}, ${config.getAdventurerRadiusByLevel(o.getAdventurerState.level)})")
+//    this.position.distance(o.position) < (this.radius + config.getWeaponLengthByLevel(level) + o.radius) && math.abs(oTheta) < scala.math.Pi * (1.0 / 9.0)
+    this.position.distance(o.position) < (config.getAdventurerRadiusByLevel(level) + config.getWeaponLengthByLevel(level) + config.getAdventurerRadiusByLevel(o.getAdventurerState.level)) && math.abs(oTheta) < scala.math.Pi * (1.0 / 9.0)
   }
 
   //判断是否攻击到其他
