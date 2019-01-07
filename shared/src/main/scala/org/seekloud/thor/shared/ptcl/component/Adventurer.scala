@@ -77,18 +77,18 @@ trait Adventurer extends CircleObjectOfGame {
     //获取起始刀线的斜率
     val oSwordSlope = math.tan(oTheta)
     //获取起始刀线的一点
-    val oSwordPoint = Point((math.cos(oTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.x, (math.sin(oTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.y)
+    val oSwordPoint = Point((math.cos(oTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + position.x, (math.sin(oTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + position.y)
     //获取起始刀线的另一点
-    val oSwordPoint2 = Point((math.cos(oTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + oSwordPoint.x, (math.sin(oTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + oSwordPoint.y)
+    val oSwordPoint2 = Point((math.cos(oTheta) * config.getWeaponLengthByLevel(level)).toFloat + oSwordPoint.x, (math.sin(oTheta) * config.getWeaponLengthByLevel(level)).toFloat + oSwordPoint.y)
     //获取起始刀线
     val oSwordSegment = new Segment(oSwordSlope, oSwordPoint)
 //    val oSwordSegment = new Segment(oSwordPoint, oSwordPoint2)
     //获取终止刀线的斜率
     val tSwordSlope = math.tan(tTheta)
     //获取终止刀线的一点
-    val tSwordPoint = Point((math.cos(tTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.x, (math.sin(tTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.y)
+    val tSwordPoint = Point((math.cos(tTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + position.x, (math.sin(tTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + position.y)
     //获取终止刀线的另一点
-    val tSwordPoint2 = Point((math.cos(tTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + tSwordPoint.x, (math.sin(tTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + tSwordPoint.y)
+    val tSwordPoint2 = Point((math.cos(tTheta) * config.getWeaponLengthByLevel(level)).toFloat + tSwordPoint.x, (math.sin(tTheta) * config.getWeaponLengthByLevel(level)).toFloat + tSwordPoint.y)
     //获取终止刀线
     val tSwordSegment = new Segment(tSwordSlope, tSwordPoint)
 //    val tSwordSegment = new Segment(tSwordPoint, tSwordPoint2)
@@ -105,13 +105,6 @@ trait Adventurer extends CircleObjectOfGame {
         !oSwordSegment.directionFromPoint(o.position) && !tSwordSegment.directionFromPoint(o.position)
       case _ => true
     }
-//    println((math.abs(oTheta), math.abs(tTheta)))
-//    println(o.position)
-//    println(oSwordPoint, oSwordPoint2)
-//    println(oSwordSegment.printSegment)
-//    println(tSwordPoint, tSwordPoint2)
-//    println(tSwordSegment.printSegment)
-//    println(pointInShape)
 
     //判断对方是否在边界
     if(pointInShape){

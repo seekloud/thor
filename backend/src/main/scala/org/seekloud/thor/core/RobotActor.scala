@@ -120,14 +120,20 @@ object RobotActor {
               }
           }
           val random = new Random()
-          val theta = thorSchema.adventurerMap(botId).position match{
-            case a if a.x + 20 > thorSchema.boundary.x => random.nextFloat() * math.Pi - 1.5 * math.Pi
-            case b if b.x - 20 < 0 => random.nextFloat() * math.Pi - 0.5 * math.Pi
-            case c if c.y + 20 > thorSchema.boundary.y => - random.nextFloat() * math.Pi
-            case d if d.y - 20 < 0 => random.nextFloat() * math.Pi
-            case _ => random.nextFloat() * 2 * math.Pi - math.Pi
+          val theta = thorSchema.adventurerMap.get(botId) match{
+            case None =>
+              0
+            case Some(adventurer) =>
+              adventurer.position match{
+                case a if a.x + 20 > thorSchema.boundary.x => random.nextFloat() * math.Pi - 1.5 * math.Pi
+                case b if b.x - 20 < 0 => random.nextFloat() * math.Pi - 0.5 * math.Pi
+                case c if c.y + 20 > thorSchema.boundary.y => - random.nextFloat() * math.Pi
+                case d if d.y - 20 < 0 => random.nextFloat() * math.Pi
+                case _ => random.nextFloat() * 2 * math.Pi - math.Pi
+              }
           }
-          val direction = thorSchema.adventurerMap(botId).direction
+          val direction = if(theta == 0) theta.toFloat else thorSchema.adventurerMap(botId).direction
+
           if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
 
             val tDirection = {
