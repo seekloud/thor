@@ -167,7 +167,7 @@ object RobotActor {
           timer.cancel(MouseMoveGoOnKey)
           timer.cancel(MouseLeftDownKey)
           ctx.system.scheduler.scheduleOnce(2.seconds){
-            thorSchema.robotJoinGame(botId, botName, ctx.self)
+            roomActor ! RoomActor.ReliveRobot(botId, botName, ctx.self)
           }
           ctx.system.scheduler.scheduleOnce(4.seconds){
             timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)

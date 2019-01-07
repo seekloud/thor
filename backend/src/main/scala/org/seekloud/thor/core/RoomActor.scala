@@ -39,6 +39,8 @@ object RoomActor {
 
   case class CreateRobot(botId: String, name: String) extends Command
 
+  case class ReliveRobot(botId: String, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
+
   case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
 
   //  case class GetKilled(playerId: String, name: String) extends Command with RoomManager.Command
@@ -67,8 +69,9 @@ object RoomActor {
             ctx.self ! CreateRobot("robot2", "害羞鬼")
             ctx.self ! CreateRobot("robot3", "瞌睡虫")
             ctx.self ! CreateRobot("robot4", "开心果")
-            ctx.self ! CreateRobot("robot5", "迷糊鬼")
+            ctx.self ! CreateRobot("robot5", "迷糊蛋")
             ctx.self ! CreateRobot("robot6", "搞事精")
+            ctx.self ! CreateRobot("robot7", "爱生气")
 
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
@@ -96,6 +99,10 @@ object RoomActor {
           case CreateRobot(botId, name) =>
             val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, name), botId)
             thorSchema.robotJoinGame(botId, name, robot)
+            Behaviors.same
+
+          case ReliveRobot(botId, name, botActor) =>
+            thorSchema.robotJoinGame(botId, name, botActor)
             Behaviors.same
 
           case JoinRoom(roomId, userId, name, userActor) =>
