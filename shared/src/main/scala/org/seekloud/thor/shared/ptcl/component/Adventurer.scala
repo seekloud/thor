@@ -2,7 +2,7 @@ package org.seekloud.thor.shared.ptcl.component
 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model
-import org.seekloud.thor.shared.ptcl.model.{Constants, Point, Rectangle}
+import org.seekloud.thor.shared.ptcl.model.{Constants, Point, Rectangle, Segment}
 import org.seekloud.thor.shared.ptcl.util.QuadTree
 /**
   * User: TangYaruo
@@ -56,7 +56,76 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  //判断扇形区域碰撞,角度为刀的角度
+  //以线段方位判断碰撞,角度为刀的相对角度
+  def isSwordShapeDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig): Boolean ={
+
+    //wTheta: 1帧起始刀的绝对角度
+    val oTheta = {
+      val myDir = this.direction
+      if (myDir - Theta > math.Pi) myDir - Theta - 2 * math.Pi
+      else if(myDir - Theta < -math.Pi) myDir - Theta + 2 * math.Pi
+      else myDir - Theta
+    }
+    //tTheta: 1帧终止刀的绝对角度
+    val tTheta = {
+      val myDir = this.direction
+      if (myDir - Theta + math.Pi / 6.0 > math.Pi) myDir - Theta + math.Pi / 6.0 - 2 * math.Pi
+      else if(myDir - Theta + math.Pi / 6.0 < -math.Pi) myDir - Theta + math.Pi / 6.0 + 2 * math.Pi
+      else myDir - Theta + math.Pi / 6.0
+    }
+
+    //获取起始刀线的斜率
+    val oSwordSlope = math.tan(oTheta)
+    //获取起始刀线的一点
+    val oSwordPoint = Point((math.cos(oTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.x, (math.sin(oTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.y)
+    //获取起始刀线的另一点
+    val oSwordPoint2 = Point((math.cos(oTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + oSwordPoint.x, (math.sin(oTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + oSwordPoint.y)
+    //获取起始刀线
+    val oSwordSegment = new Segment(oSwordSlope, oSwordPoint)
+//    val oSwordSegment = new Segment(oSwordPoint, oSwordPoint2)
+    //获取终止刀线的斜率
+    val tSwordSlope = math.tan(tTheta)
+    //获取终止刀线的一点
+    val tSwordPoint = Point((math.cos(tTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.x, (math.sin(tTheta + 0.5 * math.Pi) * config.getAdventurerRadiusByLevel(level)).toFloat + this.position.y)
+    //获取终止刀线的另一点
+    val tSwordPoint2 = Point((math.cos(tTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + tSwordPoint.x, (math.sin(tTheta) * config.getWeaponLengthByLevel(this.level)).toFloat + tSwordPoint.y)
+    //获取终止刀线
+    val tSwordSegment = new Segment(tSwordSlope, tSwordPoint)
+//    val tSwordSegment = new Segment(tSwordPoint, tSwordPoint2)
+
+    //判断对方是否在范围内
+    val pointInShape = (math.abs(oTheta), math.abs(tTheta)) match{
+      case (a, b) if a < 0.5 * math.Pi && b < 0.5 * math.Pi =>
+        oSwordSegment.directionFromPoint(o.position) && !tSwordSegment.directionFromPoint(o.position)
+      case (a, b) if a < 0.5 * math.Pi && b > 0.5 * math.Pi =>
+        oSwordSegment.directionFromPoint(o.position) && tSwordSegment.directionFromPoint(o.position)
+      case (a, b) if a > 0.5 * math.Pi && b > 0.5 * math.Pi =>
+        !oSwordSegment.directionFromPoint(o.position) && tSwordSegment.directionFromPoint(o.position)
+      case (a, b) if a > 0.5 * math.Pi && b < 0.5 * math.Pi =>
+        !oSwordSegment.directionFromPoint(o.position) && !tSwordSegment.directionFromPoint(o.position)
+      case _ => true
+    }
+//    println((math.abs(oTheta), math.abs(tTheta)))
+//    println(o.position)
+//    println(oSwordPoint, oSwordPoint2)
+//    println(oSwordSegment.printSegment)
+//    println(tSwordPoint, tSwordPoint2)
+//    println(tSwordSegment.printSegment)
+//    println(pointInShape)
+
+    //判断对方是否在边界
+    if(pointInShape){
+      true
+    }
+    else{
+      val distance = oSwordSegment.distanceFromPoint(o.position) < o.radius || tSwordSegment.distanceFromPoint(o.position) < o.radius
+      val oSwordDirection = (o.position.x - oSwordPoint.x) * (oSwordPoint2.x - oSwordPoint.x) + (o.position.y - oSwordPoint.y) * (oSwordPoint2.y - oSwordPoint.y) > 0
+      val tSwordDirection = (o.position.x - tSwordPoint.x) * (tSwordPoint2.x - tSwordPoint.x) + (o.position.y - tSwordPoint.y) * (tSwordPoint2.y - tSwordPoint.y) > 0
+      distance && (oSwordDirection || tSwordDirection)
+    }
+  }
+
+  //判断扇形区域碰撞,角度为刀的相对角度
   def isSectorDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig) = {
 
     //wTheta: 刀的绝对角度
@@ -82,7 +151,7 @@ trait Adventurer extends CircleObjectOfGame {
   //判断是否攻击到其他
   def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit)(implicit config: ThorGameConfig): Unit = {
     //    println(s"attacking: ${p.playerId},$attackingStep")
-    if (isSectorDuang(scala.math.Pi * 1.0 / 6.0 * attackingStep - 0 , p)){
+    if (isSwordShapeDuang(math.Pi * 1.0 / 6.0 * attackingStep + 0.5 * math.Pi, p)){
       println(s"${p.playerId} is attacked")
       attackedCallback(p)
     }
@@ -93,7 +162,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def attacking(killedLevel: Byte)(implicit config: ThorGameConfig): Unit ={
-    println(s"killing $killedLevel Level adventurer")
+//    println(s"killing $killedLevel Level adventurer")
     this.energy += config.getEnergyByKillingAdventurerLevel(killedLevel)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
       updateLevel
