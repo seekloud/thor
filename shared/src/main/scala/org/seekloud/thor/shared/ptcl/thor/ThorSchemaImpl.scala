@@ -113,7 +113,7 @@ class ThorSchemaImpl(
   protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState) = {
     val curFrame = systemFrame
     val startTime = System.currentTimeMillis()
-    (curFrame until thorSchemaSate.f).foreach { _ =>
+    (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { _ =>
       super.update()
       if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
     }
