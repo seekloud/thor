@@ -256,6 +256,7 @@ trait Adventurer extends CircleObjectOfGame {
 
       val horizontalDistance = moveDistance.copy(y = 0)
       val verticalDistance = moveDistance.copy(x = 0)
+      val radius = thorGameConfig.getAdventurerRadiusByLevel(this.level)
       List(horizontalDistance, verticalDistance).foreach { d =>
         if (d.x != 0 || d.y != 0) {
           val originPosition = this.position

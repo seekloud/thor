@@ -29,11 +29,9 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     if(adventurer.isMove){
       moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.getAdventurerState.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
       //如果达到边界 则不再往外走
-      val delay = 0
-      if(position.x - r <= delay || position.x + r >= config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
-      if(position.y - r <= delay || position.y + r >= config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
+      if(position.x - r <= 0 || position.x + r >= config.boundary.x) moveDistance = moveDistance.copy(x = 0)
+      if(position.y - r <= 0 || position.y + r >= config.boundary.y) moveDistance = moveDistance.copy(y = 0)
     }
-
     moveDistance
   }
 
