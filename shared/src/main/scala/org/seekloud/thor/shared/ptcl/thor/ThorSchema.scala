@@ -50,7 +50,8 @@ trait ThorSchema extends KillInformation {
   protected val actionEventMap = mutable.HashMap[Int, List[UserActionEvent]]() //frame -> List[UserActionEvent]
   protected val myAdventurerAction = mutable.HashMap[Int, List[UserActionEvent]]()
 
-  protected val attackingAdventureMap = mutable.HashMap[String, Int]()
+  protected val attackingAdventureMap = mutable.HashMap[String, Int]() // id -> 程度
+  protected var MaybeAttackingAdventureList = List[(String, String, Int)]() // id, killerId, 所在象限
   //playerId -> 攻击执行程度
   val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
 
@@ -194,12 +195,25 @@ trait ThorSchema extends KillInformation {
   //
   //  }
 
+  //杀死高速从刀下穿过的人
+  protected final def adventurerMaybeAttackedCallback(killer: Adventurer)(adventurer: Adventurer, page: Int): Unit ={
+    MaybeAttackingAdventureList.foreach{ adventurerLi =>
+      if(adventurerLi._1 == adventurer.playerId && adventurerLi._2 == killer.playerId && adventurerLi._3 < page){
+        MaybeAttackingAdventureList = MaybeAttackingAdventureList.filterNot(_._1 == adventurer.playerId)
+        adventurerAttackedCallback(killer)(adventurer)
+      }
+      else{
+        MaybeAttackingAdventureList = (adventurer.playerId, killer.playerId, page) :: MaybeAttackingAdventureList
+      }
+    }
+  }
+
   protected final def handleAdventurerAttackingNow(): Unit = {
     attackingAdventureMap.foreach { attacking =>
       adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
         val adventurerMaybeAttacked = adventurerMap.filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < adventurer.radius + config.getWeaponLengthByLevel(adventurer.level) + a._2.radius).values
 //        println(s"潜在攻击列表${adventurerMaybeAttacked.map(_.name)}")
-        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer))(config))
+        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer), adventurerMaybeAttackedCallback(killer = adventurer))(config))
       }
 
       if (attacking._2 <= 0) {
@@ -210,6 +224,7 @@ trait ThorSchema extends KillInformation {
             }
         }
         attackingAdventureMap.remove(attacking._1)
+        MaybeAttackingAdventureList = MaybeAttackingAdventureList.filterNot(_._2 == attacking._1)
       }
       else attackingAdventureMap.update(attacking._1, attacking._2 - 1)
     }
