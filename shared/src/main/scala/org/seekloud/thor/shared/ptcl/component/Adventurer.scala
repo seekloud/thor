@@ -68,10 +68,10 @@ trait Adventurer extends CircleObjectOfGame {
     }
     //tTheta: 1帧终止刀的绝对角度
     val tTheta = {
-      val myDir = this.direction
-      if (myDir - Theta + math.Pi / 6.0 > math.Pi) myDir - Theta + math.Pi / 6.0 - 2 * math.Pi
-      else if(myDir - Theta + math.Pi / 6.0 < -math.Pi) myDir - Theta + math.Pi / 6.0 + 2 * math.Pi
-      else myDir - Theta + math.Pi / 6.0
+      val myDir = this.direction + math.Pi * 2.0 / 9.0
+      if (myDir - Theta > math.Pi) myDir - Theta - 2 * math.Pi
+      else if(myDir - Theta < -math.Pi) myDir - Theta + 2 * math.Pi
+      else myDir - Theta
     }
 
     //获取起始刀线的斜率
@@ -144,13 +144,13 @@ trait Adventurer extends CircleObjectOfGame {
   //判断是否攻击到其他
   def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit, attackedMaybeCallback: (Adventurer, Int) => Unit)(implicit config: ThorGameConfig): Unit = {
 
-    if (isSwordShapeDuang(math.Pi * 1.0 / 6.0 * attackingStep + 0.5 * math.Pi, p)){
+    if (isSwordShapeDuang(math.Pi * 2.0 / 9.0 * attackingStep + 0.33 * math.Pi, p)){
       println(s"${p.playerId} is attacked")
       attackedCallback(p)
     }
     else {
       for(a <- 0 to 3) {
-        if (isSwordShapeDuang(math.Pi * 1.0 / 6.0 * a + 0.5 * math.Pi, p)){
+        if (isSwordShapeDuang(math.Pi * 2.0 / 9.0 * a + 0.33 * math.Pi, p)){
           attackedMaybeCallback(p, a)
         }
       }
