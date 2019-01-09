@@ -27,4 +27,20 @@ class PreDraw {
   }
   , 10000)
 
+  val drawAdventurer = new MiddleFrameInJs
+  val adventurerImg: List[MiddleImage] = for(a <- (1 to 14).toList) yield drawAdventurer.createImage(s"/img/Adventurer-$a.png")
+
+  val adventurerCanvas: List[MiddleCanvas] = for(a <- (1 to 14).toList) yield drawAdventurer.createCanvas(150.0, 150.0)
+
+  val adventurerCtx: List[MiddleContext] = for(a <- (1 to 14).toList) yield adventurerCanvas(a-1).getCtx
+
+  dom.window.setTimeout(()=>{
+    var cnt = 0
+    adventurerCtx.foreach{ t =>
+      t.drawImage(adventurerImg(cnt),0 ,0, Some(150 ,150))
+      cnt += 1
+    }
+  }
+    , 10000)
+
 }

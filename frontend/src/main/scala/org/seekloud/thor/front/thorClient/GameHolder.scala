@@ -73,6 +73,13 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var currentRank = List.empty[Score]
   protected var historyRank = List.empty[Score]
 
+  var drawTime:List[Long] = Nil
+  var drawTimeLong = 0l
+  var drawTimeSize = 60
+  var frameTime:List[Long] = Nil
+  var frameTimeLong = 0l
+  var frameTimeSize = 10
+
 
 
   protected val websocketClient = new WebSocketClient(wsConnectSuccess, wsConnectError, wsMessageHandler, wsConnectClose)
@@ -117,7 +124,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
       canvasBounds = canvasBoundary / canvasUnit
       canvas.setWidth(canvasWidth)
       canvas.setHeight(canvasHeight)
-//      println(s"reSize!!!!!!!!!! canvasUnit:$canvasUnit")
       thorSchemaOpt.foreach(_.updateSize(canvasBoundary, canvasUnit))
     }
   }
@@ -162,7 +168,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 //  var startTime = System.currentTimeMillis()
 
   protected def gameLoop(): Unit = {
-//    println(s"current state: $gameState")
     handleResize
     logicFrameTime = System.currentTimeMillis()
     gameState match{
@@ -171,20 +176,10 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
       case GameState.loadingPlay =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.stop =>
-//        println(s"GameState.stop------------")
         thorSchemaOpt.foreach{ _.update()}
+        frameTime :+ System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
         ping()
-//        if (thorSchemaOpt.nonEmpty) {
-//          if (!thorSchemaOpt.get.adventurerMap.contains(myId)) {
-//            Shortcut.pauseMusic("bgm-2")
-//            Shortcut.refreshMusic("bgm-2")
-////            dom.window.cancelAnimationFrame(nextFrame)
-//            thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
-//          } else {
-//            gameState = GameState.play
-//          }
-//        }
       case GameState.replayLoading =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.play =>
@@ -192,23 +187,30 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           Shortcut.playMusic("bgm-2")
         }
         thorSchemaOpt.foreach{ _.update()}
+        frameTime = frameTime :+ System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
         ping()
-
     }
   }
 
 
 
   def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasBounds: Point): Unit = {
-//    println("drawGameByTime")
     thorSchemaOpt match{
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if(thorSchema.adventurerMap.contains(mainId)){
+          val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
           thorSchema.drawRank(historyRank,false,myId)
           thorSchema.drawRank(currentRank,true,myId)
-          thorSchema.drawNetInfo(getNetworkLatency)
+          drawTime = drawTime :+ System.currentTimeMillis() - start
+          if(drawTime.length >= drawTimeSize){
+            drawTimeLong = drawTime.sum / drawTime.size
+          }
+          if(frameTime.length >= frameTimeSize){
+            frameTimeLong = frameTime.sum / frameTime.size
+          }
+          thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeLong)
           if (barrageTime > 0){
             thorSchema.drawBarrage(barrage)
             barrageTime -= 1
