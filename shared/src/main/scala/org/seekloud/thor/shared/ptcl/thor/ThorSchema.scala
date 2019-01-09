@@ -245,19 +245,26 @@ trait ThorSchema extends KillInformation {
 
   protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
     val killerOpt = adventurerMap.get(e.killerId)
-    adventurerMap.get(e.playerId).foreach { adventurer =>
-//      println(s"handle ${e.playerId} attacked")
-      killerOpt.foreach(_.killNum += 1)
-      quadTree.remove(adventurer)
-      adventurerMap.remove(adventurer.playerId)
-      dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
-      addKillInfo(e.killerName, adventurer.name)
+    if(killerOpt.nonEmpty){
+      adventurerMap.get(e.playerId).foreach { adventurer =>
+        //      println(s"handle ${e.playerId} attacked")
+        killerOpt.foreach(_.killNum += 1)
+        quadTree.remove(adventurer)
+        adventurerMap.remove(adventurer.playerId)
+        dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
+        addKillInfo(e.killerName, adventurer.name)
+      }
     }
   }
 
 
   protected final def handleAdventurerAttacked(es: List[BeAttacked]): Unit = {
-    es foreach handleAdventurerAttacked
+    es.sortBy{ event =>
+      adventurerMap.find(_._1 == event.playerId) match{
+        case None => 100
+        case Some(a) => a._2.level
+      }
+    } foreach handleAdventurerAttacked
   }
 
   final protected def handleAdventurerAttackedNow(): Unit = {
