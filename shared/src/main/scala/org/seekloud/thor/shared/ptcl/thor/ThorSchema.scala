@@ -332,6 +332,18 @@ trait ThorSchema extends KillInformation {
 
   protected def adventurerMove(): Unit = {
     adventurerMap.values.foreach { adventurer =>
+      val intersectNum = adventurerMap.filterNot(_._1 == adventurer.playerId).values.foldLeft(0) {
+        (sum, otherAd) =>
+          val distance = adventurer.position.distance(otherAd.position)
+          if (distance < config.getAdventurerRadiusByLevel(adventurer.level) + config.getAdventurerRadiusByLevel(otherAd.level)) {
+            sum + 1
+          } else sum
+      }
+      if (intersectNum == 0) {
+        adventurer.isMove = true
+      } else {
+        adventurer.isMove = false
+      }
       adventurer.move(boundary, quadTree)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
     }
