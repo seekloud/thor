@@ -73,8 +73,12 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var currentRank = List.empty[Score]
   protected var historyRank = List.empty[Score]
 
-  var drawTime = 0l
-  var frameTime = 0l
+  var drawTime:List[Long] = Nil
+  var drawTimeLong = 0l
+  var drawTimeSize = 60
+  var frameTime:List[Long] = Nil
+  var frameTimeLong = 0l
+  var frameTimeSize = 10
 
 
 
@@ -166,7 +170,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected def gameLoop(): Unit = {
     handleResize
     logicFrameTime = System.currentTimeMillis()
-    val start = System.currentTimeMillis()
     gameState match{
       case GameState.firstCome =>
         drawGameLoading()
@@ -174,6 +177,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.stop =>
         thorSchemaOpt.foreach{ _.update()}
+        frameTime :+ System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
         ping()
       case GameState.replayLoading =>
@@ -183,10 +187,10 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           Shortcut.playMusic("bgm-2")
         }
         thorSchemaOpt.foreach{ _.update()}
+        frameTime = frameTime :+ System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
         ping()
     }
-    frameTime = System.currentTimeMillis() - start
   }
 
 
@@ -199,8 +203,14 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
           thorSchema.drawRank(historyRank,false,myId)
           thorSchema.drawRank(currentRank,true,myId)
-          drawTime = System.currentTimeMillis() - start
-          thorSchema.drawNetInfo(getNetworkLatency, drawTime, frameTime)
+          drawTime = drawTime :+ System.currentTimeMillis() - start
+          if(drawTime.length >= drawTimeSize){
+            drawTimeLong = drawTime.sum / drawTime.size
+          }
+          if(frameTime.length >= frameTimeSize){
+            frameTimeLong = frameTime.sum / frameTime.size
+          }
+          thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeLong)
           if (barrageTime > 0){
             thorSchema.drawBarrage(barrage)
             barrageTime -= 1

@@ -26,7 +26,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     val position = adventurer.getAdventurerState.position
     var moveDistance = Point(0, 0)
 
-    if(adventurer.isMove){
+    if(adventurer.isMove && adventurer.isIntersect == 0){
       moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.getAdventurerState.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
       //如果达到边界 则不再往外走
       if(position.x - r <= 0 || position.x + r >= config.boundary.x) moveDistance = moveDistance.copy(x = 0)
