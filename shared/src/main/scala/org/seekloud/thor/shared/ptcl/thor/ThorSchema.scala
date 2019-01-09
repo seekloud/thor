@@ -340,9 +340,9 @@ trait ThorSchema extends KillInformation {
           } else sum
       }
       if (intersectNum == 0) {
-        adventurer.isMove = true
+        adventurer.isIntersect = 0
       } else {
-        adventurer.isMove = false
+        adventurer.isIntersect = 1
       }
       adventurer.move(boundary, quadTree)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
