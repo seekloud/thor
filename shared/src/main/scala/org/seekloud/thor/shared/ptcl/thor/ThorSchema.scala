@@ -332,17 +332,37 @@ trait ThorSchema extends KillInformation {
 
   protected def adventurerMove(): Unit = {
     adventurerMap.values.foreach { adventurer =>
+      val adRadius = config.getAdventurerRadiusByLevel(adventurer.level)
       val intersectNum = adventurerMap.filterNot(_._1 == adventurer.playerId).values.foldLeft(0) {
         (sum, otherAd) =>
+          val oAdRadius = config.getAdventurerRadiusByLevel(otherAd.level)
           val distance = adventurer.position.distance(otherAd.position)
-          if (distance < config.getAdventurerRadiusByLevel(adventurer.level) + config.getAdventurerRadiusByLevel(otherAd.level)) {
+          if (distance <= adRadius + oAdRadius) {
+            val relativeTheta = otherAd.position.getTheta(adventurer.position)
+            val theta = (math.Pi / 2) - math.acos(oAdRadius / (oAdRadius + adRadius))
+            val thetaB = relativeTheta - theta
+            val thetaC = relativeTheta + theta
+
+            println(s"主体[${adventurer.name}]角度[${adventurer.direction}]], 相对角度[$relativeTheta], 偏移[$theta]")
+
+            if (math.max(thetaB, thetaC) <= 0 || math.min(theta, thetaC) >= 0) {
+              if (adventurer.direction >= math.min(thetaB, thetaC) && adventurer.direction <= math.max(thetaB, thetaC)) {
+                adventurer.isIntersect = 1
+              } else {
+                adventurer.isIntersect = 0
+              }
+            } else {
+              if ((adventurer.direction >= - math.Pi && adventurer.direction <= math.min(thetaB, thetaC)) || (adventurer.direction >= math.max(theta, thetaC) && adventurer.direction <= math.Pi)) {
+                adventurer.isIntersect = 1
+              } else {
+                adventurer.isIntersect = 0
+              }
+            }
             sum + 1
           } else sum
       }
       if (intersectNum == 0) {
         adventurer.isIntersect = 0
-      } else {
-        adventurer.isIntersect = 1
       }
       adventurer.move(boundary, quadTree)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
