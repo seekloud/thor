@@ -97,7 +97,13 @@ case class ThorSchemaServerImpl(
   }
 
   private[this] def updateRanks() = {
-    currentRankList = adventurerMap.values.map(a => Score(a.playerId, a.name, a.killNum, a.energy)).toList.sorted
+    currentRankList = adventurerMap.values.map{ a =>
+      val scoreOfEnergy = currentRankList.find(_.id == a.playerId) match{
+        case None => a.energy
+        case Some(score) => math.max(score.e, a.energy)
+      }
+      Score(a.playerId, a.name, a.killNum, scoreOfEnergy)
+    }.toList.sorted
     var historyChange = false
     currentRankList.foreach { cScore =>
       historyRankMap.get(cScore.id) match {
