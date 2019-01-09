@@ -79,8 +79,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
 
       case e: BeAttacked =>
-        println("attack!!!!!!!!!!!!!" + e)
-        barrage = s"${e.killerName}杀死了${e.name}"
+        barrage = s"${e.killerName}  杀死了  ${e.name}"
         barrageTime = 300
         if (e.playerId == mainId) {
           mainId = e.killerId //跟随凶手视角
@@ -125,15 +124,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case e: GameEvent =>
-        e match {
-          case event: UserEnterRoom =>
-            barrage = s"${event.name}加入了游戏"
-            barrageTime = 300
-//          case event: UserLeftRoom =>
-//            barrage = s"${event.name}离开了游戏"
-//            barrageTime = 300
-          case _ =>
-        }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
       case x => dom.window.console.log(s"接收到无效消息$x")
