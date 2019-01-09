@@ -26,7 +26,8 @@ case class AdventurerState(
   isMove: Boolean,
   isUpdateLevel: Boolean,
   levelUpExecute: Int,
-  mouseStop: Boolean
+  mouseStop: Boolean,
+  isIntersect: Byte
 )
 
 trait Adventurer extends CircleObjectOfGame {
@@ -46,6 +47,7 @@ trait Adventurer extends CircleObjectOfGame {
   var isUpdateLevel: Boolean
   var levelUpExecute: Int
   var mouseStop: Boolean
+  var isIntersect: Byte
 
   def getMoveState() = isMove
 
@@ -158,7 +160,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, position, direction, faceDirection, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute, mouseStop)
+    AdventurerState(playerId, name, level, energy, position, direction, faceDirection, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute, mouseStop, isIntersect)
   }
 
   def attacking(killedLevel: Byte)(implicit config: ThorGameConfig): Unit ={
@@ -180,7 +182,7 @@ trait Adventurer extends CircleObjectOfGame {
     if (mouseDistance > config.getAdventurerRadiusByLevel(this.level) * 10)
     {
       if (!isAttacking) {
-        isMove = true
+//        isMove = true
         direction = d
         mouseStop = false
       }
@@ -240,7 +242,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def move(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Unit = {
-    if (isMove) {
+    if (isMove && isIntersect == 0) {
       val oldOb = this
       val moveDistance = if (isSpeedUp) {
         if (energy >= thorGameConfig.speedUpEnergyLoose) {
@@ -299,12 +301,13 @@ case class AdventurerImpl(
   var isMove: Boolean,
   var isUpdateLevel: Boolean,
   var levelUpExecute: Int,
-  var mouseStop: Boolean
+  var mouseStop: Boolean,
+  var isIntersect: Byte
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
     this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.position,
       adventurerState.direction, adventurerState.faceDirection, adventurerState.isSpeedUp, adventurerState.killNum, adventurerState.isMove,
-      adventurerState.isUpdateLevel, adventurerState.levelUpExecute, adventurerState.mouseStop)
+      adventurerState.isUpdateLevel, adventurerState.levelUpExecute, adventurerState.mouseStop, adventurerState.isIntersect)
   }
 
   override var radius: Float = config.getAdventurerRadiusByLevel(level)
