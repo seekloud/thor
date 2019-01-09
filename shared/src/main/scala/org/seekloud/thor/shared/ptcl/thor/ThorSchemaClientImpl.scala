@@ -20,6 +20,7 @@ case class ThorSchemaClientImpl (
   var canvasSize:Point,
   var canvasUnit:Float,
   preCanvas: List[MiddleCanvas] = Nil,
+  preCanvasAdventurer: List[MiddleCanvas] = Nil,
 ) extends ThorSchemaImpl(config, myId, myName)
 with AdventurerClient
 with FoodClient
