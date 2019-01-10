@@ -37,7 +37,7 @@ object RoomActor {
 
   case class BeDead(playerId: String, name: String, userList: List[(String, String)]) extends Command
 
-  case class CreateRobot(botId: String, name: String) extends Command
+  case class CreateRobot(botId: String, name: String, level: Int) extends Command
 
   case class ReliveRobot(botId: String, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
 
@@ -65,13 +65,9 @@ object RoomActor {
             implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
-            ctx.self ! CreateRobot("robot1", "万事通")
-            ctx.self ! CreateRobot("robot2", "害羞鬼")
-            ctx.self ! CreateRobot("robot3", "瞌睡虫")
-            ctx.self ! CreateRobot("robot4", "开心果")
-            ctx.self ! CreateRobot("robot5", "迷糊蛋")
-            ctx.self ! CreateRobot("robot6", "搞事精")
-            ctx.self ! CreateRobot("robot7", "爱生气")
+            for (cnt <- 0 until thorSchema.config.getRobotNumber) {
+              ctx.self ! CreateRobot(s"robot$cnt", thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
+            }
 
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
@@ -96,8 +92,8 @@ object RoomActor {
     Behaviors.receive {
       (ctx, msg) =>
         msg match {
-          case CreateRobot(botId, name) =>
-            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, name), botId)
+          case CreateRobot(botId, name, level) =>
+            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, name, level), botId)
             thorSchema.robotJoinGame(botId, name, robot)
             Behaviors.same
 
