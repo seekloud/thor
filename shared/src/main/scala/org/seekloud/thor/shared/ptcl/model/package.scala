@@ -219,5 +219,15 @@ package object model {
 
   }
 
+  def normalizeTheta(theta: Double): Double = {
+    if (theta > math.Pi) {
+      theta - 2 * math.Pi
+    } else if (theta < - math.Pi){
+      theta + 2 * math.Pi
+    } else {
+      theta
+    }
+  }
+
 
 }
