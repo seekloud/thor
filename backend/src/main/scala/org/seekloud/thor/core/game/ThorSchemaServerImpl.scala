@@ -71,18 +71,21 @@ case class ThorSchemaServerImpl(
       a.score += adventurer.energyScore
     }
     addGameEvent(event)
-    dispatch(event)
   }
 
   override protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
     super.handleAdventurerAttacked(e)
-    if(e.playerId.take(5).equals("robot")){
-      if(robotMap.contains(e.playerId)){
-        robotMap(e.playerId) ! RobotActor.RobotDead
+    val killerOpt = adventurerMap.get(e.killerId)
+    if(killerOpt.nonEmpty){
+      dispatch(e)
+      if(e.playerId.take(5).equals("robot")){
+        if(robotMap.contains(e.playerId)){
+          robotMap(e.playerId) ! RobotActor.RobotDead
+        }
+        robotMap.remove(e.playerId)
+        adventurerMap.get(e.playerId).foreach(quadTree.remove)
+        adventurerMap.remove(e.playerId)
       }
-      robotMap.remove(e.playerId)
-      adventurerMap.get(e.playerId).foreach(quadTree.remove)
-      adventurerMap.remove(e.playerId)
     }
   }
 

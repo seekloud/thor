@@ -85,7 +85,8 @@ object RobotActor {
     roomActor: ActorRef[RoomActor.Command],
     thorSchema: ThorSchemaServerImpl,
     botId: String,
-    botName: String
+    botName: String,
+    level: Int
   ): Behavior[Command] =
     Behaviors.setup[Command] { ctx =>
       log.info(s"*** is starting...")
@@ -94,7 +95,7 @@ object RobotActor {
       Behaviors.withTimers[Command] { implicit timer =>
         timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
         timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
-        switchBehavior(ctx, "idle", idle(roomActor, thorSchema, botId, botName, actionSerialNumGenerator))
+        switchBehavior(ctx, "idle", idle(roomActor, thorSchema, botId, botName, thorSchema.config.getRobotMoveFrequency(level), thorSchema.config.getRobotAttackFrequency(level), actionSerialNumGenerator))
       }
     }
 
@@ -103,6 +104,8 @@ object RobotActor {
     thorSchema: ThorSchemaServerImpl,
     botId: String,
     botName: String,
+    moveFrequency: Double,
+    attackFrequency: Double,
     actionSerialNumGenerator: AtomicInteger
   )(
     implicit stashBuffer: StashBuffer[Command],
@@ -114,7 +117,7 @@ object RobotActor {
           def sendBackendMove(thetaList: List[Float], num: Int): Unit = {
             val data = MouseMove(botId, thetaList(num), 128f, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
             roomActor ! RoomActor.WsMessage(botId, data)
-            if(num < thetaList.length - 1)
+            if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 50))
               ctx.system.scheduler.scheduleOnce(50.millis){
                 sendBackendMove(thetaList, num + 1)
               }
@@ -135,11 +138,11 @@ object RobotActor {
             sendBackendMove(thetaList.toList, 0)
 
             timer.cancel(MouseMoveKey)
-            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 2.seconds)
+            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, moveFrequency.seconds)
           }
           else{
             timer.cancel(MouseMoveKey)
-            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 2.seconds)
+            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, moveFrequency.seconds)
           }
           Behavior.same
 
@@ -149,7 +152,7 @@ object RobotActor {
             roomActor ! RoomActor.WsMessage(botId, data)
           }
           timer.cancel(MouseLeftDownKey)
-          timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 0.8.seconds)
+          timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, attackFrequency.seconds)
           Behaviors.same
 
         case RobotDead =>

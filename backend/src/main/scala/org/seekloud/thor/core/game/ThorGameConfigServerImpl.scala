@@ -73,8 +73,15 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val foodRadiusLevel = config.getDoubleList("thorGame.food.radius")
     .requiring(_.size() >= 1,"minimum supported food energy size is 1").asScala.map(_.toFloat).toList
 
-
-
+  //robot config
+  private[this] val robotNames = config.getStringList("thorGame.robot.name")
+    .requiring(_.size() >= 1, msg="minimum robot names size is 1").asScala.toList
+  private[this] val robotNumber = config.getInt("thorGame.robot.number")
+    .requiring(t => t >= 1 && t <= 7, msg="minimum robot number is 1")
+  private[this] val robotMoveFrequency = config.getDoubleList("thorGame.robot.moveFrequency")
+    .requiring(_.size() >= 1, msg="minimum robot moveFrequency size is 1").asScala.map(_.toDouble).toList
+  private[this] val robotAttackFrequency = config.getDoubleList("thorGame.robot.attackFrequency")
+    .requiring(_.size() >= 1, msg="minimum robot attackFrequency size is 1").asScala.map(_.toDouble).toList
 
 
 //  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
@@ -87,7 +94,9 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private[this] val weaponParams = WeaponParams(weaponLengthLevel)
 
-  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, gamePlayRate, gameReplayRate, adventurerParams, foodParams, weaponParams)
+  private[this] val robotParams = RobotParams(robotNumber, robotNames, robotMoveFrequency, robotAttackFrequency)
+
+  private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, gamePlayRate, gameReplayRate, adventurerParams, foodParams, weaponParams, robotParams)
 
   def getThorGameConfigImpl: ThorGameConfigImpl = thorGameConfig
 
@@ -122,7 +131,14 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   override def getAdventurerLevelUpAnimation: Int = thorGameConfig.getAdventurerLevelUpAnimation
 
+  //robot
+  override def getRobotNumber:Int = thorGameConfig.getRobotNumber
 
+  override def getRobotNames:List[String] = thorGameConfig.getRobotNames
+
+  override def getRobotMoveFrequency:List[Double] = thorGameConfig.getRobotMoveFrequency
+
+  override def getRobotAttackFrequency:List[Double] = thorGameConfig.getRobotAttackFrequency
 
 
 }
