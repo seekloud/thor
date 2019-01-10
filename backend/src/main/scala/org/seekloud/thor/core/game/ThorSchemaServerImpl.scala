@@ -140,7 +140,7 @@ case class ThorSchemaServerImpl(
 
   private final def generateFood(level: Byte = 1, position: Point, radius: Float = 2): FoodState = {
     //生成食物事件，被后台定时事件调用，前端不产生此事件，食物的属性暂且全部作为参数,color作为随机数
-    val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius, random.nextInt(8))
+    val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius, random.nextInt(8).toByte)
     val event = GenerateFood(systemFrame, foodState)
     addGameEvent(event)
     dispatch(event)
