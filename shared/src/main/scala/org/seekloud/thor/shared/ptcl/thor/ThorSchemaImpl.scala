@@ -43,9 +43,6 @@ class ThorSchemaImpl(
 
   def receiveGameEvent(e: GameEvent) = {
     if (e.frame >= systemFrame) {
-      if (e.isInstanceOf[BeAttacked]) {
-        println(s"接收到死亡事件！！！")
-      }
       addGameEvent(e)
     } else if (esRecoverSupport) {
       if (e.isInstanceOf[BeAttacked]) {
