@@ -30,7 +30,7 @@ with FpsRender{
 
   var killerNew : String = "?"
   var duringTime : String = "0"
-  val ifTest: Boolean = true
+  val ifTest: Boolean = false
   val preTime: Long = System.currentTimeMillis()
 
   def drawGame(mainId: String, offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
