@@ -15,7 +15,7 @@ case class AdventurerState(
   name: String,
   level: Byte,
   energy: Int,
-  var energyScore: Int,
+  energyScore: Int,
 //  radiusLevel: Int,
   position: Point,
   direction: Float,
