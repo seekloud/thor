@@ -339,40 +339,75 @@ trait ThorSchema extends KillInformation {
           val distance = adventurer.position.distance(otherAd.position)
           if (distance <= adRadius + oAdRadius) {
             val relativeTheta = otherAd.position.getTheta(adventurer.position)
-            val theta = (math.Pi / 2) - math.acos(oAdRadius / distance)
-            val thetaB = relativeTheta - theta
-            val thetaC = relativeTheta + theta
-
-            println(s"主体[${adventurer.name}]角度[${adventurer.direction}]], 相对角度[$relativeTheta], 偏移[$theta]")
-            println(s"")
-
-            if (math.max(thetaB, thetaC) <= 0 || math.min(theta, thetaC) >= 0) {
-              if (adventurer.direction >= math.min(thetaB, thetaC) && adventurer.direction <= math.max(thetaB, thetaC)) {
-                adventurer.isIntersect = 1
-              } else {
+            if (math.abs(relativeTheta) >= (math.Pi / 2) && math.abs(relativeTheta) <= math.Pi) {
+              println(s"主体 [${adventurer.name}] 碰撞检测 debug point 1")
+              val positiveUpperLimit = normalizeTheta(relativeTheta - (math.Pi / 2))
+              val negativeFloorLimit = normalizeTheta(relativeTheta + (math.Pi / 2))
+//              println(s"主体[${adventurer.name}]，对方[${otherAd.name}]")
+              if ((adventurer.direction >= 0 && adventurer.direction <= positiveUpperLimit) || (adventurer.direction >= negativeFloorLimit && adventurer.direction <= 0)) {
+                println(s"主体 [${adventurer.name}] 可动范围")
                 if (sum == 0) {
                   adventurer.isIntersect = 0
-                } else if (adventurer.isIntersect != 1) {
-                  adventurer.isIntersect = 0
                 }
+              } else {
+                println(s"主体 [${adventurer.name}] 碰撞范围")
+                adventurer.isIntersect = 1
               }
-            } else {
-              if ((adventurer.direction >= - math.Pi && adventurer.direction <= math.min(thetaB, thetaC)) || (adventurer.direction >= math.max(theta, thetaC) && adventurer.direction <= math.Pi)) {
-                adventurer.isIntersect = 1
-              } else {
+            } else if (math.abs(relativeTheta) >= 0 && math.abs(relativeTheta) <= (math.Pi / 2)) {
+              println(s"主体 [${adventurer.name}] 碰撞检测 debug point 2")
+              val positiveFloorLimit = normalizeTheta(relativeTheta + (math.Pi / 2))
+              val negativeUpperLimit = normalizeTheta(relativeTheta - (math.Pi / 2))
+              if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= - math.Pi && adventurer.direction <= negativeUpperLimit)) {
+                println(s"主体 [${adventurer.name}] 可动范围")
                 if (sum == 0) {
                   adventurer.isIntersect = 0
-                } else if (adventurer.isIntersect != 1) {
-                  adventurer.isIntersect = 0
                 }
+              } else {
+                println(s"主体 [${adventurer.name}] 碰撞范围")
+                adventurer.isIntersect = 1
               }
             }
+//            val theta = (math.Pi / 2) - math.acos(oAdRadius / adRadius + oAdRadius)
+//            val thetaB = relativeTheta - theta
+//            val thetaC = relativeTheta + theta
+
+//            println(s"****************************************\n" +
+//                    s"主体[${adventurer.name}],对方[${otherAd.name}]\n" +
+//                    s"主体运动角度[${adventurer.direction}]]\n" +
+//                    s"圆心相对角度[$relativeTheta], 偏移[$theta]\n" +
+//                    s"thetaB [$thetaB],thetaC [$thetaC]\n" +
+//                    s"****************************************\n")
+
+//            if (math.max(thetaB, thetaC) <= 0 || math.min(theta, thetaC) >= 0) {
+//              println(s"主体 [${adventurer.name}] debug point1 - theta the same")
+//              if (adventurer.direction >= math.min(thetaB, thetaC) && adventurer.direction <= math.max(thetaB, thetaC)) {
+//                adventurer.isIntersect = 1
+//              } else {
+//                if (sum == 0) {
+//                  adventurer.isIntersect = 0
+//                } else if (adventurer.isIntersect != 1) {
+//                  adventurer.isIntersect = 0
+//                }
+//              }
+//            } else {
+//              println(s"主体 [${adventurer.name}] debug point2 - diff theta")
+//              if ((adventurer.direction >= - math.Pi && adventurer.direction <= math.min(thetaB, thetaC)) || (adventurer.direction >= math.max(theta, thetaC) && adventurer.direction <= math.Pi)) {
+//                adventurer.isIntersect = 1
+//              } else {
+//                if (sum == 0) {
+//                  adventurer.isIntersect = 0
+//                } else if (adventurer.isIntersect != 1) {
+//                  adventurer.isIntersect = 0
+//                }
+//              }
+//            }
             sum + 1
           } else sum
       }
       if (intersectNum == 0) {
         adventurer.isIntersect = 0
       }
+//      println(s"主体 [${adventurer.name}] isIntersect ${adventurer.isIntersect}")
       adventurer.move(boundary, quadTree)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
     }
