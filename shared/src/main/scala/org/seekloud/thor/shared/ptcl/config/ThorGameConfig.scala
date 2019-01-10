@@ -43,7 +43,10 @@ final case class RobotParams(
   number: Int,
   nameList: List[String],
   moveFrequency: List[Double],
-  attackFrequency: List[Double]
+  attackFrequency: List[Double],
+  level: Int,
+  isAttack: Boolean,
+  isMove: Boolean
 )
 
 
@@ -96,6 +99,12 @@ trait ThorGameConfig {
   def getRobotMoveFrequency:List[Double]
 
   def getRobotAttackFrequency:List[Double]
+
+  def getRobotLevel:Int
+
+  def isRobotAttack:Boolean
+
+  def isRobotMove:Boolean
 
 }
 
@@ -167,6 +176,9 @@ case class ThorGameConfigImpl(
   def getRobotNames:List[String] = robotParams.nameList
   def getRobotMoveFrequency:List[Double] = robotParams.moveFrequency
   def getRobotAttackFrequency:List[Double] = robotParams.attackFrequency
+  def getRobotLevel:Int = robotParams.level
+  def isRobotAttack:Boolean = robotParams.isAttack
+  def isRobotMove:Boolean = robotParams.isMove
 
 
 

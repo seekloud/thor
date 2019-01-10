@@ -77,11 +77,17 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val robotNames = config.getStringList("thorGame.robot.name")
     .requiring(_.size() >= 1, msg="minimum robot names size is 1").asScala.toList
   private[this] val robotNumber = config.getInt("thorGame.robot.number")
-    .requiring(t => t >= 1 && t <= 7, msg="minimum robot number is 1")
+    .requiring(t => t >= 1 && t <= 7, msg="minimum robot number is 1-7")
   private[this] val robotMoveFrequency = config.getDoubleList("thorGame.robot.moveFrequency")
     .requiring(_.size() >= 1, msg="minimum robot moveFrequency size is 1").asScala.map(_.toDouble).toList
   private[this] val robotAttackFrequency = config.getDoubleList("thorGame.robot.attackFrequency")
     .requiring(_.size() >= 1, msg="minimum robot attackFrequency size is 1").asScala.map(_.toDouble).toList
+  private[this] val robotlevel = config.getInt("thorGame.robot.level")
+    .requiring(t => t >= 0 && t <= 2, msg="minimum robot level is 0-2")
+  private[this] val robotIsAttack = config.getBoolean("thorGame.robot.isAttack")
+    .requiring(t => t || !t, msg="robotIsAttack is boolean")
+  private[this] val robotIsMove = config.getBoolean("thorGame.robot.isMove")
+    .requiring(t => t || !t, msg="robotIsMove is boolean")
 
 
 //  private[this] val adventurerRadiusData = config.getDouble("thorGame.adventurer.adventurerRadius")
@@ -94,7 +100,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private[this] val weaponParams = WeaponParams(weaponLengthLevel)
 
-  private[this] val robotParams = RobotParams(robotNumber, robotNames, robotMoveFrequency, robotAttackFrequency)
+  private[this] val robotParams = RobotParams(robotNumber, robotNames, robotMoveFrequency, robotAttackFrequency, robotlevel, robotIsAttack, robotIsMove)
 
   private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, gamePlayRate, gameReplayRate, adventurerParams, foodParams, weaponParams, robotParams)
 
@@ -139,6 +145,12 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   override def getRobotMoveFrequency:List[Double] = thorGameConfig.getRobotMoveFrequency
 
   override def getRobotAttackFrequency:List[Double] = thorGameConfig.getRobotAttackFrequency
+
+  override def getRobotLevel:Int = thorGameConfig.getRobotLevel
+
+  override def isRobotAttack:Boolean = thorGameConfig.isRobotAttack
+
+  override def isRobotMove:Boolean = thorGameConfig.isRobotMove
 
 
 }

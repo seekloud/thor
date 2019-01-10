@@ -115,7 +115,9 @@ object RobotActor {
       msg match {
         case AutoMouseMove =>
           def sendBackendMove(thetaList: List[Float], num: Int): Unit = {
-            val data = MouseMove(botId, thetaList(num), 128f, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
+            //moveDistance是否移动
+            val moveDistance = if(thorSchema.config.isRobotMove) 128f else 1f
+            val data = MouseMove(botId, thetaList(num), moveDistance, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
             roomActor ! RoomActor.WsMessage(botId, data)
             if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 50))
               ctx.system.scheduler.scheduleOnce(50.millis){
@@ -147,8 +149,8 @@ object RobotActor {
           Behavior.same
 
         case AutoMouseLeftDown =>
-          val data = MouseClickDownLeft(botId, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
-          if(attack2Player(thorSchema, botId)){
+          if(attack2Player(thorSchema, botId) && thorSchema.config.isRobotAttack){
+            val data = MouseClickDownLeft(botId, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
             roomActor ! RoomActor.WsMessage(botId, data)
           }
           timer.cancel(MouseLeftDownKey)
