@@ -176,11 +176,9 @@ object RoomActor {
               val newFood = thorSchema.genFood(25)
               val data = thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
 
-              //              val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
-              //              else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
+              //根据userId尾数分批同步数据 每5帧1批 10批一轮 每个用户每50帧受到一次数据
               val tail = (tickCount - 1) / 5 % 10
-              log.debug(s"${subscribersMap.head._1} ${subscribersMap.head._1.substring(-1)}")
-              dispatch(subscribersMap.filter(_._1.last.toInt == tail), watchingMap.filter(_._1.last.toInt == tail))(GridSyncState(data))
+              dispatch(subscribersMap.filter(_._1.endsWith(tail.toString)), watchingMap.filter(_._1.endsWith(tail.toString)))(GridSyncState(data))
             }
             if (tickCount % 20 == 3) {
               //排行榜
