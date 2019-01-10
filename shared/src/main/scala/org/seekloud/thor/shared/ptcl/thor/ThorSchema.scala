@@ -339,23 +339,32 @@ trait ThorSchema extends KillInformation {
           val distance = adventurer.position.distance(otherAd.position)
           if (distance <= adRadius + oAdRadius) {
             val relativeTheta = otherAd.position.getTheta(adventurer.position)
-            val theta = (math.Pi / 2) - math.acos(oAdRadius / (oAdRadius + adRadius))
+            val theta = (math.Pi / 2) - math.acos(oAdRadius / distance)
             val thetaB = relativeTheta - theta
             val thetaC = relativeTheta + theta
 
-//            println(s"主体[${adventurer.name}]角度[${adventurer.direction}]], 相对角度[$relativeTheta], 偏移[$theta]")
+            println(s"主体[${adventurer.name}]角度[${adventurer.direction}]], 相对角度[$relativeTheta], 偏移[$theta]")
+            println(s"")
 
             if (math.max(thetaB, thetaC) <= 0 || math.min(theta, thetaC) >= 0) {
               if (adventurer.direction >= math.min(thetaB, thetaC) && adventurer.direction <= math.max(thetaB, thetaC)) {
                 adventurer.isIntersect = 1
               } else {
-                adventurer.isIntersect = 0
+                if (sum == 0) {
+                  adventurer.isIntersect = 0
+                } else if (adventurer.isIntersect != 1) {
+                  adventurer.isIntersect = 0
+                }
               }
             } else {
               if ((adventurer.direction >= - math.Pi && adventurer.direction <= math.min(thetaB, thetaC)) || (adventurer.direction >= math.max(theta, thetaC) && adventurer.direction <= math.Pi)) {
                 adventurer.isIntersect = 1
               } else {
-                adventurer.isIntersect = 0
+                if (sum == 0) {
+                  adventurer.isIntersect = 0
+                } else if (adventurer.isIntersect != 1) {
+                  adventurer.isIntersect = 0
+                }
               }
             }
             sum + 1

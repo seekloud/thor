@@ -210,6 +210,7 @@ trait Adventurer extends CircleObjectOfGame {
         levelUpExecute = thorGameConfig.getAdventurerLevelUpAnimation
         isUpdateLevel = true
         level = (level + 1).toByte
+        this.radius = thorGameConfig.getAdventurerRadiusByLevel(level)
 //        speedLevel += 1
 //        weaponLevel += 1
       }
@@ -227,7 +228,8 @@ trait Adventurer extends CircleObjectOfGame {
     if (this.level > 1) {
       if (this.energy <= thorGameConfig.getMaxEnergyByLevel((this.level - 1).toByte)) {
         this.level = (level - 1).toByte
-//        speedLevel -= 1
+        this.radius = thorGameConfig.getAdventurerRadiusByLevel(level)
+        //        speedLevel -= 1
 //        weaponLevel -= 1
       }
     }
