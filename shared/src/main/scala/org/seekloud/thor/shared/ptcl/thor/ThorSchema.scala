@@ -340,10 +340,13 @@ trait ThorSchema extends KillInformation {
           if (distance <= adRadius + oAdRadius) {
             val relativeTheta = otherAd.position.getTheta(adventurer.position)
             if (math.abs(relativeTheta) >= (math.Pi / 2) && math.abs(relativeTheta) <= math.Pi) {
-              println(s"主体 [${adventurer.name}] 碰撞检测 debug point 1")
               val positiveUpperLimit = normalizeTheta(relativeTheta - (math.Pi / 2))
               val negativeFloorLimit = normalizeTheta(relativeTheta + (math.Pi / 2))
-//              println(s"主体[${adventurer.name}]，对方[${otherAd.name}]")
+              println(s"******************point1******************\n" +
+                      s"主体[${adventurer.name}]，对方[${otherAd.name}]\n" +
+                      s"相对角度[$relativeTheta]\n" +
+                      s"正上限[$positiveUpperLimit]，负下限[$negativeFloorLimit]\n" +
+                      s"******************************************\n")
               if ((adventurer.direction >= 0 && adventurer.direction <= positiveUpperLimit) || (adventurer.direction >= negativeFloorLimit && adventurer.direction <= 0)) {
                 println(s"主体 [${adventurer.name}] 可动范围")
                 if (sum == 0) {
@@ -357,6 +360,11 @@ trait ThorSchema extends KillInformation {
               println(s"主体 [${adventurer.name}] 碰撞检测 debug point 2")
               val positiveFloorLimit = normalizeTheta(relativeTheta + (math.Pi / 2))
               val negativeUpperLimit = normalizeTheta(relativeTheta - (math.Pi / 2))
+              println(s"******************point2******************\n" +
+                      s"主体[${adventurer.name}]，对方[${otherAd.name}]\n" +
+                      s"相对角度[$relativeTheta]\n" +
+                      s"正下限[$positiveFloorLimit]，负上限[$negativeUpperLimit]\n" +
+                      s"******************************************\n")
               if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= - math.Pi && adventurer.direction <= negativeUpperLimit)) {
                 println(s"主体 [${adventurer.name}] 可动范围")
                 if (sum == 0) {
