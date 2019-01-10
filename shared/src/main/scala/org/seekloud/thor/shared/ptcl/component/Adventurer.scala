@@ -15,6 +15,7 @@ case class AdventurerState(
   name: String,
   level: Byte,
   energy: Int,
+  var energyScore: Int,
 //  radiusLevel: Int,
   position: Point,
   direction: Float,
@@ -35,6 +36,7 @@ trait Adventurer extends CircleObjectOfGame {
   val name: String
   var level: Byte
   var energy: Int
+  var energyScore: Int
 //  var radiusLevel: Int
   var position: Point
   var direction: Float
@@ -160,12 +162,13 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, position, direction, faceDirection, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute, mouseStop, isIntersect)
+    AdventurerState(playerId, name, level, energy, energyScore, position, direction, faceDirection, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute, mouseStop, isIntersect)
   }
 
   def attacking(killedLevel: Byte)(implicit config: ThorGameConfig): Unit ={
 //    println(s"killing $killedLevel Level adventurer")
     this.energy += config.getEnergyByKillingAdventurerLevel(killedLevel)
+    this.energyScore += config.getEnergyByKillingAdventurerLevel(killedLevel)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
       updateLevel
     }
@@ -173,6 +176,7 @@ trait Adventurer extends CircleObjectOfGame {
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
     this.energy += config.getEnergyByFoodLevel(food.level)
+    this.energyScore += config.getEnergyByFoodLevel(food.level)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
       updateLevel
     }
@@ -290,6 +294,7 @@ case class AdventurerImpl(
   name: String,
   var level: Byte,
   var energy: Int,
+  var energyScore: Int,
 //  var radiusLevel: Int,
   var position: Point,
   var direction: Float,
@@ -305,7 +310,7 @@ case class AdventurerImpl(
   var isIntersect: Byte
 ) extends Adventurer {
   def this(config: ThorGameConfig, adventurerState: AdventurerState) {
-    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.position,
+    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.energyScore, adventurerState.position,
       adventurerState.direction, adventurerState.faceDirection, adventurerState.isSpeedUp, adventurerState.killNum, adventurerState.isMove,
       adventurerState.isUpdateLevel, adventurerState.levelUpExecute, adventurerState.mouseStop, adventurerState.isIntersect)
   }
