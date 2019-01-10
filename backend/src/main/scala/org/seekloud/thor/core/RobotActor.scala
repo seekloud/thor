@@ -93,7 +93,7 @@ object RobotActor {
       val actionSerialNumGenerator = new AtomicInteger(0)
       Behaviors.withTimers[Command] { implicit timer =>
         timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
-//        timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
+        timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
         switchBehavior(ctx, "idle", idle(roomActor, thorSchema, botId, botName, actionSerialNumGenerator))
       }
     }
@@ -119,19 +119,7 @@ object RobotActor {
                 sendBackendMove(thetaList, num + 1)
               }
           }
-          val random = new Random()
-          val theta = thorSchema.adventurerMap.get(botId) match{
-            case None =>
-              0
-            case Some(adventurer) =>
-              adventurer.position match{
-                case a if a.x + 20 > thorSchema.boundary.x => random.nextFloat() * math.Pi - 1.5 * math.Pi
-                case b if b.x - 20 < 0 => random.nextFloat() * math.Pi - 0.5 * math.Pi
-                case c if c.y + 20 > thorSchema.boundary.y => - random.nextFloat() * math.Pi
-                case d if d.y - 20 < 0 => random.nextFloat() * math.Pi
-                case _ => random.nextFloat() * 2 * math.Pi - math.Pi
-              }
-          }
+          val theta = move2Player(thorSchema, botId)
           val direction = if(theta == 0) theta.toFloat else thorSchema.adventurerMap(botId).direction
 
           if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
@@ -157,9 +145,11 @@ object RobotActor {
 
         case AutoMouseLeftDown =>
           val data = MouseClickDownLeft(botId, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
-          roomActor ! RoomActor.WsMessage(botId, data)
+          if(attack2Player(thorSchema, botId)){
+            roomActor ! RoomActor.WsMessage(botId, data)
+          }
           timer.cancel(MouseLeftDownKey)
-          timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
+          timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 0.8.seconds)
           Behaviors.same
 
         case RobotDead =>
@@ -170,14 +160,57 @@ object RobotActor {
             roomActor ! RoomActor.ReliveRobot(botId, botName, ctx.self)
           }
           ctx.system.scheduler.scheduleOnce(4.seconds){
-//            timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
-            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 2.seconds)
+            timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
+            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
           }
           Behaviors.same
 
         case _ =>
           Behaviors.same
       }
+    }
+  }
+
+  /*
+  * 随机移动
+  * return: 移动方向
+  * */
+  def randomMouseMove(thorSchema: ThorSchemaServerImpl, botId: String): Double ={
+    val random = new Random()
+    thorSchema.adventurerMap.get(botId) match{
+      case None =>
+        0d
+      case Some(adventurer) =>
+        adventurer.position match{
+          case a if a.x + 20 > thorSchema.boundary.x => random.nextFloat() * math.Pi - 1.5 * math.Pi
+          case b if b.x - 20 < 0 => random.nextFloat() * math.Pi - 0.5 * math.Pi
+          case c if c.y + 20 > thorSchema.boundary.y => - random.nextFloat() * math.Pi
+          case d if d.y - 20 < 0 => random.nextFloat() * math.Pi
+          case _ => random.nextFloat() * 2 * math.Pi - math.Pi
+        }
+    }
+  }
+
+  //面向其他玩家移动
+  def move2Player(thorSchema: ThorSchemaServerImpl, botId: String): Float ={
+    //得到自己的状态
+    val adventurerSelfOpt = thorSchema.adventurerMap.get(botId)
+    //选择最近的移动或者随机移动
+    adventurerSelfOpt.flatMap{ adventurerSelf =>
+      val otherAdventurer = thorSchema.adventurerMap.filter(a => a._2.position.distance(adventurerSelf.position) < 80 && a._1 != adventurerSelf.playerId).values
+      val distanceMinAdventurer = otherAdventurer.toList.sortBy(a => a.position.distance(adventurerSelf.position))
+      distanceMinAdventurer.headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
+    }.getOrElse(randomMouseMove(thorSchema, botId).toFloat)
+  }
+
+  //可以攻击时发动攻击
+  //return: boolean
+  def attack2Player(thorSchema: ThorSchemaServerImpl, botId: String): Boolean ={
+    //得到自己的状态
+    val adventurerSelfOpt = thorSchema.adventurerMap.get(botId)
+    //判断是否执行攻击
+    adventurerSelfOpt.exists { adventurerSelf =>
+      thorSchema.adventurerMap.filterNot(_._1 == adventurerSelf.playerId).values.exists(a => a.position.distance(adventurerSelf.position) < thorSchema.config.getWeaponLengthByLevel(a.level) + adventurerSelf.radius + a.radius)
     }
   }
 
