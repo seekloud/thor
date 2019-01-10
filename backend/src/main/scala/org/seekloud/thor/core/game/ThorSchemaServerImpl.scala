@@ -68,7 +68,7 @@ case class ThorSchemaServerImpl(
     RecordMap.get(adventurer.playerId).foreach{ a =>
       a.killed += 1
       a.killing += adventurer.killNum
-      a.score += adventurer.energy
+      a.score += adventurer.energyScore
     }
     addGameEvent(event)
     dispatch(event)
@@ -97,7 +97,9 @@ case class ThorSchemaServerImpl(
   }
 
   private[this] def updateRanks() = {
-    currentRankList = adventurerMap.values.map(a => Score(a.playerId, a.name, a.killNum, a.energy)).toList.sorted
+    currentRankList = adventurerMap.values.map{ a =>
+      Score(a.playerId, a.name, a.killNum, a.energyScore)
+    }.toList.sorted
     var historyChange = false
     currentRankList.foreach { cScore =>
       historyRankMap.get(cScore.id) match {
@@ -188,6 +190,13 @@ case class ThorSchemaServerImpl(
     //只有平台用户才上传战绩（平台用户的id是guest.../user...）
     if(userId.take(5).equals("guest") || userId.take(4).equals("user"))
       RecordMap.get(userId).foreach { a =>
+        //若是死之后离开房间，不会执行以下foreach
+        adventurerMap.get(userId).foreach{ adventurer =>
+          RecordMap.get(userId).foreach{ a =>
+            a.killing += adventurer.killNum
+            a.score += adventurer.energyScore
+          }
+        }
         val record = ESheepRecord(
           playerId = userId,
           nickname = name,
