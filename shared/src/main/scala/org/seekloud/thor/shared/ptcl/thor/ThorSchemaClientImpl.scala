@@ -47,8 +47,8 @@ with FpsRender{
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
 
-          if(ifTest)
-            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
+//          if(ifTest)
+//            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
 
           val end = System.currentTimeMillis()
 //          if(end-start > 10)println(s"drawTime too Long: ${end-start}")
