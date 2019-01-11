@@ -88,6 +88,8 @@ trait BackgroundClient {
 
   def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit ={
     ctx.save()
+    ctx.setFill("rgba(250,250,250,0.6)")
+    ctx.fillRec(0,0,canvasSize.x,canvasSize.y)
     ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left")
     ctx.setFont("Helvetica", baseFont * 26)
