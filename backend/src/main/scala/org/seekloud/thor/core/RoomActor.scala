@@ -35,6 +35,12 @@ object RoomActor {
 
   case class LeftRoom(playerId: String, name: String, userList: List[(String, String)]) extends Command
 
+  case class BeDead(playerId: String, name: String, userList: List[(String, String)]) extends Command
+
+  case class CreateRobot(botId: String, name: String, level: Int) extends Command
+
+  case class ReliveRobot(botId: String, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
+
   case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
 
   //  case class GetKilled(playerId: String, name: String) extends Command with RoomManager.Command
@@ -58,6 +64,11 @@ object RoomActor {
             //为新房间创建thorSchema
             implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
+
+            for (cnt <- 0 until thorSchema.config.getRobotNumber) {
+              ctx.self ! CreateRobot(s"robot$cnt", thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
+            }
+
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
             }
@@ -81,6 +92,15 @@ object RoomActor {
     Behaviors.receive {
       (ctx, msg) =>
         msg match {
+          case CreateRobot(botId, name, level) =>
+            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, name, level), botId)
+            thorSchema.robotJoinGame(botId, name, robot)
+            Behaviors.same
+
+          case ReliveRobot(botId, name, botActor) =>
+            thorSchema.robotJoinGame(botId, name, botActor)
+            Behaviors.same
+
           case JoinRoom(roomId, userId, name, userActor) =>
             log.debug(s"user $userId join room $roomId")
             thorSchema.joinGame(userId, name, userActor)
@@ -97,6 +117,15 @@ object RoomActor {
             thorSchema.leftGame(userId, name)
             subscribersMap.remove(userId)
             dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
+
+            if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
+            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
+
+          case BeDead(userId, name, userList) =>
+            log.debug(s"roomactor - ${userId} die")
+            thorSchema.leftGame(userId, name)
+//            subscribersMap.remove(userId)
+//            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
@@ -128,7 +157,6 @@ object RoomActor {
               }
             }
 
-            val thorSchemaData = thorSchema.getThorSchemaState()
             if (tickCount % 40 == 5) {
               //生成食物+同步全量adventurer数据+新生成的食物
               val newFood = thorSchema.genFood(25)
@@ -145,6 +173,7 @@ object RoomActor {
             newPlayer.foreach {
               //为新用户分发全量数据
               player =>
+                val thorSchemaData = thorSchema.getThorSchemaState()
                 val actor = thorSchema.getUserActor4WatchGameList(player._1)
                 subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)

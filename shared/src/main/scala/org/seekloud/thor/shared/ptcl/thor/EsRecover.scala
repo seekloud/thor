@@ -31,7 +31,7 @@ trait EsRecover {
     gameSnapshotMap.clear()
   }
 
-  def rollback(frame:Long) = {
+  def rollback(frame:Int) = {
     require(frame < this.systemFrame)
 
     gameSnapshotMap.get(frame) match {

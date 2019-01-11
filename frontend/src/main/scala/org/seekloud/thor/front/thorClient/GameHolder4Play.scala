@@ -35,6 +35,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     if (firstCome) {
       addActionListenEvent()
       val url = if (id.isEmpty) Routes.wsJoinGameUrl(name) else Routes.wsJoinGameUrlESheep(id.get, name, accessCode.getOrElse("?"), roomId)
+//      dom.window.setTimeout(()=>websocketClient.setup(url), 3000)
       websocketClient.setup(url)
       gameLoop()
     }
@@ -48,8 +49,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
   def reStart() = {
     //    firstCome = true
-    start(myName, None, None, None) //重启没有验证accessCode
-    //    websocketClient.sendMsg(RestartGame(myName))
+//    start(myName, None, None, None) //重启没有验证accessCode
+        websocketClient.sendMsg(RestartGame(myName))
   }
 
   def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
@@ -57,58 +58,48 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
-      case YourInfo(config, id, name) =>
-        dom.console.log(s"get YourInfo ${config} ${id} ${name}")
+      case YourInfo(config, id, yourName) =>
+        dom.console.log(s"get YourInfo $config $id $yourName")
         startTime = System.currentTimeMillis()
         myId = id
-        myName = name
+        mainId = id
+        myName = yourName
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
         if (timer != 0) {
           dom.window.clearInterval(timer)
           thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
-        } else {
-          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         }
+        else thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+
         gameState = GameState.play
         Shortcut.playMusic("bgm-2")
-        nextFrame = dom.window.requestAnimationFrame(gameRender())
+        if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
-      //      case UserEnterRoom(userId, name, _, _) =>
-      //        barrage = s"${name}加入了游戏"
-      //        barrageTime = 300
-      //        println(s"222222222222")
-      //
-      //      case UserLeftRoom(userId, name, _) =>
-      //        barrage = s"${name}离开了游戏"
-      //        barrageTime = 300
-      //        println(s"user left $name")
-      //        thorSchemaOpt.foreach { grid => grid.leftGame(userId, name) }
 
       case e: BeAttacked =>
-        println("attack!!!!!!!!!!!!!" + e)
-        barrage = s"${e.killerName}杀死了${e.name}"
+        barrage = s"${e.killerName}  杀死了  ${e.name}"
         barrageTime = 300
-        if (e.playerId == myId) {
-//          println(s"隔500ms设置gameState为Stop!!!")
-          dom.window.setTimeout(() => gameState = GameState.stop, 350)
-          killer = e.killerName
-          endTime = System.currentTimeMillis()
-          val time = duringTime(endTime - startTime)
-          thorSchemaOpt match {
-            case Some(thorSchema: ThorSchemaClientImpl) =>
-              thorSchema.adventurerMap.get(myId).foreach { my =>
-                thorSchema.killerNew = e.killerName
-                thorSchema.duringTime = time
-                killerName = e.killerName
-                killNum = my.killNum
-                energy = my.energy
-                level = my.level
-              }
-            case None =>
+        if (e.playerId == mainId) {
+          mainId = e.killerId //跟随凶手视角
+          if(e.playerId == myId){
+            gameState = GameState.stop
+            killer = e.killerName
+            endTime = System.currentTimeMillis()
+            thorSchemaOpt match {
+              case Some(thorSchema: ThorSchemaClientImpl) =>
+                thorSchema.adventurerMap.get(myId).foreach { my =>
+                  thorSchema.killerNew = e.killerName
+                  thorSchema.duringTime = duringTime(endTime - startTime)
+                  killerName = e.killerName
+                  killNum = my.killNum
+                  energy = my.energy
+                  level = my.level
+                }
+              case None =>
+            }
           }
-//          dom.window.cancelAnimationFrame(nextFrame)
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
@@ -133,15 +124,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case e: GameEvent =>
-        e match {
-          case event: UserEnterRoom =>
-            barrage = s"${event.name}加入了游戏"
-            barrageTime = 300
-//          case event: UserLeftRoom =>
-//            barrage = s"${event.name}离开了游戏"
-//            barrageTime = 300
-          case _ =>
-        }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
       case x => dom.window.console.log(s"接收到无效消息$x")
@@ -151,14 +133,13 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   def addActionListenEvent(): Unit = {
     canvas.getCanvas.focus()
     canvas.getCanvas.oncontextmenu = _ => false //取消右键弹出行为
-    canvas.getCanvas.onmousemove = { (e: dom.MouseEvent) =>
+    canvas.getCanvas.onmousemove = { e: dom.MouseEvent =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
+          if (thorSchema.adventurerMap.contains(myId)) {
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
-            //            println(s"mouseDistance: $mouseDistance")
             val direction = thorSchema.adventurerMap(myId).direction
             if (math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
               val data = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
@@ -178,8 +159,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmousedown = { (e: dom.MouseEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
-            println("mouse down")
+          if (thorSchema.adventurerMap.contains(myId)) {
+//            println("mouse down")
             if (e.button == 0) { //左键
               val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
@@ -212,7 +193,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmouseup = { (e: dom.MouseEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId))
+          if (thorSchema.adventurerMap.contains(myId))
             if (e.button == 2) { //右键
               val event = MouseClickUpRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
@@ -227,9 +208,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onkeydown = { (e: dom.KeyboardEvent) =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
-          if (!thorSchema.adventurerMap.contains(myId) && !thorSchema.dyingAdventurerMap.contains(myId)) {
+          if (!thorSchema.adventurerMap.contains(myId)) {
             if (e.keyCode == KeyCode.Space) {
-              println("key space down")
+//              println("key space down")
               reStart()
               e.preventDefault()
             }

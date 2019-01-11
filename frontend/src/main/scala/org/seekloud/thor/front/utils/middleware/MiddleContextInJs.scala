@@ -35,14 +35,25 @@ class MiddleContextInJs extends MiddleContext {
     image match {
       case js: MiddleImageInJs =>
         if(imgOffsetX.isEmpty){
-        if (size.isEmpty) {
-          context.drawImage(js.getImage, offsetX, offsetY)
-        } else {
-          context.drawImage(js.getImage, offsetX, offsetY, size.get._1, size.get._2)
-        }
+          if (size.isEmpty) {
+            context.drawImage(js.getImage, offsetX, offsetY)
+          } else {
+            context.drawImage(js.getImage, offsetX, offsetY, size.get._1, size.get._2)
+          }
         }
         else{
           context.drawImage(js.getImage, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
+        }
+      case js: MiddleCanvasInJs =>
+        if(imgOffsetX.isEmpty){
+          if (size.isEmpty) {
+            context.drawImage(js.getCanvas, offsetX, offsetY)
+          } else {
+            context.drawImage(js.getCanvas, offsetX, offsetY, size.get._1, size.get._2)
+          }
+        }
+        else{
+          context.drawImage(js.getCanvas, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
       case js: Canvas =>
         if(imgOffsetX.isEmpty){
@@ -63,6 +74,8 @@ class MiddleContextInJs extends MiddleContext {
   override def clearRect(x: Double, y: Double, w: Double, h: Double) = context.clearRect(x, y, w, h)
 
   override def beginPath() = context.beginPath()
+
+  override def closePath() = context.closePath()
 
   override def lineTo(x1: Double, y1: Double) = context.lineTo(x1, y1)
 

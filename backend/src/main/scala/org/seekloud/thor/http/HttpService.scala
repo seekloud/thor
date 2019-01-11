@@ -49,9 +49,13 @@ trait HttpService
     complete(TestPswRsp(psw))
   }
 
+  private val getVersion: Route = (path("getVersion") & get){
+    val version = AppSettings.version
+    complete(TestPswRsp(version))
+  }
 
   lazy val routes: Route = pathPrefix(AppSettings.rootPath) {
-    resourceRoutes ~ platEnterRoute ~ roomInfoRoutes ~ replayRoutes ~ getTestPsw ~
+    resourceRoutes ~ platEnterRoute ~ roomInfoRoutes ~ replayRoutes ~ getTestPsw ~ getVersion ~
       (pathPrefix("game") & get){
         pathEndOrSingleSlash{
           getFromResource("html/admin.html")

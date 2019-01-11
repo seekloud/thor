@@ -8,6 +8,7 @@ import io.circe.parser._
 
 import scala.concurrent.Future
 import org.seekloud.thor.Boot.executor
+import org.seekloud.thor.common.AppSettings
 /**
   * User: XuSiRan
   * Date: 2018/11/22
@@ -17,13 +18,14 @@ object ESheepClient extends HttpUtil {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  val thorId = 1000000006l // TODO 写入配置文件？
-  val thorKey = "Ta5DFWhVhJY4F7gRTWzsGufcaOED478v"// TODO 写入配置文件？
+  private val baseUrl = AppSettings.esheepProtocol + "://" + AppSettings.esheepHost + ":" + AppSettings.esheepPort + "/" + AppSettings.esheepUrl
+  private val thorId = AppSettings.esheepAppId
+  private val thorKey = AppSettings.esheepSecureKey
 
   def gsKey2Token(): Future[Either[Throwable, GetTokenByGsKeyRsp]] ={
 
     val methodName = "test_name_gsKey2Token"
-    val url = "http://10.1.29.250:30374/esheep/api/gameServer/gsKey2Token" //FIXME 修改url
+    val url = baseUrl + "/api/gameServer/gsKey2Token"
     val jsonStr = GsKey2TokenReq(thorId, thorKey).asJson.noSpaces
 
     postJsonRequestSend(methodName, url, Nil, jsonStr).map{
@@ -37,7 +39,7 @@ object ESheepClient extends HttpUtil {
 
   def verifyAccessCode(accessCode: String, token: String): Future[Either[Throwable, GetPlayerByAccessCodeRsp]] ={
     val methodName = "test_name_verifyAccessCode"
-    val url = s"http://10.1.29.250:30374/esheep/api/gameServer/verifyAccessCode?token=$token"//FIXME 修改url
+    val url = baseUrl + s"/api/gameServer/verifyAccessCode?token=$token"
     val jsonStr = VerifyAccessCodeReq(thorId, accessCode).asJson.noSpaces
 
     postJsonRequestSend(methodName, url, Nil, jsonStr).map{
@@ -51,7 +53,7 @@ object ESheepClient extends HttpUtil {
 
   def addRecord2ESheep(record: ESheepRecord, token: String): Future[Either[Throwable, EsheepCommonRsp]] ={
     val methodName = "test_name_addRecord2ESheep"
-    val url = s"http://10.1.29.250:30374/esheep/api/gameServer/addPlayerRecord?token=$token"//FIXME 修改url
+    val url = baseUrl + s"/api/gameServer/addPlayerRecord?token=$token"
     val jsonStr = AddESheepRecordRsp(record).asJson.noSpaces
 
     postJsonRequestSend(methodName, url, Nil, jsonStr).map{

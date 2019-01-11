@@ -30,6 +30,8 @@ trait MiddleContext {
 
   def beginPath(): Unit
 
+  def closePath(): Unit
+
   def lineTo(x1: Double, y1: Double): Unit
 
   def stroke(): Unit

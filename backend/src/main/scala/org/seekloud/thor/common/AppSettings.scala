@@ -39,6 +39,7 @@ object AppSettings {
   val thorGameConfig:ThorGameConfig = ThorGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
 
   val testPsw = appConfig.getString("testPsw")
+  val version = appConfig.getString("version")
 //  val wxConfig = appConfig.getConfig("wx.config")
 //  val mpAppId = wxConfig.getString("mpAppId")
 //  val componentAppId = wxConfig.getString("componentAppid")
@@ -95,6 +96,18 @@ object AppSettings {
   val ramblerPort = ramblerConfig.getInt("port")
   val ramblerDomain = ramblerConfig.getString("domain")
   val ramblerRootUrl = ramblerConfig.getString("rootUrl")
+
+
+  val dependenceConfig = config.getConfig("dependence")
+
+  private val eSheepConfig = dependenceConfig.getConfig("esheep.config")
+  val esheepAppId = eSheepConfig.getLong("appId")
+  val esheepSecureKey = eSheepConfig.getString("secureKey")
+  val esheepProtocol = eSheepConfig.getString("protocol")
+  val esheepHost = eSheepConfig.getString("host")
+  val esheepPort = eSheepConfig.getInt("port")
+  val esheepDomain = eSheepConfig.getString("domain")
+  val esheepUrl = eSheepConfig.getString("url")
 
 
 

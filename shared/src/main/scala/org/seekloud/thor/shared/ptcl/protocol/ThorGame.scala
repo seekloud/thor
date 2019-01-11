@@ -9,7 +9,7 @@ import org.seekloud.thor.shared.ptcl.thor.{ThorSchemaState}
 object ThorGame {
 
   sealed trait GameEvent {
-    val frame: Long
+    val frame: Int
   }
 
   sealed trait UserEvent extends GameEvent
@@ -51,21 +51,21 @@ object ThorGame {
 
   final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String) extends WsMsgServer
 
-  final case class UserEnterRoom(playerId: String, name: String, adventurer: AdventurerState, override val frame: Long = 0l) extends UserEvent with WsMsgServer
+  final case class UserEnterRoom(playerId: String, name: String, adventurer: AdventurerState, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class UserLeftRoom(playerId: String, name: String, override val frame: Long = 0l) extends UserEvent with WsMsgServer
+  final case class UserLeftRoom(playerId: String, name: String, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class BeAttacked(playerId: String, name: String, killerId: String, killerName: String, override val frame: Long = 0l) extends UserEvent with WsMsgServer
+  final case class BeAttacked(playerId: String, name: String, killerId: String, killerName: String, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class EatFood(playerId: String, foodId: Long, foodLevel: Int, override val frame: Long = 0l) extends UserEvent with WsMsgServer
+  final case class EatFood(playerId: String, foodId: Int, foodLevel: Int, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class MouseMove(playerId: String, direction: Float, mouseDistance: Float, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseMove(playerId: String, direction: Float, mouseDistance: Float, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
-  final case class MouseClickDownLeft(playerId: String, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseClickDownLeft(playerId: String, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
-  final case class MouseClickDownRight(playerId: String, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseClickDownRight(playerId: String, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
-  final case class MouseClickUpRight(playerId: String, override val frame: Long, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseClickUpRight(playerId: String, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
   final case object RebuildWebSocket extends WsMsgServer
 
@@ -73,7 +73,7 @@ object ThorGame {
 
 
   /*生成环境元素*/
-  final case class GenerateFood(override val frame: Long, food: FoodState) extends EnvironmentEvent with WsMsgServer
+  final case class GenerateFood(override val frame: Int, food: FoodState) extends EnvironmentEvent with WsMsgServer
 
 
   final case class RestartGame(name: String) extends WsMsgFront

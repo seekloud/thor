@@ -17,7 +17,7 @@ import scala.collection.mutable
   * Time: 16:30
   */
 case class ThorSchemaState(
-  f: Long,
+  f: Int,
   adventurer: List[AdventurerState],
   food: List[FoodState],
   isIncrement: Boolean = false
@@ -37,20 +37,21 @@ trait ThorSchema extends KillInformation {
 
   var playerId = ""
 
-  var systemFrame: Long = 0L //系统帧数
+  var systemFrame: Int = 0 //系统帧数
 
   /*元素*/
   var adventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
   val tmpAdventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
-  var foodMap = mutable.HashMap[Long, Food]() // foodId -> food
-  val tmpFoodMap = mutable.HashMap[Long, Food]() // foodId -> food
+  var foodMap = mutable.HashMap[Int, Food]() // foodId -> food
+  val tmpFoodMap = mutable.HashMap[Int, Food]() // foodId -> food
 
   /*事件*/
-  protected val gameEventMap = mutable.HashMap[Long, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
-  protected val actionEventMap = mutable.HashMap[Long, List[UserActionEvent]]() //frame -> List[UserActionEvent]
-  protected val myAdventurerAction = mutable.HashMap[Long, List[UserActionEvent]]()
+  protected val gameEventMap = mutable.HashMap[Int, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
+  protected val actionEventMap = mutable.HashMap[Int, List[UserActionEvent]]() //frame -> List[UserActionEvent]
+  protected val myAdventurerAction = mutable.HashMap[Int, List[UserActionEvent]]()
 
-  protected val attackingAdventureMap = mutable.HashMap[String, Int]()
+  protected val attackingAdventureMap = mutable.HashMap[String, Int]() // id -> 程度
+  protected var MaybeAttackingAdventureList = List[(String, String, Int)]() // id, killerId, 所在象限
   //playerId -> 攻击执行程度
   val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
 
@@ -90,6 +91,7 @@ trait ThorSchema extends KillInformation {
 
   //处理本帧离开的用户
   protected final def handleUserLeftRoom(e: UserLeftRoom): Unit = {
+//    println(s"[[[${e.playerId} left room]]]")
     adventurerMap.get(e.playerId).foreach(quadTree.remove)
     adventurerMap.remove(e.playerId)
   }
@@ -115,13 +117,13 @@ trait ThorSchema extends KillInformation {
         case Some(adventurer) =>
           action match {
             case a: MouseMove =>
-              adventurer.setMoveDirection(a.direction, a.mouseDistance)
+              adventurer.setMoveDirection(a.direction, a.mouseDistance, attackingAdventureMap.contains(a.playerId))
               adventurer.setFaceDirection(a.direction)
             case a: MouseClickDownLeft =>
               attackingAdventureMap.get(a.playerId) match {
                 case Some(_) => ()
                 case None =>
-                  attackingAdventureMap.put(a.playerId, 4) //TODO 动画持续帧数 现在是3
+                  attackingAdventureMap.put(a.playerId, 3) //动画持续帧数 现在是3
                   adventurerMap.filter(_._1 == a.playerId).values.foreach {
                     adventurer =>
                       adventurer.isMove = false
@@ -175,12 +177,12 @@ trait ThorSchema extends KillInformation {
     }
   }
 
-  protected def addGameEvents(frame: Long, events: List[GameEvent], actionEvents: List[UserActionEvent]): Unit = {
+  protected def addGameEvents(frame: Int, events: List[GameEvent], actionEvents: List[UserActionEvent]): Unit = {
     gameEventMap.put(frame, events)
     actionEventMap.put(frame, actionEvents)
   }
 
-  def removePreEvent(frame: Long, playerId: String, serialNum: Int): Unit = {
+  def removePreEvent(frame: Int, playerId: String, serialNum: Int): Unit = {
     actionEventMap.get(frame).foreach { actions =>
       actionEventMap.put(frame, actions.filterNot(t => t.playerId == playerId && t.serialNum == serialNum))
     }
@@ -193,11 +195,25 @@ trait ThorSchema extends KillInformation {
   //
   //  }
 
+  //杀死高速从刀下穿过的人
+  protected final def adventurerMaybeAttackedCallback(killer: Adventurer)(adventurer: Adventurer, page: Int): Unit ={
+    MaybeAttackingAdventureList.foreach{ adventurerLi =>
+      if(adventurerLi._1 == adventurer.playerId && adventurerLi._2 == killer.playerId && adventurerLi._3 < page){
+        MaybeAttackingAdventureList = MaybeAttackingAdventureList.filterNot(_._1 == adventurer.playerId)
+        adventurerAttackedCallback(killer)(adventurer)
+      }
+      else{
+        MaybeAttackingAdventureList = (adventurer.playerId, killer.playerId, page) :: MaybeAttackingAdventureList
+      }
+    }
+  }
+
   protected final def handleAdventurerAttackingNow(): Unit = {
     attackingAdventureMap.foreach { attacking =>
       adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
-        val adventurerMaybeAttacked = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Adventurer]).map(_.asInstanceOf[Adventurer])
-        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer))(config))
+        val adventurerMaybeAttacked = adventurerMap.filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < adventurer.radius + config.getWeaponLengthByLevel(adventurer.level) + a._2.radius).values
+//        println(s"潜在攻击列表${adventurerMaybeAttacked.map(_.name)}")
+        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer), adventurerMaybeAttackedCallback(killer = adventurer))(config))
       }
 
       if (attacking._2 <= 0) {
@@ -208,6 +224,7 @@ trait ThorSchema extends KillInformation {
             }
         }
         attackingAdventureMap.remove(attacking._1)
+        MaybeAttackingAdventureList = MaybeAttackingAdventureList.filterNot(_._2 == attacking._1)
       }
       else attackingAdventureMap.update(attacking._1, attacking._2 - 1)
     }
@@ -218,29 +235,36 @@ trait ThorSchema extends KillInformation {
       if (dying._2._2 <= 0) {
         println(s"remove adventurer: ${dying._1}")
         dyingAdventurerMap.remove(dying._1)
-        adventurerMap.remove(dying._1)
+//        adventurerMap.remove(dying._1)
       } else {
-        println(s"${dying._1} dying...")
+//        println(s"${dying._1} dying...")
         dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 - 1))
       }
     }
   }
 
-  protected final def handleAdventurerAttacked(e: BeAttacked): Unit = {
+  protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
     val killerOpt = adventurerMap.get(e.killerId)
-    adventurerMap.get(e.playerId).foreach { adventurer =>
-      println(s"handle ${e.playerId} attacked")
-      killerOpt.foreach(_.killNum += 1)
-      quadTree.remove(adventurer)
-//      adventurerMap.remove(adventurer.playerId)
-      dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
-      addKillInfo(e.killerName, adventurer.name)
+    if(killerOpt.nonEmpty){
+      adventurerMap.get(e.playerId).foreach { adventurer =>
+        //      println(s"handle ${e.playerId} attacked")
+        killerOpt.foreach(_.killNum += 1)
+        quadTree.remove(adventurer)
+        adventurerMap.remove(adventurer.playerId)
+        dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
+        addKillInfo(e.killerName, adventurer.name)
+      }
     }
   }
 
 
   protected final def handleAdventurerAttacked(es: List[BeAttacked]): Unit = {
-    es foreach handleAdventurerAttacked
+    es.sortBy{ event =>
+      adventurerMap.find(_._1 == event.playerId) match{
+        case None => 100
+        case Some(a) => a._2.level
+      }
+    } foreach handleAdventurerAttacked
   }
 
   final protected def handleAdventurerAttackedNow(): Unit = {
@@ -275,8 +299,8 @@ trait ThorSchema extends KillInformation {
 
   //后台单独重写
   protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food): Unit = {
-    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
-    addGameEvent(event)
+//    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
+//    addGameEvent(event)
   }
 
   protected def handleGenerateFood(e: GenerateFood): Unit = {
@@ -308,6 +332,89 @@ trait ThorSchema extends KillInformation {
 
   protected def adventurerMove(): Unit = {
     adventurerMap.values.foreach { adventurer =>
+      val adRadius = config.getAdventurerRadiusByLevel(adventurer.level)
+      val intersectNum = adventurerMap.filterNot(_._1 == adventurer.playerId).values.foldLeft(0) {
+        (sum, otherAd) =>
+          val oAdRadius = config.getAdventurerRadiusByLevel(otherAd.level)
+          val distance = adventurer.position.distance(otherAd.position)
+          if (distance <= adRadius + oAdRadius) {
+            val relativeTheta = otherAd.position.getTheta(adventurer.position)
+            if (math.abs(relativeTheta) >= (math.Pi / 2) && math.abs(relativeTheta) <= math.Pi) {
+              val positiveUpperLimit = normalizeTheta(relativeTheta - (math.Pi / 2))
+              val negativeFloorLimit = normalizeTheta(relativeTheta + (math.Pi / 2))
+              if ((adventurer.direction >= 0 && adventurer.direction <= positiveUpperLimit) || (adventurer.direction >= negativeFloorLimit && adventurer.direction <= 0)) {
+                if (sum == 0) {
+                  adventurer.isIntersect = 0
+                }
+              } else {
+                adventurer.isIntersect = 1
+              }
+            } else if (math.abs(relativeTheta) >= 0 && math.abs(relativeTheta) <= (math.Pi / 2)) {
+              val positiveFloorLimit = normalizeTheta(relativeTheta + (math.Pi / 2))
+              val negativeUpperLimit = normalizeTheta(relativeTheta - (math.Pi / 2))
+              if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= - math.Pi && adventurer.direction <= negativeUpperLimit)) {
+                if (sum == 0) {
+                  adventurer.isIntersect = 0
+                }
+              } else {
+                adventurer.isIntersect = 1
+              }
+            }
+
+
+
+
+//            val theta = (math.Pi / 2) - math.acos(oAdRadius / (adRadius + oAdRadius))
+//            val thetaB = normalizeTheta(relativeTheta - theta)
+//            val thetaC = normalizeTheta(relativeTheta + theta)
+//
+//            println(s"****************************************\n" +
+//                    s"主体[${adventurer.name}],对方[${otherAd.name}]\n" +
+//                    s"主体运动角度[${adventurer.direction}]]\n" +
+//                    s"圆心相对角度[$relativeTheta], 偏移[$theta]\n" +
+//                    s"thetaB [$thetaB],thetaC [$thetaC]\n" +
+//                    s"****************************************\n")
+//
+//            if (math.max(thetaB, thetaC) <= 0 || math.min(theta, thetaC) >= 0) {
+////              println(s"主体 [${adventurer.name}] debug point1 - theta the same")
+//              if (adventurer.direction >= math.min(thetaB, thetaC) && adventurer.direction <= math.max(thetaB, thetaC)) {
+//                adventurer.isIntersect = 1
+//              } else {
+//                if (sum == 0) {
+//                  adventurer.isIntersect = 0
+//                }
+//              }
+//            } else {
+////              println(s"主体 [${adventurer.name}] debug point2 - diff theta")
+//              if (math.abs(thetaB) >= 0 && math.abs(thetaB) <= (math.Pi / 2)) {
+//                val positiveUpperLimit = math.max(thetaB, thetaC)
+//                val negativeFloorLimit = math.min(thetaB, thetaC)
+//                if ((adventurer.direction >= 0 && adventurer.direction <= positiveUpperLimit) || (adventurer.direction >= negativeFloorLimit && adventurer.direction <= 0)) {
+//                  adventurer.isIntersect = 1
+//                } else {
+//                  if (sum == 0) {
+//                    adventurer.isIntersect = 0
+//                  }
+//                }
+//              } else {
+//                val positiveFloorLimit = math.max(thetaB, thetaC)
+//                val negativeUpperLimit = math.min(thetaB, thetaC)
+//                if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= - math.Pi && adventurer.direction <= negativeUpperLimit)) {
+//                  adventurer.isIntersect = 1
+//                } else {
+//                  if (sum == 0) {
+//                    adventurer.isIntersect = 0
+//                  }
+//                }
+//              }
+//            }
+            sum + 1
+          } else sum
+      }
+      if (intersectNum == 0) {
+        adventurer.isIntersect = 0
+      }
+//      println(s"主体 [${adventurer.name}] isIntersect ${adventurer.isIntersect}")
       adventurer.move(boundary, quadTree)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
     }

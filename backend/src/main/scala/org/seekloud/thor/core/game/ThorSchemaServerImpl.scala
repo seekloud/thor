@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.TimerScheduler
-import org.seekloud.thor.core.{ESheepLinkClient, RoomActor, UserActor}
+import org.seekloud.thor.core.{ESheepLinkClient, RobotActor, RoomActor, UserActor}
 import org.seekloud.thor.protocol.ESheepProtocol.{ESheepRecord, ESheepRecordSimple}
 import org.seekloud.thor.shared.ptcl.component._
 import org.slf4j.Logger
@@ -40,7 +40,9 @@ case class ThorSchemaServerImpl(
 
   private val foodIdGenerator = new AtomicInteger(100)
 
-  private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil
+  private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil // userId, name, Actor
+  private var justJoinBot: List[(String, String, ActorRef[RobotActor.Command])] = Nil // botId, name
+  private val robotMap: mutable.HashMap[String, ActorRef[RobotActor.Command]] = mutable.HashMap.empty
   private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
 
   private val RecordMap = mutable.HashMap[String, ESheepRecordSimple]() //后台战绩： playerId -> (开始时间，)
@@ -66,10 +68,25 @@ case class ThorSchemaServerImpl(
     RecordMap.get(adventurer.playerId).foreach{ a =>
       a.killed += 1
       a.killing += adventurer.killNum
-      a.score += adventurer.energy
+      a.score += adventurer.energyScore
     }
     addGameEvent(event)
-    dispatch(event)
+  }
+
+  override protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
+    super.handleAdventurerAttacked(e)
+    val killerOpt = adventurerMap.get(e.killerId)
+    if(killerOpt.nonEmpty){
+      dispatch(e)
+      if(e.playerId.take(5).equals("robot")){
+        if(robotMap.contains(e.playerId)){
+          robotMap(e.playerId) ! RobotActor.RobotDead
+        }
+        robotMap.remove(e.playerId)
+        adventurerMap.get(e.playerId).foreach(quadTree.remove)
+        adventurerMap.remove(e.playerId)
+      }
+    }
   }
 
   implicit val scoreOrdering = new Ordering[Score] {
@@ -83,7 +100,9 @@ case class ThorSchemaServerImpl(
   }
 
   private[this] def updateRanks() = {
-    currentRankList = adventurerMap.values.map(a => Score(a.playerId, a.name, a.killNum, a.energy)).toList.sorted
+    currentRankList = adventurerMap.values.map{ a =>
+      Score(a.playerId, a.name, a.killNum, a.energyScore)
+    }.toList.sorted
     var historyChange = false
     currentRankList.foreach { cScore =>
       historyRankMap.get(cScore.id) match {
@@ -120,7 +139,7 @@ case class ThorSchemaServerImpl(
 
   private final def generateFood(level: Byte = 1, position: Point, radius: Float = 2): FoodState = {
     //生成食物事件，被后台定时事件调用，前端不产生此事件，食物的属性暂且全部作为参数,color作为随机数
-    val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius, random.nextInt(8))
+    val foodState = FoodState(foodIdGenerator.getAndIncrement(), level, position, radius, random.nextInt(8).toByte)
     val event = GenerateFood(systemFrame, foodState)
     addGameEvent(event)
     dispatch(event)
@@ -149,6 +168,10 @@ case class ThorSchemaServerImpl(
     justJoinUser = (userId, name, userActor) :: justJoinUser
   }
 
+  def robotJoinGame(botId: String, name: String, ref: ActorRef[RobotActor.Command]): Unit ={
+    justJoinBot = (botId, name, ref) :: justJoinBot
+  }
+
   def handleJoinRoom4Watch(userActor4WatchGame: ActorRef[UserActor.Command], uid: String, playerId: String) = {
     adventurerMap.find(_._2.playerId == playerId) match {
       case Some((_, adventurer)) =>
@@ -168,8 +191,15 @@ case class ThorSchemaServerImpl(
     val event = UserLeftRoom(userId, name, systemFrame)
     addGameEvent(event)
     //只有平台用户才上传战绩（平台用户的id是guest.../user...）
-    if(userId.length > 5)
+    if(userId.take(5).equals("guest") || userId.take(4).equals("user"))
       RecordMap.get(userId).foreach { a =>
+        //若是死之后离开房间，不会执行以下foreach
+        adventurerMap.get(userId).foreach{ adventurer =>
+          RecordMap.get(userId).foreach{ a =>
+            a.killing += adventurer.killNum
+            a.score += adventurer.energyScore
+          }
+        }
         val record = ESheepRecord(
           playerId = userId,
           nickname = name,
@@ -230,7 +260,7 @@ case class ThorSchemaServerImpl(
       def genAdventurer() = {
         val position = genPosition()
         var adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
-        var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
+        //var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
         //        while (adventurer.isIntersectsObject(objects)){
         //          val position = genPosition()
         //          adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
@@ -253,8 +283,16 @@ case class ThorSchemaServerImpl(
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
     }
+    justJoinBot.foreach {
+      case (botId, name, ref) =>
+        val adventurer = generateAdventurer(botId, name)
+        robotMap.put(botId, ref)
+        adventurerMap.put(botId, adventurer)
+        quadTree.insert(adventurer)
+    }
 
     justJoinUser = Nil
+    justJoinBot = Nil
   }
 
   private def init(): Unit = {

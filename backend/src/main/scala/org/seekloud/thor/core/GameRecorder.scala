@@ -96,7 +96,7 @@ object GameRecorder {
         val gameRecordBuffer: List[GameRecord] = List[GameRecord]()
         val data = GameRecorderData(roomId, fileName, 0, gameInformation, initStateOpt, fileRecorder, gameRecordBuffer)
         timer.startSingleTimer(SaveDataKey, Save, saveTime)
-        val startFrame = initStateOpt.map(_.asInstanceOf[ThorSnapshot].state.f).getOrElse(0L)
+        val startFrame = initStateOpt.map(_.asInstanceOf[ThorSnapshot].state.f).getOrElse(0)
         switchBehavior(ctx, "work", work(data, mutable.HashMap.empty[EssfMapKey, EssfMapJoinLeftInfo], mutable.HashMap.empty[String, String], mutable.HashMap.empty[String, String], startFrame, -1L))
       }
     }

@@ -55,15 +55,16 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         dom.console.log(s"get YourInfo ${config} ${id} ${name}")
         startTime = System.currentTimeMillis()
         myId = id
+        mainId = id
         myName = name
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
         thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
         clickTimer = Shortcut.schedule(fakeMouseClick, 3000)
-        mousemoveTimer = Shortcut.schedule(fakeMouseMove, 1000)
+        mousemoveTimer = Shortcut.schedule(fakeMouseMove, 1500)
 
       case e:BeAttacked =>
         println("attack!!!!!!!!!!!!!"+e)
@@ -111,7 +112,8 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         receivePingPackage(e)
 
 
-      case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
+      case e: UserActionEvent =>
+        thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case e: GameEvent =>
         if (e.isInstanceOf[UserEnterRoom]) {
@@ -151,10 +153,27 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         //            println(s"mouseDistance: $mouseDistance")
         val direction = thorSchema.adventurerMap.get(myId).get.direction
         if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
-          val data = MouseMove(thorSchema.myId,theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-          websocketClient.sendMsg(data)
-          thorSchema.preExecuteUserEvent(data)
+          Shortcut.scheduleOnce(()=>fakeMouseMoveLittle(theta, mouseDistance.toFloat), 20)
         }
+      }
+    }
+  }
+  private def fakeMouseMoveLittle(targetTheta: Float, mouseDistance: Float): Unit ={
+    def fakeMove(thorSchema: ThorSchemaClientImpl, thetaList: List[Float], num: Int): Unit ={
+      val data = MouseMove(thorSchema.myId, thetaList(num), mouseDistance, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+      websocketClient.sendMsg(data)
+      thorSchema.preExecuteUserEvent(data)
+      if(num < thetaList.length - 1)
+        Shortcut.scheduleOnce(()=> fakeMove(thorSchema, thetaList, num + 1 ) , 50)
+    }
+    thorSchemaOpt.foreach{ thorSchema =>
+      val direction = thorSchema.adventurerMap(myId).direction
+      if(math.abs(targetTheta - direction) > 0.2){
+
+        val increment = (1 to (math.abs(targetTheta - direction) / 0.2).toInt).map(_ => if(targetTheta - direction > 0) 0.2f else -0.2f)
+        val thetaList = increment.scanLeft(direction)(_ + _)
+        println(thetaList)
+        Shortcut.scheduleOnce(()=> fakeMove(thorSchema, thetaList.toList, 0 ) , 50)
       }
     }
   }

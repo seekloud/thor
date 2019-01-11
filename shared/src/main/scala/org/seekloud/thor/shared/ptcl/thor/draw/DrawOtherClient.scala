@@ -24,7 +24,7 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     ctx.setTextAlign("center")
     ctx.setFont("Comic Sans Ms", 36)
     ctx.setTextBaseLine("top")
-    ctx.fillText(adventurer.level.toString, barLeft + 32, barTop + 8)
+    ctx.fillText(adventurer.level.toString, barLeft + 32, barTop + 18)
     ctx.restore()
 
     //画能量条进度
@@ -47,14 +47,15 @@ trait DrawOtherClient {this: ThorSchemaClientImpl =>
     val x = adventurer.getPosition.x + offset.x
     val y = adventurer.getPosition.y + offset.y
     val rx = adventurer.radius * canvasUnit * 0.85
-    val sA = adventurer.direction - scala.math.Pi * 2.0 / 9.0 * step - scala.math.Pi * 1.0 / 9.0
-    val eA = adventurer.direction - scala.math.Pi * 2.0 / 9.0 * step + scala.math.Pi * 1.0 / 9.0
+    val sA = adventurer.direction - scala.math.Pi * 1.0 / 6.0 * step - scala.math.Pi * 1.0 / 9.0
+    val eA = adventurer.direction - scala.math.Pi * 1.0 / 6.0 * step + scala.math.Pi * 1.0 / 9.0
     ctx.save()
     ctx.beginPath()
     ctx.setStrokeStyle("#30B8E8")
     ctx.lineWidth(config.getWeaponLengthByLevel(adventurer.level) * canvasUnit * 0.85)
     ctx.arc(x * canvasUnit, y * canvasUnit, rx + config.getWeaponLengthByLevel(adventurer.level) / 2 * canvasUnit * 0.85, sA, eA, false)
     ctx.stroke()
+    ctx.closePath()
     ctx.restore()
   }
 }

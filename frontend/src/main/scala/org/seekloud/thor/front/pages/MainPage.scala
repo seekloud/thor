@@ -3,6 +3,7 @@ package org.seekloud.thor.front.pages
 import org.seekloud.thor.front.common.{Page, PageSwitcher}
 import mhtml.{Cancelable, Rx, Var, mount}
 import org.scalajs.dom
+import org.seekloud.thor.front.Main
 import org.seekloud.thor.front.model.ReplayInfo
 
 import scala.xml.Elem
@@ -23,12 +24,15 @@ object MainPage extends PageSwitcher {
     case _ => println("error in switch"); EntryPage.render
   }
 
+  private val versionDiv = Main.version.map{ version => <div style="color:white;position:fixed;left:20px;bottom:20px;font-family:consolas;font-weight:bold">V{version}</div>}
+
 
   def show(): Cancelable = {
     switchPageByHash()
     val page =
       <div>
         {currentPage}
+        {versionDiv}
       </div>
     mount(dom.document.body, page)
   }

@@ -32,6 +32,8 @@ object RoomManager {
 
   case class LeftRoom(playerId: String, name:String) extends Command
 
+  case class BeDead(playerId: String, name:String) extends Command
+
   def create():Behavior[Command] = {
     log.debug(s"RoomManager start...")
     Behaviors.setup[Command]{
@@ -93,6 +95,16 @@ object RoomManager {
                 case Some(t) =>
                   roomInUse.put(t._1,t._2.filterNot(_._1 == uid))
                   getRoomActor(ctx,t._1) ! RoomActor.LeftRoom(uid,name,roomInUse(t._1))
+                  if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
+                case None => log.debug(s"该玩家不在任何房间")
+              }
+              Behaviors.same
+
+            case BeDead(playerId, name) =>
+              roomInUse.find(_._2.exists(_._1 == playerId)) match{
+                case Some(t) =>
+                  roomInUse.put(t._1,t._2.filterNot(_._1 == playerId))
+                  getRoomActor(ctx,t._1) ! RoomActor.BeDead(playerId,name,roomInUse(t._1))
                   if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
                 case None => log.debug(s"该玩家不在任何房间")
               }
