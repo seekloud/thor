@@ -360,12 +360,61 @@ trait ThorSchema extends KillInformation {
                 adventurer.isIntersect = 1
               }
             }
+
+
+
+
+//            val theta = (math.Pi / 2) - math.acos(oAdRadius / (adRadius + oAdRadius))
+//            val thetaB = normalizeTheta(relativeTheta - theta)
+//            val thetaC = normalizeTheta(relativeTheta + theta)
+//
+//            println(s"****************************************\n" +
+//                    s"主体[${adventurer.name}],对方[${otherAd.name}]\n" +
+//                    s"主体运动角度[${adventurer.direction}]]\n" +
+//                    s"圆心相对角度[$relativeTheta], 偏移[$theta]\n" +
+//                    s"thetaB [$thetaB],thetaC [$thetaC]\n" +
+//                    s"****************************************\n")
+//
+//            if (math.max(thetaB, thetaC) <= 0 || math.min(theta, thetaC) >= 0) {
+////              println(s"主体 [${adventurer.name}] debug point1 - theta the same")
+//              if (adventurer.direction >= math.min(thetaB, thetaC) && adventurer.direction <= math.max(thetaB, thetaC)) {
+//                adventurer.isIntersect = 1
+//              } else {
+//                if (sum == 0) {
+//                  adventurer.isIntersect = 0
+//                }
+//              }
+//            } else {
+////              println(s"主体 [${adventurer.name}] debug point2 - diff theta")
+//              if (math.abs(thetaB) >= 0 && math.abs(thetaB) <= (math.Pi / 2)) {
+//                val positiveUpperLimit = math.max(thetaB, thetaC)
+//                val negativeFloorLimit = math.min(thetaB, thetaC)
+//                if ((adventurer.direction >= 0 && adventurer.direction <= positiveUpperLimit) || (adventurer.direction >= negativeFloorLimit && adventurer.direction <= 0)) {
+//                  adventurer.isIntersect = 1
+//                } else {
+//                  if (sum == 0) {
+//                    adventurer.isIntersect = 0
+//                  }
+//                }
+//              } else {
+//                val positiveFloorLimit = math.max(thetaB, thetaC)
+//                val negativeUpperLimit = math.min(thetaB, thetaC)
+//                if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= - math.Pi && adventurer.direction <= negativeUpperLimit)) {
+//                  adventurer.isIntersect = 1
+//                } else {
+//                  if (sum == 0) {
+//                    adventurer.isIntersect = 0
+//                  }
+//                }
+//              }
+//            }
             sum + 1
           } else sum
       }
       if (intersectNum == 0) {
         adventurer.isIntersect = 0
       }
+//      println(s"主体 [${adventurer.name}] isIntersect ${adventurer.isIntersect}")
       adventurer.move(boundary, quadTree)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
     }
