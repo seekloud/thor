@@ -11,15 +11,18 @@ trait BackgroundClient {
 
   def window = Point((canvasSize.x - 12).toFloat, (canvasSize.y - 12).toFloat)
   def baseFont = window.x / 1440
-  private val mapImg = drawFrame.createImage(s"/img/map.jpg")
-  private val rankImg = drawFrame.createImage(s"/img/rank.png")
+  private val mapImg = drawFrame.createImage(s"/img/background.png")
+//  private val rankImg = drawFrame.createImage(s"/img/rank.png")
 
   def drawBackground(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
     ctx.save()
     ctx.setFill("#171b1f")
     ctx.fillRec(0, 0, canvasBoundary.x * canvasUnit, canvasBoundary.y * canvasUnit)
     ctx.fill()
-    ctx.drawImage(mapImg, offset.x * canvasUnit, offset.y * canvasUnit, Some(config.boundary.x * canvasUnit, config.boundary.y * canvasUnit))
+    ctx.drawImage(mapImg, offset.x * canvasUnit, offset.y * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
+    ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, offset.y * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
+    ctx.drawImage(mapImg, offset.x * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
+    ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
     ctx.restore()
   }
 
@@ -49,7 +52,7 @@ trait BackgroundClient {
     val begin = if (CurrentOrNot) 10 else window.x * 0.78
     var last = ""
     ctx.save()
-    ctx.drawImage(rankImg, begin, 0, Some(window.x * 0.22, window.x * 0.18))
+//    ctx.drawImage(rankImg, begin, 0, Some(window.x * 0.22, window.x * 0.18))
     ctx.setFill("#fdffff")
     Rank.foreach { score =>
       index += 1
@@ -80,10 +83,10 @@ trait BackgroundClient {
   }
 
 
-  private val logo = drawFrame.createImage("/img/logo.png")
-  private val deadBlank = drawFrame.createImage("/img/dead-blank.png")
-  private val userName = drawFrame.createImage("/img/user-name.png")
-  private val playAgain = drawFrame.createImage("/img/play-again.png")
+//  private val logo = drawFrame.createImage("/img/logo.png")
+//  private val deadBlank = drawFrame.createImage("/img/dead-blank.png")
+//  private val userName = drawFrame.createImage("/img/user-name.png")
+//  private val playAgain = drawFrame.createImage("/img/play-again.png")
 
 
   def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit ={
@@ -119,8 +122,8 @@ trait BackgroundClient {
     ctx.save()
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)
-    ctx.drawImage(logo, window.x * 0.375, 20, Some(window.x * 0.25, window.y * 0.25))
-    ctx.drawImage(deadBlank, window.x * 0.35, window.y * 0.3, Some(window.x * 0.3, window.y / 3))
+//    ctx.drawImage(logo, window.x * 0.375, 20, Some(window.x * 0.25, window.y * 0.25))
+//    ctx.drawImage(deadBlank, window.x * 0.35, window.y * 0.3, Some(window.x * 0.3, window.y / 3))
     ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left") 
     ctx.setFont("Helvetica", baseFont * 26)
@@ -144,11 +147,11 @@ trait BackgroundClient {
     ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
 
 
-    ctx.drawImage(userName, window.x * 0.4, window.y * 0.7, Some(window.x * 0.2, window.y * 0.1))
+//    ctx.drawImage(userName, window.x * 0.4, window.y * 0.7, Some(window.x * 0.2, window.y * 0.1))
     ctx.setFont("Comic Sans Ms", baseFont * 24)
     ctx.setFill("#000000")
     ctx.fillText("Press space to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)
-    ctx.drawImage(playAgain, window.x * 0.4, window.y * 0.85, Some(window.x * 0.2, window.y * 0.1))
+//    ctx.drawImage(playAgain, window.x * 0.4, window.y * 0.85, Some(window.x * 0.2, window.y * 0.1))
     ctx.restore()
   }
 
