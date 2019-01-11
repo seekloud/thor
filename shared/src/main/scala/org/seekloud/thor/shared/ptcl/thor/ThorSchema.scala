@@ -75,7 +75,7 @@ trait ThorSchema extends KillInformation {
   protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer
 
   final protected def handleUserEnterRoomEvent(e: UserEnterRoom): Unit = {
-    println(s"user [${e.playerId}] enter room")
+//    println(s"user [${e.playerId}] enter room")
     val adventurer: Adventurer = e.adventurer
     adventurerMap.put(e.adventurer.playerId, adventurer)
     quadTree.insert(adventurer)
@@ -233,7 +233,7 @@ trait ThorSchema extends KillInformation {
   final protected def handleAdventurerDyingNow(): Unit = {
     dyingAdventurerMap.foreach { dying =>
       if (dying._2._2 <= 0) {
-        println(s"remove adventurer: ${dying._1}")
+//        println(s"remove adventurer: ${dying._1}")
         dyingAdventurerMap.remove(dying._1)
 //        adventurerMap.remove(dying._1)
       } else {
