@@ -79,6 +79,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   var frameTime:List[Long] = Nil
   var frameTimeLong = 0l
   var frameTimeSize = 10
+  var frameTimeSingle = 0l
 
 
 
@@ -188,6 +189,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         }
         thorSchemaOpt.foreach{ _.update()}
         frameTime = frameTime :+ System.currentTimeMillis() - logicFrameTime
+        frameTimeSingle = System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
         ping()
     }
@@ -206,11 +208,14 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
             drawTimeLong = drawTime.sum / drawTime.size
+            drawTime = Nil
           }
           if(frameTime.length >= frameTimeSize){
             frameTimeLong = frameTime.sum / frameTime.size
+            frameTime = Nil
           }
-          thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeLong)
+          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
+          thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle)
           if (barrageTime > 0){
             thorSchema.drawBarrage(barrage)
             barrageTime -= 1

@@ -48,7 +48,7 @@ object CanvasUtils {
   def drawAdventurerByPre(ctx: MiddleContext, preCanvasAdventurer: List[MiddleCanvas], level: Int, offset: Point, size: Point): Unit ={
 
     ctx.save()
-    ctx.drawImage(preCanvasAdventurer(level-1), offset.x, offset.y, Some(size.x, size.y))
+    ctx.drawImage(preCanvasAdventurer((level-1) % 20), offset.x, offset.y, Some(size.x, size.y))
     ctx.restore()
 
   }

@@ -157,16 +157,26 @@ object RoomActor {
               }
             }
 
-            if (tickCount % 40 == 5) {
+//            if (tickCount % 40 == 5) {
+//              //生成食物+同步全量adventurer数据+新生成的食物
+//              val newFood = thorSchema.genFood(25)
+//              val data = thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
+//
+////              val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
+////              else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
+//
+//              dispatch(subscribersMap, watchingMap)(GridSyncState(data))
+//            }
+            if (tickCount % 5 == 1) {
               //生成食物+同步全量adventurer数据+新生成的食物
               val newFood = thorSchema.genFood(25)
+              val data = thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
 
-              val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
-              else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
-
-              dispatch(subscribersMap, watchingMap)(GridSyncState(data))
+              //根据userId尾数分批同步数据 每5帧1批 10批一轮 每个用户每50帧受到一次数据
+              val tail = (tickCount - 1) / 5 % 10
+              dispatch(subscribersMap.filter(_._1.endsWith(tail.toString)), watchingMap.filter(_._1.endsWith(tail.toString)))(GridSyncState(data))
             }
-            if (tickCount % 20 == 1) {
+            if (tickCount % 20 == 3) {
               //排行榜
               dispatch(subscribersMap, watchingMap)(Ranks(thorSchema.currentRankList,thorSchema.historyRank))
             }

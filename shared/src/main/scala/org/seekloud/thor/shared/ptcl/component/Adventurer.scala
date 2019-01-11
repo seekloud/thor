@@ -149,7 +149,7 @@ trait Adventurer extends CircleObjectOfGame {
   def checkAttacked(p: Adventurer, attackingStep: Int, attackedCallback: Adventurer => Unit, attackedMaybeCallback: (Adventurer, Int) => Unit)(implicit config: ThorGameConfig): Unit = {
 
     if (isSwordShapeDuang(math.Pi * 2.0 / 9.0 * attackingStep + 0.33 * math.Pi, p)){
-      println(s"${p.playerId} is attacked")
+//      println(s"${p.playerId} is attacked")
       attackedCallback(p)
     }
     else {

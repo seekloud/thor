@@ -28,11 +28,11 @@ class PreDraw {
   , 10000)
 
   val drawAdventurer = new MiddleFrameInJs
-  val adventurerImg: List[MiddleImage] = for(a <- (1 to 14).toList) yield drawAdventurer.createImage(s"/img/Adventurer-$a.png")
+  val adventurerImg: List[MiddleImage] = for(a <- (0 to 19).toList) yield drawAdventurer.createImage(s"/img/char${a/4 + 1}-${a%4}.png")
 
-  val adventurerCanvas: List[MiddleCanvas] = for(a <- (1 to 14).toList) yield drawAdventurer.createCanvas(150.0, 150.0)
+  val adventurerCanvas: List[MiddleCanvas] = for(a <- (0 to 19).toList) yield drawAdventurer.createCanvas(150.0, 150.0)
 
-  val adventurerCtx: List[MiddleContext] = for(a <- (1 to 14).toList) yield adventurerCanvas(a-1).getCtx
+  val adventurerCtx: List[MiddleContext] = for(a <- (0 to 19).toList) yield adventurerCanvas(a).getCtx
 
   dom.window.setTimeout(()=>{
     var cnt = 0
