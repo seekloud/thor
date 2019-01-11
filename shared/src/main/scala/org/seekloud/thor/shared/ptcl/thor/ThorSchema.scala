@@ -291,7 +291,7 @@ trait ThorSchema extends KillInformation {
       val adventurerMaybeEatFood = quadTree.retrieveFilter(adventurer).filter(_.isInstanceOf[Food]).map(_.asInstanceOf[Food])
       adventurerMaybeEatFood.foreach(adventurer.checkEatFood(_, adventurerEatFoodCallback(adventurer)))
     }
-    //以上判断判断可以放在adventurer移动中以提前1帧处理
+
     gameEventMap.get(systemFrame).foreach { events =>
       handleAdventurerEatFood(events.filter(_.isInstanceOf[EatFood]).map(_.asInstanceOf[EatFood]).reverse)
     }

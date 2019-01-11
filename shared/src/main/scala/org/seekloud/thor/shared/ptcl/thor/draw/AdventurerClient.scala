@@ -65,7 +65,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
           ctx.fill()
           ctx.restore()
         }
-        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, s"/img/char${(adventurer.level - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
+        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, s"/img/char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
 //        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
         //画武器
         var step:Float = 3
