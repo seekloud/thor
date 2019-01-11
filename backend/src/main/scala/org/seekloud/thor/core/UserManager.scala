@@ -12,8 +12,11 @@ import org.seekloud.thor.core.UserActor.{ChangeUserInfo, ChangeWatchedPlayerId}
 import org.seekloud.thor.protocol.ReplayProtocol._
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaState
 import org.seekloud.utils.byteObject.MiddleBufferInJvm
 import org.slf4j.LoggerFactory
+
+import scala.collection.mutable
 
 /**
   * @author Jingyi
@@ -120,6 +123,25 @@ object UserManager {
     }
   }
 
+  /*----------------------------带宽统计----------------------------*/
+  
+  val statics = mutable.HashMap[String, Double](
+    "thorSchemaState"-> 0.0,
+    "configInfo"-> 0.0,
+    "userEnterRoom"-> 0.0,
+    "userLeftRoom"-> 0.0,
+    "isAttacked"-> 0.0,
+    "eatFood"-> 0.0,
+    "mouseMove"-> 0.0,
+    "mouseClickLeft"-> 0.0,
+    "mouseClickRight"-> 0.0,
+    "rank"-> 0.0,
+    "ping"-> 0.0,
+    "others"-> 0.0
+  )
+  var timer = System.currentTimeMillis()
+  val period = 30 * 1000
+
   private def getWebSocketFlow(userActor: ActorRef[UserActor.Command]): Flow[Message, Message, Any] = {
     import scala.language.implicitConversions
     import org.seekloud.byteobject.ByteObject._
@@ -155,6 +177,56 @@ object UserManager {
       }.via(UserActor.flow(userActor))
       .map {
         case t: Wrap =>
+          val a = ByteString(t.ws)
+          val buffer = new MiddleBufferInJvm(a.asByteBuffer)
+          val msg = bytesDecode[WsMsgServer](buffer) match{
+            case Right(req) =>
+              val sendBuffer = new MiddleBufferInJvm(409600)
+              val a = req.fillMiddleBuffer(sendBuffer).result()
+              req match{
+                case _: GridSyncState=>
+                  statics.update("thorSchemaState", statics("thorSchemaState") + a.length.toDouble/1024)
+                case _: YourInfo=>
+                  statics.update("configInfo", statics("configInfo") + a.length.toDouble/1024)
+                case _: UserEnterRoom =>
+                  statics.update("userEnterRoom", statics("userEnterRoom") + a.length.toDouble/1024)
+                case _: UserLeftRoom =>
+                  statics.update("userLeftRoom", statics("userLeftRoom") + a.length.toDouble/1024)
+                case _: BeAttacked =>
+                  statics.update("isAttacked", statics("isAttacked") + a.length.toDouble/1024)
+                case _: EatFood =>
+                  statics.update("eatFood", statics("eatFood") + a.length.toDouble/1024)
+                case _: MouseMove=>
+                  statics.update("mouseMove", statics("mouseMove") + a.length.toDouble/1024)
+                case _: MouseClickDownLeft=>
+                  statics.update("mouseClickLeft", statics("mouseClickLeft") + a.length.toDouble/1024)
+                case _: MouseClickUpRight =>
+                  statics.update("mouseClickRight", statics("mouseClickRight") + a.length.toDouble/1024)
+                case _: MouseClickDownRight =>
+                  statics.update("mouseClickRight", statics("mouseClickRight") + a.length.toDouble/1024)
+                case _: Ranks=>
+                  statics.update("rank", statics("rank") + a.length.toDouble/1024)
+                case _: PingPackage =>
+                  statics.update("ping", statics("ping") + a.length.toDouble/1024)
+                case _ =>
+                  statics.update("others", statics("others") + a.length.toDouble/1024)
+
+              }
+              if(System.currentTimeMillis() - timer > period){
+                timer = System.currentTimeMillis()
+                val total =  statics.values.sum
+                var details = ""
+                details = details + s"TOTAL:$total kb\n"
+                statics.foreach{s =>
+                  details = details + s"${s._1}: ${s._2} kb\n"
+                  statics.update(s._1, 0)
+                }
+                log.info(details)
+
+              }
+
+            case Left(e) =>
+          }
           BinaryMessage.Strict(ByteString(t.ws))
 
         case t: ThorGame.ReplayFrameData =>

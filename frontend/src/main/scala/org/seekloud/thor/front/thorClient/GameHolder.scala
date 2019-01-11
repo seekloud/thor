@@ -214,7 +214,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
             frameTimeLong = frameTime.sum / frameTime.size
             frameTime = Nil
           }
-          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
+//          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
           thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle)
           if (barrageTime > 0){
             thorSchema.drawBarrage(barrage)
