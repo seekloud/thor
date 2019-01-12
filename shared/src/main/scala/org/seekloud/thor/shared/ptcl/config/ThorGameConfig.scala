@@ -39,6 +39,16 @@ final case class WeaponParams(
   lengthList: List[Float]
 )
 
+final case class RobotParams(
+  number: Int,
+  nameList: List[String],
+  moveFrequency: List[Double],
+  attackFrequency: List[Double],
+  level: Int,
+  isAttack: Boolean,
+  isMove: Boolean
+)
+
 
 trait ThorGameConfig {
 
@@ -82,6 +92,20 @@ trait ThorGameConfig {
 
   def getAdventurerLevelUpAnimation: Int
 
+  def getRobotNumber:Int
+
+  def getRobotNames:List[String]
+
+  def getRobotMoveFrequency:List[Double]
+
+  def getRobotAttackFrequency:List[Double]
+
+  def getRobotLevel:Int
+
+  def isRobotAttack:Boolean
+
+  def isRobotMove:Boolean
+
 }
 
 
@@ -92,7 +116,8 @@ case class ThorGameConfigImpl(
   replayRate: Int,
   adventurerParams: AdventurerParams,
   foodParams: FoodParams,
-  weaponParams: WeaponParams
+  weaponParams: WeaponParams,
+  robotParams: RobotParams
 ) extends ThorGameConfig {
 
   def getThorGameConfigImpl(): ThorGameConfigImpl = this
@@ -145,6 +170,15 @@ case class ThorGameConfigImpl(
   def getAdventurerDyingAnimation: Int = adventurerParams.dyingAnimation
 
   def getAdventurerLevelUpAnimation: Int = adventurerParams.levelUpAnimation
+
+  //robot
+  def getRobotNumber:Int = robotParams.number
+  def getRobotNames:List[String] = robotParams.nameList
+  def getRobotMoveFrequency:List[Double] = robotParams.moveFrequency
+  def getRobotAttackFrequency:List[Double] = robotParams.attackFrequency
+  def getRobotLevel:Int = robotParams.level
+  def isRobotAttack:Boolean = robotParams.isAttack
+  def isRobotMove:Boolean = robotParams.isMove
 
 
 

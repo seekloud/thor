@@ -26,14 +26,12 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     val position = adventurer.getAdventurerState.position
     var moveDistance = Point(0, 0)
 
-    if(adventurer.isMove){
-      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
+    if(adventurer.isMove && adventurer.isIntersect == 0){
+      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.getAdventurerState.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
       //如果达到边界 则不再往外走
-      val delay = 0.5
-      if(position.x - r < delay || position.x + r > config.boundary.x - delay) moveDistance = moveDistance.copy(x = 0)
-      if(position.y - r < delay || position.y + r > config.boundary.y - delay) moveDistance = moveDistance.copy(y = 0)
+      if(position.x - r <= 0 || position.x + r >= config.boundary.x) moveDistance = moveDistance.copy(x = 0)
+      if(position.y - r <= 0 || position.y + r >= config.boundary.y) moveDistance = moveDistance.copy(y = 0)
     }
-
     moveDistance
   }
 
@@ -53,30 +51,37 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
           val height = config.getAdventurerRadiusByLevel(adventurer.level) * 2 * canvasUnit
           val width = 3 * height
 
-          CanvasUtils.rotateImage(drawFrame, ctx, s"/img/speedparticles.png", Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction)
+          CanvasUtils.rotateImage("speed",drawFrame, ctx, Nil, s"/img/speedparticles.png", Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
         }
 
         //画人物
         //      val drawX = if(systemFrame%6 < 3) dx * 0.98.toFloat else dx
-        CanvasUtils.rotateImage(drawFrame, ctx, s"/img/Adventurer-${adventurer.level}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction)
-
+        if(ifTest){
+          ctx.save()
+          ctx.setFill("#FF0000")
+          ctx.beginPath()
+          ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit, 0, 2*Math.PI, false)
+          ctx.closePath()
+          ctx.fill()
+          ctx.restore()
+        }
+        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, s"/img/char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
+//        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
         //画武器
-        var step = 3
+        var step:Float = 3
         var isAttacking = false
         attackingAdventureMap.filterNot(_._2 < 0).get(adventurer.playerId) match {
           case Some(s) =>
             step = s
-            if (s != 0) isAttacking = true
+            if(step != 0)isAttacking = true
           case _ =>
         }
         val weaponLength = config.getWeaponLengthByLevel(adventurer.getAdventurerState.level)
-        val angle = adventurer.getAdventurerState.direction - (step * math.Pi / 3 + 1 / 12 * math.Pi).toFloat //武器旋转角度
-        val gap: Float = 1 // 武器离人物的距离
-        val move: Float = if (isAttacking) math.Pi.toFloat * 1 / 3 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
-        val weaponPosition = Point(sx, sy) + Point(-r - gap.toFloat, gap + weaponLength / 2).rotate(angle + move - math.Pi.toFloat / 2)
-
-        CanvasUtils.rotateImage(drawFrame, ctx, s"/img/weapon-${adventurer.level}.png", weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move)
-
+        val angle = adventurer.getAdventurerState.direction - math.Pi.toFloat * (3*step + 1) / 10  //武器旋转角度
+        val gap: Float = 0 // 武器离人物的距离
+        val move: Float = if (isAttacking) math.Pi.toFloat * 3 / 10 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
+        val weaponPosition = Point(sx, sy) + Point(weaponLength / 2, r).rotate(angle + move)
+        CanvasUtils.rotateImage("weapon", drawFrame, ctx, Nil, s"/img/weapon${(adventurer.level-1)/4+1}.png", weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move,preTime, adventurer.getAdventurerState.level)
 
         //用户昵称
         ctx.setFill("#ffffff")

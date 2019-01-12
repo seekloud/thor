@@ -1,7 +1,13 @@
 package org.seekloud.thor.front
 
+import mhtml.Var
+import org.seekloud.thor.front.common.Routes
 import org.seekloud.thor.front.pages.MainPage
-
+import org.seekloud.thor.front.utils.{Http, JsFunc}
+import org.seekloud.thor.shared.ptcl.TestPswRsp
+import scala.concurrent.ExecutionContext.Implicits.global
+import io.circe.generic.auto._
+import io.circe.syntax._
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 /**
@@ -21,8 +27,20 @@ object Main {
     "庞统","干将莫邪","鬼谷子","女娲","SnowWhite","Cinderella","Aurora","Ariel","Belle","Jasmine",
     "Pocahontas","Mulan","Tiana","Rapunzel","Merida","Anna","Elsa","Moana")
 
+  val version = Var("")
+
+  def getVersion: Unit = {
+    Http.getAndParse[TestPswRsp](Routes.getVersion).map{
+      rsp =>
+        if(rsp.errCode == 0){
+          version := rsp.psw
+        }
+        else JsFunc.alert(s"报错啦$rsp")
+    }
+  }
   @JSExport
   def run(): Unit = {
+    getVersion
     MainPage.show()
   }
 

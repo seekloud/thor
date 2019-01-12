@@ -20,6 +20,7 @@ case class AdventurerServer(
                         var position: Point = Point(0, 0),
                         var level: Byte = 1,
                         var energy: Int = 0,
+                        var energyScore: Int = 0,
 //                        var radiusLevel: Int = 1,
                         var direction: Float = 0,
                         var faceDirection: Float = 0,
@@ -30,14 +31,15 @@ case class AdventurerServer(
                         var isMove: Boolean = true,
                         var isUpdateLevel: Boolean = false,
                         var levelUpExecute: Int = 100,
-                        var mouseStop: Boolean = false
+                        var mouseStop: Boolean = false,
+                        var isIntersect: Byte = 0
                       ) extends Adventurer{
 
   override var radius: Float = config.getAdventurerRadiusByLevel(level)
 
   def this(roomActor:ActorRef[RoomActor.Command], timer:TimerScheduler[RoomActor.Command],config: ThorGameConfig,adventurerState: AdventurerState){
-    this(roomActor, timer, config,adventurerState.playerId,adventurerState.name,adventurerState.position,adventurerState.level,adventurerState.energy, adventurerState.direction,
+    this(roomActor, timer, config,adventurerState.playerId,adventurerState.name,adventurerState.position,adventurerState.level,adventurerState.energy, adventurerState.energyScore, adventurerState.direction,
       adventurerState.faceDirection, adventurerState.isSpeedUp,adventurerState.killNum, adventurerState.isMove, adventurerState.isUpdateLevel, adventurerState.levelUpExecute,
-      adventurerState.mouseStop)
+      adventurerState.mouseStop, adventurerState.isIntersect)
   }
 }

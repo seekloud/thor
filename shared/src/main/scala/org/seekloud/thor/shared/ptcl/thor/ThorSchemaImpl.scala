@@ -43,9 +43,6 @@ class ThorSchemaImpl(
 
   def receiveGameEvent(e: GameEvent) = {
     if (e.frame >= systemFrame) {
-      if (e.isInstanceOf[BeAttacked]) {
-        println(s"接收到死亡事件！！！")
-      }
       addGameEvent(e)
     } else if (esRecoverSupport) {
       if (e.isInstanceOf[BeAttacked]) {
@@ -113,7 +110,7 @@ class ThorSchemaImpl(
   protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState) = {
     val curFrame = systemFrame
     val startTime = System.currentTimeMillis()
-    (curFrame until thorSchemaSate.f).foreach { _ =>
+    (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { _ =>
       super.update()
       if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
     }

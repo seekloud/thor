@@ -3,10 +3,11 @@ package org.seekloud.thor.http
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.headers.CacheDirectives.{`max-age`, public}
-import akka.http.scaladsl.model.headers.`Cache-Control`
+import akka.http.scaladsl.model.headers.{CacheDirective, CacheDirectives, `Cache-Control`}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directive0, Route}
 import akka.stream.Materializer
+import org.seekloud.thor.common.AppSettings
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -29,13 +30,16 @@ trait ResourceService {
 
   val log: LoggingAdapter
 
-
-  private val resources = {
+  private val htmlResources = {
     pathPrefix("html") {
       extractUnmatchedPath { path =>
         getFromResourceDirectory("html")
       }
-    } ~ pathPrefix("css") {
+    }
+  }
+
+  private val resources = {
+    pathPrefix("css") {
       extractUnmatchedPath { path =>
         getFromResourceDirectory("css")
       }
@@ -45,7 +49,7 @@ trait ResourceService {
         getFromResourceDirectory("js")
       }
     } ~
-    pathPrefix("sjsout") {
+    pathPrefix(s"sjsout-${AppSettings.version}") {
       extractUnmatchedPath { path =>
         getFromResourceDirectory("sjsout")
       }
@@ -61,9 +65,25 @@ trait ResourceService {
   //cache code copied from zhaorui.
   private val cacheSeconds = 24 * 60 * 60
 
+  //只使用强制缓存,设置强制缓存时间,去除协商缓存的字段
+  def addCacheControlHeadersWithFilter(first: CacheDirective, more: CacheDirective*): Directive0 = {
+    mapResponseHeaders { headers =>
+      `Cache-Control`(first, more: _*) +: headers.filterNot(h => h.name() == "Last-Modified" || h.name() == "ETag")
+    }
+  }
+
+  //只使用强制缓存,设置不缓存，去除协商缓存字段
+  def setNoCacheInHeaderWithFilter: Directive0 = {
+    mapResponseHeaders { headers =>
+      `Cache-Control`.apply(CacheDirectives.`no-cache`) +: headers.filterNot(h => h.name() == "Last-Modified" || h.name() == "ETag")
+    }
+  }
+
   def resourceRoutes: Route = (pathPrefix("static") & get) {
     mapResponseHeaders { headers => `Cache-Control`(`public`, `max-age`(cacheSeconds)) +: headers } {
       encodeResponse(resources)
+    } ~ setNoCacheInHeaderWithFilter {
+      encodeResponse(htmlResources)
     }
   }
 

@@ -13,7 +13,7 @@ trait KillInformation { this: ThorSchema =>
   private val displayFrameNum:Long = displayDuration * 1000 / this.config.frameDuration
 
   protected def addKillInfo(killerName:String,killedName:String) = {
-    println(s"----------,$killedName,$killerName,${this.systemFrame}")
+//    println(s"----------,$killedName,$killerName,${this.systemFrame}")
     killInfoList = (killerName,killedName,this.systemFrame) :: killInfoList
   }
 

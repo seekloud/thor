@@ -39,6 +39,7 @@ object AppSettings {
   val thorGameConfig:ThorGameConfig = ThorGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
 
   val testPsw = appConfig.getString("testPsw")
+  val version = appConfig.getString("version")
 //  val wxConfig = appConfig.getConfig("wx.config")
 //  val mpAppId = wxConfig.getString("mpAppId")
 //  val componentAppId = wxConfig.getString("componentAppid")

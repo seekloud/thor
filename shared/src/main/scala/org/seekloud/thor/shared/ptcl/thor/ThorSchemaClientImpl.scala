@@ -20,6 +20,7 @@ case class ThorSchemaClientImpl (
   var canvasSize:Point,
   var canvasUnit:Float,
   preCanvas: List[MiddleCanvas] = Nil,
+  preCanvasAdventurer: List[MiddleCanvas] = Nil,
 ) extends ThorSchemaImpl(config, myId, myName)
 with AdventurerClient
 with FoodClient
@@ -29,7 +30,7 @@ with FpsRender{
 
   var killerNew : String = "?"
   var duringTime : String = "0"
-  val ifTest: Boolean = true
+  val ifTest: Boolean = false
   val preTime: Long = System.currentTimeMillis()
 
   def drawGame(mainId: String, offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
@@ -46,8 +47,8 @@ with FpsRender{
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
 
-          if(ifTest)
-            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
+//          if(ifTest)
+//            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
 
           val end = System.currentTimeMillis()
 //          if(end-start > 10)println(s"drawTime too Long: ${end-start}")

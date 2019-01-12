@@ -65,13 +65,12 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         mainId = id
         myName = yourName
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
         if (timer != 0) {
           dom.window.clearInterval(timer)
           thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
         }
         else thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
-//        if (nextFrame != 0 ) dom.window.cancelAnimationFrame(nextFrame)
 
         gameState = GameState.play
         Shortcut.playMusic("bgm-2")
@@ -80,8 +79,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
 
       case e: BeAttacked =>
-        println("attack!!!!!!!!!!!!!" + e)
-        barrage = s"${e.killerName}杀死了${e.name}"
+        barrage = s"${e.killerName}  杀死了  ${e.name}"
         barrageTime = 300
         if (e.playerId == mainId) {
           mainId = e.killerId //跟随凶手视角
@@ -102,6 +100,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               case None =>
             }
           }
+        }
+        if(e.playerId == myId || e.killerId == myId){
+          println(s"后台消息：玩家${e.name}(${e.playerId})被杀，凶手是${e.killerName}(${e.killerId})")
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
@@ -126,15 +127,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case e: GameEvent =>
-        e match {
-          case event: UserEnterRoom =>
-            barrage = s"${event.name}加入了游戏"
-            barrageTime = 300
-//          case event: UserLeftRoom =>
-//            barrage = s"${event.name}离开了游戏"
-//            barrageTime = 300
-          case _ =>
-        }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
       case x => dom.window.console.log(s"接收到无效消息$x")
