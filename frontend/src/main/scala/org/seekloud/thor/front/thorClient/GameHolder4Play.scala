@@ -147,20 +147,18 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmousemove = { e: dom.MouseEvent =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
+      var lastMouseMove = 0l //限制一帧只能发一次mousemove
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId)) {
             val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             val direction = thorSchema.adventurerMap(myId).direction
-            if (math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+            if (thorSchema.systemFrame > lastMouseMove && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
               val data = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(data)
-              //            if(org.seekloud.thor.shared.ptcl.model.Constants.fakeRender) {
-              //              thorSchema.addMyAction(data)
-              //            }
               thorSchema.preExecuteUserEvent(data)
+              lastMouseMove = thorSchema.systemFrame
             }
-
           }
 
         case None =>
