@@ -88,7 +88,6 @@ class PlayGameController(
   private def drawGameByTime(offsetTime: Long): Unit = {
     thorSchemaOpt.foreach { thorSchema =>
       thorSchema.drawGame(offsetTime, playGameScreen.canvasUnit, playGameScreen.canvasBounds)
-      thorSchema.drawRank(historyRank, CurrentOrNot = false, playerInfo.playerId)
       thorSchema.drawRank(currentRank, CurrentOrNot = true, playerInfo.playerId)
       thorSchema.drawNetInfo(getNetworkLatency)
       if (barrageTime > 0) {
@@ -184,7 +183,7 @@ class PlayGameController(
           if (thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
             val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
             if (math.abs(theta - direction) > 0.3) {
-              val preExecuteAction = MouseMove(thorSchema.myId, theta, mouseDistance.toFloat, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              val preExecuteAction = MM(thorSchema.myId, (point.x - playGameScreen.screen.getMaxX.toFloat / 2.0).toShort, (point.y - playGameScreen.screen.getMaxX.toFloat / 2.0).toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               thorSchema.preExecuteUserEvent(preExecuteAction)
               playGameActor ! DispatchMsg(preExecuteAction)
             }

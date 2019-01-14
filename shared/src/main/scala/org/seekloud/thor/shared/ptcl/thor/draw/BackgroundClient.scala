@@ -1,6 +1,8 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 
 
+import java.awt.Color
+
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
@@ -36,15 +38,25 @@ trait BackgroundClient {
   }
 
 
-  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0) = {
+  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp:Int) = {
     ctx.save()
     ctx.setTextBaseLine("top")
-    ctx.setFont("Comic Sans MS", baseFont * 16)
+    if (tp == 1)
+      ctx.setFont("Comic Sans MS", baseFont * 20)
+    else if (tp == 2){
+      ctx.setFont("Comic Sans MS", baseFont * 16)
+      ctx.setFill("#fdffff")}
+    else{
+      ctx.setFont("Comic Sans MS", baseFont * 16)
+      ctx.setFill("#ffff00")
+    }
+
     ctx.fillText(str, x, (lineNum + lineBegin) * window.x * 0.01)
     ctx.restore()
   }
 
   def drawRank(Rank: List[Score], CurrentOrNot: Boolean, id: String): Unit = {
+    val text = "———————排行榜———————"
     val RankBaseLine = 2
     var index = 0
     var yourRank = 100
@@ -53,18 +65,25 @@ trait BackgroundClient {
     var last = ""
     ctx.save()
 //    ctx.drawImage(rankImg, begin, 0, Some(window.x * 0.22, window.x * 0.18))
+    ctx.setFill("rgba(0,0,0,0.6)")
+    ctx.fillRec(begin, 0, window.x * 0.21, window.x * 0.24)
     ctx.setFill("#fdffff")
+    drawTextLine(s"                                                              $text", 10 + window.x * 0.01, 0, RankBaseLine,1)
     Rank.foreach { score =>
       index += 1
       if (score.id == id) yourRank = index
       val name = if (score.n.contains("guest")) score.n.take(13) else score.n.take(7)
-      if (index < 6) {
-        if (score.id == id) yourNameIn = true
+      if (index < 10) {
         ctx.setTextAlign("left")
-        drawTextLine(s" $index:  $name   score=${score.e}   kill=${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine)
+        if (score.id == id) {
+          yourNameIn = true
+          drawTextLine(s" 【$index】  $name   分数:${score.e}   击杀数:${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine,3)
+        }
+        else
+          drawTextLine(s" 【$index】  $name   分数:${score.e}   击杀数:${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine,2)
       }
-      if (index == 6) {
-        last = s" 6 :  $name   score=${score.e}   kill=${score.k}"
+      if (index == 10) {
+        last = s" 【10】   $name   分数:${score.e}   击杀数:${score.k}"
       }
     }
     index += 1
@@ -73,12 +92,12 @@ trait BackgroundClient {
       Rank.find(_.id == id) match {
         case Some(yourScore) =>
           val name = if (yourScore.n.contains("guest")) yourScore.n.take(13) else yourScore.n.take(7)
-          drawTextLine(s" $yourRank :  $name   score=${yourScore.e}   kill=${yourScore.k}", begin + window.x * 0.01, 12, RankBaseLine)
+          drawTextLine(s" 【$yourRank】   $name   分数:${yourScore.e}   击杀数:${yourScore.k}", begin + window.x * 0.01, 12, RankBaseLine,3)
         case None =>
       }
     }
     else
-      drawTextLine(last, begin + window.x * 0.01, 12, RankBaseLine)
+      drawTextLine(last, begin + window.x * 0.01, 12, RankBaseLine,2)
     ctx.restore()
   }
 

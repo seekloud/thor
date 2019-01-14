@@ -182,7 +182,23 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  def setMoveDirection(d: Float, mouseDistance: Float, isAttacking: Boolean)(implicit config: ThorGameConfig) = {
+  def setMoveDirection(offsetX: Short, offSetY: Short, isAttacking: Boolean)(implicit config: ThorGameConfig) = {
+    val mouseDistance = math.sqrt(math.pow(offsetX, 2) + math.pow(offSetY, 2))
+    val d = if (offsetX < 0) {
+      if (offSetY < 0) {
+        - (math.Pi - math.acos(offSetY.toFloat / offsetX.toFloat)).toFloat
+      } else {
+        (math.Pi - math.acos(offSetY.toFloat / offsetX.toFloat)).toFloat
+      }
+
+    } else {
+      if (offSetY > 0) {
+        math.acos(offSetY.toFloat / offsetX.toFloat).toFloat
+      } else {
+        - math.acos(offSetY.toFloat / offsetX.toFloat).toFloat
+      }
+
+    }
     if (mouseDistance > config.getAdventurerRadiusByLevel(this.level) * 10)
     {
       if (!isAttacking) {

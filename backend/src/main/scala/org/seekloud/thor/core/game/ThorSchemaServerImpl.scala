@@ -225,7 +225,7 @@ case class ThorSchemaServerImpl(
     val f = math.max(preExecuteUserAction.frame, systemFrame)
 
     val act = preExecuteUserAction match {
-      case a: MouseMove => a.copy(frame = f)
+      case a: MM => a.copy(frame = f)
       case a: MouseClickDownLeft => a.copy(frame = f)
       case a: MouseClickDownRight => a.copy(frame = f)
       case a: MouseClickUpRight => a.copy(frame = f)

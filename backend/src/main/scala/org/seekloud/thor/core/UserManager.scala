@@ -132,7 +132,7 @@ object UserManager {
     "userLeftRoom"-> 0.0,
     "isAttacked"-> 0.0,
     "eatFood"-> 0.0,
-    "mouseMove"-> 0.0,
+    "MM"-> 0.0,
     "mouseClickLeft"-> 0.0,
     "mouseClickRight"-> 0.0,
     "rank"-> 0.0,
@@ -196,8 +196,8 @@ object UserManager {
                   statics.update("isAttacked", statics("isAttacked") + msg.length.toDouble/1024)
                 case _: EatFood =>
                   statics.update("eatFood", statics("eatFood") + msg.length.toDouble/1024)
-                case _: MouseMove=>
-                  statics.update("mouseMove", statics("mouseMove") + msg.length.toDouble/1024)
+                case _: MM=>
+                  statics.update("MM", statics("MM") + msg.length.toDouble/1024)
                 case _: MouseClickDownLeft=>
                   statics.update("mouseClickLeft", statics("mouseClickLeft") + msg.length.toDouble/1024)
                 case _: MouseClickUpRight =>
