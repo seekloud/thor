@@ -59,7 +59,7 @@ object ThorGame {
 
   final case class EatFood(playerId: String, foodId: Int, foodLevel: Int, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class MouseMove(playerId: String, direction: Float, mouseDistance: Float, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MM(playerId: String, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
   final case class MouseClickDownLeft(playerId: String, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
