@@ -33,7 +33,12 @@ trait EsRecover {
   }
 
   def rollback(frame: Int) = {
-    require(frame < this.systemFrame)
+    try {
+      require(frame < this.systemFrame)
+    } catch {
+      case _: Exception =>
+        println(s"rollback frame: $frame, curFrame: ${this.systemFrame}")
+    }
     removeRollBackFrame(frame)
 
     gameSnapshotMap.get(frame) match {
@@ -59,14 +64,14 @@ trait EsRecover {
   }
 
   def rollback4GameEvent(e: GameEvent) = {
-    //    println(s"roll back to frame=${e.frame},nowFrame=${systemFrame} because event:${e}")
+    println(s"roll back to frame=${e.frame},nowFrame=$systemFrame because event:$e")
     gameEventHistoryMap.put(e.frame, e :: gameEventHistoryMap.getOrElse(e.frame, Nil))
 //    rollback(e.frame)
     addRollBackFrame(e.frame)
   }
 
   def rollback4UserActionEvent(e: UserActionEvent) = {
-    //    println(s"roll back to frame=${e.frame},nowFrame=${systemFrame} because event:${e}")
+    println(s"roll back to frame=${e.frame},nowFrame=$systemFrame because event:$e")
     actionEventHistoryMap.put(e.frame, e :: actionEventHistoryMap.getOrElse(e.frame, Nil))
 //    rollback(e.frame)
     addRollBackFrame(e.frame)

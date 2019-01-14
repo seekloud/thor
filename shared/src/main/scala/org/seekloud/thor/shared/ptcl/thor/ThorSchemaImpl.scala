@@ -62,12 +62,16 @@ class ThorSchemaImpl(
                 removePreEvent(preFrame, e.playerId, e.serialNum)
                 addUserAction(e)
               } else if (e.frame >= systemFrame) {
+                //preFrame 比 systemFrame小，但事件frame比systemFrame大，删除preFrame历史数据，回滚后加入事件
                 removePreEventHistory(preFrame, e.playerId, e.serialNum)
+                println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
                 addRollBackFrame(preFrame)
                 addUserAction(e)
               } else {
+                //preFrame 比 systemFrame小，事件frame比systemFrame小，删除preFrame历史数据，加入事件e为历史，回滚
                 removePreEventHistory(preFrame, e.playerId, e.serialNum)
                 addUserActionHistory(e)
+                println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
                 addRollBackFrame(preFrame)
               }
             }
