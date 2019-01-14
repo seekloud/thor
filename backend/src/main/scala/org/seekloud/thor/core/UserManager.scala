@@ -176,40 +176,40 @@ object UserManager {
           }
       }.via(UserActor.flow(userActor))
       .map {
-        case t: Wrap =>
-          val a = ByteString(t.ws)
-          val buffer = new MiddleBufferInJvm(a.asByteBuffer)
-          val msg = bytesDecode[WsMsgServer](buffer) match{
+        case wrap: Wrap =>
+          val s = ByteString(wrap.ws)
+          val buffer = new MiddleBufferInJvm(s.asByteBuffer)
+          bytesDecode[WsMsgServer](buffer) match{
             case Right(req) =>
               val sendBuffer = new MiddleBufferInJvm(409600)
-              val a = req.fillMiddleBuffer(sendBuffer).result()
+              val msg = req.fillMiddleBuffer(sendBuffer).result()
               req match{
                 case _: GridSyncState=>
-                  statics.update("thorSchemaState", statics("thorSchemaState") + a.length.toDouble/1024)
+                  statics.update("thorSchemaState", statics("thorSchemaState") + msg.length.toDouble/1024)
                 case _: YourInfo=>
-                  statics.update("configInfo", statics("configInfo") + a.length.toDouble/1024)
+                  statics.update("configInfo", statics("configInfo") + msg.length.toDouble/1024)
                 case _: UserEnterRoom =>
-                  statics.update("userEnterRoom", statics("userEnterRoom") + a.length.toDouble/1024)
+                  statics.update("userEnterRoom", statics("userEnterRoom") + msg.length.toDouble/1024)
                 case _: UserLeftRoom =>
-                  statics.update("userLeftRoom", statics("userLeftRoom") + a.length.toDouble/1024)
+                  statics.update("userLeftRoom", statics("userLeftRoom") + msg.length.toDouble/1024)
                 case _: BeAttacked =>
-                  statics.update("isAttacked", statics("isAttacked") + a.length.toDouble/1024)
+                  statics.update("isAttacked", statics("isAttacked") + msg.length.toDouble/1024)
                 case _: EatFood =>
-                  statics.update("eatFood", statics("eatFood") + a.length.toDouble/1024)
+                  statics.update("eatFood", statics("eatFood") + msg.length.toDouble/1024)
                 case _: MouseMove=>
-                  statics.update("mouseMove", statics("mouseMove") + a.length.toDouble/1024)
+                  statics.update("mouseMove", statics("mouseMove") + msg.length.toDouble/1024)
                 case _: MouseClickDownLeft=>
-                  statics.update("mouseClickLeft", statics("mouseClickLeft") + a.length.toDouble/1024)
+                  statics.update("mouseClickLeft", statics("mouseClickLeft") + msg.length.toDouble/1024)
                 case _: MouseClickUpRight =>
-                  statics.update("mouseClickRight", statics("mouseClickRight") + a.length.toDouble/1024)
+                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble/1024)
                 case _: MouseClickDownRight =>
-                  statics.update("mouseClickRight", statics("mouseClickRight") + a.length.toDouble/1024)
+                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble/1024)
                 case _: Ranks=>
-                  statics.update("rank", statics("rank") + a.length.toDouble/1024)
+                  statics.update("rank", statics("rank") + msg.length.toDouble/1024)
                 case _: PingPackage =>
-                  statics.update("ping", statics("ping") + a.length.toDouble/1024)
+                  statics.update("ping", statics("ping") + msg.length.toDouble/1024)
                 case _ =>
-                  statics.update("others", statics("others") + a.length.toDouble/1024)
+                  statics.update("others", statics("others") + msg.length.toDouble/1024)
 
               }
               if(System.currentTimeMillis() - timer > period){
@@ -227,7 +227,7 @@ object UserManager {
 
             case Left(e) =>
           }
-          BinaryMessage.Strict(ByteString(t.ws))
+          BinaryMessage.Strict(ByteString(wrap.ws))
 
         case t: ThorGame.ReplayFrameData =>
           BinaryMessage.Strict(ByteString(t.ws))
