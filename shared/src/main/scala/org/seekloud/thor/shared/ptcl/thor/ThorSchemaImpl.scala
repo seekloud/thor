@@ -45,10 +45,7 @@ class ThorSchemaImpl(
     if (e.frame >= systemFrame) {
       addGameEvent(e)
     } else if (esRecoverSupport) {
-      if (e.isInstanceOf[BeAttacked]) {
-        println(s"接收到死亡事件，开始回滚！！！")
-      }
-      println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=${e}")
+//      println(s"rollback-frame=${e.frame}, curFrame=${this.systemFrame},e=$e")
       rollback4GameEvent(e)
     }
   }
@@ -179,7 +176,7 @@ class ThorSchemaImpl(
       }
     } else {
       super.update()
-      if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
+      if (esRecoverSupport) addGameSnapshot(systemFrame, this.getThorSchemaState())
     }
   }
 
