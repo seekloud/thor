@@ -45,7 +45,7 @@ trait EsRecover {
         removeKillInfoByRollback(frame)
 //        removeRollBackFrame(frame)
         (frame until curFrame).foreach { f =>
-          this.systemFrame = f
+//          this.systemFrame = f
           this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
           this.rollbackUpdate()
         }
