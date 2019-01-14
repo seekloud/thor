@@ -63,12 +63,12 @@ class ThorSchemaImpl(
                 addUserAction(e)
               } else if (e.frame >= systemFrame) {
                 removePreEventHistory(preFrame, e.playerId, e.serialNum)
-                rollback(preFrame)
+                addRollBackFrame(preFrame)
                 addUserAction(e)
               } else {
                 removePreEventHistory(preFrame, e.playerId, e.serialNum)
                 addUserActionHistory(e)
-                rollback(preFrame)
+                addRollBackFrame(preFrame)
               }
             }
           }
@@ -83,7 +83,7 @@ class ThorSchemaImpl(
       if (e.frame >= systemFrame) {
         addUserAction(e)
       } else if (esRecoverSupport) {
-        println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=$e")
+//        println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=$e")
         rollback4GameEvent(e)
       }
     }
@@ -172,11 +172,19 @@ class ThorSchemaImpl(
       if (esRecoverSupport) {
         clearEsRecoverData()
         addGameSnapshot(systemFrame, this.getThorSchemaState())
-
       }
     } else {
-      super.update()
-      if (esRecoverSupport) addGameSnapshot(systemFrame, this.getThorSchemaState())
+//      super.update()
+      if (esRecoverSupport) {
+        if (rollBackFrame.nonEmpty) {
+          rollBackFrame.sortWith(_ < _).foreach(rollback)
+        } else {
+          super.update()
+          addGameSnapshot(systemFrame, this.getThorSchemaState())
+        }
+      } else {
+        super.update()
+      }
     }
   }
 
