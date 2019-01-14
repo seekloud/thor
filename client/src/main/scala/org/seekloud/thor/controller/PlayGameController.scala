@@ -179,7 +179,7 @@ class PlayGameController(
       val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
       if (thorSchemaOpt.nonEmpty && gameState == GameState.play) {
         thorSchemaOpt.foreach { thorSchema =>
-          val mouseDistance = math.sqrt(math.pow(e.getX - playGameScreen.screen.getWidth / 2.0, 2) + math.pow(e.getY - playGameScreen.screen.getHeight / 2.0, 2))
+//          val mouseDistance = math.sqrt(math.pow(e.getX - playGameScreen.screen.getWidth / 2.0, 2) + math.pow(e.getY - playGameScreen.screen.getHeight / 2.0, 2))
           if (thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
             val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
             if (math.abs(theta - direction) > 0.3) {
