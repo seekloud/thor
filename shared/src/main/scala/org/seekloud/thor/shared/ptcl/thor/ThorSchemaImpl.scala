@@ -62,13 +62,17 @@ class ThorSchemaImpl(
                 removePreEvent(preFrame, e.playerId, e.serialNum)
                 addUserAction(e)
               } else if (e.frame >= systemFrame) {
+                //preFrame 比 systemFrame小，但事件frame比systemFrame大，删除preFrame历史数据，回滚后加入事件
                 removePreEventHistory(preFrame, e.playerId, e.serialNum)
-                rollback(preFrame)
+                println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
+                addRollBackFrame(preFrame)
                 addUserAction(e)
               } else {
+                //preFrame 比 systemFrame小，事件frame比systemFrame小，删除preFrame历史数据，加入事件e为历史，回滚
                 removePreEventHistory(preFrame, e.playerId, e.serialNum)
                 addUserActionHistory(e)
-                rollback(preFrame)
+                println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
+                addRollBackFrame(preFrame)
               }
             }
           }
@@ -83,7 +87,7 @@ class ThorSchemaImpl(
       if (e.frame >= systemFrame) {
         addUserAction(e)
       } else if (esRecoverSupport) {
-        println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=$e")
+//        println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=$e")
         rollback4GameEvent(e)
       }
     }
@@ -172,11 +176,19 @@ class ThorSchemaImpl(
       if (esRecoverSupport) {
         clearEsRecoverData()
         addGameSnapshot(systemFrame, this.getThorSchemaState())
-
       }
     } else {
-      super.update()
-      if (esRecoverSupport) addGameSnapshot(systemFrame, this.getThorSchemaState())
+//      super.update()
+      if (esRecoverSupport) {
+        if (rollBackFrame.nonEmpty) {
+          rollBackFrame.sortWith(_ < _).foreach(rollback)
+        } else {
+          super.update()
+          addGameSnapshot(systemFrame, this.getThorSchemaState())
+        }
+      } else {
+        super.update()
+      }
     }
   }
 

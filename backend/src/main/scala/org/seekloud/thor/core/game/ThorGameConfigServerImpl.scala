@@ -77,7 +77,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val robotNames = config.getStringList("thorGame.robot.name")
     .requiring(_.size() >= 1, msg="minimum robot names size is 1").asScala.toList
   private[this] val robotNumber = config.getInt("thorGame.robot.number")
-    .requiring(t => t >= 1 && t <= 7, msg="minimum robot number is 1-7")
+    .requiring(t => t >= 1 && t <= 18, msg="minimum robot number is 1-18")
   private[this] val robotMoveFrequency = config.getDoubleList("thorGame.robot.moveFrequency")
     .requiring(_.size() >= 1, msg="minimum robot moveFrequency size is 1").asScala.map(_.toDouble).toList
   private[this] val robotAttackFrequency = config.getDoubleList("thorGame.robot.attackFrequency")

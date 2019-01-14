@@ -64,7 +64,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
         clickTimer = Shortcut.schedule(fakeMouseClick, 3000)
-        mousemoveTimer = Shortcut.schedule(fakeMouseMove, 1500)
+        mousemoveTimer = Shortcut.schedule(fakeMouseMove, 2500)
 
       case e:BeAttacked =>
         println("attack!!!!!!!!!!!!!"+e)
@@ -164,13 +164,13 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
       websocketClient.sendMsg(data)
       thorSchema.preExecuteUserEvent(data)
       if(num < thetaList.length - 1)
-        Shortcut.scheduleOnce(()=> fakeMove(thorSchema, thetaList, num + 1 ) , 50)
+        Shortcut.scheduleOnce(()=> fakeMove(thorSchema, thetaList, num + 1 ) , 200)
     }
     thorSchemaOpt.foreach{ thorSchema =>
       val direction = thorSchema.adventurerMap(myId).direction
       if(math.abs(targetTheta - direction) > 0.2){
 
-        val increment = (1 to (math.abs(targetTheta - direction) / 0.2).toInt).map(_ => if(targetTheta - direction > 0) 0.2f else -0.2f)
+        val increment = (1 to (math.abs(targetTheta - direction) / 0.4).toInt).map(_ => if(targetTheta - direction > 0) 0.4f else -0.4f)
         val thetaList = increment.scanLeft(direction)(_ + _)
         println(thetaList)
         Shortcut.scheduleOnce(()=> fakeMove(thorSchema, thetaList.toList, 0 ) , 50)
