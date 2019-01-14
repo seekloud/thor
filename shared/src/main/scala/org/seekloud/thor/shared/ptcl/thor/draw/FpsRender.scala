@@ -31,9 +31,9 @@ trait FpsRender {
     val drawStr = s"drawTime : ${drawTime}ms"
     val frameStr = s"frameTime : ${frameTime}ms"
     ctx.setTextBaseLine("top")
-    ctx.fillText(pingStr,window.x * 0.24,10)
-    ctx.fillText(fpsStr,window.x * 0.24,30)
-    ctx.fillText(drawStr,window.x * 0.24,50)
-    ctx.fillText(frameStr,window.x * 0.24,70)
+    ctx.fillText(pingStr,window.x * 0.9,10)
+    ctx.fillText(fpsStr,window.x * 0.9,30)
+    ctx.fillText(drawStr,window.x * 0.9,50)
+    ctx.fillText(frameStr,window.x * 0.9,70)
   }
 }

@@ -203,7 +203,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         if(thorSchema.adventurerMap.contains(mainId)){
           val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
-          thorSchema.drawRank(historyRank,false,myId)
           thorSchema.drawRank(currentRank,true,myId)
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
