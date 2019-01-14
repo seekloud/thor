@@ -133,7 +133,7 @@ trait ThorSchema extends KillInformation {
             case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
           }
         case None =>
-          info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
+//          info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
 
       }
     }

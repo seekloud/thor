@@ -186,16 +186,16 @@ trait Adventurer extends CircleObjectOfGame {
     val mouseDistance = math.sqrt(math.pow(offsetX, 2) + math.pow(offSetY, 2))
     val d = if (offsetX < 0) {
       if (offSetY < 0) {
-        - (math.Pi - math.acos(offSetY.toFloat / offsetX.toFloat)).toFloat
+        - (math.Pi - math.atan(math.abs(offSetY).toFloat / math.abs(offsetX).toFloat)).toFloat
       } else {
-        (math.Pi - math.acos(offSetY.toFloat / offsetX.toFloat)).toFloat
+        (math.Pi - math.atan(math.abs(offSetY) / math.abs(offsetX).toFloat)).toFloat
       }
 
     } else {
       if (offSetY > 0) {
-        math.acos(offSetY.toFloat / offsetX.toFloat).toFloat
+        math.atan(math.abs(offSetY) / math.abs(offsetX).toFloat).toFloat
       } else {
-        - math.acos(offSetY.toFloat / offsetX.toFloat).toFloat
+        - math.atan(math.abs(offSetY) / math.abs(offsetX).toFloat).toFloat
       }
 
     }
