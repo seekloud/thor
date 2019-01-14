@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import org.seekloud.thor.Boot.executor
 import org.seekloud.thor.core.game.ThorSchemaServerImpl
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{MouseClickDownLeft, MouseMove}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{MouseClickDownLeft, MM}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.FiniteDuration
@@ -140,8 +140,8 @@ object RobotActor {
 
         case AutoMouseMoveGoOn(thetaList, num) =>
           //moveDistance是否移动
-          val moveDistance = if(thorSchema.config.isRobotMove) 128f else 1f
-          val data = MouseMove(botId, thetaList(num), moveDistance, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
+          val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
+          val data = MM(botId, (math.cos(thetaList(num)) * moveDistance).toShort, (math.sin(thetaList(num)) * moveDistance).toShort, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
           roomActor ! RoomActor.WsMessage(botId, data)
           if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 50))
             timer.startSingleTimer(MouseMoveGoOnKey, AutoMouseMoveGoOn(thetaList, num + 1), 100.millis)
