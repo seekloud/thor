@@ -78,7 +78,7 @@ object ThorGame {
 
   final case class RestartGame(name: String) extends WsMsgFront
 
-  final case class Ranks(currentRank: List[Score], historyRank: List[Score]) extends WsMsgServer
+  final case class Ranks(currentRank: List[Score]) extends WsMsgServer
 
   final case class GridSyncState(d: ThorSchemaState) extends WsMsgServer
 

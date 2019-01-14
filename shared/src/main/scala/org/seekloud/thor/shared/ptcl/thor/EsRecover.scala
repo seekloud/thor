@@ -37,7 +37,7 @@ trait EsRecover {
       require(frame < this.systemFrame)
     } catch {
       case _: Exception =>
-        println(s"rollback frame: $frame, curFrame: ${this.systemFrame}")
+        println(s"rollback exception frame: $frame, curFrame: ${this.systemFrame}")
     }
     removeRollBackFrame(frame)
 

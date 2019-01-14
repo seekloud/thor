@@ -150,7 +150,7 @@ object RoomActor {
             if (AppSettings.gameRecordIsWork) {
               if (tickCount % 20 == 1) {
                 //排行榜
-                val rankEvent = Ranks(thorSchema.currentRankList,thorSchema.historyRank)
+                val rankEvent = Ranks(thorSchema.currentRankList)
                 getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(rankEvent :: gameEvents, snapShotOpt)
               } else {
                 getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(gameEvents, snapShotOpt)
@@ -178,7 +178,7 @@ object RoomActor {
             }
             if (tickCount % 20 == 3) {
               //排行榜
-              dispatch(subscribersMap, watchingMap)(Ranks(thorSchema.currentRankList,thorSchema.historyRank))
+              dispatch(subscribersMap, watchingMap)(Ranks(thorSchema.currentRankList))
             }
             newPlayer.foreach {
               //为新用户分发全量数据

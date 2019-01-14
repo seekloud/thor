@@ -66,7 +66,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
 
       case e: ThorGame.Ranks =>
         currentRank = e.currentRank
-        historyRank = e.historyRank
+//        historyRank = e.historyRank
 
 
       case ThorGame.StartReplay =>
