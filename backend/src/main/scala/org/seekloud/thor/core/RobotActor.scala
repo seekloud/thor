@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import org.seekloud.thor.Boot.executor
 import org.seekloud.thor.core.game.ThorSchemaServerImpl
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{MouseClickDownLeft, MouseMove}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{MouseClickDownLeft, MM}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.FiniteDuration
