@@ -99,9 +99,9 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
 
 
 
-      case Ranks(current, history) =>
+      case Ranks(current) =>
         currentRank = current
-        historyRank = history
+//        historyRank = history
 
       case GridSyncState(d) =>
         //                  dom.console.log(d.toString)

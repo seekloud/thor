@@ -107,9 +107,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
 
-      case Ranks(current, history) =>
+      case Ranks(current) =>
         currentRank = current
-        historyRank = history
+//        historyRank = history
 
       case GridSyncState(d) =>
         //                  dom.console.log(d.toString)

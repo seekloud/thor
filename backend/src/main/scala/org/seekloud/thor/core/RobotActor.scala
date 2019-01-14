@@ -40,8 +40,8 @@ object RobotActor {
   private final case object AutoMouseMove extends Command
 
   private final case class AutoMouseMoveGoOn(
-    theta: Float,
-    distance: Float
+    thetaList: List[Float],
+    num: Int
   ) extends Command
 
   private final case object AutoMouseLeftDown extends Command
@@ -114,16 +114,6 @@ object RobotActor {
     Behaviors.receive[Command]{(ctx, msg) =>
       msg match {
         case AutoMouseMove =>
-          def sendBackendMove(thetaList: List[Float], num: Int): Unit = {
-            //moveDistance是否移动
-            val moveDistance = if(thorSchema.config.isRobotMove) 128f else 1f
-            val data = MouseMove(botId, thetaList(num), moveDistance, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
-            roomActor ! RoomActor.WsMessage(botId, data)
-            if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 50))
-              ctx.system.scheduler.scheduleOnce(50.millis){
-                sendBackendMove(thetaList, num + 1)
-              }
-          }
           val theta = move2Player(thorSchema, botId)
           val direction = if(theta == 0) theta.toFloat else thorSchema.adventurerMap(botId).direction
 
@@ -137,7 +127,7 @@ object RobotActor {
             val increment = (1 to (math.abs(tDirection) / 0.2).toInt).map(_ => if(tDirection > 0) 0.2f else -0.2f)
             val thetaList = increment.scanLeft(direction)(_ + _).map(t => if(t > math.Pi) t - 2 * math.Pi.toFloat else if(t < -math.Pi) t + 2 * math.Pi.toFloat else t)
 
-            sendBackendMove(thetaList.toList, 0)
+            ctx.self ! AutoMouseMoveGoOn(thetaList.toList, 0)
 
             timer.cancel(MouseMoveKey)
             timer.startSingleTimer(MouseMoveKey, AutoMouseMove, moveFrequency.seconds)
@@ -147,6 +137,17 @@ object RobotActor {
             timer.startSingleTimer(MouseMoveKey, AutoMouseMove, moveFrequency.seconds)
           }
           Behavior.same
+
+        case AutoMouseMoveGoOn(thetaList, num) =>
+          //moveDistance是否移动
+          val moveDistance = if(thorSchema.config.isRobotMove) 128f else 1f
+          val data = MouseMove(botId, thetaList(num), moveDistance, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
+          roomActor ! RoomActor.WsMessage(botId, data)
+          if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 50))
+            timer.startSingleTimer(MouseMoveGoOnKey, AutoMouseMoveGoOn(thetaList, num + 1), 100.millis)
+
+          Behaviors.same
+
 
         case AutoMouseLeftDown =>
           if(attack2Player(thorSchema, botId) && thorSchema.config.isRobotAttack){

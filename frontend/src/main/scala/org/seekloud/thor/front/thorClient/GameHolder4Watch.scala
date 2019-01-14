@@ -82,7 +82,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
           * 游戏排行榜
           **/
         currentRank = e.currentRank
-        historyRank = e.historyRank
+//        historyRank = e.historyRank
 
       case e: GridSyncState =>
         //        println(s"still sync.but thorSchema is: $thorSchemaOpt")

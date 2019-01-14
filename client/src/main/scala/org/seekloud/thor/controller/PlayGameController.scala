@@ -319,7 +319,7 @@ class PlayGameController(
 
         case e: ThorGame.Ranks =>
           currentRank = e.currentRank
-          historyRank = e.historyRank
+//          historyRank = e.historyRank
 
         case e: ThorGame.GridSyncState =>
           thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
