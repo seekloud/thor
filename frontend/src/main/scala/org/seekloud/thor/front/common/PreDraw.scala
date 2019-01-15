@@ -25,7 +25,7 @@ class PreDraw {
       cnt += 1
     }
   }
-  , 10000)
+  , 20000)
 
   //预渲染人物
   val drawAdventurer = new MiddleFrameInJs
@@ -42,7 +42,7 @@ class PreDraw {
       cnt += 1
     }
   }
-  , 10000)
+  , 20000)
 
   //预渲染武器
   val drawWeapon = new MiddleFrameInJs
@@ -61,6 +61,6 @@ class PreDraw {
       cnt += 1
     }
   }
-    , 10000)
+    , 20000)
 
 }

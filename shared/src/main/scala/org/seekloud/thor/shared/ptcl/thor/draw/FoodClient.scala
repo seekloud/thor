@@ -22,7 +22,7 @@ trait FoodClient { this: ThorSchemaClientImpl =>
           drawAFood(food._2, offset, canvasUnit,canvasBoundary)
         }
       case _ =>
-        if(System.currentTimeMillis() - preTime < 12000){
+        if(System.currentTimeMillis() - preTime < 22000){
           foodMap.foreach{food=>
             drawAFood(food._2, offset, canvasUnit,canvasBoundary)
           }
