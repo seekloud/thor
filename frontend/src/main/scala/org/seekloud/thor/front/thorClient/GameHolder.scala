@@ -169,6 +169,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 //  var testEndTime = System.currentTimeMillis()
 //  var startTime = System.currentTimeMillis()
 
+  var lastSendReq = 0L
   protected def gameLoop(): Unit = {
     handleResize
     logicFrameTime = System.currentTimeMillis()
@@ -192,6 +193,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         frameTime = frameTime :+ System.currentTimeMillis() - logicFrameTime
         frameTimeSingle = System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
+        if(logicFrameTime - lastSendReq > 5000){
+          websocketClient.sendMsg(UserMapReq)
+        }
         ping()
     }
   }
