@@ -49,7 +49,7 @@ object ThorGame {
 
   final case class UserInfo(playerId: String, name: String) extends WsMsgServer
 
-  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String) extends WsMsgServer
+  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Short = 0) extends WsMsgServer
 
   final case class UserEnterRoom(playerId: String, name: String, adventurer: AdventurerState, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
@@ -59,7 +59,8 @@ object ThorGame {
 
   final case class EatFood(playerId: String, foodId: Int, foodLevel: Int, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class MM(playerId: String, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MM(playerId: Short, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseMove(playerId: String, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
   final case class MouseClickDownLeft(playerId: String, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 

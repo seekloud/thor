@@ -27,6 +27,8 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
   private val window = Point((dom.window.innerWidth - 12).toFloat, (dom.window.innerHeight - 12).toFloat)
 
+  private var shortId = 0
+
   //游戏启动
   def start(name: String, id: Option[String], accessCode: Option[String], roomId: Option[Long]): Unit = {
     println(s"start $name; firstCome $firstCome")
@@ -58,11 +60,12 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
-      case YourInfo(config, id, yourName) =>
+      case YourInfo(config, id, yourName, sId) =>
         dom.console.log(s"get YourInfo $config $id $yourName")
         startTime = System.currentTimeMillis()
         myId = id
         mainId = id
+        shortId = sId
         myName = yourName
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
@@ -146,7 +149,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 //            val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             val direction = thorSchema.adventurerMap(myId).direction
             if (thorSchema.systemFrame > lastMouseMove && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
-              val data = MM(thorSchema.myId, (e.clientX - dom.window.innerWidth / 2.0).toShort, (e.clientY - dom.window.innerHeight / 2.0).toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              val data = MM(shortId.toShort, (e.clientX - dom.window.innerWidth / 2.0).toShort, (e.clientY - dom.window.innerHeight / 2.0).toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(data)
               thorSchema.preExecuteUserEvent(data)
               lastMouseMove = thorSchema.systemFrame

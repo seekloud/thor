@@ -40,7 +40,7 @@ case class ThorSchemaServerImpl(
 
   private val foodIdGenerator = new AtomicInteger(100)
 
-  private var justJoinUser: List[(String, String, ActorRef[UserActor.Command])] = Nil // userId, name, Actor
+  private var justJoinUser: List[(String, String, Short, ActorRef[UserActor.Command])] = Nil // userId, name, Actor
   private var justJoinBot: List[(String, String, ActorRef[RobotActor.Command])] = Nil // botId, name
   private val robotMap: mutable.HashMap[String, ActorRef[RobotActor.Command]] = mutable.HashMap.empty
   private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
@@ -164,8 +164,8 @@ case class ThorSchemaServerImpl(
     foodList
   }
 
-  def joinGame(userId: String, name: String, userActor: ActorRef[UserActor.Command]): Unit = {
-    justJoinUser = (userId, name, userActor) :: justJoinUser
+  def joinGame(userId: String, name: String, shortId: Short, userActor: ActorRef[UserActor.Command]): Unit = {
+    justJoinUser = (userId, name, shortId, userActor) :: justJoinUser
   }
 
   def robotJoinGame(botId: String, name: String, ref: ActorRef[RobotActor.Command]): Unit ={
@@ -273,12 +273,12 @@ case class ThorSchemaServerImpl(
     }
 
     justJoinUser.foreach {
-      case (playerId, name, ref) =>
+      case (playerId, name, shortId, ref) =>
         val adventurer = generateAdventurer(playerId, name)
         val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
         addGameEvent(event)
-        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, roomActorRef, config.getThorGameConfigImpl())
+        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl())
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
