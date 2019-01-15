@@ -420,7 +420,7 @@ object UserActor {
 
           case DispatchMsg(m) =>
             if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) { //玩家死亡
-              log.debug(s"deadmsg $m")
+//              log.debug(s"deadmsg $m")
               frontActor ! m
               roomManager ! RoomManager.BeDead(playerId, userInfo.name)
 //              roomManager ! RoomManager.BeDead(playerId, userInfo.name)
@@ -432,7 +432,7 @@ object UserActor {
             }
 
           case DispatchMap(map) =>
-            val msg = Wrap(map.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            val msg = Wrap(UserMap(map).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
             frontActor ! msg
             Behaviors.same
 

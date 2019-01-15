@@ -139,6 +139,7 @@ object UserManager {
     "rank" -> 0.0,
     "ping" -> 0.0,
     "userMap" -> 0.0,
+    "generateFood" -> 0.0,
     "others" -> 0.0
   )
   var timer = System.currentTimeMillis()
@@ -213,6 +214,8 @@ object UserManager {
                   statics.update("ping", statics("ping") + msg.length.toDouble / 1024)
                 case _: UserMap =>
                   statics.update("userMap", statics("userMap") + msg.length.toDouble / 1024)
+                case _: GenerateFood =>
+                  statics.update("generateFood", statics("generateFood") + msg.length.toDouble / 1024)
                 case _ =>
                   statics.update("others", statics("others") + msg.length.toDouble / 1024)
 
