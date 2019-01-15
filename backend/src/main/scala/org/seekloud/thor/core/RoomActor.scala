@@ -65,7 +65,6 @@ object RoomActor {
           implicit timer =>
             val subscribersMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
             val watchingMap = mutable.HashMap[String, ActorRef[UserActor.Command]]()
-            val idMap = mutable.HashMap[Short, String]()
             //为新房间创建thorSchema
             implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
@@ -78,7 +77,7 @@ object RoomActor {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
             }
             timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
-            idle(roomId, Nil, subscribersMap, watchingMap, idMap, thorSchema, 0L)
+            idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, 0L)
         }
     }
   }
@@ -88,7 +87,6 @@ object RoomActor {
     newPlayer: List[(String, ActorRef[UserActor.Command])],
     subscribersMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
     watchingMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
-    idMap: mutable.HashMap[Short, String],
     thorSchema: ThorSchemaServerImpl,
     tickCount: Long
   )(
@@ -112,7 +110,7 @@ object RoomActor {
             val tmpId = idGenerator.getAndIncrement()
             thorSchema.joinGame(userId, name, tmpId.toShort, userActor)
 
-            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, idMap, thorSchema, tickCount)
+            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 
           case JoinRoom4Watch(uid, _, playerId, userActor4Watch) =>
             log.debug(s"${ctx.self.path} recv a msg=${msg}")
@@ -124,11 +122,16 @@ object RoomActor {
 //            log.debug(s"roomactor - ${userId} left room")
             thorSchema.leftGame(userId, name)
             subscribersMap.remove(userId)
-            idMap.foreach(i => if(i._2 == userId) idMap.remove(i._1))
-            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
+
+            thorSchema.playerIdMap.foreach{i =>
+              if(i._2 == userId) {
+                dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, i._1, name))
+                thorSchema.playerIdMap.remove(i._1)
+              }
+            }
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
-            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, idMap, thorSchema, tickCount)
+            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
 
           case BeDead(userId, name, userList) =>
 //            log.debug(s"roomactor - ${userId} die")
@@ -137,7 +140,7 @@ object RoomActor {
 //            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
-            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, idMap, thorSchema, tickCount)
+            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
 
           case LeftRoom4Watch(uid,playerId) =>
             thorSchema.leftRoom4Watch(uid,playerId)
@@ -197,7 +200,7 @@ object RoomActor {
                 subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)
             }
-            idle(roomId, Nil, subscribersMap, watchingMap, idMap, thorSchema, tickCount + 1)
+            idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
 
           case ChildDead(_, childRef) =>
             ctx.unwatch(childRef)

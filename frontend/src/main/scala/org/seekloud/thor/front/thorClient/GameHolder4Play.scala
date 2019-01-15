@@ -71,7 +71,10 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
         if (timer != 0) {
           dom.window.clearInterval(timer)
-          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+          thorSchemaOpt.foreach { grid =>
+            timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
+            grid.playerIdMap.put(sId, id)
+          }
         }
         else thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
 
@@ -127,7 +130,15 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         closeHolder
 
 
-      case e: UserActionEvent => thorSchemaOpt.foreach(_.receiveUserEvent(e))
+      case e: UserActionEvent =>
+        e match{
+          case msg: UserEnterRoom =>
+            thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.put(msg.shortId, msg.playerId))
+          case msg: UserLeftRoom =>
+            thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(msg.shortId))
+
+        }
+        thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case e: GameEvent =>
         thorSchemaOpt.foreach(_.receiveGameEvent(e))

@@ -275,9 +275,10 @@ case class ThorSchemaServerImpl(
     justJoinUser.foreach {
       case (playerId, name, shortId, ref) =>
         val adventurer = generateAdventurer(playerId, name)
-        val event = UserEnterRoom(playerId, name, adventurer.getAdventurerState, systemFrame)
+        val event = UserEnterRoom(playerId, shortId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
         addGameEvent(event)
+        playerIdMap.put(shortId, playerId)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl())
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
         adventurerMap.put(playerId, adventurer)
