@@ -177,7 +177,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           if (thorSchema.adventurerMap.contains(myId)) {
 //            println("mouse down")
             if (e.button == 0) { //左键
-              val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              val event = MouseClickDownLeft(shortId.toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
               //              thorSchema.addMyAction(event)
@@ -185,7 +185,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               //              e.preventDefault()
             }
             else if (e.button == 2) { //右键
-              val event = MouseClickDownRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              val event = MouseClickDownRight(shortId.toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event) // actionEventMap
               //              thorSchema.addMyAction(event) // myAdventurerAction
@@ -210,7 +210,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId))
             if (e.button == 2) { //右键
-              val event = MouseClickUpRight(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              val event = MouseClickUpRight(shortId.toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
               //              thorSchema.addMyAction(event)
