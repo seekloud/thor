@@ -189,13 +189,16 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         if (Shortcut.isPaused("bgm-2")) {
           Shortcut.playMusic("bgm-2")
         }
-        thorSchemaOpt.foreach{ _.update()}
+        thorSchemaOpt.foreach{ thorSchema =>
+          thorSchema.update()
+          if( thorSchema.needUserMap && logicFrameTime - lastSendReq > 5000){
+            websocketClient.sendMsg(UserMapReq)
+          }
+        }
         frameTime = frameTime :+ System.currentTimeMillis() - logicFrameTime
         frameTimeSingle = System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
-        if(logicFrameTime - lastSendReq > 5000){
-          websocketClient.sendMsg(UserMapReq)
-        }
+
         ping()
     }
   }
