@@ -37,6 +37,24 @@ class ThorSchemaImpl(
 
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
 
+//  override protected def shortId2PlayerId(shortId: Short): Either[String, String] = {
+//    if (playerIdMap.contains(shortId)) {
+//      Right(playerIdMap(shortId))
+//    } else {
+//      needUserMap = true
+//      Left("")
+//    }
+//  }
+
+//  override protected def playerId2ShortId(playerId: String): Either[Short, Short] = {
+//    if (playerIdMap.exists(_._2 == playerId)) {
+//      Right(playerIdMap.filter(_._2 == playerId).keySet.head)
+//    } else {
+//      needUserMap = true
+//      Left(-1)
+//    }
+//  }
+
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState) = {
     new AdventurerImpl(config, adventurer)
   }
@@ -52,45 +70,51 @@ class ThorSchemaImpl(
 
   //接受服务器的用户事件
   def receiveUserEvent(e: UserActionEvent) = {
-    if (playerIdMap(e.playerId) == aId) {
-      uncheckedActionMap.get(e.serialNum) match {
-        case Some(preFrame) =>
-          if (e.frame != preFrame) {
-            //            println(s"preFrame=$preFrame eventFrame=${e.frame} curFrame=$systemFrame")
-            if (preFrame < e.frame && esRecoverSupport) {
-              if (preFrame >= systemFrame) {
-                removePreEvent(preFrame, e.playerId, e.serialNum)
-                addUserAction(e)
-              } else if (e.frame >= systemFrame) {
-                //preFrame 比 systemFrame小，但事件frame比systemFrame大，删除preFrame历史数据，回滚后加入事件
-                removePreEventHistory(preFrame, e.playerId, e.serialNum)
-                println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
-                addRollBackFrame(preFrame)
-                addUserAction(e)
-              } else {
-                //preFrame 比 systemFrame小，事件frame比systemFrame小，删除preFrame历史数据，加入事件e为历史，回滚
-                removePreEventHistory(preFrame, e.playerId, e.serialNum)
-                addUserActionHistory(e)
-                println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
-                addRollBackFrame(preFrame)
+    val pIdStr = shortId2PlayerId(e.playerId)
+    pIdStr match {
+      case Right(pId) =>
+        if (pId == aId) {
+          uncheckedActionMap.get(e.serialNum) match {
+            case Some(preFrame) =>
+              if (e.frame != preFrame) {
+                //            println(s"preFrame=$preFrame eventFrame=${e.frame} curFrame=$systemFrame")
+                if (preFrame < e.frame && esRecoverSupport) {
+                  if (preFrame >= systemFrame) {
+                    removePreEvent(preFrame, e.playerId, e.serialNum)
+                    addUserAction(e)
+                  } else if (e.frame >= systemFrame) {
+                    //preFrame 比 systemFrame小，但事件frame比systemFrame大，删除preFrame历史数据，回滚后加入事件
+                    removePreEventHistory(preFrame, e.playerId, e.serialNum)
+                    println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
+                    addRollBackFrame(preFrame)
+                    addUserAction(e)
+                  } else {
+                    //preFrame 比 systemFrame小，事件frame比systemFrame小，删除preFrame历史数据，加入事件e为历史，回滚
+                    removePreEventHistory(preFrame, e.playerId, e.serialNum)
+                    addUserActionHistory(e)
+                    println(s"roll back to $preFrame curFrame $systemFrame because of UserActionEvent $e")
+                    addRollBackFrame(preFrame)
+                  }
+                }
               }
-            }
+            case None =>
+              if (e.frame >= systemFrame) {
+                addUserAction(e)
+              } else if (esRecoverSupport) {
+                rollback4UserActionEvent(e)
+              }
           }
-        case None =>
+        } else {
           if (e.frame >= systemFrame) {
             addUserAction(e)
           } else if (esRecoverSupport) {
-            rollback4UserActionEvent(e)
+            //        println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=$e")
+            rollback4GameEvent(e)
           }
-      }
-    } else {
-      if (e.frame >= systemFrame) {
-        addUserAction(e)
-      } else if (esRecoverSupport) {
-//        println(s"rollback-frame=${e.frame},curFrame=${this.systemFrame},e=$e")
-        rollback4GameEvent(e)
-      }
+        }
+      case Left(_) => // do nothing
     }
+
 
   }
 
@@ -100,12 +124,18 @@ class ThorSchemaImpl(
   }
 
   final def addMyAction(action: UserActionEvent): Unit = {
-    if (playerIdMap(action.playerId) == aId) {
-      myAdventurerAction.get(action.frame - preExecuteFrameOffset) match {
-        case Some(actionEvents) => myAdventurerAction.put(action.frame - preExecuteFrameOffset, action :: actionEvents)
-        case None => myAdventurerAction.put(action.frame - preExecuteFrameOffset, List(action))
-      }
+    val pIdStr = shortId2PlayerId(action.playerId)
+    pIdStr match {
+      case Right(pId) =>
+        if (pId == aId) {
+          myAdventurerAction.get(action.frame - preExecuteFrameOffset) match {
+            case Some(actionEvents) => myAdventurerAction.put(action.frame - preExecuteFrameOffset, action :: actionEvents)
+            case None => myAdventurerAction.put(action.frame - preExecuteFrameOffset, List(action))
+          }
+        }
+      case Left(_) => // do nothing
     }
+
   }
 
   protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState) = {
