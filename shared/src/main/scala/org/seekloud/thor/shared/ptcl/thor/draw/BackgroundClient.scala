@@ -56,7 +56,7 @@ trait BackgroundClient {
   }
 
   def drawRank(Rank: List[Score], CurrentOrNot: Boolean, id: String): Unit = {
-    val text = "—————排行榜—————"
+    val text = "———————排行榜——————"
     val RankBaseLine = 3
     var index = 0
     var yourRank = 100
@@ -64,9 +64,8 @@ trait BackgroundClient {
     val begin = if (CurrentOrNot) 10 else window.x * 0.78
     var last = ""
     ctx.save()
-//    ctx.drawImage(rankImg, begin, 0, Some(window.x * 0.22, window.x * 0.18))
     ctx.setFill("rgba(0,0,0,0.6)")
-    ctx.fillRec(begin, 0, window.x * 0.21, window.x * 0.24)
+    ctx.fillRec(begin, 0, window.x * 0.24, window.x * 0.24)
     ctx.setFill("#fdffff")
     ctx.setTextAlign("start")
     drawTextLine(s"   $text", 10 + window.x * 0.01, 0, 2,1)
@@ -74,15 +73,21 @@ trait BackgroundClient {
     Rank.foreach { score =>
       index += 1
       if (score.id == id) yourRank = index
-      val name = if (score.n.contains("guest")) score.n.take(13) else score.n.take(7)
+      val name = if (score.n.length <= 4) score.n.take(4) else score.n.take(4) + "..."
       if (index < 10) {
         ctx.setTextAlign("left")
         if (score.id == id) {
           yourNameIn = true
-          drawTextLine(s" 【$index】  $name   分数:${score.e}   击杀数:${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine,3)
+          drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,3)
+          drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,3)
+          drawTextLine(s" 击杀数: ${score.k}", begin + window.x * 0.18, index * 2, RankBaseLine,3)
         }
-        else
-          drawTextLine(s" 【$index】  $name   分数:${score.e}   击杀数:${score.k}", begin + window.x * 0.01, index * 2, RankBaseLine,2)
+        else{
+          drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,2)
+          drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,2)
+          drawTextLine(s" 击杀数: ${score.k}", begin + window.x * 0.18, index * 2, RankBaseLine,2)
+        }
+
       }
       if (index == 10) {
         last = s" 【10】   $name   分数:${score.e}   击杀数:${score.k}"
@@ -93,13 +98,13 @@ trait BackgroundClient {
       ctx.setFill("#FFFF00")
       Rank.find(_.id == id) match {
         case Some(yourScore) =>
-          val name = if (yourScore.n.contains("guest")) yourScore.n.take(13) else yourScore.n.take(7)
-          drawTextLine(s" 【$yourRank】   $name   分数:${yourScore.e}   击杀数:${yourScore.k}", begin + window.x * 0.01, 20, RankBaseLine,3)
+          val name = if (yourScore.n.length <= 4) yourScore.n.take(4) + "   " else yourScore.n.take(4) + "..."
+          drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,2)
+          drawTextLine(s" 分数: ${yourScore.e}", begin + window.x * 0.11, index * 2, RankBaseLine,2)
+          drawTextLine(s" 击杀数: ${yourScore.k}", begin + window.x * 0.18, index * 2, RankBaseLine,2)
         case None =>
       }
     }
-    else
-      drawTextLine(last, begin + window.x * 0.01, 12, RankBaseLine,2)
     ctx.restore()
   }
 
