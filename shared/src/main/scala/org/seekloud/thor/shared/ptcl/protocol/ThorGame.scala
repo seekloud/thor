@@ -53,6 +53,8 @@ object ThorGame {
 
   final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Short = 0, playerIdMap: List[(Short, String)] = Nil) extends WsMsgServer
 
+  final case class UserMap(playerIdMap: List[(Short, String)] = Nil) extends WsMsgServer
+
   final case class UserEnterRoom(playerId: String, shortId: Short, name: String, adventurer: AdventurerState, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
   final case class UserLeftRoom(playerId: String, shortId: Short, name: String, override val frame: Int = 0) extends UserEvent with WsMsgServer
