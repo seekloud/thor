@@ -70,7 +70,7 @@ trait ThorSchema extends KillInformation {
 //    playerId = id
 //  }
 
-//  final protected def playerId
+  protected implicit def playerId
 
   final protected def handleUserEnterRoomEvent(l: List[UserEnterRoom]): Unit = {
     l foreach handleUserEnterRoomEvent

@@ -55,7 +55,7 @@ object ThorGame {
 
   final case class UserMap(playerIdMap: List[(Short, String)] = Nil) extends WsMsgServer
 
-  final case class UserMapReq(playerId: Short) extends WsMsgFront
+  final case object UserMapReq extends WsMsgFront
 
   final case class UserEnterRoom(playerId: String, shortId: Short, name: String, adventurer: AdventurerState, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
