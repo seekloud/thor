@@ -27,6 +27,7 @@ class PreDraw {
   }
   , 10000)
 
+  //预渲染人物
   val drawAdventurer = new MiddleFrameInJs
   val adventurerImg: List[MiddleImage] = for(a <- (0 to 19).toList) yield drawAdventurer.createImage(s"/img/char${a/4 + 1}-${a%4}.png")
 
@@ -42,5 +43,24 @@ class PreDraw {
     }
   }
   , 10000)
+
+  //预渲染武器
+  val drawWeapon = new MiddleFrameInJs
+  val weaponImg: List[MiddleImage] = for(a <- (0 to 5).toList) yield drawWeapon.createImage(s"/img/weapon${a + 1}.png")
+
+  val canvasHeight: List[Float] = for(a <- (0 to 5).toList) yield (250.0 / weaponImg(a).width * weaponImg(a).height).toFloat
+
+  val weaponCanvas: List[MiddleCanvas] = for(a <- (0 to 5).toList) yield drawWeapon.createCanvas(500.0, 120)
+
+  val weaponCtx: List[MiddleContext] = for(a <- (0 to 5).toList) yield weaponCanvas(a).getCtx
+
+  dom.window.setTimeout(()=>{
+    var cnt = 0
+    weaponCtx.foreach{ t =>
+      t.drawImage(weaponImg(cnt),0 ,0)
+      cnt += 1
+    }
+  }
+    , 10000)
 
 }
