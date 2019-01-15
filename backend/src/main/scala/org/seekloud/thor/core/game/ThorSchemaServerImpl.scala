@@ -41,7 +41,7 @@ case class ThorSchemaServerImpl(
   private val foodIdGenerator = new AtomicInteger(100)
 
   private var justJoinUser: List[(String, String, Short, ActorRef[UserActor.Command])] = Nil // userId, name, Actor
-  private var justJoinBot: List[(String, String, ActorRef[RobotActor.Command])] = Nil // botId, name
+  private var justJoinBot: List[(String, String, Short, ActorRef[RobotActor.Command])] = Nil // botId, name
   private val robotMap: mutable.HashMap[String, ActorRef[RobotActor.Command]] = mutable.HashMap.empty
   private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
 
@@ -167,8 +167,8 @@ case class ThorSchemaServerImpl(
     justJoinUser = (userId, name, shortId, userActor) :: justJoinUser
   }
 
-  def robotJoinGame(botId: String, name: String, ref: ActorRef[RobotActor.Command]): Unit ={
-    justJoinBot = (botId, name, ref) :: justJoinBot
+  def robotJoinGame(botId: String, name: String, shortId: Short, ref: ActorRef[RobotActor.Command]): Unit ={
+    justJoinBot = (botId, name, shortId, ref) :: justJoinBot
   }
 
   def handleJoinRoom4Watch(userActor4WatchGame: ActorRef[UserActor.Command], uid: String, playerId: String) = {
@@ -178,7 +178,7 @@ case class ThorSchemaServerImpl(
         val playerObserversMap = watchingMap.getOrElse(playerId, mutable.HashMap[String, ActorRef[UserActor.Command]]())
         playerObserversMap.put(uid, userActor4WatchGame)
         watchingMap.put(playerId, playerObserversMap)
-        log.debug(s"当前的watchingMaps是${watchingMap}")
+//        log.debug(s"当前的watchingMaps是${watchingMap}")
         userActor4WatchGame ! UserActor.JoinRoomSuccess4Watch(adventurer, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()))
 
       case None =>
@@ -284,8 +284,9 @@ case class ThorSchemaServerImpl(
         quadTree.insert(adventurer)
     }
     justJoinBot.foreach {
-      case (botId, name, ref) =>
+      case (botId, name, shortId, ref) =>
         val adventurer = generateAdventurer(botId, name)
+        playerIdMap.put(shortId, botId)
         robotMap.put(botId, ref)
         adventurerMap.put(botId, adventurer)
         quadTree.insert(adventurer)

@@ -35,7 +35,7 @@ trait ThorSchema extends KillInformation {
 
   val boundary: Point = config.boundary
 
-  var playerId = ""
+//  var playerId = ""
 
   var systemFrame: Int = 0 //系统帧数
 
@@ -66,9 +66,9 @@ trait ThorSchema extends KillInformation {
 
   protected val quadTree: QuadTree = new QuadTree(Rectangle(Point(0, 0), boundary))
 
-  final protected def getPlayer(id: String): Unit = {
-    playerId = id
-  }
+//  final protected def getPlayer(id: String): Unit = {
+//    playerId = id
+//  }
 
   final protected def handleUserEnterRoomEvent(l: List[UserEnterRoom]): Unit = {
     l foreach handleUserEnterRoomEvent

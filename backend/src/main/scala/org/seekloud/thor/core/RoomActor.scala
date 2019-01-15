@@ -39,9 +39,9 @@ object RoomActor {
 
   case class BeDead(playerId: String, name: String, userList: List[(String, String)]) extends Command
 
-  case class CreateRobot(botId: String, name: String, level: Int) extends Command
+  case class CreateRobot(botId: String, shortId: Short, name: String, level: Int) extends Command
 
-  case class ReliveRobot(botId: String, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
+  case class ReliveRobot(botId: String, shortId: Short, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
 
   case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
 
@@ -70,7 +70,8 @@ object RoomActor {
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
             for (cnt <- 0 until thorSchema.config.getRobotNumber) {
-              ctx.self ! CreateRobot(s"robot$cnt", thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
+              val tmpId = idGenerator.getAndIncrement()
+              ctx.self ! CreateRobot(s"robot$cnt", tmpId.toShort, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
             }
 
             if (AppSettings.gameRecordIsWork) {
@@ -96,13 +97,13 @@ object RoomActor {
     Behaviors.receive {
       (ctx, msg) =>
         msg match {
-          case CreateRobot(botId, name, level) =>
-            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, name, level), botId)
-            thorSchema.robotJoinGame(botId, name, robot)
+          case CreateRobot(botId, shortId, name, level) =>
+            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, shortId, name, level), botId)
+            thorSchema.robotJoinGame(botId, name, shortId, robot)
             Behaviors.same
 
-          case ReliveRobot(botId, name, botActor) =>
-            thorSchema.robotJoinGame(botId, name, botActor)
+          case ReliveRobot(botId, shortId, name, botActor) =>
+            thorSchema.robotJoinGame(botId, name, shortId, botActor)
             Behaviors.same
 
           case JoinRoom(roomId, userId, name, userActor) =>
