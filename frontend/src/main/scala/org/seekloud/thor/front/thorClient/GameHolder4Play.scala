@@ -111,9 +111,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             }
           }
         }
-        if(e.playerId == myId || e.killerId == myId){
-          println(s"后台消息：玩家${e.name}(${e.playerId})被杀，凶手是${e.killerName}(${e.killerId})")
-        }
+//        if(e.playerId == myId || e.killerId == myId){
+//          println(s"后台消息：玩家${e.name}(${e.playerId})被杀，凶手是${e.killerName}(${e.killerId})")
+//        }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
 

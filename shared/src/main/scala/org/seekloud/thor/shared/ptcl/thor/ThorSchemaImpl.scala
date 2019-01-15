@@ -2,7 +2,7 @@ package org.seekloud.thor.shared.ptcl.thor
 
 import org.seekloud.thor.shared.ptcl.component.{AdventurerImpl, AdventurerState, Food}
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{BeAttacked, GameEvent, UserActionEvent}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 
 import scala.collection.mutable
 
@@ -37,6 +37,8 @@ class ThorSchemaImpl(
 
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
 
+  private var justSyncFrame = 0
+
 //  override protected def shortId2PlayerId(shortId: Short): Either[String, String] = {
 //    if (playerIdMap.contains(shortId)) {
 //      Right(playerIdMap(shortId))
@@ -64,7 +66,14 @@ class ThorSchemaImpl(
       addGameEvent(e)
     } else if (esRecoverSupport) {
 //      println(s"rollback-frame=${e.frame}, curFrame=${this.systemFrame},e=$e")
-      rollback4GameEvent(e)
+      if (e.isInstanceOf[EatFood] || e.isInstanceOf[GenerateFood]) {
+        e match {
+          case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
+          case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
+        }
+      } else {
+        rollback4GameEvent(e)
+      }
     }
   }
 
@@ -150,6 +159,7 @@ class ThorSchemaImpl(
       println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
     }
     systemFrame = thorSchemaSate.f
+    justSyncFrame = systemFrame
     quadTree.clear()
     //    adventurerMap.clear()
     tmpAdventurerMap.clear()
@@ -189,7 +199,7 @@ class ThorSchemaImpl(
       handleThorSchemaState(thorSchemaState)
     } else {
       info(s"收到同步数据，不完全同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
-      if (systemFrame - thorSchemaState.f < 10) {
+      if (systemFrame - thorSchemaState.f < 5) {
         thorSchemaStateOpt = None
         handleThorSchemaState(thorSchemaState)
       }
@@ -211,7 +221,7 @@ class ThorSchemaImpl(
 //      super.update()
       if (esRecoverSupport) {
         if (rollBackFrame.nonEmpty) {
-          rollBackFrame.distinct.sortWith(_ < _).foreach(rollback)
+          rollBackFrame.distinct.filterNot(_ < justSyncFrame).sortWith(_ < _).foreach(rollback)
           super.update()
         } else {
           super.update()

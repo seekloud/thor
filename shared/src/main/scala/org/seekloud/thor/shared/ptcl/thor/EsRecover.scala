@@ -1,6 +1,6 @@
 package org.seekloud.thor.shared.ptcl.thor
 
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{GameEvent, UserActionEvent}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{EatFood, GameEvent, GenerateFood, UserActionEvent}
 
 import scala.collection.mutable
 
@@ -68,6 +68,7 @@ trait EsRecover {
     gameEventHistoryMap.put(e.frame, e :: gameEventHistoryMap.getOrElse(e.frame, Nil))
 //    rollback(e.frame)
     addRollBackFrame(e.frame)
+
   }
 
   def rollback4UserActionEvent(e: UserActionEvent) = {
