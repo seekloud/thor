@@ -27,7 +27,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
   private val window = Point((dom.window.innerWidth - 12).toFloat, (dom.window.innerHeight - 12).toFloat)
 
-  private var shortId = 0
 
   //游戏启动
   def start(name: String, id: Option[String], accessCode: Option[String], roomId: Option[Long]): Unit = {

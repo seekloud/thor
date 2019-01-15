@@ -51,11 +51,12 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
   override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
-      case YourInfo(config, id, name) =>
+      case YourInfo(config, id, name, sId) =>
         dom.console.log(s"get YourInfo ${config} ${id} ${name}")
         startTime = System.currentTimeMillis()
         myId = id
         mainId = id
+        shortId = sId
         myName = name
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
@@ -133,7 +134,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
   private def fakeMouseClick(): Unit = { //模拟左键
     thorSchemaOpt.foreach{ thorSchema =>
       if(thorSchema.adventurerMap.contains(myId)){
-        val event = MouseClickDownLeft(myId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+        val event = MouseClickDownLeft(shortId.toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
         websocketClient.sendMsg(event)
         thorSchema.preExecuteUserEvent(event)
         Shortcut.playMusic("sound-4")
@@ -160,7 +161,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
   }
   private def fakeMouseMoveLittle(offSetX: Short, offSetY: Short, targetTheta: Float): Unit ={
     def fakeMove(thorSchema: ThorSchemaClientImpl, thetaList: List[Float], num: Int): Unit ={
-      val data = MM(thorSchema.myId, offSetX, offSetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+      val data = MM(shortId.toShort, offSetX, offSetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
       websocketClient.sendMsg(data)
       thorSchema.preExecuteUserEvent(data)
       if(num < thetaList.length - 1)

@@ -64,6 +64,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   //  var thorSchema = thorSchemaOpt.get
   protected var myId = "test"
   protected var mainId = "test" //主视角ID（方便死亡跟随）
+  protected var shortId = 0
   protected var myName = "testName"
   protected var killer = "someone"
   protected var startTime = 0l
