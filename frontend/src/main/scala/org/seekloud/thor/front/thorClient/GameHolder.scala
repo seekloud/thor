@@ -193,6 +193,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           thorSchema.update()
           if( thorSchema.needUserMap && logicFrameTime - lastSendReq > 5000){
             websocketClient.sendMsg(UserMapReq)
+            lastSendReq = System.currentTimeMillis()
           }
         }
         frameTime = frameTime :+ System.currentTimeMillis() - logicFrameTime
