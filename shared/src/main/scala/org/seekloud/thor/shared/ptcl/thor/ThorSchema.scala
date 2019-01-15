@@ -142,7 +142,6 @@ trait ThorSchema extends KillInformation {
   }
 
   protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
-    killer.attacking(adventurer.level)(config) // 干掉对面加能量
     //
 //    val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
 //    addGameEvent(event)
@@ -248,6 +247,11 @@ trait ThorSchema extends KillInformation {
 
   protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
     val killerOpt = adventurerMap.get(e.killerId)
+    killerOpt.foreach{  killer =>
+      adventurerMap.get(e.playerId).foreach{ adventurer =>
+        killer.attacking(adventurer.level)(config) // 干掉对面加能量
+      }
+    }
     if(killerOpt.nonEmpty){
       adventurerMap.get(e.playerId).foreach { adventurer =>
         //      println(s"handle ${e.playerId} attacked")
