@@ -124,20 +124,21 @@ object UserManager {
   }
 
   /*----------------------------带宽统计----------------------------*/
-  
+
   val statics = mutable.HashMap[String, Double](
-    "thorSchemaState"-> 0.0,
-    "configInfo"-> 0.0,
-    "userEnterRoom"-> 0.0,
-    "userLeftRoom"-> 0.0,
-    "isAttacked"-> 0.0,
-    "eatFood"-> 0.0,
-    "MM"-> 0.0,
-    "mouseClickLeft"-> 0.0,
-    "mouseClickRight"-> 0.0,
-    "rank"-> 0.0,
-    "ping"-> 0.0,
-    "others"-> 0.0
+    "thorSchemaState" -> 0.0,
+    "configInfo" -> 0.0,
+    "userEnterRoom" -> 0.0,
+    "userLeftRoom" -> 0.0,
+    "isAttacked" -> 0.0,
+    "eatFood" -> 0.0,
+    "MM" -> 0.0,
+    "MM_num" -> 0,
+    "mouseClickLeft" -> 0.0,
+    "mouseClickRight" -> 0.0,
+    "rank" -> 0.0,
+    "ping" -> 0.0,
+    "others" -> 0.0
   )
   var timer = System.currentTimeMillis()
   val period = 30 * 1000
@@ -179,48 +180,56 @@ object UserManager {
         case wrap: Wrap =>
           val s = ByteString(wrap.ws)
           val buffer = new MiddleBufferInJvm(s.asByteBuffer)
-          bytesDecode[WsMsgServer](buffer) match{
+          bytesDecode[WsMsgServer](buffer) match {
             case Right(req) =>
               val sendBuffer = new MiddleBufferInJvm(409600)
               val msg = req.fillMiddleBuffer(sendBuffer).result()
-              req match{
-                case _: GridSyncState=>
-                  statics.update("thorSchemaState", statics("thorSchemaState") + msg.length.toDouble/1024)
-                case _: YourInfo=>
-                  statics.update("configInfo", statics("configInfo") + msg.length.toDouble/1024)
+              req match {
+                case _: GridSyncState =>
+                  statics.update("thorSchemaState", statics("thorSchemaState") + msg.length.toDouble / 1024)
+                case _: YourInfo =>
+                  statics.update("configInfo", statics("configInfo") + msg.length.toDouble / 1024)
                 case _: UserEnterRoom =>
-                  statics.update("userEnterRoom", statics("userEnterRoom") + msg.length.toDouble/1024)
+                  statics.update("userEnterRoom", statics("userEnterRoom") + msg.length.toDouble / 1024)
                 case _: UserLeftRoom =>
-                  statics.update("userLeftRoom", statics("userLeftRoom") + msg.length.toDouble/1024)
+                  statics.update("userLeftRoom", statics("userLeftRoom") + msg.length.toDouble / 1024)
                 case _: BeAttacked =>
-                  statics.update("isAttacked", statics("isAttacked") + msg.length.toDouble/1024)
+                  statics.update("isAttacked", statics("isAttacked") + msg.length.toDouble / 1024)
                 case _: EatFood =>
-                  statics.update("eatFood", statics("eatFood") + msg.length.toDouble/1024)
-                case _: MM=>
-                  statics.update("MM", statics("MM") + msg.length.toDouble/1024)
-                case _: MouseClickDownLeft=>
-                  statics.update("mouseClickLeft", statics("mouseClickLeft") + msg.length.toDouble/1024)
+                  statics.update("eatFood", statics("eatFood") + msg.length.toDouble / 1024)
+                case _: MM =>
+                  statics.update("MM", statics("MM") + msg.length.toDouble / 1024)
+                  statics.update("MM_num", statics("MM_num") + 1)
+                case _: MouseClickDownLeft =>
+                  statics.update("mouseClickLeft", statics("mouseClickLeft") + msg.length.toDouble / 1024)
                 case _: MouseClickUpRight =>
-                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble/1024)
+                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble / 1024)
                 case _: MouseClickDownRight =>
-                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble/1024)
-                case _: Ranks=>
-                  statics.update("rank", statics("rank") + msg.length.toDouble/1024)
+                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble / 1024)
+                case _: Ranks =>
+                  statics.update("rank", statics("rank") + msg.length.toDouble / 1024)
                 case _: PingPackage =>
-                  statics.update("ping", statics("ping") + msg.length.toDouble/1024)
+                  statics.update("ping", statics("ping") + msg.length.toDouble / 1024)
                 case _ =>
-                  statics.update("others", statics("others") + msg.length.toDouble/1024)
+                  statics.update("others", statics("others") + msg.length.toDouble / 1024)
 
               }
-              if(System.currentTimeMillis() - timer > period){
+              if (System.currentTimeMillis() - timer > period) {
                 timer = System.currentTimeMillis()
-                val total =  statics.values.sum
-                var details = ""
-                details = details + s"TOTAL:$total kb\n"
-                statics.foreach{s =>
-                  details = details + s"${s._1}: ${s._2} kb\n"
+                val total = statics.filterNot(_._1 == "MM_num").values.sum
+                var details = "\n*****************带宽统计*****************"
+                details = details + s"\nTOTAL:$total kb\n"
+                statics.foreach { s =>
+                  if (s._1 == "MM_num") {
+                    details = details + s"${s._1}: ${s._2}\n" +
+                              s"MM_MEAN: ${statics("MM") / s._2} kb\n" +
+                              s"MM_percent: ${statics("MM") / total * 100}%\n"
+                  } else {
+                    details = details + s"${s._1}: ${s._2} kb\n"
+                  }
                   statics.update(s._1, 0)
                 }
+                details = details + "**************************************\n"
                 log.info(details)
 
               }

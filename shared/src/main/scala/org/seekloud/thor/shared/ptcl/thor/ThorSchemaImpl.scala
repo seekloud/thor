@@ -181,7 +181,8 @@ class ThorSchemaImpl(
 //      super.update()
       if (esRecoverSupport) {
         if (rollBackFrame.nonEmpty) {
-          rollBackFrame.sortWith(_ < _).foreach(rollback)
+          rollBackFrame.distinct.sortWith(_ < _).foreach(rollback)
+          super.update()
         } else {
           super.update()
           addGameSnapshot(systemFrame, this.getThorSchemaState())
