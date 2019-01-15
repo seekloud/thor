@@ -102,7 +102,8 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
           thorSchemaOpt.foreach(_.receiveGameEvent(e))
         }
 
-
+      case UserMap(map) =>
+        thorSchemaOpt.foreach(grid => map.foreach(p => grid.playerIdMap.put(p._1, p._2)))
 
       case Ranks(current) =>
         currentRank = current

@@ -16,6 +16,7 @@ import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.protocol.ReplayProtocol.{ChangeRecordMsg, GetRecordFrameMsg, GetUserInRecordMsg}
 import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.UserMapReq
 
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -39,6 +40,8 @@ object UserActor {
   case class FailMsgFront(ex: Throwable) extends Command
 
   case class DispatchMsg(msg: WsMsgSource) extends Command
+
+  case class DispatchMap(map: List[(Short, String)]) extends Command
 
   case class StartGame(roomId: Option[Long]) extends Command
 
@@ -407,6 +410,8 @@ object UserActor {
                 log.debug(s"restartGame $event")
 //                JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
                 roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
+              case Some(UserMapReq) =>
+                roomActor ! RoomActor.UserMap(ctx.self)
               case Some(event: PingPackage) =>
                 frontActor ! Wrap(event.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
               case _ =>
@@ -425,6 +430,11 @@ object UserActor {
               frontActor ! m
               Behaviors.same
             }
+
+          case DispatchMap(map) =>
+            val msg = Wrap(map.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+            frontActor ! msg
+            Behaviors.same
 
           case LeftRoom(actor) =>
             ctx.unwatch(actor)
