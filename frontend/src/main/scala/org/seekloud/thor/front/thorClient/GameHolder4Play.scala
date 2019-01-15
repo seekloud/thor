@@ -127,7 +127,10 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         justSynced = true
 
       case UserMap(map) =>
-        thorSchemaOpt.foreach(grid => map.foreach(p => grid.playerIdMap.put(p._1, p._2)))
+        thorSchemaOpt.foreach{grid =>
+          map.foreach(p => grid.playerIdMap.put(p._1, p._2))
+          grid.needUserMap = false
+        }
 
       case e: PingPackage =>
         receivePingPackage(e)
