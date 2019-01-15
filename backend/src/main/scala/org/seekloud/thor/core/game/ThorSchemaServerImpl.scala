@@ -63,7 +63,6 @@ case class ThorSchemaServerImpl(
 
   override protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
     super.adventurerAttackedCallback(killer)(adventurer)
-    killer.attacking(adventurer.level)(config) // 干掉对面加能量
     val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
     RecordMap.get(adventurer.playerId).foreach{ a =>
       a.killed += 1
