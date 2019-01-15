@@ -17,6 +17,7 @@ import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions
 import org.seekloud.byteobject.ByteObject._
+import org.seekloud.thor.core.RoomActor.Command
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 /**
@@ -47,6 +48,8 @@ object RoomActor {
 
   //  case class GetKilled(playerId: String, name: String) extends Command with RoomManager.Command
   case class WsMessage(playerId: String, msg: UserActionEvent) extends Command
+
+  case class UserMap(userActor: ActorRef[UserActor.Command]) extends Command
 
   case object GameLoop extends Command
 
@@ -146,6 +149,11 @@ object RoomActor {
           case LeftRoom4Watch(uid,playerId) =>
             thorSchema.leftRoom4Watch(uid,playerId)
             watchingMap.remove(uid)
+            Behaviors.same
+
+          case UserMap(userActor) =>
+
+            userActor ! UserActor.DispatchMap(thorSchema.playerIdMap.toList)
             Behaviors.same
 
           case WsMessage(userId, msg) =>
