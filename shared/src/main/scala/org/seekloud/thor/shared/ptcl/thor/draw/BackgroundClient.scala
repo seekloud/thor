@@ -56,7 +56,7 @@ trait BackgroundClient {
   }
 
   def drawRank(Rank: List[Score], CurrentOrNot: Boolean, id: String): Unit = {
-    val text = "———————排行榜——————"
+    val text = "———————排行榜———————"
     val RankBaseLine = 3
     var index = 0
     var yourRank = 100
@@ -65,7 +65,7 @@ trait BackgroundClient {
     var last = ""
     ctx.save()
     ctx.setFill("rgba(0,0,0,0.6)")
-    ctx.fillRec(begin, 0, window.x * 0.24, window.x * 0.24)
+    ctx.fillRec(begin, 0, window.x * 0.25, window.x * 0.25)
     ctx.setFill("#fdffff")
     ctx.setTextAlign("start")
     drawTextLine(s"   $text", 10 + window.x * 0.01, 0, 2,1)
@@ -99,9 +99,9 @@ trait BackgroundClient {
       Rank.find(_.id == id) match {
         case Some(yourScore) =>
           val name = if (yourScore.n.length <= 4) yourScore.n.take(4) + "   " else yourScore.n.take(4) + "..."
-          drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,2)
-          drawTextLine(s" 分数: ${yourScore.e}", begin + window.x * 0.11, index * 2, RankBaseLine,2)
-          drawTextLine(s" 击杀数: ${yourScore.k}", begin + window.x * 0.18, index * 2, RankBaseLine,2)
+          drawTextLine(s"【$yourRank】  $name ", begin + window.x * 0.01, 20, RankBaseLine,3)
+          drawTextLine(s" 分数: ${yourScore.e}", begin + window.x * 0.11, 20, RankBaseLine,3)
+          drawTextLine(s" 击杀数: ${yourScore.k}", begin + window.x * 0.18, 20, RankBaseLine,3)
         case None =>
       }
     }
