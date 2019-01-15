@@ -56,8 +56,8 @@ trait BackgroundClient {
   }
 
   def drawRank(Rank: List[Score], CurrentOrNot: Boolean, id: String): Unit = {
-    val text = "————排行榜————"
-    val RankBaseLine = 2
+    val text = "—————排行榜—————"
+    val RankBaseLine = 3
     var index = 0
     var yourRank = 100
     var yourNameIn = false
@@ -68,7 +68,9 @@ trait BackgroundClient {
     ctx.setFill("rgba(0,0,0,0.6)")
     ctx.fillRec(begin, 0, window.x * 0.21, window.x * 0.24)
     ctx.setFill("#fdffff")
-    drawTextLine(s"$text", 10 + window.x * 0.01, 0, RankBaseLine,1)
+    ctx.setTextAlign("start")
+    drawTextLine(s"   $text", 10 + window.x * 0.01, 0, 2,1)
+
     Rank.foreach { score =>
       index += 1
       if (score.id == id) yourRank = index
