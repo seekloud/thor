@@ -131,16 +131,16 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
 
       case e: UserActionEvent =>
+        thorSchemaOpt.foreach(_.receiveUserEvent(e))
+
+      case e: GameEvent =>
         e match{
           case msg: UserEnterRoom =>
             thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.put(msg.shortId, msg.playerId))
           case msg: UserLeftRoom =>
             thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(msg.shortId))
-
+          case _ =>
         }
-        thorSchemaOpt.foreach(_.receiveUserEvent(e))
-
-      case e: GameEvent =>
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
       case x => dom.window.console.log(s"接收到无效消息$x")
