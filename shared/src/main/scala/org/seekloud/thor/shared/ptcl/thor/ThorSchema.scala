@@ -44,6 +44,8 @@ trait ThorSchema extends KillInformation {
   val tmpAdventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
   var foodMap = mutable.HashMap[Int, Food]() // foodId -> food
   val tmpFoodMap = mutable.HashMap[Int, Food]() // foodId -> food
+  val playerIdMap = mutable.HashMap[Short, String]() //映射id -> playerId
+
 
   /*事件*/
   protected val gameEventMap = mutable.HashMap[Int, List[GameEvent]]() //frame -> List[GameEvent] 待处理的事件 frame >= curFrame
