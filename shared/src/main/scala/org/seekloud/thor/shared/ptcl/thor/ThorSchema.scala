@@ -35,9 +35,9 @@ trait ThorSchema extends KillInformation {
 
   val boundary: Point = config.boundary
 
-//  var playerId = ""
-
   var systemFrame: Int = 0 //系统帧数
+
+  var needUserMap: Boolean = false
 
   /*元素*/
   var adventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
@@ -70,7 +70,23 @@ trait ThorSchema extends KillInformation {
 //    playerId = id
 //  }
 
-  protected implicit def playerId
+  protected def shortId2PlayerId(shortId: Short): Either[String, String] = {
+    if (playerIdMap.contains(shortId)) {
+      Right(playerIdMap(shortId))
+    } else {
+      needUserMap = true
+      Left("")
+    }
+  }
+
+  protected def playerId2ShortId(playerId: String): Either[Short, Short] = {
+    if (playerIdMap.exists(_._2 == playerId)) {
+      Right(playerIdMap.filter(_._2 == playerId).keySet.head)
+    } else {
+      needUserMap = true
+      Left(-1)
+    }
+  }
 
   final protected def handleUserEnterRoomEvent(l: List[UserEnterRoom]): Unit = {
     l foreach handleUserEnterRoomEvent
@@ -117,29 +133,35 @@ trait ThorSchema extends KillInformation {
       * 用户行为事件
       **/
     actions.sortBy(_.serialNum).foreach { action =>
-      adventurerMap.get(playerIdMap(action.playerId)) match {
-        case Some(adventurer) =>
-          action match {
-            case a: MM =>
-              adventurer.setMoveDirection(a.offsetX, a.offsetY, attackingAdventureMap.contains(playerIdMap(a.playerId)))
-//              adventurer.setFaceDirection(a.direction)
-            case a: MouseClickDownLeft =>
-              attackingAdventureMap.get(playerIdMap(a.playerId)) match {
-                case Some(_) => ()
-                case None =>
-                  attackingAdventureMap.put(playerIdMap(a.playerId), 3) //动画持续帧数 现在是3
-                  adventurerMap.filter(_._1 == a.playerId).values.foreach {
-                    adventurer =>
-                      adventurer.isMove = false
+      val playerIdStr = shortId2PlayerId(action.playerId)
+      playerIdStr match {
+        case Right(pId) =>
+          adventurerMap.get(pId) match {
+            case Some(adventurer) =>
+              action match {
+                case a: MM =>
+                  adventurer.setMoveDirection(a.offsetX, a.offsetY, attackingAdventureMap.contains(pId))
+                //              adventurer.setFaceDirection(a.direction)
+                case a: MouseClickDownLeft =>
+                  attackingAdventureMap.get(pId) match {
+                    case Some(_) => ()
+                    case None =>
+                      attackingAdventureMap.put(pId, 3) //动画持续帧数 现在是3
+                      adventurerMap.filter(_._1 == a.playerId).values.foreach {
+                        adventurer =>
+                          adventurer.isMove = false
+                      }
                   }
+                case a: MouseClickDownRight => adventurer.speedUp(config)
+                case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
               }
-            case a: MouseClickDownRight => adventurer.speedUp(config)
-            case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
-          }
-        case None =>
-//          info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
+            case None =>
+            //          info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
 
+          }
+        case Left(_) => //do nothing
       }
+
     }
   }
 
@@ -382,8 +404,14 @@ trait ThorSchema extends KillInformation {
   }
 
   def leftGame(userId: String, name: String) = {
-    val event = UserLeftRoom(userId, playerIdMap.filter(_._2 == userId).keySet.head, name, systemFrame)
-    addGameEvent(event)
+    val shortId = playerId2ShortId(userId)
+    shortId match {
+      case Right(sId) =>
+        val event = UserLeftRoom(userId, sId, name, systemFrame)
+        addGameEvent(event)
+      case Left(_) => // do nothing
+    }
+
     //    dispatch(event)
   }
 
