@@ -40,9 +40,9 @@ object RoomActor {
 
   case class BeDead(playerId: String, name: String, userList: List[(String, String)]) extends Command
 
-  case class CreateRobot(botId: String, shortId: Short, name: String, level: Int) extends Command
+  case class CreateRobot(botId: String, shortId: Byte, name: String, level: Int) extends Command
 
-  case class ReliveRobot(botId: String, shortId: Short, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
+  case class ReliveRobot(botId: String, shortId: Byte, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
 
   case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
 
