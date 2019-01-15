@@ -115,17 +115,17 @@ trait ThorSchema extends KillInformation {
       * 用户行为事件
       **/
     actions.sortBy(_.serialNum).foreach { action =>
-      adventurerMap.get(action.playerId) match {
+      adventurerMap.get(playerIdMap(action.playerId)) match {
         case Some(adventurer) =>
           action match {
             case a: MM =>
-              adventurer.setMoveDirection(a.offsetX, a.offsetY, attackingAdventureMap.contains(a.playerId))
+              adventurer.setMoveDirection(a.offsetX, a.offsetY, attackingAdventureMap.contains(playerIdMap(a.playerId)))
 //              adventurer.setFaceDirection(a.direction)
             case a: MouseClickDownLeft =>
-              attackingAdventureMap.get(a.playerId) match {
+              attackingAdventureMap.get(playerIdMap(a.playerId)) match {
                 case Some(_) => ()
                 case None =>
-                  attackingAdventureMap.put(a.playerId, 3) //动画持续帧数 现在是3
+                  attackingAdventureMap.put(playerIdMap(a.playerId), 3) //动画持续帧数 现在是3
                   adventurerMap.filter(_._1 == a.playerId).values.foreach {
                     adventurer =>
                       adventurer.isMove = false
@@ -184,7 +184,7 @@ trait ThorSchema extends KillInformation {
     actionEventMap.put(frame, actionEvents)
   }
 
-  def removePreEvent(frame: Int, playerId: String, serialNum: Int): Unit = {
+  def removePreEvent(frame: Int, playerId: Short, serialNum: Int): Unit = {
     actionEventMap.get(frame).foreach { actions =>
       actionEventMap.put(frame, actions.filterNot(t => t.playerId == playerId && t.serialNum == serialNum))
     }
@@ -367,54 +367,6 @@ trait ThorSchema extends KillInformation {
                 adventurer.isIntersect = 1
               }
             }
-
-
-
-
-//            val theta = (math.Pi / 2) - math.acos(oAdRadius / (adRadius + oAdRadius))
-//            val thetaB = normalizeTheta(relativeTheta - theta)
-//            val thetaC = normalizeTheta(relativeTheta + theta)
-//
-//            println(s"****************************************\n" +
-//                    s"主体[${adventurer.name}],对方[${otherAd.name}]\n" +
-//                    s"主体运动角度[${adventurer.direction}]]\n" +
-//                    s"圆心相对角度[$relativeTheta], 偏移[$theta]\n" +
-//                    s"thetaB [$thetaB],thetaC [$thetaC]\n" +
-//                    s"****************************************\n")
-//
-//            if (math.max(thetaB, thetaC) <= 0 || math.min(theta, thetaC) >= 0) {
-////              println(s"主体 [${adventurer.name}] debug point1 - theta the same")
-//              if (adventurer.direction >= math.min(thetaB, thetaC) && adventurer.direction <= math.max(thetaB, thetaC)) {
-//                adventurer.isIntersect = 1
-//              } else {
-//                if (sum == 0) {
-//                  adventurer.isIntersect = 0
-//                }
-//              }
-//            } else {
-////              println(s"主体 [${adventurer.name}] debug point2 - diff theta")
-//              if (math.abs(thetaB) >= 0 && math.abs(thetaB) <= (math.Pi / 2)) {
-//                val positiveUpperLimit = math.max(thetaB, thetaC)
-//                val negativeFloorLimit = math.min(thetaB, thetaC)
-//                if ((adventurer.direction >= 0 && adventurer.direction <= positiveUpperLimit) || (adventurer.direction >= negativeFloorLimit && adventurer.direction <= 0)) {
-//                  adventurer.isIntersect = 1
-//                } else {
-//                  if (sum == 0) {
-//                    adventurer.isIntersect = 0
-//                  }
-//                }
-//              } else {
-//                val positiveFloorLimit = math.max(thetaB, thetaC)
-//                val negativeUpperLimit = math.min(thetaB, thetaC)
-//                if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= - math.Pi && adventurer.direction <= negativeUpperLimit)) {
-//                  adventurer.isIntersect = 1
-//                } else {
-//                  if (sum == 0) {
-//                    adventurer.isIntersect = 0
-//                  }
-//                }
-//              }
-//            }
             sum + 1
           } else sum
       }
@@ -428,7 +380,7 @@ trait ThorSchema extends KillInformation {
   }
 
   def leftGame(userId: String, name: String) = {
-    val event = UserLeftRoom(userId, name, systemFrame)
+    val event = UserLeftRoom(userId, playerIdMap.filter(_._2 == userId).keySet.head, name, systemFrame)
     addGameEvent(event)
     //    dispatch(event)
   }

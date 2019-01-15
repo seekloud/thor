@@ -120,11 +120,11 @@ object GameRecorder {
         case msg: GameRecord =>
           val wsMsg = msg.event._1
           wsMsg.foreach {
-            case UserEnterRoom(playerId, name, adventurerState, frame) =>
+            case UserEnterRoom(playerId, _, name, adventurerState, frame) =>
               userAllMap.put(playerId, name)
               userMap.put(playerId, name)
               essfMap.put(EssfMapKey(playerId, name), EssfMapJoinLeftInfo(frame, -1L))
-            case UserLeftRoom(playerId, name, frame) =>
+            case UserLeftRoom(playerId, _, name, frame) =>
               userMap.remove(playerId)
               if (essfMap.get(EssfMapKey(playerId, name)).isDefined) {
                 val startF = essfMap(EssfMapKey(playerId, name)).joinF

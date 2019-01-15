@@ -187,7 +187,7 @@ case class ThorSchemaServerImpl(
   }
 
   override def leftGame(userId: String, name: String) = {
-    val event = UserLeftRoom(userId, name, systemFrame)
+    val event = UserLeftRoom(userId, playerIdMap.filter(_._2 == userId).keySet.head, name, systemFrame)
     addGameEvent(event)
     //只有平台用户才上传战绩（平台用户的id是guest.../user...）
     if(userId.take(5).equals("guest") || userId.take(4).equals("user"))

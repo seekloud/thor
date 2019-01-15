@@ -85,7 +85,7 @@ trait EsRecover {
     if (rollBackFrame.contains(frame)) rollBackFrame = rollBackFrame.filterNot(_ == frame)
   }
 
-  def removePreEventHistory(frame: Int, playerId: String, serialNum: Int): Unit = {
+  def removePreEventHistory(frame: Int, playerId: Short, serialNum: Int): Unit = {
     actionEventHistoryMap.get(frame).foreach { actions =>
       actionEventHistoryMap.put(frame, actions.filterNot(t => t.playerId == playerId && t.serialNum == serialNum))
     }

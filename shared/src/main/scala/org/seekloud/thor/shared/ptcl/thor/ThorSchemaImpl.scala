@@ -52,7 +52,7 @@ class ThorSchemaImpl(
 
   //接受服务器的用户事件
   def receiveUserEvent(e: UserActionEvent) = {
-    if (e.playerId == aId) {
+    if (playerIdMap(e.playerId) == aId) {
       uncheckedActionMap.get(e.serialNum) match {
         case Some(preFrame) =>
           if (e.frame != preFrame) {
@@ -100,7 +100,7 @@ class ThorSchemaImpl(
   }
 
   final def addMyAction(action: UserActionEvent): Unit = {
-    if (action.playerId == aId) {
+    if (playerIdMap(action.playerId) == aId) {
       myAdventurerAction.get(action.frame - preExecuteFrameOffset) match {
         case Some(actionEvents) => myAdventurerAction.put(action.frame - preExecuteFrameOffset, action :: actionEvents)
         case None => myAdventurerAction.put(action.frame - preExecuteFrameOffset, List(action))
