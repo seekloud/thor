@@ -94,7 +94,7 @@ trait BackgroundClient {
       Rank.find(_.id == id) match {
         case Some(yourScore) =>
           val name = if (yourScore.n.contains("guest")) yourScore.n.take(13) else yourScore.n.take(7)
-          drawTextLine(s" 【$yourRank】   $name   分数:${yourScore.e}   击杀数:${yourScore.k}", begin + window.x * 0.01, 12, RankBaseLine,3)
+          drawTextLine(s" 【$yourRank】   $name   分数:${yourScore.e}   击杀数:${yourScore.k}", begin + window.x * 0.01, 20, RankBaseLine,3)
         case None =>
       }
     }
