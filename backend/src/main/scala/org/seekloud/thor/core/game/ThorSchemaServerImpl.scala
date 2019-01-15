@@ -40,8 +40,8 @@ case class ThorSchemaServerImpl(
 
   private val foodIdGenerator = new AtomicInteger(100)
 
-  private var justJoinUser: List[(String, String, Short, ActorRef[UserActor.Command])] = Nil // userId, name, Actor
-  private var justJoinBot: List[(String, String, Short, ActorRef[RobotActor.Command])] = Nil // botId, name
+  private var justJoinUser: List[(String, String, Byte, ActorRef[UserActor.Command])] = Nil // userId, name, Actor
+  private var justJoinBot: List[(String, String, Byte, ActorRef[RobotActor.Command])] = Nil // botId, name
   private val robotMap: mutable.HashMap[String, ActorRef[RobotActor.Command]] = mutable.HashMap.empty
   private val watchingMap: mutable.HashMap[String, mutable.HashMap[String, ActorRef[UserActor.Command]]] = mutable.HashMap.empty
 
@@ -163,11 +163,11 @@ case class ThorSchemaServerImpl(
     foodList
   }
 
-  def joinGame(userId: String, name: String, shortId: Short, userActor: ActorRef[UserActor.Command]): Unit = {
+  def joinGame(userId: String, name: String, shortId: Byte, userActor: ActorRef[UserActor.Command]): Unit = {
     justJoinUser = (userId, name, shortId, userActor) :: justJoinUser
   }
 
-  def robotJoinGame(botId: String, name: String, shortId: Short, ref: ActorRef[RobotActor.Command]): Unit ={
+  def robotJoinGame(botId: String, name: String, shortId: Byte, ref: ActorRef[RobotActor.Command]): Unit ={
     justJoinBot = (botId, name, shortId, ref) :: justJoinBot
   }
 

@@ -58,7 +58,6 @@ object RoomActor {
 
   private final case object GameLoopKey
 
-  private val idGenerator = new AtomicLong(0L)
 
   def create(roomId: Long): Behavior[Command] = {
     log.debug(s"RoomActor-$roomId starting...")
@@ -73,8 +72,8 @@ object RoomActor {
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
             for (cnt <- 0 until thorSchema.config.getRobotNumber) {
-              val tmpId = idGenerator.getAndIncrement()
-              ctx.self ! CreateRobot(s"robot$cnt", tmpId.toShort, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
+              val tmpId = getTmpId(thorSchema)
+              ctx.self ! CreateRobot(s"robot$cnt", tmpId.toByte, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
             }
 
             if (AppSettings.gameRecordIsWork) {
@@ -111,8 +110,8 @@ object RoomActor {
 
           case JoinRoom(roomId, userId, name, userActor) =>
 //            log.debug(s"user $userId join room $roomId")
-            val tmpId = idGenerator.getAndIncrement()
-            thorSchema.joinGame(userId, name, tmpId.toShort, userActor)
+            val tmpId = getTmpId(thorSchema)
+            thorSchema.joinGame(userId, name, tmpId, userActor)
 
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 
@@ -222,6 +221,14 @@ object RoomActor {
     }
   }
 
+  def getTmpId(thorSchema: ThorSchemaServerImpl): Byte = {
+    var id:Byte = 0
+    val idGenerator = new AtomicLong(1L)
+    while(thorSchema.playerIdMap.contains(id)){
+      id = idGenerator.getAndIncrement().toByte
+    }
+    id
+  }
 
   //向所有用户发数据
   def dispatch(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]], observers: mutable.HashMap[String, ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {

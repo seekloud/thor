@@ -139,7 +139,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
   private def fakeMouseClick(): Unit = { //模拟左键
     thorSchemaOpt.foreach{ thorSchema =>
       if(thorSchema.adventurerMap.contains(myId)){
-        val event = MouseClickDownLeft(shortId.toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+        val event = MouseClickDownLeft(shortId.toByte, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
         websocketClient.sendMsg(event)
         thorSchema.preExecuteUserEvent(event)
         Shortcut.playMusic("sound-4")
@@ -159,14 +159,14 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         //            println(s"mouseDistance: $mouseDistance")
         val direction = thorSchema.adventurerMap(myId).direction
         if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
-          Shortcut.scheduleOnce(()=>fakeMouseMoveLittle((point.x - dom.window.innerWidth / 2.0).toShort, (point.y - dom.window.innerHeight / 2.0).toShort, theta), 20)
+          Shortcut.scheduleOnce(()=>fakeMouseMoveLittle((point.x - dom.window.innerWidth / 2.0).toByte, (point.y - dom.window.innerHeight / 2.0).toByte, theta), 20)
         }
       }
     }
   }
   private def fakeMouseMoveLittle(offSetX: Short, offSetY: Short, targetTheta: Float): Unit ={
     def fakeMove(thorSchema: ThorSchemaClientImpl, thetaList: List[Float], num: Int): Unit ={
-      val data = MM(shortId.toShort, offSetX, offSetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+      val data = MM(shortId.toByte, offSetX, offSetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
       websocketClient.sendMsg(data)
       thorSchema.preExecuteUserEvent(data)
       if(num < thetaList.length - 1)

@@ -19,7 +19,7 @@ object ThorGame {
   trait EnvironmentEvent extends GameEvent
 
   sealed trait UserActionEvent extends UserEvent {
-    val playerId: Short
+    val playerId: Byte
     val serialNum: Int
   }
 
@@ -51,28 +51,28 @@ object ThorGame {
 
   final case class UserInfo(playerId: String, name: String) extends WsMsgServer
 
-  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Short = 0, playerIdMap: List[(Short, String)] = Nil) extends WsMsgServer
+  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Byte = 0, playerIdMap: List[(Byte, String)] = Nil) extends WsMsgServer
 
-  final case class UserMap(playerIdMap: List[(Short, String)] = Nil) extends WsMsgServer
+  final case class UserMap(playerIdMap: List[(Byte, String)] = Nil) extends WsMsgServer
 
   final case object UserMapReq extends WsMsgFront
 
-  final case class UserEnterRoom(playerId: String, shortId: Short, name: String, adventurer: AdventurerState, override val frame: Int = 0) extends UserEvent with WsMsgServer
+  final case class UserEnterRoom(playerId: String, shortId: Byte, name: String, adventurer: AdventurerState, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class UserLeftRoom(playerId: String, shortId: Short, name: String, override val frame: Int = 0) extends UserEvent with WsMsgServer
+  final case class UserLeftRoom(playerId: String, shortId: Byte, name: String, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
   final case class BeAttacked(playerId: String, name: String, killerId: String, killerName: String, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
   final case class EatFood(playerId: String, foodId: Int, foodLevel: Int, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
-  final case class MM(playerId: Short, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MM(playerId: Byte, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 //  final case class MouseMove(playerId: String, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
-  final case class MouseClickDownLeft(playerId: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseClickDownLeft(playerId: Byte, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
-  final case class MouseClickDownRight(playerId: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseClickDownRight(playerId: Byte, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
-  final case class MouseClickUpRight(playerId: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+  final case class MouseClickUpRight(playerId: Byte, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
   final case object RebuildWebSocket extends WsMsgServer
 
