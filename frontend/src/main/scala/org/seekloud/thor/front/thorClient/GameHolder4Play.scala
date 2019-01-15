@@ -59,7 +59,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
-      case YourInfo(config, id, yourName, sId) =>
+      case YourInfo(config, id, yourName, sId, pMap) =>
         dom.console.log(s"get YourInfo $config $id $yourName")
         startTime = System.currentTimeMillis()
         myId = id
@@ -72,11 +72,16 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           dom.window.clearInterval(timer)
           thorSchemaOpt.foreach { grid =>
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
+            pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.playerIdMap.put(sId, id)
           }
         }
-        else thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
-
+        else
+          thorSchemaOpt.foreach { grid =>
+            timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
+            pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
+            grid.playerIdMap.put(sId, id)
+          }
         gameState = GameState.play
         Shortcut.playMusic("bgm-2")
         if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
@@ -152,13 +157,14 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     canvas.getCanvas.onmousemove = { e: dom.MouseEvent =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
-      var lastMouseMove = 0l //限制一帧只能发一次mousemove
+      var lastMouseMove = 0l //限制多帧只能发一次mousemove
+      val frequency = 5
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId)) {
 //            val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             val direction = thorSchema.adventurerMap(myId).direction
-            if (thorSchema.systemFrame > lastMouseMove && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+            if (thorSchema.systemFrame > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
               val data = MM(shortId.toShort, (e.clientX - dom.window.innerWidth / 2.0).toShort, (e.clientY - dom.window.innerHeight / 2.0).toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(data)
               thorSchema.preExecuteUserEvent(data)

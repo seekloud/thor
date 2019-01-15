@@ -17,6 +17,7 @@ import org.seekloud.thor.protocol.ReplayProtocol.{ChangeRecordMsg, GetRecordFram
 import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
+import scala.collection.mutable
 import scala.language.implicitConversions
 import scala.concurrent.duration._
 
@@ -45,7 +46,7 @@ object UserActor {
 
   case class LeftRoom[U](actorRef: ActorRef[U]) extends Command
 
-  case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, shortId: Short, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl) extends Command
+  case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, shortId: Short, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl, playerIdMap: List[(Short, String)]) extends Command
 
   final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
 
@@ -176,9 +177,9 @@ object UserActor {
             getGameReplay(ctx, rid) ! GameReplay.InitReplay(frontActor, uid, f)
             switchBehavior(ctx, "replay", replay(uid, rid, userInfo, startTime, frontActor))
 
-          case JoinRoomSuccess(adventurer, playerId, shortId, roomActor, config) =>
+          case JoinRoomSuccess(adventurer, playerId, shortId, roomActor, config, playerIdMap) =>
             log.debug(s"$playerId join room success")
-            val ws = YourInfo(config, playerId, userInfo.name, shortId).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            val ws = YourInfo(config, playerId, userInfo.name, shortId, playerIdMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             switchBehavior(ctx, "play", play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
 
@@ -436,9 +437,9 @@ object UserActor {
             ctx.unwatch(frontActor)
             switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
-          case JoinRoomSuccess(adventurer, playerId, shortId, roomActor, config) =>
+          case JoinRoomSuccess(adventurer, playerId, shortId, roomActor, config, playerIdMap) =>
             log.debug(s"$playerId join room success")
-            val ws = YourInfo(config, playerId, userInfo.name, shortId).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            val ws = YourInfo(config, playerId, userInfo.name, shortId, playerIdMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             Behaviors.same
 

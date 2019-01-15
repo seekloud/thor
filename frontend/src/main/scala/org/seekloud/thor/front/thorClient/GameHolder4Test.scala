@@ -51,7 +51,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
   override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
-      case YourInfo(config, id, name, sId) =>
+      case YourInfo(config, id, name, sId, pMap) =>
         dom.console.log(s"get YourInfo ${config} ${id} ${name}")
         startTime = System.currentTimeMillis()
         myId = id
@@ -60,7 +60,11 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         myName = name
         gameConfig = Some(config)
         thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, name, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
-        thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+        thorSchemaOpt.foreach { grid =>
+          timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
+          pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
+          grid.playerIdMap.put(sId, id)
+        }
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false

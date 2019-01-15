@@ -3,7 +3,9 @@ package org.seekloud.thor.shared.ptcl.protocol
 import org.seekloud.thor.shared.ptcl.component.{AdventurerState, FoodState}
 import org.seekloud.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
 import org.seekloud.thor.shared.ptcl.model.Score
-import org.seekloud.thor.shared.ptcl.thor.{ThorSchemaState}
+import org.seekloud.thor.shared.ptcl.thor.ThorSchemaState
+
+import scala.collection.mutable
 
 
 object ThorGame {
@@ -49,7 +51,7 @@ object ThorGame {
 
   final case class UserInfo(playerId: String, name: String) extends WsMsgServer
 
-  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Short = 0) extends WsMsgServer
+  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Short = 0, playerIdMap: List[(Short, String)] = Nil) extends WsMsgServer
 
   final case class UserEnterRoom(playerId: String, shortId: Short, name: String, adventurer: AdventurerState, override val frame: Int = 0) extends UserEvent with WsMsgServer
 

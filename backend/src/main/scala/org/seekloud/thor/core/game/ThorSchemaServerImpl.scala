@@ -278,7 +278,7 @@ case class ThorSchemaServerImpl(
         dispatch(event)
         addGameEvent(event)
         playerIdMap.put(shortId, playerId)
-        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl())
+        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
         adventurerMap.put(playerId, adventurer)
         quadTree.insert(adventurer)
