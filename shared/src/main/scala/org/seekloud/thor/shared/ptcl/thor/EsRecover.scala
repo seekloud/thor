@@ -41,7 +41,7 @@ trait EsRecover {
     }
     removeRollBackFrame(frame)
 
-    gameSnapshotMap.get(frame - 1) match {
+    gameSnapshotMap.get(frame) match {
       case Some(thorSchemaState) =>
         val startTime = System.currentTimeMillis()
         val curFrame = this.systemFrame
