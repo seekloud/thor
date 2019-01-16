@@ -74,7 +74,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.playerIdMap.put(sId, id)
-            println(s"playerIdMap:${grid.playerIdMap}")
+//            println(s"playerIdMap:${grid.playerIdMap}")
           }
         }
         else
@@ -82,7 +82,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.playerIdMap.put(sId, id)
-            println(s"playerIdMap:${grid.playerIdMap}")
+//            println(s"playerIdMap:${grid.playerIdMap}")
           }
 
         gameState = GameState.play
@@ -90,6 +90,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
+      case RestartYourInfo =>
+        mainId = myId
+        gameState = GameState.play
 
       case e: BeAttacked =>
         barrage = s"${e.killerName}  杀死了  ${e.name}"

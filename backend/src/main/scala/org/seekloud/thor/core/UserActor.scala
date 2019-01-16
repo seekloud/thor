@@ -450,7 +450,8 @@ object UserActor {
 
           case JoinRoomSuccess(adventurer, playerId, shortId, roomActor, config, playerIdMap) =>
             log.debug(s"$playerId join room success")
-            val ws = YourInfo(config, playerId, userInfo.name, shortId, playerIdMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+//            val ws = YourInfo(config, playerId, userInfo.name, shortId, playerIdMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            val ws = RestartYourInfo.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             Behaviors.same
 

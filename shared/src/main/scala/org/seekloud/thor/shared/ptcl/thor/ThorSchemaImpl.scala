@@ -39,24 +39,6 @@ class ThorSchemaImpl(
 
   private var justSyncFrame = 0
 
-//  override protected def shortId2PlayerId(shortId: Short): Either[String, String] = {
-//    if (playerIdMap.contains(shortId)) {
-//      Right(playerIdMap(shortId))
-//    } else {
-//      needUserMap = true
-//      Left("")
-//    }
-//  }
-
-//  override protected def playerId2ShortId(playerId: String): Either[Short, Short] = {
-//    if (playerIdMap.exists(_._2 == playerId)) {
-//      Right(playerIdMap.filter(_._2 == playerId).keySet.head)
-//    } else {
-//      needUserMap = true
-//      Left(-1)
-//    }
-//  }
-
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState) = {
     new AdventurerImpl(config, adventurer)
   }
@@ -222,7 +204,7 @@ class ThorSchemaImpl(
 //      super.update()
       if (esRecoverSupport) {
         if (rollBackFrame.nonEmpty) {
-          rollBackFrame.distinct.filterNot(_ < justSyncFrame).sortWith(_ < _).foreach(rollback)
+          rollBackFrame.distinct.filterNot(_ < justSyncFrame).sortWith(_ < _).headOption.foreach(rollback)
           super.update()
         } else {
           super.update()
