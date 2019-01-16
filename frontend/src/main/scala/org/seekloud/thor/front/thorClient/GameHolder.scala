@@ -237,6 +237,25 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   }
 
+  def checkAndChangePreCanvas(): Unit ={
+    (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas) match{
+      case (Nil, Nil, Nil) =>
+        dom.window.setTimeout(()=>checkAndChangePreCanvas(), 1000)
+//        println("3 none")
+      case (foodCanvas, Nil, Nil) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, Nil, Nil))
+        dom.window.setTimeout(()=>checkAndChangePreCanvas(), 1000)
+//        println("2 none")
+      case (foodCanvas, adventurerCanvas, Nil) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, Nil))
+        dom.window.setTimeout(()=>checkAndChangePreCanvas(), 1000)
+//        println("1 none")
+      case (foodCanvas, adventurerCanvas, weaponCanvas) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas))
+//        println("0 none")
+    }
+  }
+
   def duringTime(time:Long) = {
     var remain = time / 1000 % 86400
     val hour = remain / 3600
