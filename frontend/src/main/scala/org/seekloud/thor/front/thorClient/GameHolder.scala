@@ -241,18 +241,14 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas) match{
       case (Nil, Nil, Nil) =>
         dom.window.setTimeout(()=>checkAndChangePreCanvas(), 1000)
-//        println("3 none")
       case (foodCanvas, Nil, Nil) =>
         thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, Nil, Nil))
         dom.window.setTimeout(()=>checkAndChangePreCanvas(), 1000)
-//        println("2 none")
       case (foodCanvas, adventurerCanvas, Nil) =>
         thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, Nil))
         dom.window.setTimeout(()=>checkAndChangePreCanvas(), 1000)
-//        println("1 none")
       case (foodCanvas, adventurerCanvas, weaponCanvas) =>
         thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas))
-//        println("0 none")
     }
   }
 

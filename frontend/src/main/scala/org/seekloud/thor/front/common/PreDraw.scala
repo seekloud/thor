@@ -44,8 +44,7 @@ class PreDraw {
     var cnt = 0
     if(weaponImg.forall(t => t.isComplete)){
       val weaponHeight = for(a <- (0 to 5).toList) yield 250.0 / weaponImg(a).width * weaponImg(a).height
-      for(a <- (0 to 5).toList) {weaponCanvas = weaponCanvas :+ drawWeapon.createCanvas(250.0, weaponHeight(a))}
-//      println(weaponCanvas)
+      for(a <- (0 to 5).toList) {weaponCanvas = weaponCanvas :+ drawWeapon.createCanvas(250.0, weaponHeight(a).toInt)}
       for(a <- (0 to 5).toList) {weaponCtx = weaponCtx :+ weaponCanvas(a).getCtx}
       weaponCtx.foreach{ t =>
         t.drawImage(weaponImg(cnt),0 ,0, Some(250.0, weaponHeight(cnt)))

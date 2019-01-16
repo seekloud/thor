@@ -62,7 +62,7 @@ object CanvasUtils {
   def drawWeaponByPre(ctx: MiddleContext, preCanvasWeapon: List[MiddleCanvas], level: Int, offset: Point, size: Point): Unit ={
 
     ctx.save()
-    ctx.drawImage(preCanvasWeapon(level / 4), offset.x, offset.y, Some(size.x, size.y))
+    ctx.drawImage(preCanvasWeapon((level-1) / 4), offset.x, offset.y, Some(size.x, size.y))
     ctx.restore()
 
   }
