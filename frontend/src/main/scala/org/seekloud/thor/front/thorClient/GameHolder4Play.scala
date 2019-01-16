@@ -60,7 +60,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
       case YourInfo(config, id, yourName, sId, pMap) =>
-        dom.console.log(s"get YourInfo $config $id $yourName")
+        dom.console.log(s"get YourInfo $id $yourName $pMap")
         startTime = System.currentTimeMillis()
         myId = id
         mainId = id
@@ -74,6 +74,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.playerIdMap.put(sId, id)
+            println(s"playerIdMap:${grid.playerIdMap}")
           }
         }
         else
@@ -81,7 +82,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.playerIdMap.put(sId, id)
+            println(s"playerIdMap:${grid.playerIdMap}")
           }
+
         gameState = GameState.play
         Shortcut.playMusic("bgm-2")
         if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
@@ -127,6 +130,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         justSynced = true
 
       case UserMap(map) =>
+        println(s"userMap ---- $map")
         thorSchemaOpt.foreach{grid =>
           map.foreach(p => grid.playerIdMap.put(p._1, p._2))
           grid.needUserMap = false

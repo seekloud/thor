@@ -283,6 +283,7 @@ case class ThorSchemaServerImpl(
         val event = UserEnterRoom(playerId, shortId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
         addGameEvent(event)
+        playerIdMap.put(shortId, playerId)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
         adventurerMap.put(playerId, adventurer)
@@ -291,6 +292,7 @@ case class ThorSchemaServerImpl(
     justJoinBot.foreach {
       case (botId, name, shortId, ref) =>
         val adventurer = generateAdventurer(botId, name)
+        playerIdMap.put(shortId, botId)
         robotMap.put(botId, ref)
         adventurerMap.put(botId, adventurer)
         quadTree.insert(adventurer)

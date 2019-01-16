@@ -159,7 +159,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         //            println(s"mouseDistance: $mouseDistance")
         val direction = thorSchema.adventurerMap(myId).direction
         if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
-          Shortcut.scheduleOnce(()=>fakeMouseMoveLittle((point.x - dom.window.innerWidth / 2.0).toByte, (point.y - dom.window.innerHeight / 2.0).toByte, theta), 20)
+          Shortcut.scheduleOnce(()=>fakeMouseMoveLittle((point.x - dom.window.innerWidth / 2.0).toShort, (point.y - dom.window.innerHeight / 2.0).toShort, theta), 20)
         }
       }
     }

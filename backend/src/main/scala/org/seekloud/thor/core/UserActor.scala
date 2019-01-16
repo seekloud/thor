@@ -432,6 +432,7 @@ object UserActor {
             }
 
           case DispatchMap(map) =>
+            println("dispatch map")
             val msg = Wrap(UserMap(map).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
             frontActor ! msg
             Behaviors.same

@@ -192,6 +192,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         thorSchemaOpt.foreach{ thorSchema =>
           thorSchema.update()
           if( thorSchema.needUserMap && logicFrameTime - lastSendReq > 5000){
+            println("request for user map")
             websocketClient.sendMsg(UserMapReq)
             lastSendReq = System.currentTimeMillis()
           }
