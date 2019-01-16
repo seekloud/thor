@@ -4,7 +4,7 @@ import org.seekloud.thor.shared.ptcl
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
-
+import org.seekloud.thor.shared.ptcl.model.Constants._
 import scala.collection.mutable
 
 
@@ -51,7 +51,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
           val height = config.getAdventurerRadiusByLevel(adventurer.level) * 2 * canvasUnit
           val width = 3 * height
 
-          CanvasUtils.rotateImage("speed",drawFrame, ctx, Nil, s"/img/speedparticles.png", Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
+          CanvasUtils.rotateImage("speed",drawFrame, ctx, Nil, pictureMap("speedParticles.png"), Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
         }
 
         //画人物
@@ -65,7 +65,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
           ctx.fill()
           ctx.restore()
         }
-        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, s"/img/char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png", Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
+        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, pictureMap(s"char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
 //        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
         //画武器
         var step:Float = 3
@@ -81,7 +81,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
         val gap: Float = 0 // 武器离人物的距离
         val move: Float = if (isAttacking) math.Pi.toFloat * 3 / 10 * offSetTime.toFloat / config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
         val weaponPosition = Point(sx, sy) + Point(weaponLength / 2, r).rotate(angle + move)
-        CanvasUtils.rotateImage("weapon", drawFrame, ctx, preCanvasWeapon, s"/img/weapon${(adventurer.level-1)/4+1}.png", weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move,preTime, adventurer.getAdventurerState.level)
+        CanvasUtils.rotateImage("weapon", drawFrame, ctx, preCanvasWeapon, pictureMap(s"weapon${(adventurer.level-1)/4+1}.png"), weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move,preTime, adventurer.getAdventurerState.level)
 
         //用户昵称
         ctx.setFill("#ffffff")
@@ -109,7 +109,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
       //根据进度选取死亡动画 step -> 2,1,0 img -> 1~6
 
-      val img = drawFrame.createImage(s"/img/kill${5 - step*2 + o}.png")
+      val img = drawFrame.createImage(pictureMap(s"kill${5 - step*2 + o}.png"))
 //      println(s"dying img: /img/kill${5 - step*2 + o}.png")
 
       val width = img.width
@@ -132,7 +132,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
     if(adventurer.getAdventurerState.isUpdateLevel){
 
-      val img = drawFrame.createImage(s"/img/level-up.png")
+      val img = drawFrame.createImage(pictureMap("level-up.png"))
 
       val width = img.width
       val height = img.height

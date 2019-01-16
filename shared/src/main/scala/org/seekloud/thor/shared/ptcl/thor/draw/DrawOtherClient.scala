@@ -1,13 +1,14 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
+import org.seekloud.thor.shared.ptcl.model.Constants._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 import scala.collection.mutable
 trait DrawOtherClient {this: ThorSchemaClientImpl =>
 
-  private val bar = drawFrame.createImage("/img/weaponlevelbar_bg-sheet0.png")
-  private val fillBar = drawFrame.createImage("/img/weaponlevelbar_fg-sheet0.png")
+  private val bar = drawFrame.createImage(pictureMap( "bar.png"))
+  private val fillBar = drawFrame.createImage(pictureMap( "fillBar.png"))
 
   private val barLength = 500
   private val barHeight = barLength / 288 * 70 //这张图片的比例是288 * 70

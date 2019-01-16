@@ -1,11 +1,8 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 
-
-import java.awt.Color
-
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
-
+import org.seekloud.thor.shared.ptcl.model.Constants._
 
 trait BackgroundClient {
   this: ThorSchemaClientImpl =>
@@ -13,8 +10,7 @@ trait BackgroundClient {
 
   def window = Point((canvasSize.x - 12).toFloat, (canvasSize.y - 12).toFloat)
   def baseFont = window.x / 1440
-  private val mapImg = drawFrame.createImage(s"/img/background.png")
-//  private val rankImg = drawFrame.createImage(s"/img/rank.png")
+  private val mapImg = drawFrame.createImage(pictureMap("background.png"))
 
   def drawBackground(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
     ctx.save()
@@ -106,12 +102,6 @@ trait BackgroundClient {
   }
 
 
-//  private val logo = drawFrame.createImage("/img/logo.png")
-//  private val deadBlank = drawFrame.createImage("/img/dead-blank.png")
-//  private val userName = drawFrame.createImage("/img/user-name.png")
-//  private val playAgain = drawFrame.createImage("/img/play-again.png")
-
-
   def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit ={
     ctx.save()
     ctx.setFill("rgba(250,250,250,0.6)")
@@ -170,13 +160,9 @@ trait BackgroundClient {
     ctx.setFill("#ffa400")
     ctx.fillText(s"You Dead,Killer is ${killerName.take(5)} ", window.x * 0.4, window.y * 0.48)
     ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
-
-
-//    ctx.drawImage(userName, window.x * 0.4, window.y * 0.7, Some(window.x * 0.2, window.y * 0.1))
     ctx.setFont("Comic Sans Ms", baseFont * 24)
     ctx.setFill("#000000")
     ctx.fillText("Press space to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)
-//    ctx.drawImage(playAgain, window.x * 0.4, window.y * 0.85, Some(window.x * 0.2, window.y * 0.1))
     ctx.restore()
   }
 

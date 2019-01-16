@@ -3,6 +3,7 @@ package org.seekloud.thor.shared.ptcl.thor.draw
 import org.seekloud.thor.shared.ptcl.component.Food
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
+import org.seekloud.thor.shared.ptcl.model.Constants._
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleContext, MiddleFrame}
 
 import scala.collection.mutable
@@ -41,7 +42,7 @@ trait FoodClient { this: ThorSchemaClientImpl =>
 
   def drawAFood(food:Food, offset:Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
-    val img = drawFrame.createImage(s"/img/food-sheet0-${food.getFoodState.color}.png")
+    val img = drawFrame.createImage(pictureMap(s"food-sheet0-${food.getFoodState.color}.png"))
 
     val r = config.getRadiusByFoodLevel(food.getFoodState.level)
     val sx = food.getFoodState.position.x - r + offset.x
