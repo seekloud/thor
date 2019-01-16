@@ -140,30 +140,28 @@ class ThorSchemaImpl(
     val endTime = System.currentTimeMillis()
     if (curFrame < thorSchemaSate.f) {
       println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
+      justSyncFrame = thorSchemaSate.f
     }
+
     systemFrame = thorSchemaSate.f
-    justSyncFrame = systemFrame
+
     quadTree.clear()
-    //    adventurerMap.clear()
     tmpAdventurerMap.clear()
-    if (!thorSchemaSate.isIncrement) tmpFoodMap.clear() //foodMap.clear()
+    if (!thorSchemaSate.isIncrement) tmpFoodMap.clear()
     thorSchemaSate.adventurer.foreach { a =>
       val adventurer = new AdventurerImpl(config, a)
       quadTree.insert(adventurer)
-      //      adventurerMap.put(a.playerId, adventurer)
       tmpAdventurerMap.put(a.playerId, adventurer)
     }
     if (!thorSchemaSate.isIncrement) {
       thorSchemaSate.food.foreach { f =>
         val food = Food(f)
         quadTree.insert(food)
-        //        foodMap.put(f.fId, food)
         tmpFoodMap.put(f.fId, food)
       }
     } else {
       thorSchemaSate.food.foreach { f =>
         val food = Food(f)
-        //        foodMap.put(f.fId, food)
         tmpFoodMap.put(f.fId, food)
       }
       tmpFoodMap.values.foreach { f => quadTree.insert(f) }
