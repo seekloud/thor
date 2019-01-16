@@ -44,7 +44,7 @@ trait ThorSchema extends KillInformation {
   val tmpAdventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
   var foodMap = mutable.HashMap[Int, Food]() // foodId -> food
   val tmpFoodMap = mutable.HashMap[Int, Food]() // foodId -> food
-  val playerIdMap = mutable.HashMap[Short, String]() //映射id -> playerId
+  val playerIdMap = mutable.HashMap[Byte, String]() //映射id -> playerId
 
 
   /*事件*/
@@ -70,16 +70,16 @@ trait ThorSchema extends KillInformation {
 //    playerId = id
 //  }
 
-  protected def shortId2PlayerId(shortId: Short): Either[String, String] = {
-    if (playerIdMap.contains(shortId)) {
-      Right(playerIdMap(shortId))
+  protected def byteId2PlayerId(byteId: Byte): Either[String, String] = {
+    if (playerIdMap.contains(byteId)) {
+      Right(playerIdMap(byteId))
     } else {
       needUserMap = true
       Left("")
     }
   }
 
-  protected def playerId2ShortId(playerId: String): Either[Short, Short] = {
+  protected def playerId2ByteId(playerId: String): Either[Byte, Byte] = {
     if (playerIdMap.exists(_._2 == playerId)) {
       Right(playerIdMap.filter(_._2 == playerId).keySet.head)
     } else {
@@ -133,7 +133,7 @@ trait ThorSchema extends KillInformation {
       * 用户行为事件
       **/
     actions.sortBy(_.serialNum).foreach { action =>
-      val playerIdStr = shortId2PlayerId(action.playerId)
+      val playerIdStr = byteId2PlayerId(action.playerId)
       playerIdStr match {
         case Right(pId) =>
           adventurerMap.get(pId) match {
@@ -404,10 +404,10 @@ trait ThorSchema extends KillInformation {
   }
 
   def leftGame(userId: String, name: String) = {
-    val shortId = playerId2ShortId(userId)
-    shortId match {
-      case Right(sId) =>
-        val event = UserLeftRoom(userId, sId, name, systemFrame)
+    val byteId = playerId2ByteId(userId)
+    byteId match {
+      case Right(bId) =>
+        val event = UserLeftRoom(userId, bId, name, systemFrame)
         addGameEvent(event)
       case Left(_) => // do nothing
     }

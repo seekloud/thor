@@ -49,7 +49,7 @@ object UserActor {
 
   case class LeftRoom[U](actorRef: ActorRef[U]) extends Command
 
-  case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, shortId: Short, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl, playerIdMap: List[(Short, String)]) extends Command
+  case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, shortId: Short, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl, playerIdMap: List[(Byte, String)]) extends Command
 
   final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
 

@@ -70,6 +70,7 @@ class ThorSchemaImpl(
         e match {
           case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
           case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
+          case _ => println(s"unknown case.")
         }
       } else {
         rollback4GameEvent(e)
@@ -79,7 +80,7 @@ class ThorSchemaImpl(
 
   //接受服务器的用户事件
   def receiveUserEvent(e: UserActionEvent) = {
-    val pIdStr = shortId2PlayerId(e.playerId)
+    val pIdStr = byteId2PlayerId(e.playerId)
     pIdStr match {
       case Right(pId) =>
         if (pId == aId) {
@@ -133,7 +134,7 @@ class ThorSchemaImpl(
   }
 
   final def addMyAction(action: UserActionEvent): Unit = {
-    val pIdStr = shortId2PlayerId(action.playerId)
+    val pIdStr = byteId2PlayerId(action.playerId)
     pIdStr match {
       case Right(pId) =>
         if (pId == aId) {

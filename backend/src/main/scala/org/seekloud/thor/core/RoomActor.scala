@@ -40,9 +40,9 @@ object RoomActor {
 
   case class BeDead(playerId: String, name: String, userList: List[(String, String)]) extends Command
 
-  case class CreateRobot(botId: String, shortId: Short, name: String, level: Int) extends Command
+  case class CreateRobot(botId: String, byteId: Byte, name: String, level: Int) extends Command
 
-  case class ReliveRobot(botId: String, shortId: Short, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
+  case class ReliveRobot(botId: String, byteId: Byte, name: String, botActor: ActorRef[RobotActor.Command]) extends Command
 
   case class LeftRoom4Watch(playerId:String, watchedPlayerId:String) extends Command with RoomManager.Command
 
@@ -99,13 +99,13 @@ object RoomActor {
     Behaviors.receive {
       (ctx, msg) =>
         msg match {
-          case CreateRobot(botId, shortId, name, level) =>
-            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, shortId, name, level), botId)
-            thorSchema.robotJoinGame(botId, name, shortId, robot)
+          case CreateRobot(botId, byteId, name, level) =>
+            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, byteId, name, level), botId)
+            thorSchema.robotJoinGame(botId, name, byteId, robot)
             Behaviors.same
 
-          case ReliveRobot(botId, shortId, name, botActor) =>
-            thorSchema.robotJoinGame(botId, name, shortId, botActor)
+          case ReliveRobot(botId, byteId, name, botActor) =>
+            thorSchema.robotJoinGame(botId, name, byteId, botActor)
             Behaviors.same
 
           case JoinRoom(roomId, userId, name, userActor) =>

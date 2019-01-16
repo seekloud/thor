@@ -187,7 +187,7 @@ case class ThorSchemaServerImpl(
   }
 
   override def leftGame(userId: String, name: String) = {
-    val shortId = playerId2ShortId(userId)
+    val shortId = playerId2ByteId(userId)
     shortId match {
       case Right(sId) =>
         val event = UserLeftRoom(userId, sId, name, systemFrame)
