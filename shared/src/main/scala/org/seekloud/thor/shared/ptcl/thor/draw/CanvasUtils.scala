@@ -33,7 +33,7 @@ object CanvasUtils {
         case Nil =>
           ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, Some(width, drawHeight))
         case _ =>
-          if(System.currentTimeMillis() - preTime < 22000)
+          if(System.currentTimeMillis() - preTime < 2000)
             ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, Some(width, drawHeight))
           else{
             typ match {
