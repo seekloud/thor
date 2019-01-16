@@ -230,9 +230,11 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
             barrageTime -= 1
           }
         }
+        else{
+
+        }
 
       case None =>
-        println("aaaaaaaaaaaaddfjdifjdi")
 
     }
 
