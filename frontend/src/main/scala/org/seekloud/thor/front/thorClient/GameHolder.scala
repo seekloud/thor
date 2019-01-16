@@ -232,6 +232,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         }
 
       case None =>
+        println("aaaaaaaaaaaaddfjdifjdi")
 
     }
 

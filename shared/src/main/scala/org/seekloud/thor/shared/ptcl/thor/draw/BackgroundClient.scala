@@ -139,7 +139,7 @@ trait BackgroundClient {
     ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
     ctx.setFont("Comic Sans Ms", baseFont * 24)
     ctx.setFill("#FFFFFF")
-    ctx.fillText("Press space to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)
+    ctx.fillText("Click to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)
     ctx.restore()
   }
 
