@@ -153,7 +153,11 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       case e: GameEvent =>
         e match{
           case msg: UserEnterRoom =>
-            thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.put(msg.shortId, msg.playerId))
+            thorSchemaOpt.foreach{ thorSchema =>
+              thorSchema.playerIdMap.put(msg.shortId, msg.playerId)
+              if(msg.playerId == myId)
+                shortId = msg.shortId
+            }
           case msg: UserLeftRoom =>
             thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(msg.shortId))
           case _ =>
