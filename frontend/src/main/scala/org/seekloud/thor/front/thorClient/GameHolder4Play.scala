@@ -169,24 +169,25 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     }
   }
 
+
+  var lastMouseMove = 0l //限制只能发一次mousemove
+  val frequency = 50
   def addActionListenEvent(): Unit = {
     canvas.getCanvas.focus()
     canvas.getCanvas.oncontextmenu = _ => false //取消右键弹出行为
     canvas.getCanvas.onmousemove = { e: dom.MouseEvent =>
       val point = Point(e.clientX.toFloat, e.clientY.toFloat)
       val theta = point.getTheta(canvasBounds * canvasUnit / 2).toFloat
-      var lastMouseMove = 0l //限制多帧只能发一次mousemove
-      val frequency = 5
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId)) {
 //            val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             val direction = thorSchema.adventurerMap(myId).direction
-            if (thorSchema.systemFrame > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+            if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
               val data = MM(shortId.toByte, (e.clientX - dom.window.innerWidth / 2.0).toShort, (e.clientY - dom.window.innerHeight / 2.0).toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(data)
               thorSchema.preExecuteUserEvent(data)
-              lastMouseMove = thorSchema.systemFrame
+              lastMouseMove = System.currentTimeMillis()
             }
           }
 
