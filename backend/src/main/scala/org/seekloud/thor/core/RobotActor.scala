@@ -90,7 +90,7 @@ object RobotActor {
     level: Int
   ): Behavior[Command] =
     Behaviors.setup[Command] { ctx =>
-      log.info(s"*** is starting...")
+      log.info(s"robot$botName is starting...")
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       val actionSerialNumGenerator = new AtomicInteger(0)
       Behaviors.withTimers[Command] { implicit timer =>
@@ -121,15 +121,18 @@ object RobotActor {
 
           if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
 
-            val tDirection = {
-              if(theta - direction > math.Pi) theta - direction - 2 * math.Pi
-              else if(theta - direction < -math.Pi) theta - direction + 2 * math.Pi
-              else theta - direction
-            }
-            val increment = (1 to (math.abs(tDirection) / 0.2).toInt).map(_ => if(tDirection > 0) 0.2f else -0.2f)
-            val thetaList = increment.scanLeft(direction)(_ + _).map(t => if(t > math.Pi) t - 2 * math.Pi.toFloat else if(t < -math.Pi) t + 2 * math.Pi.toFloat else t)
+//            val tDirection = {
+//              if(theta - direction > math.Pi) theta - direction - 2 * math.Pi
+//              else if(theta - direction < -math.Pi) theta - direction + 2 * math.Pi
+//              else theta - direction
+//            }
+//            val increment = (1 to (math.abs(tDirection) / 0.2).toInt).map(_ => if(tDirection > 0) 0.2f else -0.2f)
+//            val thetaList = increment.scanLeft(direction)(_ + _).map(t => if(t > math.Pi) t - 2 * math.Pi.toFloat else if(t < -math.Pi) t + 2 * math.Pi.toFloat else t)
 
-            ctx.self ! AutoMouseMoveGoOn(thetaList.toList, 0)
+//            ctx.self ! AutoMouseMoveGoOn(thetaList.toList, 0)
+            val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
+            val data = MM(byteId, (math.cos(theta) * moveDistance).toShort, (math.sin(theta) * moveDistance).toShort, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
+            roomActor ! RoomActor.WsMessage(botId, data)
 
             timer.cancel(MouseMoveKey)
             timer.startSingleTimer(MouseMoveKey, AutoMouseMove, moveFrequency.seconds)
@@ -145,7 +148,7 @@ object RobotActor {
           val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
           val data = MM(byteId, (math.cos(thetaList(num)) * moveDistance).toShort, (math.sin(thetaList(num)) * moveDistance).toShort, thorSchema.systemFrame, actionSerialNumGenerator.getAndIncrement())
           roomActor ! RoomActor.WsMessage(botId, data)
-          if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 50))
+          if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 100))
             timer.startSingleTimer(MouseMoveGoOnKey, AutoMouseMoveGoOn(thetaList, num + 1), 100.millis)
 
           Behaviors.same
