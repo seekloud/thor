@@ -193,7 +193,6 @@ class ThorSchemaImpl(
   }
 
   override def update(): Unit = {
-    println(s"systemframe: $systemFrame")
     if (thorSchemaStateOpt.nonEmpty) {
       val thorSchemaState = thorSchemaStateOpt.get
       info(s"逻辑帧同步，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
