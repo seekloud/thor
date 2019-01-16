@@ -48,9 +48,7 @@ trait EsRecover {
         handleThorSchemaState(thorSchemaState)
         //同步所有数据
         removeKillInfoByRollback(frame)
-//        removeRollBackFrame(frame)
         (frame until curFrame).foreach { f =>
-//          this.systemFrame = f
           this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
           this.rollbackUpdate()
         }
@@ -58,7 +56,6 @@ trait EsRecover {
         println(s"roll back to frame=$frame, nowFrame=$curFrame use Time:${endTime - startTime}")
       case None =>
         println(s"there are not snapshot frame=$frame")
-//        removeRollBackFrame(frame)
         this.rollbackUpdate()
     }
   }
