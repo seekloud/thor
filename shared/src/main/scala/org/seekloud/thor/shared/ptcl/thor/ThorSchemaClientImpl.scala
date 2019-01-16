@@ -19,9 +19,9 @@ case class ThorSchemaClientImpl (
   myName: String,
   var canvasSize:Point,
   var canvasUnit:Float,
-  preCanvas: List[MiddleCanvas] = Nil,
-  preCanvasAdventurer: List[MiddleCanvas] = Nil,
-  preCanvasWeapon: List[MiddleCanvas] = Nil
+  var preCanvasFood: List[MiddleCanvas] = Nil,
+  var preCanvasAdventurer: List[MiddleCanvas] = Nil,
+  var preCanvasWeapon: List[MiddleCanvas] = Nil
 ) extends ThorSchemaImpl(config, myId, myName)
 with AdventurerClient
 with FoodClient
@@ -64,6 +64,16 @@ with FpsRender{
   def updateSize(bounds: Point, unit: Float): Unit ={
     canvasSize = bounds
     canvasUnit = unit
+  }
+
+  def changePreCanvas(
+  preFood: List[MiddleCanvas] = Nil,
+  preAdventurer: List[MiddleCanvas] = Nil,
+  preWeapon: List[MiddleCanvas] = Nil
+  ): Unit ={
+    preCanvasFood = preFood
+    preCanvasAdventurer = preAdventurer
+    preCanvasWeapon = preWeapon
   }
 
 }

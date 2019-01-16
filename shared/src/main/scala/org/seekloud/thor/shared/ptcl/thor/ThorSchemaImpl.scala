@@ -175,17 +175,17 @@ class ThorSchemaImpl(
     if (thorSchemaState.f > systemFrame) {
       thorSchemaStateOpt = Some(thorSchemaState)
     } else if (thorSchemaState.f == systemFrame) {
-      info(s"收到同步数据，立即同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
+      info(s"收到同步数据，立即同步，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
       thorSchemaStateOpt = None
       handleThorSchemaState(thorSchemaState)
     } else {
 //      info(s"收到滞后数据，准备同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
-      thorSchemaStateOpt = Some(thorSchemaState)
-//      if (systemFrame - thorSchemaState.f < 5) {
-////        thorSchemaStateOpt = None
-////        handleThorSchemaState(thorSchemaState)
-//        thorSchemaStateOpt = Some(thorSchemaState)
-//      }
+//      thorSchemaStateOpt = Some(thorSchemaState)
+      if (systemFrame - thorSchemaState.f < 5) {
+//        thorSchemaStateOpt = None
+//        handleThorSchemaState(thorSchemaState)
+        thorSchemaStateOpt = Some(thorSchemaState)
+      }
     }
 
   }

@@ -14,9 +14,9 @@ class PreDraw {
   val drawFood = new MiddleFrameInJs
   val foodImg: List[MiddleImage] = for(a <- (0 to 7).toList) yield drawFood.createImage(s"/img/food-sheet0-$a.png")
 
-  val foodCanvas: List[MiddleCanvas] = Nil
+  var foodCanvas: List[MiddleCanvas] = Nil
 
-  val foodCtx: List[MiddleContext] = Nil
+  var foodCtx: List[MiddleContext] = Nil
 
   canvasDrawFood()
 
@@ -24,9 +24,9 @@ class PreDraw {
   val drawAdventurer = new MiddleFrameInJs
   val adventurerImg: List[MiddleImage] = for(a <- (0 to 19).toList) yield drawAdventurer.createImage(s"/img/char${a/4 + 1}-${a%4}.png")
 
-  val adventurerCanvas: List[MiddleCanvas] = Nil
+  var adventurerCanvas: List[MiddleCanvas] = Nil
 
-  val adventurerCtx: List[MiddleContext] = Nil
+  var adventurerCtx: List[MiddleContext] = Nil
 
   canvasDrawAdventurer()
 
@@ -34,9 +34,9 @@ class PreDraw {
   val drawWeapon = new MiddleFrameInJs
   val weaponImg: List[MiddleImage] = for(a <- (0 to 5).toList) yield drawWeapon.createImage(s"/img/weapon${a + 1}.png")
 
-  val weaponCanvas: List[MiddleCanvas] = Nil
+  var weaponCanvas: List[MiddleCanvas] = Nil
 
-  val weaponCtx: List[MiddleContext] = Nil
+  var weaponCtx: List[MiddleContext] = Nil
 
   canvasDrawWeapon()
 
@@ -44,8 +44,8 @@ class PreDraw {
     var cnt = 0
     if(weaponImg.forall(t => t.isComplete)){
       val weaponHeight = for(a <- (0 to 5).toList) yield 250.0 / weaponImg(a).width * weaponImg(a).height
-      for(a <- (0 to 5).toList) yield weaponCanvas :+ drawWeapon.createCanvas(250.0, weaponHeight(a))
-      for(a <- (0 to 5).toList) yield weaponCtx :+ weaponCanvas(a).getCtx
+      for(a <- (0 to 5).toList) {weaponCanvas = weaponCanvas :+ drawWeapon.createCanvas(250.0, weaponHeight(a).toInt)}
+      for(a <- (0 to 5).toList) {weaponCtx = weaponCtx :+ weaponCanvas(a).getCtx}
       weaponCtx.foreach{ t =>
         t.drawImage(weaponImg(cnt),0 ,0, Some(250.0, weaponHeight(cnt)))
         cnt += 1
@@ -61,8 +61,8 @@ class PreDraw {
   def canvasDrawAdventurer(): Unit ={
     var cnt = 0
     if(adventurerImg.forall(t => t.isComplete)){
-      for(a <- (0 to 19).toList) yield adventurerCanvas :+ drawAdventurer.createCanvas(150.0, 150.0)
-      for(a <- (0 to 19).toList) yield adventurerCtx :+ adventurerCanvas(a).getCtx
+      for(a <- (0 to 19).toList) {adventurerCanvas = adventurerCanvas :+ drawAdventurer.createCanvas(150.0, 150.0)}
+      for(a <- (0 to 19).toList) {adventurerCtx = adventurerCtx :+ adventurerCanvas(a).getCtx}
       adventurerCtx.foreach{ t =>
         t.drawImage(adventurerImg(cnt),0 ,0, Some(150 ,150))
         cnt += 1
@@ -78,8 +78,8 @@ class PreDraw {
   def canvasDrawFood(): Unit ={
     var cnt = 0
     if(foodImg.forall(t => t.isComplete)){
-      for(a <- (0 to 7).toList) yield foodCanvas :+ drawFood.createCanvas(48.0, 48.0)
-      for(a <- (0 to 7).toList) yield foodCtx :+ foodCanvas(a).getCtx
+      for(a <- (0 to 7).toList) {foodCanvas = foodCanvas :+ drawFood.createCanvas(48.0, 48.0)}
+      for(a <- (0 to 7).toList) {foodCtx = foodCtx :+ foodCanvas(a).getCtx}
       foodCtx.foreach{ t =>
         t.drawImage(foodImg(cnt),0 ,0, Some(48 ,48))
         cnt += 1

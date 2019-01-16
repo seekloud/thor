@@ -16,20 +16,23 @@ trait FoodClient { this: ThorSchemaClientImpl =>
 
   def drawFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
-    preCanvas match{
+    preCanvasFood match{
       case Nil =>
         foodMap.foreach{food=>
           drawAFood(food._2, offset, canvasUnit,canvasBoundary)
+//          if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("no Pre first")
         }
       case _ =>
         if(System.currentTimeMillis() - preTime < 2000){
           foodMap.foreach{food=>
             drawAFood(food._2, offset, canvasUnit,canvasBoundary)
+//            if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("no Pre")
           }
         }
         else{
           foodMap.foreach{food=>
             drawFoodByPre(food._2, offset, canvasUnit,canvasBoundary)
+//            if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("Pre !!!")
           }
 
         }
@@ -68,7 +71,7 @@ trait FoodClient { this: ThorSchemaClientImpl =>
     if(0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y){
       //只绘制视角窗口内的食物
       ctx.save()
-      ctx.drawImage(preCanvas(color), sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
+      ctx.drawImage(preCanvasFood(color), sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
       ctx.restore()
     }
   }
