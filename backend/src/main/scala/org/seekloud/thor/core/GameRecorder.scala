@@ -178,7 +178,7 @@ object GameRecorder {
           switchBehavior(ctx, "save", save(gameRecordData, essfMap, userAllMap, userMap, startF, endF))
 
         case unknown =>
-          log.warn(s"unknown msg:$unknown")
+          log.warn(s"unknown msg in work: $unknown")
           Behaviors.unhandled
 
       }
@@ -319,7 +319,7 @@ object GameRecorder {
 
 
         case unknown =>
-          log.warn(s"unknown msg:$unknown")
+          log.warn(s"unknown msg in save:$unknown")
           Behaviors.unhandled
       }
 
@@ -365,7 +365,7 @@ object GameRecorder {
           Behaviors.stopped
 
         case unknown =>
-          log.warn(s"unknown msg:$unknown")
+          log.warn(s"unknown msg in initRecorder:$unknown")
           Behaviors.unhandled
       }
     }
