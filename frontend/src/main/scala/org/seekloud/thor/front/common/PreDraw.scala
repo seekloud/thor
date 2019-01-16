@@ -3,6 +3,7 @@ package org.seekloud.thor.front.common
 import org.scalajs.dom
 import org.seekloud.thor.front.utils.middleware.MiddleFrameInJs
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleContext, MiddleImage}
+import org.seekloud.thor.shared.ptcl.model.Constants._
 
 /**
   * User: XuSiRan
@@ -12,7 +13,7 @@ import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleContex
 class PreDraw {
   // 食物预渲染Canvas
   val drawFood = new MiddleFrameInJs
-  val foodImg: List[MiddleImage] = for(a <- (0 to 7).toList) yield drawFood.createImage(s"/img/food-sheet0-$a.png")
+  val foodImg: List[MiddleImage] = for(a <- (0 to 7).toList) yield drawFood.createImage(pictureMap(s"food-sheet0-$a.png"))
 
   var foodCanvas: List[MiddleCanvas] = Nil
 
@@ -22,7 +23,7 @@ class PreDraw {
 
   //预渲染人物
   val drawAdventurer = new MiddleFrameInJs
-  val adventurerImg: List[MiddleImage] = for(a <- (0 to 19).toList) yield drawAdventurer.createImage(s"/img/char${a/4 + 1}-${a%4}.png")
+  val adventurerImg: List[MiddleImage] = for(a <- (0 to 19).toList) yield drawAdventurer.createImage(pictureMap(s"char${a/4 + 1}-${a%4}.png"))
 
   var adventurerCanvas: List[MiddleCanvas] = Nil
 
@@ -32,7 +33,7 @@ class PreDraw {
 
   //预渲染武器
   val drawWeapon = new MiddleFrameInJs
-  val weaponImg: List[MiddleImage] = for(a <- (0 to 5).toList) yield drawWeapon.createImage(s"/img/weapon${a + 1}.png")
+  val weaponImg: List[MiddleImage] = for(a <- (0 to 5).toList) yield drawWeapon.createImage(pictureMap(s"weapon${a + 1}.png"))
 
   var weaponCanvas: List[MiddleCanvas] = Nil
 
