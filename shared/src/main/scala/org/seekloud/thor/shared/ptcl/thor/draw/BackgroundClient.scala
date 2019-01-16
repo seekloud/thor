@@ -89,9 +89,6 @@ trait BackgroundClient {
         }
 
       }
-      if (index == 10) {
-        last = s" 【10】   $name   分数:${score.e}   击杀数:${score.k}"
-      }
     }
     index += 1
     if (!yourNameIn) {

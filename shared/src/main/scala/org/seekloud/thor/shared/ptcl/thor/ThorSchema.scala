@@ -208,7 +208,7 @@ trait ThorSchema extends KillInformation {
     actionEventMap.put(frame, actionEvents)
   }
 
-  def removePreEvent(frame: Int, playerId: Short, serialNum: Int): Unit = {
+  def removePreEvent(frame: Int, playerId: Short, serialNum: Byte): Unit = {
     actionEventMap.get(frame).foreach { actions =>
       actionEventMap.put(frame, actions.filterNot(t => t.playerId == playerId && t.serialNum == serialNum))
     }
