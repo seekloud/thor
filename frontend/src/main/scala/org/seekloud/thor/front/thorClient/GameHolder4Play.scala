@@ -67,7 +67,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         shortId = sId
         myName = yourName
         gameConfig = Some(config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.canvas, preDrawFrame.adventurerCanvas))
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas))
         if (timer != 0) {
           dom.window.clearInterval(timer)
           thorSchemaOpt.foreach { grid =>
