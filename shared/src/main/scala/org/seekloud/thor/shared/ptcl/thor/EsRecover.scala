@@ -35,29 +35,30 @@ trait EsRecover {
   def rollback(frame: Int) = {
     try {
       require(frame < this.systemFrame)
+      removeRollBackFrame(frame)
+
+      gameSnapshotMap.get(frame) match {
+        case Some(thorSchemaState) =>
+          val startTime = System.currentTimeMillis()
+          val curFrame = this.systemFrame
+          handleThorSchemaState(thorSchemaState, isRollBack = true)
+          //同步所有数据
+          removeKillInfoByRollback(frame)
+          (frame until curFrame).foreach { f =>
+            this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
+            this.rollbackUpdate()
+          }
+          val endTime = System.currentTimeMillis()
+          println(s"roll back to frame=$frame, nowFrame=$curFrame use Time:${endTime - startTime}")
+        case None =>
+          println(s"there are not snapshot frame=$frame")
+          this.rollbackUpdate()
+      }
     } catch {
       case _: Exception =>
         println(s"rollback exception frame: $frame, curFrame: ${this.systemFrame}")
     }
-    removeRollBackFrame(frame)
 
-    gameSnapshotMap.get(frame) match {
-      case Some(thorSchemaState) =>
-        val startTime = System.currentTimeMillis()
-        val curFrame = this.systemFrame
-        handleThorSchemaState(thorSchemaState)
-        //同步所有数据
-        removeKillInfoByRollback(frame)
-        (frame until curFrame).foreach { f =>
-          this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
-          this.rollbackUpdate()
-        }
-        val endTime = System.currentTimeMillis()
-        println(s"roll back to frame=$frame, nowFrame=$curFrame use Time:${endTime - startTime}")
-      case None =>
-        println(s"there are not snapshot frame=$frame")
-        this.rollbackUpdate()
-    }
   }
 
   def rollback4GameEvent(e: GameEvent) = {
