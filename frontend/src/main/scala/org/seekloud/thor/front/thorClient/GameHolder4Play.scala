@@ -90,6 +90,9 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
+      case RestartYourInfo =>
+        mainId = myId
+        gameState = GameState.play
 
       case e: BeAttacked =>
         barrage = s"${e.killerName}  杀死了  ${e.name}"
