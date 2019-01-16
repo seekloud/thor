@@ -55,6 +55,7 @@ object RoomManager {
         (ctx, msg) =>
           msg match {
             case JoinRoom(userId, name, userActor, roomIdOpt) =>
+              log.debug(s"$name joinRoom. roomInUse before: $roomInUse")
               //为新用户分配房间
               roomIdOpt match {
                 case Some(roomId) => //用户指定roomId
@@ -63,6 +64,7 @@ object RoomManager {
                     case None => roomInUse.put(roomId, List((userId, name)))
                   }
                   getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, userId, name, userActor)
+
 
                 case None => //随机分配room
                   roomInUse.find(p => p._2.length < personLimit).toList.sortBy(_._1).headOption match{
@@ -76,6 +78,7 @@ object RoomManager {
                       getRoomActor(ctx,roomId) ! RoomActor.JoinRoom(roomId, userId, name, userActor)
                   }
               }
+              log.debug(s"$name joinRoom. roomInUse after: $roomInUse")
               Behaviors.same
 
             case RoomActor.JoinRoom4Watch(uid,roomId,playerId,userActor4Watch) =>
@@ -91,6 +94,7 @@ object RoomManager {
               Behaviors.same
 
             case LeftRoom(uid, name) =>
+              log.debug(s"$name leftRoom. roomInUse before $roomInUse")
               roomInUse.find(_._2.exists(_._1 == uid)) match{
                 case Some(t) =>
                   roomInUse.put(t._1,t._2.filterNot(_._1 == uid))
@@ -98,6 +102,8 @@ object RoomManager {
                   if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
                 case None => log.debug(s"LeftRoom 玩家 $name 不在任何房间")
               }
+              log.debug(s"$name leftRoom. roomInUse after $roomInUse")
+
               Behaviors.same
 
             case BeDead(playerId, name) =>
