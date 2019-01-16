@@ -142,7 +142,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         val event = MouseClickDownLeft(shortId.toByte, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
         websocketClient.sendMsg(event)
         thorSchema.preExecuteUserEvent(event)
-        Shortcut.playMusic("sound-4")
+//        Shortcut.playMusic("sound-4")
       }
     }
   }

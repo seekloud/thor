@@ -87,7 +87,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           }
 
         gameState = GameState.play
-        Shortcut.playMusic("bgm-2")
+//        Shortcut.playMusic("bgm-2")
         if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
@@ -204,7 +204,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
               websocketClient.sendMsg(event)
               thorSchema.preExecuteUserEvent(event)
               //              thorSchema.addMyAction(event)
-              Shortcut.playMusic("sound-4")
+//              Shortcut.playMusic("sound-4")
               //              e.preventDefault()
             }
             else if (e.button == 2) { //右键
