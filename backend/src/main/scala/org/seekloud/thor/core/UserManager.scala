@@ -140,6 +140,9 @@ object UserManager {
     "ping" -> 0.0,
     "userMap" -> 0.0,
     "generateFood" -> 0.0,
+    "uploadMM" -> 0.0,
+    "uploadMouseClickLeft" -> 0.0,
+    "uploadMouseClickRight" -> 0.0,
     "others" -> 0.0
   )
   var timer = System.currentTimeMillis()
@@ -172,7 +175,23 @@ object UserManager {
         case BinaryMessage.Strict(m) =>
           val buffer = new MiddleBufferInJvm(m.asByteBuffer)
           bytesDecode[WsMsgFront](buffer) match {
-            case Right(req) => UserActor.WsMessage(Some(req))
+            case Right(req) =>
+              val sendBuffer = new MiddleBufferInJvm(409600)
+              val msg = req.fillMiddleBuffer(sendBuffer).result()
+              req match {
+                case _: MM =>
+                  statics.update("uploadMM", statics("uploadMM") + msg.length.toDouble / 1024)
+                  statics.update("MM_num", statics("MM_num") + 1)
+                case _: MouseClickDownLeft =>
+                  statics.update("uploadMouseClickLeft", statics("uploadMouseClickLeft") + msg.length.toDouble / 1024)
+                case _: MouseClickUpRight =>
+                  statics.update("uploadMouseClickRight", statics("uploadMouseClickRight") + msg.length.toDouble / 1024)
+                case _: MouseClickDownRight =>
+                  statics.update("uploadMouseClickRight", statics("uploadMouseClickRight") + msg.length.toDouble / 1024)
+                case _ =>
+                  statics.update("others", statics("others") + msg.length.toDouble / 1024)
+              }
+              UserActor.WsMessage(Some(req))
             case Left(e) =>
               log.error(s"decode binaryMessage failed,error:${e.message}")
               UserActor.WsMessage(None)
@@ -228,8 +247,8 @@ object UserManager {
                 statics.foreach { s =>
                   if (s._1 == "MM_num") {
                     details = details + s"${s._1}: ${s._2}\n" +
-                              s"MM_MEAN: ${statics("MM") / s._2} kb\n" +
-                              s"MM_percent: ${statics("MM") / total * 100}%\n"
+                              s"MM_MEAN: ${(statics("MM") + statics("uploadMM")) / s._2} kb\n" +
+                              s"MM_percent: ${(statics("MM") + statics("uploadMM")) / total * 100}%\n"
                   } else {
                     details = details + s"${s._1}: ${s._2} kb\n"
                   }
