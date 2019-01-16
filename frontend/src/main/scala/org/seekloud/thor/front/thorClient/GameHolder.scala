@@ -231,7 +231,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           }
         }
         else{
-          println("aaaaaaaaaaaa")
+          drawGameLoading()
         }
 
       case None =>
