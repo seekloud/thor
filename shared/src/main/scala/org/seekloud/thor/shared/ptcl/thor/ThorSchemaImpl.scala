@@ -130,7 +130,7 @@ class ThorSchemaImpl(
 
   }
 
-  protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState) = {
+  protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState, isRollBack: Boolean = false) = {
     val curFrame = systemFrame
     val startTime = System.currentTimeMillis()
     (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { _ =>
@@ -140,6 +140,9 @@ class ThorSchemaImpl(
     val endTime = System.currentTimeMillis()
     if (curFrame < thorSchemaSate.f) {
       println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
+      justSyncFrame = thorSchemaSate.f
+    } else if (!isRollBack) {
+      println(s"handleThorSchemaState roll back to ${thorSchemaSate.f}.")
       justSyncFrame = thorSchemaSate.f
     }
 
@@ -179,12 +182,11 @@ class ThorSchemaImpl(
       thorSchemaStateOpt = None
       handleThorSchemaState(thorSchemaState)
     } else {
-//      info(s"收到滞后数据，准备同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
-//      thorSchemaStateOpt = Some(thorSchemaState)
-      if (systemFrame - thorSchemaState.f < 5) {
-//        thorSchemaStateOpt = None
-//        handleThorSchemaState(thorSchemaState)
-        thorSchemaStateOpt = Some(thorSchemaState)
+      if (systemFrame - thorSchemaState.f < 10) {
+        info(s"收到滞后数据，立即同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
+        handleThorSchemaState(thorSchemaState)
+      } else {
+        info(s"收到滞后数据，不同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
       }
     }
 
@@ -204,7 +206,7 @@ class ThorSchemaImpl(
 //      super.update()
       if (esRecoverSupport) {
         if (rollBackFrame.nonEmpty) {
-          rollBackFrame.distinct.filterNot(_ < justSyncFrame).sortWith(_ < _).headOption.foreach(rollback)
+          rollBackFrame.distinct.filterNot(r => r < justSyncFrame || r >= systemFrame).sortWith(_ < _).headOption.foreach(rollback)
           super.update()
         } else {
           super.update()
