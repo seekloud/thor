@@ -171,7 +171,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 //            val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
             val direction = thorSchema.adventurerMap(myId).direction
             if (thorSchema.systemFrame > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
-              val data = MM(shortId.toByte, (e.clientX - dom.window.innerWidth / 2.0).toByte, (e.clientY - dom.window.innerHeight / 2.0).toByte, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              val data = MM(shortId.toByte, (e.clientX - dom.window.innerWidth / 2.0).toShort, (e.clientY - dom.window.innerHeight / 2.0).toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               websocketClient.sendMsg(data)
               thorSchema.preExecuteUserEvent(data)
               lastMouseMove = thorSchema.systemFrame
