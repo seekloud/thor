@@ -206,7 +206,8 @@ class ThorSchemaImpl(
 //      super.update()
       if (esRecoverSupport) {
         if (rollBackFrame.nonEmpty) {
-          rollBackFrame.distinct.filterNot(r => r < justSyncFrame || r >= systemFrame).sortWith(_ < _).headOption.foreach(rollback)
+          rollBackFrame = rollBackFrame.distinct.filterNot(r => r < justSyncFrame || r >= systemFrame).sortWith(_< _)
+          rollBackFrame.headOption.foreach(rollback)
           super.update()
         } else {
           super.update()
