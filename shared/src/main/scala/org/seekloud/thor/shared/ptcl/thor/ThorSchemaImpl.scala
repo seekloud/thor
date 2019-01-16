@@ -183,16 +183,17 @@ class ThorSchemaImpl(
       handleThorSchemaState(thorSchemaState)
     } else {
       if (systemFrame - thorSchemaState.f < 10) {
-        info(s"收到滞后数据，立即同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
+        info(s"收到滞后数据，立即同步，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
         handleThorSchemaState(thorSchemaState)
       } else {
-        info(s"收到滞后数据，不同步，curSystemFrame=$systemFrame, sync game container state frame=${thorSchemaState.f}")
+        info(s"收到滞后数据，不同步，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
       }
     }
 
   }
 
   override def update(): Unit = {
+    println(s"systemframe: $systemFrame")
     if (thorSchemaStateOpt.nonEmpty) {
       val thorSchemaState = thorSchemaStateOpt.get
       info(s"逻辑帧同步，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
