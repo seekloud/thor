@@ -72,7 +72,7 @@ object RoomActor {
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
             for (cnt <- 0 until thorSchema.config.getRobotNumber) {
-              val tmpId = getTmpId(thorSchema)
+              val tmpId = getTmpId(thorSchema.config.getRobotNames(cnt), thorSchema)
               ctx.self ! CreateRobot(s"robot$cnt", tmpId.toByte, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
             }
 
@@ -110,7 +110,7 @@ object RoomActor {
 
           case JoinRoom(roomId, userId, name, userActor) =>
 //            log.debug(s"user $userId join room $roomId")
-            val tmpId = getTmpId(thorSchema)
+            val tmpId = getTmpId(userId, thorSchema)
             thorSchema.joinGame(userId, name, tmpId, userActor)
 
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
@@ -221,12 +221,13 @@ object RoomActor {
     }
   }
 
-  def getTmpId(thorSchema: ThorSchemaServerImpl): Byte = {
-    var id:Byte = 0
+  def getTmpId(playerId: String, thorSchema: ThorSchemaServerImpl): Byte = {
+    var id: Byte = 0
     val idGenerator = new AtomicLong(1L)
     while(thorSchema.playerIdMap.contains(id)){
       id = idGenerator.getAndIncrement().toByte
     }
+    thorSchema.playerIdMap.put(id, playerId)
     id
   }
 
