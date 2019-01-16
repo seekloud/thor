@@ -72,7 +72,7 @@ object RoomActor {
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
             for (cnt <- 0 until thorSchema.config.getRobotNumber) {
-              val tmpId = getTmpId(thorSchema.config.getRobotNames(cnt), thorSchema)
+              val tmpId = getTmpId(s"robot$cnt", thorSchema)
               ctx.self ! CreateRobot(s"robot$cnt", tmpId.toByte, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
             }
 
