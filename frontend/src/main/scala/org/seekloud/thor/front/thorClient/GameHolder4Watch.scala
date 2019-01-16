@@ -46,7 +46,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
-        Shortcut.playMusic("bgm-2")
+//        Shortcut.playMusic("bgm-2")
 
       case e: BeAttacked =>
         barrage = s"${e.killerName}杀死了${e.name}"
@@ -97,10 +97,10 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         closeHolder
 
       case e: UserActionEvent =>
-        e match {
-          case _: MouseClickDownLeft => Shortcut.playMusic("sound-4")
-          case _ =>
-        }
+//        e match {
+//          case _: MouseClickDownLeft => Shortcut.playMusic("sound-4")
+//          case _ =>
+//        }
         thorSchemaOpt.foreach(_.receiveUserEvent(e))
 
       case e: GameEvent =>

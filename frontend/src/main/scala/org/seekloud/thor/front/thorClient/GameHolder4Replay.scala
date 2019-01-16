@@ -51,7 +51,7 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
         myName = e.name
         gameConfig = Some(e.config)
         startTime = System.currentTimeMillis()
-        Shortcut.playMusic("bgm-2")
+//        Shortcut.playMusic("bgm-2")
 
       case e: ThorGame.GridSyncState =>
         if (firstCome) {
@@ -78,10 +78,10 @@ class GameHolder4Replay(name: String, playerInfoOpt: Option[PlayerInfo] = None) 
       case e: ThorGame.UserActionEvent =>
         //remind here only add preAction without rollback
 //        println(s"frame [${thorSchemaOpt.get.systemFrame}] user action event: $e")
-        e match {
-          case _: MouseClickDownLeft => Shortcut.playMusic("sound-4")
-          case _ =>
-        }
+//        e match {
+//          case _: MouseClickDownLeft => Shortcut.playMusic("sound-4")
+//          case _ =>
+//        }
         thorSchemaOpt.foreach(_.preExecuteUserEvent(e))
 
       case e: ThorGame.GameEvent =>
