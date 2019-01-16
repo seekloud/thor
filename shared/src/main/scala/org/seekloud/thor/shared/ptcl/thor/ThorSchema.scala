@@ -159,7 +159,8 @@ trait ThorSchema extends KillInformation {
             //          info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
 
           }
-        case Left(_) => //do nothing
+        case Left(_) =>
+          println(s"playerId map is incomplete, playerId ${action.playerId} is missing.")
       }
 
     }
@@ -406,8 +407,8 @@ trait ThorSchema extends KillInformation {
   def leftGame(userId: String, name: String) = {
     val byteId = playerId2ByteId(userId)
     byteId match {
-      case Right(bId) =>
-        val event = UserLeftRoom(userId, bId, name, systemFrame)
+      case Right(sId) =>
+        val event = UserLeftRoom(userId, sId, name, systemFrame)
         addGameEvent(event)
       case Left(_) => // do nothing
     }

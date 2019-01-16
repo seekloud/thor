@@ -183,6 +183,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def setMoveDirection(offsetX: Short, offSetY: Short, isAttacking: Boolean)(implicit config: ThorGameConfig) = {
+    println(s"player $playerId setMoveDirection offsetX $offsetX offsetY $offSetY")
     val mouseDistance = math.sqrt(math.pow(offsetX, 2) + math.pow(offSetY, 2))
     val d = if (offsetX < 0) {
       if (offSetY < 0) {
