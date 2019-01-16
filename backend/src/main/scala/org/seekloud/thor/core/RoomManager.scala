@@ -96,7 +96,7 @@ object RoomManager {
                   roomInUse.put(t._1,t._2.filterNot(_._1 == uid))
                   getRoomActor(ctx,t._1) ! RoomActor.LeftRoom(uid,name,roomInUse(t._1))
                   if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
-                case None => log.debug(s"该玩家不在任何房间")
+                case None => log.debug(s"LeftRoom 玩家 $name 不在任何房间")
               }
               Behaviors.same
 
@@ -106,7 +106,7 @@ object RoomManager {
                   roomInUse.put(t._1,t._2.filterNot(_._1 == playerId))
                   getRoomActor(ctx,t._1) ! RoomActor.BeDead(playerId,name,roomInUse(t._1))
                   if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
-                case None => log.debug(s"该玩家不在任何房间")
+                case None => log.debug(s"BeDead 玩家 $name 不在任何房间")
               }
               Behaviors.same
 
