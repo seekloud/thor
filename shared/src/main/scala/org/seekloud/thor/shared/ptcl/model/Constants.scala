@@ -1,5 +1,7 @@
 package org.seekloud.thor.shared.ptcl.model
 
+import scala.collection.mutable
+
 /**
   * User: TangYaruo
   * Date: 2018/11/14
@@ -21,6 +23,10 @@ object Constants {
   val fakeRender = false
 
   val canvasUnitPerLine = 160 //可视窗口每行显示多少个canvasUnit
+
+  val pictureMap = mutable.HashMap[String,String] (
+
+  )
 
 
 }

@@ -46,7 +46,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
 //    websocketClient.sendMsg(RestartGame(myName))
   }
 
-  def getActionSerialNum = actionSerialNumGenerator.getAndIncrement()
+  def getActionSerialNum:Byte = (actionSerialNumGenerator.getAndIncrement() % 127).toByte
 
   override protected def wsMessageHandler(data: WsMsgServer) = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
