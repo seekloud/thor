@@ -202,7 +202,7 @@ object RoomActor {
 //            }
             if (tickCount % 5 == 1) {
               //生成食物+同步全量adventurer数据+新生成的食物
-              val newFood = thorSchema.genFood(25)
+              val newFood = thorSchema.genFood(15)
               val data = thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
 
               //根据userId尾数分批同步数据 每5帧1批 10批一轮 每个用户每50帧受到一次数据
