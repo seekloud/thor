@@ -114,7 +114,7 @@ class PlayGameController(
     } else {
       println(s"restart...")
       thorSchemaOpt.foreach { r =>
-        playGameActor ! DispatchMsg(ThorGame.RestartGame(r.myName))
+        playGameActor ! DispatchMsg(ThorGame.RestartGame)
         setGameState(GameState.loadingPlay)
         playGameActor ! PlayGameActor.StartGameLoop
       }

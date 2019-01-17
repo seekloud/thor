@@ -197,10 +197,11 @@ object UserActor {
 
           case WsMessage(reqOpt) =>
             reqOpt match {
-              case Some(t: RestartGame) =>
-                log.debug(s"restart$t")
+              //TODO 此处reStart未修改，因为用途不明
+              case Some(RestartGame) =>
+                log.debug(s"restart")
                 roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
-                idle(userInfo.playerId, userInfo.copy(name = t.name), startTime, frontActor)
+                idle(userInfo.playerId, userInfo.copy(name = userInfo.name), startTime, frontActor)
 
               case _ =>
                 Behaviors.same
@@ -406,10 +407,10 @@ object UserActor {
             m match {
               case Some(event: UserActionEvent) =>
                 roomActor ! RoomActor.WsMessage(playerId, event)
-              case Some(event: RestartGame) =>
-                log.debug(s"restartGame $event")
+              case Some(RestartGame) =>
+                log.debug(s"restartGame ${userInfo.name}")
 //                JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
-                roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
+                roomManager ! RoomManager.reStartJoinRoom(userInfo.playerId, userInfo.name, ctx.self)
               case Some(UserMapReq) =>
                 roomActor ! RoomActor.UserMap(ctx.self)
               case Some(event: PingPackage) =>

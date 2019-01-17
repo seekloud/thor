@@ -32,6 +32,8 @@ object RoomManager {
 
   case class LeftRoom(playerId: String, name:String) extends Command
 
+  case class reStartJoinRoom(userId: String, name: String, userActor: ActorRef[UserActor.Command]) extends Command
+
   case class BeDead(playerId: String, name:String) extends Command
 
   def create():Behavior[Command] = {
@@ -81,6 +83,15 @@ object RoomManager {
               log.debug(s"$name joinRoom. roomInUse after: $roomInUse")
               Behaviors.same
 
+            case reStartJoinRoom(userId, name, userActor)=>
+              roomInUse.find(_._2.exists(_._1 == userId)) match{
+                case Some(t) =>
+                  getRoomActor(ctx,t._1) ! RoomActor.JoinRoom(t._1, userId, name, userActor)
+                case None =>
+                  log.debug(s"$name reStartJoinRoom. but not find it")
+              }
+              Behaviors.same
+
             case RoomActor.JoinRoom4Watch(uid,roomId,playerId,userActor4Watch) =>
               log.debug(s"${ctx.self.path} recv a msg=${msg}")
               roomInUse.get(roomId) match {
@@ -109,7 +120,7 @@ object RoomManager {
             case BeDead(playerId, name) =>
               roomInUse.find(_._2.exists(_._1 == playerId)) match{
                 case Some(t) =>
-                  roomInUse.put(t._1,t._2.filterNot(_._1 == playerId))
+//                  roomInUse.put(t._1,t._2.filterNot(_._1 == playerId))
                   getRoomActor(ctx,t._1) ! RoomActor.BeDead(playerId,name,roomInUse(t._1))
                   if(roomInUse(t._1).isEmpty && t._1 > 1l)roomInUse.remove(t._1)
                 case None => log.debug(s"BeDead 玩家 $name 不在任何房间")

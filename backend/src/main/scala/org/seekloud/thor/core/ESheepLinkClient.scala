@@ -74,7 +74,7 @@ object ESheepLinkClient {
         case UpdateToken =>
           ESheepClient.gsKey2Token().map{
             case Right(rsp) =>
-              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, rsp.data.expireTime.seconds)
+              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, (rsp.data.expireTime/2).seconds)
               println(s"start work token: ${rsp.data.token}")
               ctx.self ! SwitchBehavior("idle", idle(rsp.data.token))
             case Left(e) =>

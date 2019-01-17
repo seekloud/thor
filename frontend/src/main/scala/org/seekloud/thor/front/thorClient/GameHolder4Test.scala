@@ -34,7 +34,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
     }
     else if (websocketClient.getWsState) {
       println("~~~~~~restart!!!!")
-      websocketClient.sendMsg(RestartGame(name))
+      websocketClient.sendMsg(RestartGame)
     } else {
       JsFunc.alert("网络连接失败，请重新刷新")
     }

@@ -34,6 +34,8 @@ object RoomActor {
 
   case class JoinRoom(roomId: Long, playerId: String, name: String, userActor: ActorRef[UserActor.Command]) extends Command
 
+  case class reStartJoinRoom(roomId: Long, playerId: String, name: String, userActor: ActorRef[UserActor.Command]) extends Command
+
   case class JoinRoom4Watch(playerId: String,roomId: Long, watchedPlayerId: String, userActor4Watch: ActorRef[UserActor.Command]) extends Command with  RoomManager.Command
 
   case class LeftRoom(playerId: String, name: String, userList: List[(String, String)]) extends Command
@@ -115,6 +117,11 @@ object RoomActor {
 
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 
+          case reStartJoinRoom(roomId, userId, name, userActor) =>
+            val tmpId = getTmpId(userId, thorSchema)
+            thorSchema.joinGame(userId, name, tmpId, userActor)
+            Behaviors.same
+
           case JoinRoom4Watch(uid, _, playerId, userActor4Watch) =>
             log.debug(s"${ctx.self.path} recv a msg=${msg}")
             watchingMap.put(uid,userActor4Watch)
@@ -141,6 +148,12 @@ object RoomActor {
             thorSchema.leftGame(userId, name)
 //            subscribersMap.remove(userId)
 //            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
+
+            thorSchema.playerIdMap.foreach{i =>
+              if(i._2 == userId) {
+                thorSchema.playerIdMap.remove(i._1)
+              }
+            }
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
