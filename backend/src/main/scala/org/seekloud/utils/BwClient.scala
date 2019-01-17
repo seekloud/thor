@@ -65,20 +65,22 @@ object BwClient {
     downloadStatistics.foreach { s =>
       s._1 match {
         case "MM" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
-        case "MouseClickLeft" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
+        case "MouseClickDownLeft" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
         case "MouseClickUpRight" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
         case "MouseClickDownRight" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
         case "PingPackage" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
         case "others" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb, ${s._2} kb\n"
         case x: String if !x.contains("_num") => kbDetail = kbDetail + s"${s._1}: ${s._2} kb\n"
-        case _ => ""
+        case _ => // do nothing
       }
     }
-
     kbDetail = kbDetail + s"Restart(up): ${uploadStatistics("Restart")} kb (${uploadStatistics("Restart_num")} 个)\n"
+
     val detail = "\n**************************带宽统计**************************\n" +
                  s"TOTAL: ${uploadTotal + downloadTotal} kb (up: $uploadTotal kb + down: $downloadTotal kb)\n" + kbDetail +
                  "************************************************************\n"
+    downloadStatistics.foreach(d => downloadStatistics.update(d._1, 0))
+    uploadStatistics.foreach(d => uploadStatistics.update(d._1, 0))
     detail
   }
 

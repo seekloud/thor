@@ -125,7 +125,7 @@ object UserManager {
   /*----------------------------带宽统计----------------------------*/
 
   var timer = System.currentTimeMillis()
-  val period = 5 * 1000
+  val period = 10 * 1000
 
   private def getWebSocketFlow(userActor: ActorRef[UserActor.Command]): Flow[Message, Message, Any] = {
     import scala.language.implicitConversions
@@ -215,9 +215,13 @@ object UserManager {
                 case _: MM =>
                   downloadStatistics.update("MM", downloadStatistics("MM") + msg.length.toDouble / 1024)
                   downloadStatistics.update("MM_num", downloadStatistics("MM_num") + 1)
+//                  log.debug(s"MM: ${downloadStatistics("MM_num")}")
+
                 case _: MouseClickDownLeft =>
                   downloadStatistics.update("MouseClickDownLeft", downloadStatistics("MouseClickDownLeft") + msg.length.toDouble / 1024)
                   downloadStatistics.update("MouseClickDownLeft_num", downloadStatistics("MouseClickDownLeft_num") + 1)
+//                  log.debug(s"MouseClickDownLeft: ${downloadStatistics("MouseClickDownLeft_num")}")
+
                 case _: MouseClickUpRight =>
                   downloadStatistics.update("MouseClickUpRight", downloadStatistics("MouseClickUpRight") + msg.length.toDouble / 1024)
                   downloadStatistics.update("MouseClickUpRight_num", downloadStatistics("MouseClickUpRight_num") + 1)
@@ -243,7 +247,6 @@ object UserManager {
               if (System.currentTimeMillis() - timer > period) {
                 timer = System.currentTimeMillis()
                 log.info(showStatistics)
-
               }
 
             case Left(e) =>
