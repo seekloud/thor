@@ -117,7 +117,7 @@ object UserManager {
             Behaviors.same
 
           case unknown =>
-            log.error(s"${ctx.self.path} recv an unknown msg when idle:${unknown}")
+            log.error(s"${ctx.self.path} recv an unknown msg when idle:$unknown")
             Behaviors.same
         }
     }
@@ -267,7 +267,7 @@ object UserManager {
           BinaryMessage.Strict(ByteString(t.ws))
 
         case x =>
-          log.debug(s"akka stream receive unknown msg=${x}")
+          log.debug(s"akka stream receive unknown msg=$x")
           TextMessage.apply("")
       }.withAttributes(ActorAttributes.supervisionStrategy(decider))
   }
