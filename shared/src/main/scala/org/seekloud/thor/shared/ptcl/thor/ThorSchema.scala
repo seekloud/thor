@@ -44,7 +44,7 @@ trait ThorSchema extends KillInformation {
   val tmpAdventurerMap = mutable.HashMap[String, Adventurer]() // playerId -> adventurer
   var foodMap = mutable.HashMap[Int, Food]() // foodId -> food
   val tmpFoodMap = mutable.HashMap[Int, Food]() // foodId -> food
-  val playerIdMap = mutable.HashMap[Byte, String]() //映射id -> playerId
+  val playerIdMap = mutable.HashMap[Byte, (String, String)]() //映射id -> (playerId, name)
 
 
   /*事件*/
@@ -72,7 +72,7 @@ trait ThorSchema extends KillInformation {
 
   protected def byteId2PlayerId(byteId: Byte): Either[String, String] = {
     if (playerIdMap.contains(byteId)) {
-      Right(playerIdMap(byteId))
+      Right(playerIdMap(byteId)._1)
     } else {
       needUserMap = true
       Left("")
@@ -80,8 +80,8 @@ trait ThorSchema extends KillInformation {
   }
 
   protected def playerId2ByteId(playerId: String): Either[Byte, Byte] = {
-    if (playerIdMap.exists(_._2 == playerId)) {
-      Right(playerIdMap.filter(_._2 == playerId).keySet.head)
+    if (playerIdMap.exists(_._2._1 == playerId)) {
+      Right(playerIdMap.filter(_._2._1 == playerId).keySet.head)
     } else {
       needUserMap = true
       Left(-1)

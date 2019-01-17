@@ -51,11 +51,11 @@ object ThorGame {
 
   final case class UserInfo(playerId: String, name: String) extends WsMsgServer
 
-  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Byte = 0, playerIdMap: List[(Byte, String)] = Nil) extends WsMsgServer
+  final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Byte = 0, playerIdMap: List[(Byte, (String, String))] = Nil) extends WsMsgServer
 
   final case object RestartYourInfo extends WsMsgServer
 
-  final case class UserMap(playerIdMap: List[(Byte, String)] = Nil) extends WsMsgServer
+  final case class UserMap(playerIdMap: List[(Byte, (String, String))] = Nil) extends WsMsgServer
 
   final case object UserMapReq extends WsMsgFront
 

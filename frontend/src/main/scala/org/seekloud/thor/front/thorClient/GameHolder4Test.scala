@@ -63,7 +63,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt.foreach { grid =>
           timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
           pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
-          grid.playerIdMap.put(sId, id)
+          grid.playerIdMap.put(sId, (id, name))
         }
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())

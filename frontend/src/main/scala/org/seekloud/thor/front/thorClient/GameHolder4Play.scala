@@ -74,7 +74,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           thorSchemaOpt.foreach { grid =>
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
-            grid.playerIdMap.put(sId, id)
+            grid.playerIdMap.put(sId, (id, yourName))
 //            println(s"playerIdMap:${grid.playerIdMap}")
           }
         }
@@ -82,7 +82,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
           thorSchemaOpt.foreach { grid =>
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
-            grid.playerIdMap.put(sId, id)
+            grid.playerIdMap.put(sId, (id, yourName))
 //            println(s"playerIdMap:${grid.playerIdMap}")
           }
 
@@ -155,7 +155,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         e match{
           case msg: UserEnterRoom =>
             thorSchemaOpt.foreach{ thorSchema =>
-              thorSchema.playerIdMap.put(msg.shortId, msg.playerId)
+              thorSchema.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
               if(msg.playerId == myId)
                 shortId = msg.shortId
             }
