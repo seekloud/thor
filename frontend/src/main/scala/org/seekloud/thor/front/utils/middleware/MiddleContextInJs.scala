@@ -83,7 +83,7 @@ class MiddleContextInJs extends MiddleContext {
 
   override def fillText(text: String, x: Double, y: Double, z: Double = 500) = context.fillText(text, x, y, z)
 
-  override def setFont(fontFamily: String, fontSize: Double) = context.font = s"${fontSize}px $fontFamily"
+  override def setFont(fontFamily: String, fontSize: Double, wid: String = "normal") = context.font = s"$wid ${fontSize}px $fontFamily"
 
   override def setTextAlign(s: String) = context.textAlign = s
 

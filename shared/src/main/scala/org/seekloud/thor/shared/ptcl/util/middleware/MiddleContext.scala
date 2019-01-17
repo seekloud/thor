@@ -40,7 +40,7 @@ trait MiddleContext {
 
   def setTextBaseLine(s: String):Unit
 
-  def setFont(fontFamily: String, fontSize: Double): Unit
+  def setFont(fontFamily: String, fontSize: Double, wid: String = "normal"): Unit
 
   def setTextAlign(s: String)
 

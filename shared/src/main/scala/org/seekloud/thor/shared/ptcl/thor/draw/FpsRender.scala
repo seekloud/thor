@@ -21,7 +21,7 @@ trait FpsRender {
   }
 
 
-  def drawNetInfo(networkLatency:Long, drawTime: Long, frameTime: Long) = {
+  def drawNetInfo(networkLatency:Long, drawTime: Long, frameTime: Long, peopleNum: Int) = {
     addFps()
     ctx.setFont("Helvetica", baseFont * 15)
     ctx.setTextAlign("start")
@@ -30,10 +30,19 @@ trait FpsRender {
     val pingStr = s"ping : ${networkLatency}ms"
     val drawStr = s"drawTime : ${drawTime}ms"
     val frameStr = s"frameTime : ${frameTime}ms"
+    val peopleNumStr = s"总人数 : $peopleNum"
+    val explainStr2 = s"左键挥刀"
+    val explainStr1 = s"右键加速"
     ctx.setTextBaseLine("top")
     ctx.fillText(pingStr,window.x * 0.9,10)
     ctx.fillText(fpsStr,window.x * 0.9,30)
     ctx.fillText(drawStr,window.x * 0.9,50)
     ctx.fillText(frameStr,window.x * 0.9,70)
+    ctx.fillText(peopleNumStr,window.x * 0.9,100)
+    ctx.setFont("Helvetica", baseFont * 19, "bold")
+    ctx.setTextAlign("start")
+    ctx.setFill("#ffffff")
+    ctx.fillText(explainStr1,window.x * 0.9,130)
+    ctx.fillText(explainStr2,window.x * 0.9,150)
   }
 }
