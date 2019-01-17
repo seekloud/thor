@@ -272,6 +272,10 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left")
     ctx.setFont("Helvetica", 36)
-    ctx.fillText("请稍等，正在连接服务器", 150, 180)
+    if(gameState == GameState.stop)
+      ctx.fillText("您观战的玩家已离开房间", 150, 180)
+    else
+      ctx.fillText("请稍等，正在连接服务器", 150, 180)
+
   }
 }
