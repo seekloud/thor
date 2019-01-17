@@ -105,6 +105,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var energy = 0
   protected var level = 0
 
+  protected var justPingFrame = 0
+  protected val pingFrequency = 5
+
 
 
   def gameRender(): Double => Unit = { d =>
@@ -182,7 +185,12 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         thorSchemaOpt.foreach{ _.update()}
         frameTime :+ System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
-        ping()
+        if (thorSchemaOpt.nonEmpty) {
+          if (thorSchemaOpt.get.systemFrame - justPingFrame >= pingFrequency) {
+            ping()
+            justPingFrame = thorSchemaOpt.get.systemFrame
+          }
+        }
       case GameState.replayLoading =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.play =>
@@ -201,7 +209,12 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         frameTimeSingle = System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
 
-        ping()
+        if (thorSchemaOpt.nonEmpty) {
+          if (thorSchemaOpt.get.systemFrame - justPingFrame >= pingFrequency) {
+            ping()
+            justPingFrame = thorSchemaOpt.get.systemFrame
+          }
+        }
     }
   }
 

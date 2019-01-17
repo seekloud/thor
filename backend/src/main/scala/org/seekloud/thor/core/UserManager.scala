@@ -12,8 +12,7 @@ import org.seekloud.thor.core.UserActor.{ChangeUserInfo, ChangeWatchedPlayerId}
 import org.seekloud.thor.protocol.ReplayProtocol._
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
-import org.seekloud.thor.shared.ptcl.thor.ThorSchemaState
-import org.seekloud.utils.byteObject.MiddleBufferInJvm
+import org.seekloud.utils.BwClient._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -125,28 +124,8 @@ object UserManager {
 
   /*----------------------------带宽统计----------------------------*/
 
-  val statics = mutable.HashMap[String, Double](
-    "thorSchemaState" -> 0.0,
-    "configInfo" -> 0.0,
-    "userEnterRoom" -> 0.0,
-    "userLeftRoom" -> 0.0,
-    "isAttacked" -> 0.0,
-    "eatFood" -> 0.0,
-    "MM" -> 0.0,
-    "MM_num" -> 0,
-    "mouseClickLeft" -> 0.0,
-    "mouseClickRight" -> 0.0,
-    "rank" -> 0.0,
-    "ping" -> 0.0,
-    "userMap" -> 0.0,
-    "generateFood" -> 0.0,
-    "uploadMM" -> 0.0,
-    "uploadMouseClickLeft" -> 0.0,
-    "uploadMouseClickRight" -> 0.0,
-    "others" -> 0.0
-  )
   var timer = System.currentTimeMillis()
-  val period = 30 * 1000
+  val period = 5 * 1000
 
   private def getWebSocketFlow(userActor: ActorRef[UserActor.Command]): Flow[Message, Message, Any] = {
     import scala.language.implicitConversions
@@ -162,7 +141,7 @@ object UserManager {
         Some(wsMsg)
       } catch {
         case e: Exception =>
-          log.warn(s"parse front msg failed when json parse,s=${s}")
+          log.warn(s"parse front msg failed when json parse,s=$s")
           None
       }
     }
@@ -180,16 +159,25 @@ object UserManager {
               val msg = req.fillMiddleBuffer(sendBuffer).result()
               req match {
                 case _: MM =>
-                  statics.update("uploadMM", statics("uploadMM") + msg.length.toDouble / 1024)
-                  statics.update("MM_num", statics("MM_num") + 1)
+                  uploadStatistics.update("MM", uploadStatistics("MM") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("MM_num", uploadStatistics("MM_num") + 1)
                 case _: MouseClickDownLeft =>
-                  statics.update("uploadMouseClickLeft", statics("uploadMouseClickLeft") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("MouseClickDownLeft", uploadStatistics("MouseClickDownLeft") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("MouseClickDownLeft_num", uploadStatistics("MouseClickDownLeft_num") + 1)
                 case _: MouseClickUpRight =>
-                  statics.update("uploadMouseClickRight", statics("uploadMouseClickRight") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("MouseClickUpRight", uploadStatistics("MouseClickUpRight") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("MouseClickUpRight_num", uploadStatistics("MouseClickUpRight_num") + 1)
                 case _: MouseClickDownRight =>
-                  statics.update("uploadMouseClickRight", statics("uploadMouseClickRight") + msg.length.toDouble / 1024)
-                case _ =>
-                  statics.update("others", statics("others") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("MouseClickDownRight", uploadStatistics("MouseClickDownRight") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("MouseClickDownRight_num", uploadStatistics("MouseClickDownRight_num") + 1)
+
+                case _: PingPackage =>
+                  uploadStatistics.update("PingPackage", uploadStatistics("PingPackage") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("PingPackage_num", uploadStatistics("PingPackage_num") + 1)
+
+                case x =>
+                  uploadStatistics.update("others", uploadStatistics("others") + msg.length.toDouble / 1024)
+                  log.debug(s"others: $x")
               }
               UserActor.WsMessage(Some(req))
             case Left(e) =>
@@ -207,55 +195,54 @@ object UserManager {
               val msg = req.fillMiddleBuffer(sendBuffer).result()
               req match {
                 case _: GridSyncState =>
-                  statics.update("thorSchemaState", statics("thorSchemaState") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("GridSyncState", downloadStatistics("GridSyncState") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("GridSyncState_num", downloadStatistics("GridSyncState_num") + 1)
                 case _: YourInfo =>
-                  statics.update("configInfo", statics("configInfo") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("YourInfo", downloadStatistics("YourInfo") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("YourInfo_num", downloadStatistics("YourInfo_num") + 1)
                 case _: UserEnterRoom =>
-                  statics.update("userEnterRoom", statics("userEnterRoom") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("UserEnterRoom", downloadStatistics("UserEnterRoom") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("UserEnterRoom_num", downloadStatistics("UserEnterRoom_num") + 1)
                 case _: UserLeftRoom =>
-                  statics.update("userLeftRoom", statics("userLeftRoom") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("UserLeftRoom", downloadStatistics("UserLeftRoom") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("UserLeftRoom_num", downloadStatistics("UserLeftRoom_num") + 1)
                 case _: BeAttacked =>
-                  statics.update("isAttacked", statics("isAttacked") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("BeAttacked", downloadStatistics("BeAttacked") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("BeAttacked_num", downloadStatistics("BeAttacked_num") + 1)
                 case _: EatFood =>
-                  statics.update("eatFood", statics("eatFood") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("EatFood", downloadStatistics("EatFood") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("EatFood_num", downloadStatistics("EatFood_num") + 1)
                 case _: MM =>
-                  statics.update("MM", statics("MM") + msg.length.toDouble / 1024)
-                  statics.update("MM_num", statics("MM_num") + 1)
+                  downloadStatistics.update("MM", downloadStatistics("MM") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("MM_num", downloadStatistics("MM_num") + 1)
                 case _: MouseClickDownLeft =>
-                  statics.update("mouseClickLeft", statics("mouseClickLeft") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("MouseClickDownLeft", downloadStatistics("MouseClickDownLeft") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("MouseClickDownLeft_num", downloadStatistics("MouseClickDownLeft_num") + 1)
                 case _: MouseClickUpRight =>
-                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("MouseClickUpRight", downloadStatistics("MouseClickUpRight") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("MouseClickUpRight_num", downloadStatistics("MouseClickUpRight_num") + 1)
                 case _: MouseClickDownRight =>
-                  statics.update("mouseClickRight", statics("mouseClickRight") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("MouseClickDownRight", downloadStatistics("MouseClickDownRight") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("MouseClickDownRight", downloadStatistics("MouseClickDownRight") + 1)
                 case _: Ranks =>
-                  statics.update("rank", statics("rank") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("Ranks", downloadStatistics("Ranks") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("Ranks_num", downloadStatistics("Ranks_num") + 1)
                 case _: PingPackage =>
-                  statics.update("ping", statics("ping") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("PingPackage", downloadStatistics("PingPackage") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("PingPackage_num", downloadStatistics("PingPackage_num") + 1)
                 case _: UserMap =>
-                  statics.update("userMap", statics("userMap") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("UserMap", downloadStatistics("UserMap") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("UserMap_num", downloadStatistics("UserMap_num") + 1)
                 case _: GenerateFood =>
-                  statics.update("generateFood", statics("generateFood") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("GenerateFood", downloadStatistics("GenerateFood") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("GenerateFood_num", downloadStatistics("GenerateFood_num") + 1)
                 case _ =>
-                  statics.update("others", statics("others") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("others", downloadStatistics("others") + msg.length.toDouble / 1024)
 
               }
               if (System.currentTimeMillis() - timer > period) {
                 timer = System.currentTimeMillis()
-                val total = statics.filterNot(_._1 == "MM_num").values.sum
-                var details = "\n*****************带宽统计*****************"
-                details = details + s"\nTOTAL:$total kb\n"
-                statics.foreach { s =>
-                  if (s._1 == "MM_num") {
-                    details = details + s"${s._1}: ${s._2}\n" +
-                              s"MM_MEAN: ${(statics("MM") + statics("uploadMM")) / s._2} kb\n" +
-                              s"MM_percent: ${(statics("MM") + statics("uploadMM")) / total * 100}%\n"
-                  } else {
-                    details = details + s"${s._1}: ${s._2} kb\n"
-                  }
-                  statics.update(s._1, 0)
-                }
-                details = details + "**************************************\n"
-                log.info(details)
+                log.info(showStatistics)
 
               }
 
