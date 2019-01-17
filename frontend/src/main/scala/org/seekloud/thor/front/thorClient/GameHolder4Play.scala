@@ -42,7 +42,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     }
     else if (websocketClient.getWsState) {
       println("~~~~~~restart!!!!")
-      websocketClient.sendMsg(RestartGame(name))
+      websocketClient.sendMsg(RestartGame)
     } else {
       JsFunc.alert("网络连接失败，请重新刷新")
     }
@@ -51,7 +51,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   def reStart() = {
     //    firstCome = true
 //    start(myName, None, None, None) //重启没有验证accessCode
-        websocketClient.sendMsg(RestartGame(myName))
+        websocketClient.sendMsg(RestartGame)
   }
 
   def getActionSerialNum:Byte = (actionSerialNumGenerator.getAndIncrement() % 127).toByte

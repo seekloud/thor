@@ -85,7 +85,7 @@ object ThorGame {
   final case class GenerateFood(override val frame: Int, food: FoodState) extends EnvironmentEvent with WsMsgServer
 
 
-  final case class RestartGame(name: String) extends WsMsgFront
+  final case object RestartGame extends WsMsgFront
 
   final case class Ranks(currentRank: List[Score]) extends WsMsgServer
 
