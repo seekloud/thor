@@ -67,9 +67,9 @@ trait ThorSchema extends KillInformation {
 
   protected val quadTree: QuadTree = new QuadTree(Rectangle(Point(0, 0), boundary))
 
-//  final protected def getPlayer(id: String): Unit = {
-//    playerId = id
-//  }
+  //  final protected def getPlayer(id: String): Unit = {
+  //    playerId = id
+  //  }
 
   protected def byteId2PlayerId(byteId: Byte): Either[String, String] = {
     if (playerIdMap.contains(byteId)) {
@@ -98,6 +98,7 @@ trait ThorSchema extends KillInformation {
   final protected def handleUserEnterRoomEvent(e: UserEnterRoom): Unit = {
 //    println(s"user [${e.playerId}] enter room")
     val adventurer: Adventurer = e.adventurer
+    newbornAdventurerMap.put(e.adventurer.playerId, (adventurer, config.newbornFrame))
     adventurerMap.put(e.adventurer.playerId, adventurer)
     quadTree.insert(adventurer)
   }
@@ -110,9 +111,23 @@ trait ThorSchema extends KillInformation {
     }
   }
 
+
+  //处理新生用户的剩余受保护时间
+  protected final def handleNewBornNow() = {
+    newbornAdventurerMap.foreach { newborn =>
+//      println(s"newborn: ${newborn._2._1.name} leftFrame: ${newborn._2._2}")
+      if (newborn._2._2 <= 0) {
+        //新生用户受保护时间结束
+        newbornAdventurerMap.remove(newborn._1)
+      } else {
+        newbornAdventurerMap.update(newborn._1, (newborn._2._1, (newborn._2._2 - 1).toByte))
+      }
+    }
+  }
+
   //处理本帧离开的用户
   protected final def handleUserLeftRoom(e: UserLeftRoom): Unit = {
-//    println(s"[[[${e.playerId} left room]]]")
+    //    println(s"[[[${e.playerId} left room]]]")
     adventurerMap.get(e.playerId).foreach(quadTree.remove)
     adventurerMap.remove(e.playerId)
   }
@@ -169,8 +184,8 @@ trait ThorSchema extends KillInformation {
 
   protected def adventurerAttackedCallback(killer: Adventurer)(adventurer: Adventurer): Unit = {
     //
-//    val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
-//    addGameEvent(event)
+    //    val event = BeAttacked(adventurer.playerId, adventurer.name, killer.playerId, killer.name, systemFrame)
+    //    addGameEvent(event)
   }
 
 
@@ -224,13 +239,13 @@ trait ThorSchema extends KillInformation {
   //  }
 
   //杀死高速从刀下穿过的人
-  protected final def adventurerMaybeAttackedCallback(killer: Adventurer)(adventurer: Adventurer, page: Int): Unit ={
-    MaybeAttackingAdventureList.foreach{ adventurerLi =>
-      if(adventurerLi._1 == adventurer.playerId && adventurerLi._2 == killer.playerId && adventurerLi._3 < page){
+  protected final def adventurerMaybeAttackedCallback(killer: Adventurer)(adventurer: Adventurer, page: Int): Unit = {
+    MaybeAttackingAdventureList.foreach { adventurerLi =>
+      if (adventurerLi._1 == adventurer.playerId && adventurerLi._2 == killer.playerId && adventurerLi._3 < page) {
         MaybeAttackingAdventureList = MaybeAttackingAdventureList.filterNot(_._1 == adventurer.playerId)
         adventurerAttackedCallback(killer)(adventurer)
       }
-      else{
+      else {
         MaybeAttackingAdventureList = (adventurer.playerId, killer.playerId, page) :: MaybeAttackingAdventureList
       }
     }
@@ -238,10 +253,13 @@ trait ThorSchema extends KillInformation {
 
   protected final def handleAdventurerAttackingNow(): Unit = {
     attackingAdventureMap.foreach { attacking =>
-      adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
-        val adventurerMaybeAttacked = adventurerMap.filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < adventurer.radius + config.getWeaponLengthByLevel(adventurer.level) + a._2.radius).values
-//        println(s"潜在攻击列表${adventurerMaybeAttacked.map(_.name)}")
-        adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer), adventurerMaybeAttackedCallback(killer = adventurer))(config))
+      if (!newbornAdventurerMap.exists(_._1 == attacking._1)) {
+//        println(s"${adventurerMap(attacking._1).name} is attacking")
+        adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
+          val adventurerMaybeAttacked = adventurerMap.filterNot(a => newbornAdventurerMap.exists(_._1 == a._1)).filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < adventurer.radius + config.getWeaponLengthByLevel(adventurer.level) + a._2.radius).values
+          //        println(s"潜在攻击列表${adventurerMaybeAttacked.map(_.name)}")
+          adventurerMaybeAttacked.foreach(p => adventurer.checkAttacked(p, attacking._2, adventurerAttackedCallback(killer = adventurer), adventurerMaybeAttackedCallback(killer = adventurer))(config))
+        }
       }
 
       if (attacking._2 <= 0) {
@@ -261,11 +279,11 @@ trait ThorSchema extends KillInformation {
   final protected def handleAdventurerDyingNow(): Unit = {
     dyingAdventurerMap.foreach { dying =>
       if (dying._2._2 <= 0) {
-//        println(s"remove adventurer: ${dying._1}")
+        //        println(s"remove adventurer: ${dying._1}")
         dyingAdventurerMap.remove(dying._1)
-//        adventurerMap.remove(dying._1)
+        //        adventurerMap.remove(dying._1)
       } else {
-//        println(s"${dying._1} dying...")
+        //        println(s"${dying._1} dying...")
         dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 - 1))
       }
     }
@@ -273,17 +291,18 @@ trait ThorSchema extends KillInformation {
 
   protected def handleAdventurerAttacked(e: BeAttacked): Unit = {
     val killerOpt = adventurerMap.get(e.killerId)
-    killerOpt.foreach{  killer =>
-      adventurerMap.get(e.playerId).foreach{ adventurer =>
+    killerOpt.foreach { killer =>
+      adventurerMap.get(e.playerId).foreach { adventurer =>
         killer.attacking(adventurer.level)(config) // 干掉对面加能量
       }
     }
-    if(killerOpt.nonEmpty){
+    if (killerOpt.nonEmpty) {
       adventurerMap.get(e.playerId).foreach { adventurer =>
         //      println(s"handle ${e.playerId} attacked")
         killerOpt.foreach(_.killNum += 1)
         quadTree.remove(adventurer)
         adventurerMap.remove(adventurer.playerId)
+        attackingAdventureMap.remove(adventurer.playerId)
         dyingAdventurerMap.put(adventurer.playerId, (adventurer, config.getAdventurerDyingAnimation))
         addKillInfo(e.killerName, adventurer.name)
       }
@@ -292,8 +311,8 @@ trait ThorSchema extends KillInformation {
 
 
   protected final def handleAdventurerAttacked(es: List[BeAttacked]): Unit = {
-    es.sortBy{ event =>
-      adventurerMap.find(_._1 == event.playerId) match{
+    es.sortBy { event =>
+      adventurerMap.find(_._1 == event.playerId) match {
         case None => 100
         case Some(a) => a._2.level
       }
@@ -332,8 +351,8 @@ trait ThorSchema extends KillInformation {
 
   //后台单独重写
   protected def adventurerEatFoodCallback(adventurer: Adventurer)(food: Food): Unit = {
-//    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
-//    addGameEvent(event)
+    //    val event = EatFood(adventurer.playerId, food.fId, food.level, systemFrame)
+    //    addGameEvent(event)
   }
 
   protected def handleGenerateFood(e: GenerateFood): Unit = {
@@ -363,7 +382,7 @@ trait ThorSchema extends KillInformation {
   }
 
 
-  protected def adventurerMove(): Unit = {
+  protected def handleAdventurerMove(): Unit = {
     adventurerMap.values.foreach { adventurer =>
       val adRadius = config.getAdventurerRadiusByLevel(adventurer.level)
       val intersectNum = adventurerMap.filterNot(_._1 == adventurer.playerId).values.foldLeft(0) {
@@ -385,7 +404,7 @@ trait ThorSchema extends KillInformation {
             } else if (math.abs(relativeTheta) >= 0 && math.abs(relativeTheta) <= (math.Pi / 2)) {
               val positiveFloorLimit = normalizeTheta(relativeTheta + (math.Pi / 2))
               val negativeUpperLimit = normalizeTheta(relativeTheta - (math.Pi / 2))
-              if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= - math.Pi && adventurer.direction <= negativeUpperLimit)) {
+              if ((adventurer.direction >= positiveFloorLimit && adventurer.direction <= math.Pi) || (adventurer.direction >= -math.Pi && adventurer.direction <= negativeUpperLimit)) {
                 if (sum == 0) {
                   adventurer.isIntersect = 0
                 }
@@ -399,7 +418,7 @@ trait ThorSchema extends KillInformation {
       if (intersectNum == 0) {
         adventurer.isIntersect = 0
       }
-//      println(s"主体 [${adventurer.name}] isIntersect ${adventurer.isIntersect}")
+      //      println(s"主体 [${adventurer.name}] isIntersect ${adventurer.isIntersect}")
       adventurer.move(boundary, quadTree)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
     }
@@ -418,7 +437,7 @@ trait ThorSchema extends KillInformation {
   }
 
   def update(): Unit = {
-    adventurerMove()
+    handleAdventurerMove()
     handleUserLeftRoomNow()
     handleUserActionEventNow()
 
@@ -432,6 +451,7 @@ trait ThorSchema extends KillInformation {
     handleAdventurerDyingNow()
     handleAdventurerEatFoodNow()
     handleGenerateFoodNow()
+    handleNewBornNow()
     handleUserEnterRoomNow()
 
 
