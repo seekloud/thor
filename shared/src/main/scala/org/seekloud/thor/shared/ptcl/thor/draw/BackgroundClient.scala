@@ -21,15 +21,40 @@ trait BackgroundClient {
     ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, offset.y * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
     ctx.drawImage(mapImg, offset.x * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
     ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
+    val borderW = 10
+    ctx.setFill("#4A4B49")
+    ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, config.boundary.x * canvasUnit, borderW)
+    ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, borderW, config.boundary.y * canvasUnit)
+    ctx.rect((offset.x + config.boundary.x) * canvasUnit - borderW, offset.y * canvasUnit, borderW, config.boundary.y * canvasUnit)
+    ctx.rect(offset.x * canvasUnit, (offset.y + config.boundary.y) * canvasUnit - borderW, config.boundary.x * canvasUnit, borderW)
+
+    ctx.fill()
     ctx.restore()
   }
 
-  def drawBarrage(s: String): Unit = {
+  def drawBarrage(s: String, t: String): Unit = {
     ctx.save()
-    ctx.setFont("Comic Sans Ms", 30)
+    ctx.setFont("Comic Sans Ms", 25)
     ctx.setTextBaseLine("top")
     ctx.setFill("#ffffff")
-    ctx.fillText(s, window.x * 0.38, window.y * 0.17)
+    if (t == "join") {
+      println("join")
+      val tmp = s + "加入了游戏"
+      ctx.fillText(tmp, window.x * 0.38, window.y * 0.17)
+    }
+    else if (t == "left"){
+      println("left")
+      val tmp = s + "离开了游戏"
+      ctx.fillText(tmp, window.x * 0.38, window.y * 0.17)
+    }
+    else{
+      val hammerImg = drawFrame.createImage(pictureMap("hammer.png"))
+      val start = window.x * 0.5 - (ctx.measureText(s"$s $t") + 80)/2
+      ctx.fillText(s, start, window.y * 0.17)
+      ctx.drawImage(hammerImg, start + ctx.measureText(s) + 25, window.y * 0.15, Some(50, 50))
+      ctx.fillText(t, start + ctx.measureText(s) + 100 , window.y * 0.17)
+    }
+
     ctx.restore()
   }
 

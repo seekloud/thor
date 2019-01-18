@@ -59,4 +59,7 @@ trait MiddleContext {
   def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean)
 
   def lineWidth(width: Double) : Unit
+
+  def measureText(s: String) : Double
+
 }

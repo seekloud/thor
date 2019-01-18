@@ -97,7 +97,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var nextFrame = 0
   protected var logicFrameTime = System.currentTimeMillis()
 
-  var barrage = ""
+  var barrage: (String,String) = ("", "")
   var barrageTime = 0
 
   protected var killerName = ""
@@ -239,7 +239,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 //          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
           thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle, currentRank.length)
           if (barrageTime > 0){
-            thorSchema.drawBarrage(barrage)
+            thorSchema.drawBarrage(barrage._1, barrage._2)
             barrageTime -= 1
           }
         }
