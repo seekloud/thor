@@ -123,7 +123,7 @@ object RoomActor {
             Behaviors.same
 
           case JoinRoom4Watch(uid, _, playerId, userActor4Watch) =>
-            log.debug(s"${ctx.self.path} recv a msg=${msg}")
+//            log.debug(s"${ctx.self.path} recv a msg=${msg}")
             watchingMap.put(uid,userActor4Watch)
             thorSchema.handleJoinRoom4Watch(userActor4Watch,uid,playerId)
             Behaviors.same
@@ -189,17 +189,6 @@ object RoomActor {
                 getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(gameEvents, snapShotOpt)
               }
             }
-
-//            if (tickCount % 40 == 5) {
-//              //生成食物+同步全量adventurer数据+新生成的食物
-//              val newFood = thorSchema.genFood(25)
-//              val data = thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
-//
-////              val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
-////              else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
-//
-//              dispatch(subscribersMap, watchingMap)(GridSyncState(data))
-//            }
             if (tickCount % 5 == 1) {
               //生成食物+同步全量adventurer数据+新生成的食物
               val newFood = thorSchema.genFood(15)

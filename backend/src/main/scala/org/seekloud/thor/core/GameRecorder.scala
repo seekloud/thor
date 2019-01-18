@@ -88,7 +88,7 @@ object GameRecorder {
 
   def create(fileName: String, gameInformation: GameInformation, initStateOpt: Option[ThorGame.GameSnapshot] = None, roomId: Long): Behavior[Command] = {
     Behaviors.setup { ctx =>
-      log.info(s"${ctx.self.path} is starting..")
+//      log.info(s"${ctx.self.path} is starting..")
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       implicit val middleBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(10 * 4096)
       Behaviors.withTimers[Command] { implicit timer =>
@@ -157,7 +157,7 @@ object GameRecorder {
           }
 
         case Save =>
-          log.info(s"${ctx.self.path} work get msg save")
+//          log.info(s"${ctx.self.path} work get msg save")
           timer.startSingleTimer(SaveDataKey, Save, saveTime)
           val file = AppSettings.gameDataDirectoryPath + fileName + s"_$fileIndex"
           if (userAllMap.nonEmpty) {
@@ -168,7 +168,7 @@ object GameRecorder {
           switchBehavior(ctx, "save", save(gameRecordData, essfMap, userAllMap, userMap, startF, endF))
 
         case RoomClose =>
-          log.info(s"${ctx.self.path} work get msg save, room close")
+//          log.info(s"${ctx.self.path} work get msg save, room close")
           val file = AppSettings.gameDataDirectoryPath + fileName + s"_$fileIndex"
           if (userAllMap.nonEmpty) {
             ctx.self ! SaveData(1)
@@ -185,7 +185,7 @@ object GameRecorder {
     }.receiveSignal {
       case (ctx, PostStop) =>
         timer.cancel(SaveDataKey)
-        log.info(s"${ctx.self.path} stopping....")
+//        log.info(s"${ctx.self.path} stopping....")
 
         val gameRecorderBuffer = gameRecordData.gameRecordBuffer
         //保存剩余gameRecorderBuffer中数据
@@ -240,7 +240,7 @@ object GameRecorder {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case msg: SaveData =>
-          log.info(s"${ctx.self.path} save get msg SaveData")
+//          log.info(s"${ctx.self.path} save get msg SaveData")
           val gameRecorderBuffer = gameRecordData.gameRecordBuffer
           //保存剩余gameRecorderBuffer中数据
           val buffer = gameRecorderBuffer.reverse
@@ -266,7 +266,7 @@ object GameRecorder {
           recorder.putMutableInfo(AppSettings.essfMapKeyName, userMapEncode(mapInfo))
           recorder.finish()
 
-          log.info(s"${ctx.self.path} has save game data to file=${fileName}_$fileIndex")
+//          log.info(s"${ctx.self.path} has save game data to file=${fileName}_$fileIndex")
           val endTime = System.currentTimeMillis()
           val filePath = AppSettings.gameDataDirectoryPath + fileName + s"_$fileIndex"
           val recordInfo = SlickTables.rGameRecord(-1L, gameRecordData.roomId, gameRecordData.gameInformation.gameStartTime, endTime, filePath)
@@ -279,7 +279,7 @@ object GameRecorder {
               }
               RecordDao.insertUserRecordList(list.toList).onComplete {
                 case Success(_) =>
-                  log.info(s"insert user record success")
+//                  log.info(s"insert user record success")
                   ctx.self ! SwitchBehavior("initRecorder", initRecorder(roomId, gameRecordData.fileName, fileIndex, gameInformation, userMap))
                   if (msg.stop == 1) ctx.self ! StopRecord
                 case Failure(e) =>
@@ -297,7 +297,7 @@ object GameRecorder {
 
 
         case msg: SaveEmpty =>
-          log.info(s"${ctx.self.path} save get msg SaveEmpty")
+//          log.info(s"${ctx.self.path} save get msg SaveEmpty")
           val mapInfo = essfMap.map {
             essf =>
               if (essf._2.leftF == -1L) {
@@ -341,7 +341,7 @@ object GameRecorder {
       msg match {
 
         case msg: GameRecord =>
-          log.info(s"${ctx.self.path} init get msg gameRecord")
+//          log.info(s"${ctx.self.path} init get msg gameRecord")
           val startF = msg.event._2.get match {
             case tank: ThorSnapshot =>
               tank.state.f
@@ -361,7 +361,7 @@ object GameRecorder {
           switchBehavior(ctx, "work", work(newGameRecorderData, newEssfMap, newUserAllMap, userMap, startF, -1L))
 
         case StopRecord =>
-          log.info(s"${ctx.self.path} room close, stop record ")
+//          log.info(s"${ctx.self.path} room close, stop record ")
           Behaviors.stopped
 
         case unknown =>

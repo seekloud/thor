@@ -70,7 +70,7 @@ object UserManager {
             Behaviors.same
 
           case GetWebSocketFlow4Watch(roomId, watchedPlayerId, replyTo, watchingId, name) =>
-            log.debug(s"$watchingId GetWebSocketFlow4Watch")
+//            log.debug(s"$watchingId GetWebSocketFlow4Watch")
             val playerInfo = UserInfo(watchingId, name)
             getUserActorOpt(ctx, watchingId) match {
               case Some(actor) =>
@@ -85,7 +85,7 @@ object UserManager {
             Behaviors.same
 
           case GetWebSocketFlow4Replay(recordId, frame, watchedPlayerId, replyTo, watchingId, name) =>
-            log.debug(s"$watchingId GetWebSocketFlow4Replay")
+//            log.debug(s"$watchingId GetWebSocketFlow4Replay")
             val playerInfo = UserInfo(watchingId, name)
             getUserActorOpt(ctx, watchingId) match {
               case Some(actor) =>

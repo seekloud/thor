@@ -90,7 +90,7 @@ object RobotActor {
     level: Int
   ): Behavior[Command] =
     Behaviors.setup[Command] { ctx =>
-      log.info(s"robot$botName is starting...")
+//      log.info(s"robot$botName is starting...")
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       val actionSerialNumGenerator = new AtomicInteger(0)
       Behaviors.withTimers[Command] { implicit timer =>
