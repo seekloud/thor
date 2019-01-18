@@ -259,9 +259,31 @@ case class ThorSchemaServerImpl(
 
     def generateAdventurer(shortId: Byte, playerId: String, name: String) = {
 
+      def isNextToBig(point: Point): Boolean = {
+        var isNextTo = false
+        val bigMap = adventurerMap.filter(_._2.level >= 10).values
+        bigMap.foreach { big =>
+          if (big.position.distance(point) <= 100) {
+            isNextTo = true
+          }
+        }
+        isNextTo
+      }
+
       def genPosition(): Point = {
-        Point(random.nextInt(boundary.x.toInt - 15),
-          random.nextInt(boundary.y.toInt - 15))
+        var x = random.nextInt(boundary.x.toInt - 15)
+        var y = random.nextInt(boundary.y.toInt - 15)
+        while (x < 15) {
+          x = random.nextInt(boundary.x.toInt - 15)
+        }
+        while (y < 15) {
+          y = random.nextInt(boundary.y.toInt - 15)
+        }
+        while (isNextToBig(Point(x, y))) {
+          x = random.nextInt(boundary.x.toInt - 15)
+          y = random.nextInt(boundary.y.toInt - 15)
+        }
+        Point(x, y)
       }
 
       def genAdventurer() = {
