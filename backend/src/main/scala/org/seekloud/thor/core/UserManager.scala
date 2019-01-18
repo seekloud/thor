@@ -126,7 +126,7 @@ object UserManager {
   /*----------------------------带宽统计----------------------------*/
 
   var timer = System.currentTimeMillis()
-  val period = 10 * 1000
+  val period = 30 * 1000
 
   private def getWebSocketFlow(userActor: ActorRef[UserActor.Command]): Flow[Message, Message, Any] = {
     import scala.language.implicitConversions
@@ -176,9 +176,13 @@ object UserManager {
                   uploadStatistics.update("PingPackage", uploadStatistics("PingPackage") + msg.length.toDouble / 1024)
                   uploadStatistics.update("PingPackage_num", uploadStatistics("PingPackage_num") + 1)
 
-                case x =>
+                case RestartGame =>
+                  uploadStatistics.update("RestartGame", uploadStatistics("RestartGame") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("RestartGame_num", uploadStatistics("RestartGame_num") + 1)
+
+                case _ =>
                   uploadStatistics.update("others", uploadStatistics("others") + msg.length.toDouble / 1024)
-                  log.debug(s"others: $x")
+
               }
               UserActor.WsMessage(Some(req))
             case Left(e) =>

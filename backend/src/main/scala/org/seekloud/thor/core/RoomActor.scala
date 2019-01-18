@@ -181,7 +181,7 @@ object RoomActor {
 
             val gameEvents = thorSchema.getLastGameEvent
             if (AppSettings.gameRecordIsWork) {
-              if (tickCount % 20 == 1) {
+              if (tickCount % 25 == 1) {
                 //排行榜
                 val rankEvent = Ranks(thorSchema.currentRankList)
                 getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(rankEvent :: gameEvents, snapShotOpt)
