@@ -279,27 +279,26 @@ case class ThorSchemaServerImpl(
       genAdventurer()
     }
 
+    //User和Bot加入房间的统一操作
+    def normalJoin(adventurer: Adventurer, Id: String, name: String, shortId: Byte): Unit = {
+      playerIdMap.put(shortId, (Id, name))
+      val event = UserEnterRoom(Id, shortId, name, adventurer.getAdventurerState, systemFrame)
+      dispatch(event)
+      addGameEvent(event)
+    }
+
     justJoinUser.foreach {
       case (playerId, name, shortId, ref) =>
-        playerIdMap.put(shortId, (playerId, name))
         val adventurer = generateAdventurer(shortId, playerId, name)
-        val event = UserEnterRoom(playerId, shortId, name, adventurer.getAdventurerState, systemFrame)
-        dispatch(event)
-        addGameEvent(event)
+        normalJoin(adventurer, playerId, name, shortId)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
-        adventurerMap.put(playerId, adventurer)
-        quadTree.insert(adventurer)
     }
     justJoinBot.foreach {
       case (botId, name, shortId, ref) =>
-        playerIdMap.put(shortId, (botId, name))
         val adventurer = generateAdventurer(shortId, botId, name)
-        val event = UserEnterRoom(botId, shortId, name, adventurer.getAdventurerState, systemFrame)
-        dispatch(event)
+        normalJoin(adventurer, botId, name, shortId)
         robotMap.put(botId, ref)
-        adventurerMap.put(botId, adventurer)
-        quadTree.insert(adventurer)
     }
 
     justJoinUser = Nil
