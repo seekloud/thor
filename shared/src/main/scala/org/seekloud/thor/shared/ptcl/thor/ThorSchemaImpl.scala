@@ -138,7 +138,7 @@ class ThorSchemaImpl(
       if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
     }
     val endTime = System.currentTimeMillis()
-    if (curFrame < thorSchemaSate.f) {
+    if (curFrame <= thorSchemaSate.f) {
       println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
       justSyncFrame = thorSchemaSate.f
     } else if (!isRollBack) {
