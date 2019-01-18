@@ -72,7 +72,8 @@ object Constants {
     "weapon6.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/557540800005e6898235306e1ca00741.jpg",
     "bar.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/67be696df91efc95cd255b7615074b6a.jpg",
     "fillBar.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/e5bc1bca204de6e5f7060d36a25b6547.jpg",
-    "hammer.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/d714fb295524b0f0bed6aca94b935b53.png"
+    "hammer.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/d714fb295524b0f0bed6aca94b935b53.png",
+    "hand.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/8970e0eb3ae30901488d351953d0df70.png"
   )
 
 
