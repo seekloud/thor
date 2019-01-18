@@ -59,9 +59,9 @@ trait ThorSchema extends KillInformation {
 
   /*排行榜*/
   var currentRankList = List.empty[Score]
-  var historyRankMap = Map.empty[String, Score]
+  var historyRankMap = Map.empty[Byte, Score]
   var historyRank = historyRankMap.values.toList.sortBy(_.e).reverse
-  var historyRankThreshold = if (historyRank.isEmpty) -1 else historyRank.map(_.e).min
+  var historyRankThreshold: Short = if (historyRank.isEmpty) -1 else historyRank.map(_.e).min
   val historyRankLength = 5
 
   protected val quadTree: QuadTree = new QuadTree(Rectangle(Point(0, 0), boundary))

@@ -101,16 +101,16 @@ case class ThorSchemaServerImpl(
 
   private[this] def updateRanks() = {
     currentRankList = adventurerMap.values.map{ a =>
-      Score(a.playerId, a.name, a.killNum, a.energyScore)
+      Score(a.byteId, a.killNum.toShort, a.energyScore.toShort)
     }.toList.sorted
     var historyChange = false
     currentRankList.foreach { cScore =>
-      historyRankMap.get(cScore.id) match {
+      historyRankMap.get(cScore.bId) match {
         case Some(oldScore) if cScore.e > oldScore.e || (cScore.e == oldScore.e && cScore.k > oldScore.k) =>
-          historyRankMap += (cScore.id -> cScore)
+          historyRankMap += (cScore.bId -> cScore)
           historyChange = true
         case None if cScore.e > historyRankThreshold =>
-          historyRankMap += (cScore.id -> cScore)
+          historyRankMap += (cScore.bId -> cScore)
           historyChange = true
         case _ => // do nothing
       }
@@ -119,7 +119,7 @@ case class ThorSchemaServerImpl(
     if (historyChange) {
       historyRank = historyRankMap.values.toList.sorted.take(historyRankLength)
       historyRankThreshold = historyRank.lastOption.map(_.e).getOrElse(-1)
-      historyRankMap = historyRank.map(s => s.id -> s).toMap
+      historyRankMap = historyRank.map(s => s.bId -> s).toMap
     }
   }
 

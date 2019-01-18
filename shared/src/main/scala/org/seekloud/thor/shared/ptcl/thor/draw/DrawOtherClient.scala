@@ -1,7 +1,5 @@
 package org.seekloud.thor.shared.ptcl.thor.draw
 import org.seekloud.thor.shared.ptcl.component.Adventurer
-import org.seekloud.thor.shared.ptcl.model.{Point, Score}
-import org.seekloud.thor.shared.ptcl.model.Constants._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 
 import scala.collection.mutable
