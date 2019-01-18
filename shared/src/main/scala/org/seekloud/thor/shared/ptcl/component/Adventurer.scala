@@ -22,7 +22,6 @@ case class AdventurerState(
   isMove: Byte,
   isUpdateLevel: Byte,
   levelUpExecute: Short,
-  mouseStop: Byte,
   isIntersect: Byte
 )
 
@@ -167,7 +166,6 @@ trait Adventurer extends CircleObjectOfGame {
       if(isMove) 1 else 0,
       if(isUpdateLevel) 1 else 0,
       levelUpExecute.toShort,
-      if(mouseStop) 1 else 0,
       isIntersect)
   }
 
@@ -348,7 +346,7 @@ case class AdventurerImpl(
       if(adventurerState.isMove == 0) false else true,
       if(adventurerState.isUpdateLevel == 0) false else true,
       adventurerState.levelUpExecute.toInt,
-      if(adventurerState.mouseStop == 0) false else true,
+      false,
       adventurerState.isIntersect)
   }
 
