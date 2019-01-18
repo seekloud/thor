@@ -112,6 +112,7 @@ object UserManager {
             Behaviors.same
 
           case ChildDead(child, childRef) =>
+            log.debug(s"userManager 不再监管user:$child,$childRef")
             ctx.unwatch(childRef)
             Behaviors.same
 
