@@ -26,7 +26,8 @@ final case class AdventurerParams(
   speedUpEnergyLoose: Int,
   dyingAnimation: Int,
   speedUpAnimation: Int,
-  levelUpAnimation: Int
+  levelUpAnimation: Int,
+  newbornFrame: Byte
 )
 
 final case class FoodParams(
@@ -61,6 +62,8 @@ trait ThorGameConfig {
   def boundary: Point
 
   def facePalstance: Float
+
+  def newbornFrame: Byte
 
   def getAdventurerRadiusByLevel(l: Byte): Float
 
@@ -125,6 +128,8 @@ case class ThorGameConfigImpl(
   def boundary = gridBoundary.getBoundary
 
   def facePalstance: Float = adventurerParams.facePalstance
+
+  def newbornFrame: Byte = adventurerParams.newbornFrame
 
   def getAdventurerRadiusByLevel(l: Byte) = {
     adventurerParams.radius(l - 1)
