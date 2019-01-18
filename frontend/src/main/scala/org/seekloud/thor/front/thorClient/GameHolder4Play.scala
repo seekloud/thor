@@ -96,7 +96,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         gameState = GameState.play
 
       case e: BeAttacked =>
-        barrage = s"${e.killerName}  杀死了  ${e.name}"
+        barrage = (e.killerName, e.name)
         barrageTime = 300
         if (e.playerId == mainId) {
           mainId = e.killerId //跟随凶手视角

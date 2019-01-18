@@ -24,12 +24,29 @@ trait BackgroundClient {
     ctx.restore()
   }
 
-  def drawBarrage(s: String): Unit = {
+  def drawBarrage(s: String, t: String): Unit = {
     ctx.save()
-    ctx.setFont("Comic Sans Ms", 30)
+    ctx.setFont("Comic Sans Ms", 25)
     ctx.setTextBaseLine("top")
     ctx.setFill("#ffffff")
-    ctx.fillText(s, window.x * 0.38, window.y * 0.17)
+    if (t == "join") {
+      println("join")
+      val tmp = s + "加入了游戏"
+      ctx.fillText(tmp, window.x * 0.38, window.y * 0.17)
+    }
+    else if (t == "left"){
+      println("left")
+      val tmp = s + "离开了游戏"
+      ctx.fillText(tmp, window.x * 0.38, window.y * 0.17)
+    }
+    else{
+      val hammerImg = drawFrame.createImage(pictureMap("hammer.png"))
+      val start = window.x * 0.5 - (ctx.measureText(s"$s $t") + 80)/2
+      ctx.fillText(s, start, window.y * 0.17)
+      ctx.drawImage(hammerImg, start + ctx.measureText(s) + 25, window.y * 0.15, Some(50, 50))
+      ctx.fillText(t, start + ctx.measureText(s) + 100 , window.y * 0.17)
+    }
+
     ctx.restore()
   }
 
