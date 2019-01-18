@@ -21,6 +21,14 @@ trait BackgroundClient {
     ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, offset.y * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
     ctx.drawImage(mapImg, offset.x * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
     ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
+    val borderW = 10
+    ctx.setFill("#4A4B49")
+    ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, config.boundary.x * canvasUnit, borderW)
+    ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, borderW, config.boundary.y * canvasUnit)
+    ctx.rect((offset.x + config.boundary.x) * canvasUnit - borderW, offset.y * canvasUnit, borderW, config.boundary.y * canvasUnit)
+    ctx.rect(offset.x * canvasUnit, (offset.y + config.boundary.y) * canvasUnit - borderW, config.boundary.x * canvasUnit, borderW)
+
+    ctx.fill()
     ctx.restore()
   }
 
