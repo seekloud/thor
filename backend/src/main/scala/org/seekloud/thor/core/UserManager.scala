@@ -126,7 +126,7 @@ object UserManager {
   /*----------------------------带宽统计----------------------------*/
 
   var timer = System.currentTimeMillis()
-  val period = 10 * 1000
+  val period = 30 * 1000
 
   private def getWebSocketFlow(userActor: ActorRef[UserActor.Command]): Flow[Message, Message, Any] = {
     import scala.language.implicitConversions
