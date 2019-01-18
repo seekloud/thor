@@ -151,7 +151,7 @@ object ESheepLinkClient {
         case AddRecord2ESheep(record) =>
           ESheepClient.addRecord2ESheep(record, token).map{
             case Right(rsp) =>
-              log.info(s"AddRecord2ESheep success: $rsp")
+//              log.info(s"AddRecord2ESheep success: $rsp")
             case Left(e) =>
               log.debug(s"AddRecord2ESheep error: $e")
           }
