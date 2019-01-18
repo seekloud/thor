@@ -61,7 +61,7 @@ object Constants {
     "kill4.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/776a722133f98c631488564b42068ea5.png",
     "kill5.png"-> "http://pic.neoap.com/hestia/files/image/OnlyForTest/df7cc293785885d3cef428f0d6e1761f.png",
     "kill6.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/8f12d06293d34074eb9c1acdf97b8c38.png",
-    "level-up.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/05c3aa1d961e6408771fc45244b0a95a.png",
+    "level-up.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/572a2307c9021cad15a6f007a212bd81.png",
     "map.jpg" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/c58fbc5d680190cddcb28ab404df0aff.jpg",
     "speedParticles.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/a2f0d465a812ee61c80e3f241df0808c.jpg",
     "weapon1.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/ea08803dc2d211afd9f083f041104bb1.jpg",
@@ -71,7 +71,8 @@ object Constants {
     "weapon5.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/291637879e1b6ed16f3aa12dd379e624.jpg",
     "weapon6.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/557540800005e6898235306e1ca00741.jpg",
     "bar.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/67be696df91efc95cd255b7615074b6a.jpg",
-    "fillBar.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/e5bc1bca204de6e5f7060d36a25b6547.jpg"
+    "fillBar.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/e5bc1bca204de6e5f7060d36a25b6547.jpg",
+    "hammer.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/d714fb295524b0f0bed6aca94b935b53.png"
   )
 
 
