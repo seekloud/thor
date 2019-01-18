@@ -51,7 +51,7 @@ trait BackgroundClient {
     ctx.restore()
   }
 
-  def drawRank(Rank: List[Score], CurrentOrNot: Boolean, id: String): Unit = {
+  def drawRank(Rank: List[Score], CurrentOrNot: Boolean, shortId: Byte): Unit = {
     val text = "———————排行榜———————"
     val RankBaseLine = 3
     var index = 0
@@ -68,11 +68,12 @@ trait BackgroundClient {
 
     Rank.foreach { score =>
       index += 1
-      if (score.id == id) yourRank = index
-      val name = if (score.n.length <= 4) score.n.take(4) else score.n.take(4) + "..."
+      if (score.bId == shortId) yourRank = index
+      val fullName = playerIdMap(score.bId)._2
+      val name = if (fullName.length <= 4) fullName.take(4) else fullName.take(4) + "..."
       if (index < 10) {
         ctx.setTextAlign("left")
-        if (score.id == id) {
+        if (score.bId == shortId) {
           yourNameIn = true
           drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,3)
           drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,3)
@@ -89,9 +90,10 @@ trait BackgroundClient {
     index += 1
     if (!yourNameIn) {
       ctx.setFill("#FFFF00")
-      Rank.find(_.id == id) match {
+      Rank.find(_.bId == shortId) match {
         case Some(yourScore) =>
-          val name = if (yourScore.n.length <= 4) yourScore.n.take(4) + "   " else yourScore.n.take(4) + "..."
+          val fullName = playerIdMap(yourScore.bId)._2
+          val name = if (fullName.length <= 4) fullName.take(4) + "   " else fullName.take(4) + "..."
           drawTextLine(s"【$yourRank】  $name ", begin + window.x * 0.01, 20, RankBaseLine,3)
           drawTextLine(s" 分数: ${yourScore.e}", begin + window.x * 0.11, 20, RankBaseLine,3)
           drawTextLine(s" 击杀数: ${yourScore.k}", begin + window.x * 0.18, 20, RankBaseLine,3)

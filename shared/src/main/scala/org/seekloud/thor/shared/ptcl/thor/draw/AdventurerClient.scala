@@ -27,7 +27,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     var moveDistance = Point(0, 0)
 
     if(adventurer.isMove && adventurer.isIntersect == 0){
-      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.getAdventurerState.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
+      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
       //如果达到边界 则不再往外走
       if(position.x - r <= 0 || position.x + r >= config.boundary.x) moveDistance = moveDistance.copy(x = 0)
       if(position.y - r <= 0 || position.y + r >= config.boundary.y) moveDistance = moveDistance.copy(y = 0)
@@ -130,7 +130,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
   def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset:Point, canvasUnit: Float) = {
 
-    if(adventurer.getAdventurerState.isUpdateLevel){
+    if(adventurer.isUpdateLevel){
 
       val img = drawFrame.createImage(pictureMap("level-up.png"))
 

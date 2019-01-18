@@ -11,35 +11,31 @@ import org.seekloud.thor.shared.ptcl.util.QuadTree
   */
 
 case class AdventurerState(
-  playerId: String,
-  name: String,
+  byteId: Byte,
   level: Byte,
-  energy: Int,
-  energyScore: Int,
+  energy: Short,
+  energyScore: Short,
   position: Point,
   direction: Float,
-  faceDirection: Float,
-  isSpeedUp: Boolean,
-  killNum: Int,
-  isMove: Boolean,
-  isUpdateLevel: Boolean,
-  levelUpExecute: Int,
-  mouseStop: Boolean,
+  isSpeedUp: Byte,
+  killNum: Short,
+  isMove: Byte,
+  isUpdateLevel: Byte,
+  levelUpExecute: Short,
+  mouseStop: Byte,
   isIntersect: Byte
 )
 
 trait Adventurer extends CircleObjectOfGame {
+  val byteId: Byte
   val playerId: String
   val name: String
   var level: Byte
   var energy: Int
   var energyScore: Int
-//  var radiusLevel: Int
   var position: Point
   var direction: Float
   var faceDirection: Float
-//  var weaponLevel: Int
-//  var speedLevel: Byte
   var isSpeedUp: Boolean
   var killNum: Int
   var isMove: Boolean
@@ -159,7 +155,20 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def getAdventurerState: AdventurerState = {
-    AdventurerState(playerId, name, level, energy, energyScore, position, direction, faceDirection, isSpeedUp, killNum, isMove, isUpdateLevel, levelUpExecute, mouseStop, isIntersect)
+    AdventurerState(
+      byteId,
+      level,
+      energy.toShort,
+      energyScore.toShort,
+      position,
+      direction,
+      if(isSpeedUp) 1 else 0,
+      killNum.toShort,
+      if(isMove) 1 else 0,
+      if(isUpdateLevel) 1 else 0,
+      levelUpExecute.toShort,
+      if(mouseStop) 1 else 0,
+      isIntersect)
   }
 
   def attacking(killedLevel: Byte)(implicit config: ThorGameConfig): Unit ={
@@ -305,17 +314,15 @@ trait Adventurer extends CircleObjectOfGame {
 
 case class AdventurerImpl(
   config: ThorGameConfig,
+  byteId: Byte,
   playerId: String,
   name: String,
   var level: Byte,
   var energy: Int,
   var energyScore: Int,
-//  var radiusLevel: Int,
   var position: Point,
   var direction: Float,
   var faceDirection: Float,
-//  var weaponLevel: Int,
-//  var speedLevel: Int,
   var isSpeedUp: Boolean,
   var killNum: Int,
   var isMove: Boolean,
@@ -324,10 +331,25 @@ case class AdventurerImpl(
   var mouseStop: Boolean,
   var isIntersect: Byte
 ) extends Adventurer {
-  def this(config: ThorGameConfig, adventurerState: AdventurerState) {
-    this(config, adventurerState.playerId, adventurerState.name, adventurerState.level, adventurerState.energy, adventurerState.energyScore, adventurerState.position,
-      adventurerState.direction, adventurerState.faceDirection, adventurerState.isSpeedUp, adventurerState.killNum, adventurerState.isMove,
-      adventurerState.isUpdateLevel, adventurerState.levelUpExecute, adventurerState.mouseStop, adventurerState.isIntersect)
+  def this(config: ThorGameConfig, adventurerState: AdventurerState, playerId: String, name: String) {
+    this(
+      config,
+      adventurerState.byteId,
+      playerId,
+      name,
+      adventurerState.level,
+      adventurerState.energy.toInt,
+      adventurerState.energyScore.toInt,
+      adventurerState.position,
+      adventurerState.direction,
+      0,
+      if(adventurerState.isSpeedUp == 0) false else true,
+      adventurerState.killNum.toInt,
+      if(adventurerState.isMove == 0) false else true,
+      if(adventurerState.isUpdateLevel == 0) false else true,
+      adventurerState.levelUpExecute.toInt,
+      if(adventurerState.mouseStop == 0) false else true,
+      adventurerState.isIntersect)
   }
 
   override var radius: Float = config.getAdventurerRadiusByLevel(level)

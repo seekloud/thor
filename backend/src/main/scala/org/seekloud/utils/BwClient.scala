@@ -18,8 +18,8 @@ object BwClient {
     "MouseClickUpRight_num" -> 0,
     "MouseClickDownRight" -> 0.0,
     "MouseClickDownRight_num" -> 0,
-    "Restart" -> 0.0,
-    "Restart_num" -> 0,
+    "RestartGame" -> 0.0,
+    "RestartGame_num" -> 0,
     "PingPackage" -> 0.0,
     "PingPackage_num" -> 0,
     "others" -> 0.0
@@ -70,11 +70,11 @@ object BwClient {
         case "MouseClickDownRight" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
         case "PingPackage" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
         case "others" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb, ${s._2} kb\n"
-        case x: String if !x.contains("_num") => kbDetail = kbDetail + s"${s._1}: ${s._2} kb\n"
+        case x: String if !x.contains("_num") => kbDetail = kbDetail + s"${s._1}: ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
         case _ => // do nothing
       }
     }
-    kbDetail = kbDetail + s"Restart(up): ${uploadStatistics("Restart")} kb (${uploadStatistics("Restart_num")} 个)\n"
+    kbDetail = kbDetail + s"RestartGame(up): ${uploadStatistics("RestartGame")} kb (${uploadStatistics("RestartGame_num")} 个)\n"
 
     val detail = "\n**************************带宽统计**************************\n" +
                  s"TOTAL: ${uploadTotal + downloadTotal} kb (up: $uploadTotal kb + down: $downloadTotal kb)\n" + kbDetail +

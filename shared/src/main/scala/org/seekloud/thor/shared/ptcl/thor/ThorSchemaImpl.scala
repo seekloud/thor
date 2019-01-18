@@ -1,6 +1,6 @@
 package org.seekloud.thor.shared.ptcl.thor
 
-import org.seekloud.thor.shared.ptcl.component.{AdventurerImpl, AdventurerState, Food}
+import org.seekloud.thor.shared.ptcl.component.{Adventurer, AdventurerImpl, AdventurerState, Food}
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 
@@ -39,8 +39,9 @@ class ThorSchemaImpl(
 
   private var justSyncFrame = 0
 
-  override protected implicit def adventurerState2Impl(adventurer: AdventurerState) = {
-    new AdventurerImpl(config, adventurer)
+  override protected implicit def adventurerState2Impl(adventurer: AdventurerState) :Adventurer = {
+    val playerInfo = playerIdMap(adventurer.byteId)
+    new AdventurerImpl(config, adventurer, playerInfo._1, playerInfo._2)
   }
 
   def receiveGameEvent(e: GameEvent) = {
@@ -138,7 +139,7 @@ class ThorSchemaImpl(
       if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
     }
     val endTime = System.currentTimeMillis()
-    if (curFrame < thorSchemaSate.f) {
+    if (curFrame <= thorSchemaSate.f) {
       println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
       justSyncFrame = thorSchemaSate.f
     } else if (!isRollBack) {
@@ -152,7 +153,7 @@ class ThorSchemaImpl(
     tmpAdventurerMap.clear()
     if (!thorSchemaSate.isIncrement) tmpFoodMap.clear()
     thorSchemaSate.adventurer.foreach { a =>
-      val adventurer = new AdventurerImpl(config, a)
+      val adventurer = new AdventurerImpl(config, a, playerIdMap(a.byteId)._1, playerIdMap(a.byteId)._2)
       quadTree.insert(adventurer)
       tmpAdventurerMap.put(a.playerId, adventurer)
     }

@@ -176,9 +176,13 @@ object UserManager {
                   uploadStatistics.update("PingPackage", uploadStatistics("PingPackage") + msg.length.toDouble / 1024)
                   uploadStatistics.update("PingPackage_num", uploadStatistics("PingPackage_num") + 1)
 
-                case x =>
+                case RestartGame =>
+                  uploadStatistics.update("RestartGame", uploadStatistics("RestartGame") + msg.length.toDouble / 1024)
+                  uploadStatistics.update("RestartGame_num", uploadStatistics("RestartGame_num") + 1)
+
+                case _ =>
                   uploadStatistics.update("others", uploadStatistics("others") + msg.length.toDouble / 1024)
-                  log.debug(s"others: $x")
+
               }
               UserActor.WsMessage(Some(req))
             case Left(e) =>

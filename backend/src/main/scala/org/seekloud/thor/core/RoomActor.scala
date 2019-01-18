@@ -74,7 +74,7 @@ object RoomActor {
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
             for (cnt <- 0 until thorSchema.config.getRobotNumber) {
-              val tmpId = getTmpId(s"robot$cnt", thorSchema)
+              val tmpId = getTmpId(s"robot$cnt", thorSchema.config.getRobotNames(cnt), thorSchema)
               ctx.self ! CreateRobot(s"robot$cnt", tmpId.toByte, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
             }
 
@@ -112,13 +112,13 @@ object RoomActor {
 
           case JoinRoom(roomId, userId, name, userActor) =>
 //            log.debug(s"user $userId join room $roomId")
-            val tmpId = getTmpId(userId, thorSchema)
+            val tmpId = getTmpId(userId, name, thorSchema)
             thorSchema.joinGame(userId, name, tmpId, userActor)
 
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 
           case reStartJoinRoom(roomId, userId, name, userActor) =>
-            val tmpId = getTmpId(userId, thorSchema)
+            val tmpId = getTmpId(userId, name, thorSchema)
             thorSchema.joinGame(userId, name, tmpId, userActor)
             Behaviors.same
 
@@ -134,7 +134,7 @@ object RoomActor {
             subscribersMap.remove(userId)
 
             thorSchema.playerIdMap.foreach{i =>
-              if(i._2 == userId) {
+              if(i._2._1 == userId) {
                 dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, i._1, name))
                 thorSchema.playerIdMap.remove(i._1)
               }
@@ -150,7 +150,7 @@ object RoomActor {
 //            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
 
             thorSchema.playerIdMap.foreach{i =>
-              if(i._2 == userId) {
+              if(i._2._1 == userId) {
                 thorSchema.playerIdMap.remove(i._1)
               }
             }
@@ -181,7 +181,7 @@ object RoomActor {
 
             val gameEvents = thorSchema.getLastGameEvent
             if (AppSettings.gameRecordIsWork) {
-              if (tickCount % 20 == 1) {
+              if (tickCount % 25 == 1) {
                 //排行榜
                 val rankEvent = Ranks(thorSchema.currentRankList)
                 getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(rankEvent :: gameEvents, snapShotOpt)
@@ -223,13 +223,13 @@ object RoomActor {
     }
   }
 
-  def getTmpId(playerId: String, thorSchema: ThorSchemaServerImpl): Byte = {
+  def getTmpId(playerId: String, name: String, thorSchema: ThorSchemaServerImpl): Byte = {
     var id: Byte = 0
     val idGenerator = new AtomicLong(1L)
     while(thorSchema.playerIdMap.contains(id)){
       id = idGenerator.getAndIncrement().toByte
     }
-    thorSchema.playerIdMap.put(id, playerId)
+    thorSchema.playerIdMap.put(id, (playerId, name))
     id
   }
 

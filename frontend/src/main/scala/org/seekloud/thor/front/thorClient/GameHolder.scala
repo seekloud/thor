@@ -64,7 +64,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   //  var thorSchema = thorSchemaOpt.get
   protected var myId = "test"
   protected var mainId = "test" //主视角ID（方便死亡跟随）
-  protected var shortId = 0
+  protected var shortId: Byte = 0
   protected var myName = "testName"
   protected var killer = "someone"
   protected var startTime = 0l
@@ -226,7 +226,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         if(thorSchema.adventurerMap.contains(mainId)){
           val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
-          thorSchema.drawRank(currentRank,true,myId)
+          thorSchema.drawRank(currentRank,true, shortId)
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
             drawTimeLong = drawTime.sum / drawTime.size
