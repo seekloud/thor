@@ -56,6 +56,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
   protected var canvasUnit = canvasWidth / Constants.canvasUnitPerLine
   protected var canvasBounds = canvasBoundary / canvasUnit
+  protected var canvasUnitPerLine = 100
 
   var thorSchemaOpt : Option[ThorSchemaClientImpl] = None
 
@@ -118,13 +119,15 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     nextFrame = dom.window.requestAnimationFrame(gameRender())
   }
 
-  protected def handleResize = {
+  protected def handleResize(level: Int) = {
     val width = dom.window.innerWidth.toFloat
     val height = dom.window.innerHeight.toFloat
-    if(width != canvasWidth || height != canvasHeight){
+    val perLine = 100 + 5 * level
+    if(width != canvasWidth || height != canvasHeight || perLine != canvasUnitPerLine){
       canvasWidth = width
       canvasHeight = height
-      canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+      canvasUnitPerLine = perLine
+      canvasUnit = canvasWidth / canvasUnitPerLine
       canvasBoundary = Point(canvasWidth, canvasHeight)
       canvasBounds = canvasBoundary / canvasUnit
       canvas.setWidth(canvasWidth)
@@ -174,7 +177,13 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   var lastSendReq = 0L
   protected def gameLoop(): Unit = {
-    handleResize
+    var myLevel = 0
+    thorSchemaOpt.foreach{ thorSchema =>
+      thorSchema.adventurerMap.get(mainId).foreach{
+        ad => myLevel = ad.getAdventurerState.level
+      }
+    }
+    handleResize(myLevel)
     logicFrameTime = System.currentTimeMillis()
     gameState match{
       case GameState.firstCome =>
