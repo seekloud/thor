@@ -100,7 +100,7 @@ object UserActor {
         failureMatcher = {
           case FailMsgServer(e) => e
         },
-        bufferSize = 128,
+        bufferSize = 256,
         overflowStrategy = OverflowStrategy.dropHead
       ).mapMaterializedValue(outActor => actor ! UserFrontActor(outActor))
     Flow.fromSinkAndSource(in, out)
