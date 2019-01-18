@@ -59,6 +59,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private[this] val adventurerLevelUpAnimation = config.getInt("thorGame.adventurer.levelUpAnimation")
     .requiring(t => t > 1,"minimum supported adventurer level up animation  is 1")
+  private[this] val adventurerNewbornFrame = config.getInt("thorGame.adventurer.newbornFrame")
+    .requiring(t => t > 1,"minimum supported adventurer newbornFrame is 1")
 
 
   private[this] val weaponLengthLevel = config.getDoubleList("thorGame.weapon.length")
@@ -94,7 +96,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 //    .requiring(_ > 0, "minimum supported adventurer radius is 1").toFloat
 
   private[this] val adventurerParams = AdventurerParams(AdventurerMoveSpeed(adventurerSpeedLevel), adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel,
-    adventurerFacePalstance, adventurerSpeedUpRate, adventurerSpeedUpEnergyLoose, adventurerDyingAnimation, adventurerSpeedUpAnimation, adventurerLevelUpAnimation)
+    adventurerFacePalstance, adventurerSpeedUpRate, adventurerSpeedUpEnergyLoose, adventurerDyingAnimation, adventurerSpeedUpAnimation, adventurerLevelUpAnimation, adventurerNewbornFrame.toByte)
 
   private[this] val foodParams = FoodParams(foodMax, foodEnergyLevel, foodRadiusLevel)
 
@@ -115,6 +117,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   def replayRate: Int = thorGameConfig.replayRate
 
   def facePalstance: Float = thorGameConfig.facePalstance
+
+  def newbornFrame: Byte = thorGameConfig.newbornFrame
 
   def getAdventurerRadiusByLevel(adventurerLevel: Byte): Float = thorGameConfig.getAdventurerRadiusByLevel(adventurerLevel)
 

@@ -203,11 +203,11 @@ trait Adventurer extends CircleObjectOfGame {
       }
 
     }
+    direction = d
     if (mouseDistance > config.getAdventurerRadiusByLevel(this.level) * 10)
     {
       if (!isAttacking) {
         isMove = true
-        direction = d
         mouseStop = false
       }
 

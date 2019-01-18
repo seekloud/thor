@@ -259,47 +259,64 @@ case class ThorSchemaServerImpl(
 
     def generateAdventurer(shortId: Byte, playerId: String, name: String) = {
 
+      def isNextToBig(point: Point): Boolean = {
+        var isNextTo = false
+        val bigMap = adventurerMap.filter(_._2.level >= 10).values
+        bigMap.foreach { big =>
+          if (big.position.distance(point) <= 100) {
+            isNextTo = true
+          }
+        }
+        isNextTo
+      }
+
       def genPosition(): Point = {
-        Point(random.nextInt(boundary.x.toInt - 15),
-          random.nextInt(boundary.y.toInt - 15))
+        var x = random.nextInt(boundary.x.toInt - 15)
+        var y = random.nextInt(boundary.y.toInt - 15)
+        while (x < 15) {
+          x = random.nextInt(boundary.x.toInt - 15)
+        }
+        while (y < 15) {
+          y = random.nextInt(boundary.y.toInt - 15)
+        }
+        while (isNextToBig(Point(x, y))) {
+          x = random.nextInt(boundary.x.toInt - 15)
+          y = random.nextInt(boundary.y.toInt - 15)
+        }
+        Point(x, y)
       }
 
       def genAdventurer() = {
         val position = genPosition()
-        var adventurer = AdventurerServer(roomActorRef, timer, config, shortId, playerId, name, position)
-        //var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
-        //        while (adventurer.isIntersectsObject(objects)){
-        //          val position = genPosition()
-        //          adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
-        //          objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
-        //        }
+        val adventurer = AdventurerServer(roomActorRef, timer, config, shortId, playerId, name, position)
         adventurer
       }
 
       genAdventurer()
     }
 
+    //User和Bot加入房间的统一操作
+    def normalJoin(adventurer: Adventurer, Id: String, name: String, shortId: Byte): Unit = {
+      playerIdMap.put(shortId, (Id, name))
+      val event = UserEnterRoom(Id, shortId, name, adventurer.getAdventurerState, systemFrame)
+      dispatch(event)
+      adventurerMap.put(adventurer.playerId, adventurer)
+      quadTree.insert(adventurer)
+      newbornAdventurerMap.put(Id, (adventurer, config.newbornFrame))
+    }
+
     justJoinUser.foreach {
       case (playerId, name, shortId, ref) =>
-        playerIdMap.put(shortId, (playerId, name))
         val adventurer = generateAdventurer(shortId, playerId, name)
-        val event = UserEnterRoom(playerId, shortId, name, adventurer.getAdventurerState, systemFrame)
-        dispatch(event)
-        addGameEvent(event)
+        normalJoin(adventurer, playerId, name, shortId)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
-        adventurerMap.put(playerId, adventurer)
-        quadTree.insert(adventurer)
     }
     justJoinBot.foreach {
       case (botId, name, shortId, ref) =>
-        playerIdMap.put(shortId, (botId, name))
         val adventurer = generateAdventurer(shortId, botId, name)
-        val event = UserEnterRoom(botId, shortId, name, adventurer.getAdventurerState, systemFrame)
-        dispatch(event)
+        normalJoin(adventurer, botId, name, shortId)
         robotMap.put(botId, ref)
-        adventurerMap.put(botId, adventurer)
-        quadTree.insert(adventurer)
     }
 
     justJoinUser = Nil
