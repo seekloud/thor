@@ -15,9 +15,6 @@ import scala.collection.mutable
 
 trait AdventurerClient { this: ThorSchemaClientImpl =>
 
-//  private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-//  mapImg.setAttribute("src", s"${Routes.base}/img/logo-sheet0.png")
-
   private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
 
   def getMoveDistance(adventurer: Adventurer, offSetTime: Long): Point = {
@@ -67,6 +64,19 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
         }
         CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, pictureMap(s"char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.95.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
 //        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
+        //出生保护
+        newbornAdventurerMap.get(adventurer.playerId) match {
+          case Some(s) =>
+            ctx.save()
+            ctx.setFill("rgba(79,148,205,0.4)")
+            ctx.setShadowColor("rgb(255,255,255)")
+            ctx.beginPath()
+            ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 2 * Math.PI,false)
+            ctx.closePath()
+            ctx.fill()
+            ctx.restore()
+          case _ =>
+        }
         //画武器
         var step:Float = 3
         var isAttacking = false

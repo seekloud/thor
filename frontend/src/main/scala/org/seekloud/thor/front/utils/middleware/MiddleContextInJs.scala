@@ -87,6 +87,8 @@ class MiddleContextInJs extends MiddleContext {
 
   override def setTextAlign(s: String) = context.textAlign = s
 
+  override def setShadowColor(s: String): Unit = context.shadowColor = s
+
   override def setTextBaseLine(s: String) = context.textBaseline = s
 
   override def rect(x: Double, y: Double, w: Double, h: Double) = context.rect(x, y, w, h)

@@ -42,6 +42,8 @@ trait MiddleContext {
 
   def setFont(fontFamily: String, fontSize: Double, wid: String = "normal"): Unit
 
+  def setShadowColor(s: String) :Unit
+
   def setTextAlign(s: String)
 
   def rect(x: Double, y: Double, w: Double, h: Double)
