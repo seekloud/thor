@@ -300,7 +300,8 @@ case class ThorSchemaServerImpl(
       playerIdMap.put(shortId, (Id, name))
       val event = UserEnterRoom(Id, shortId, name, adventurer.getAdventurerState, systemFrame)
       dispatch(event)
-      addGameEvent(event)
+      adventurerMap.put(adventurer.playerId, adventurer)
+      quadTree.insert(adventurer)
       newbornAdventurerMap.put(Id, (adventurer, config.newbornFrame))
     }
 
