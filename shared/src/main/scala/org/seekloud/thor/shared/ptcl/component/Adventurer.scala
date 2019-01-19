@@ -1,8 +1,7 @@
 package org.seekloud.thor.shared.ptcl.component
 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
-import org.seekloud.thor.shared.ptcl.model
-import org.seekloud.thor.shared.ptcl.model.{Constants, Point, Rectangle, Segment}
+import org.seekloud.thor.shared.ptcl.model._
 import org.seekloud.thor.shared.ptcl.util.QuadTree
 /**
   * User: TangYaruo
@@ -267,10 +266,10 @@ trait Adventurer extends CircleObjectOfGame {
     if (isSpeedUp) isSpeedUp = false
   }
 
-  def move(boundary: Point, quadTree: QuadTree)(implicit thorGameConfig: ThorGameConfig): Unit = {
-    if (isMove && isIntersect == 0) {
+  def move(boundary: Point, quadTree: QuadTree, theOtherPoint: Option[Point])(implicit thorGameConfig: ThorGameConfig): Unit = {
+    if (isMove) {
       val oldOb = this
-      val moveDistance = if (isSpeedUp) {
+      var moveDistance = if (isSpeedUp) {
         if (energy >= thorGameConfig.speedUpEnergyLoose) {
           energy -= thorGameConfig.speedUpEnergyLoose
           reduceLevel
@@ -282,6 +281,24 @@ trait Adventurer extends CircleObjectOfGame {
         thorGameConfig.getMoveDistanceByFrame(this.level, isSpeedUp).rotate(direction)
       }
 
+      if(isIntersect != 0){
+        theOtherPoint foreach{ otherPoint =>
+          //碰撞对象的方位
+          val theOtherDirection = otherPoint.getTheta(this.position)
+          //自己的右方
+          val rightDirection = normalizeTheta(theOtherDirection + math.Pi * 0.5).toFloat
+          //自己的左方
+          val leftDirection = normalizeTheta(theOtherDirection - math.Pi * 0.5).toFloat
+
+          if(direction - theOtherDirection < math.Pi){
+            moveDistance = thorGameConfig.getMoveDistanceByFrame(this.level, isSpeedUp).rotate(rightDirection) * math.sin(direction - theOtherDirection).toFloat
+          }
+          else{
+            moveDistance = thorGameConfig.getMoveDistanceByFrame(this.level, isSpeedUp).rotate(leftDirection) * math.sin(2 * math.Pi - direction + theOtherDirection).toFloat
+          }
+        }
+      }
+
       val horizontalDistance = moveDistance.copy(y = 0)
       val verticalDistance = moveDistance.copy(x = 0)
       val radius = thorGameConfig.getAdventurerRadiusByLevel(this.level)
@@ -290,7 +307,7 @@ trait Adventurer extends CircleObjectOfGame {
           val originPosition = this.position
           this.position = this.position + d
           val movedRec = Rectangle(this.position - Point(radius, radius), this.position + Point(radius, radius))
-          if (movedRec.topLeft > model.Point(0, 0) && movedRec.downRight < boundary) {
+          if (movedRec.topLeft > Point(0, 0) && movedRec.downRight < boundary) {
             quadTree.updateObject(oldOb, this)
           }
           if (movedRec.topLeft.x <= 0 || movedRec.topLeft.y <= 0) {
