@@ -298,11 +298,11 @@ case class ThorSchemaServerImpl(
     //User和Bot加入房间的统一操作
     def normalJoin(adventurer: Adventurer, Id: String, name: String, shortId: Byte): Unit = {
       playerIdMap.put(shortId, (Id, name))
-      val event = UserEnterRoom(Id, shortId, name, adventurer.getAdventurerState, systemFrame)
-      dispatch(event)
       adventurerMap.put(adventurer.playerId, adventurer)
       quadTree.insert(adventurer)
       newbornAdventurerMap.put(Id, (adventurer, config.newbornFrame))
+//      val event = UserEnterRoom(Id, shortId, name, adventurer.getAdventurerState, systemFrame)
+//      dispatch(event)
     }
 
     justJoinUser.foreach {
@@ -310,12 +310,16 @@ case class ThorSchemaServerImpl(
         val adventurer = generateAdventurer(shortId, playerId, name)
         normalJoin(adventurer, playerId, name, shortId)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
+        val event = UserEnterRoom(playerId, shortId, name, adventurer.getAdventurerState, systemFrame)
+        dispatch(event)
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
     }
     justJoinBot.foreach {
       case (botId, name, shortId, ref) =>
         val adventurer = generateAdventurer(shortId, botId, name)
         normalJoin(adventurer, botId, name, shortId)
+        val event = UserEnterRoom(botId, shortId, name, adventurer.getAdventurerState, systemFrame)
+        dispatch(event)
         robotMap.put(botId, ref)
     }
 

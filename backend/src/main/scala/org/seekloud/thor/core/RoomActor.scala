@@ -111,10 +111,9 @@ object RoomActor {
             Behaviors.same
 
           case JoinRoom(roomId, userId, name, userActor) =>
-//            log.debug(s"user $userId join room $roomId")
             val tmpId = getTmpId(userId, name, thorSchema)
             thorSchema.joinGame(userId, name, tmpId, userActor)
-
+            subscribersMap.put(userId, userActor)
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 
           case reStartJoinRoom(roomId, userId, name, userActor) =>
@@ -207,7 +206,7 @@ object RoomActor {
               player =>
                 val thorSchemaData = thorSchema.getThorSchemaState()
                 val actor = thorSchema.getUserActor4WatchGameList(player._1)
-                subscribersMap.put(player._1, player._2)
+//                subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)
             }
             idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
@@ -235,10 +234,9 @@ object RoomActor {
 
   //向所有用户发数据
   def dispatch(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]], observers: mutable.HashMap[String, ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {
-//    log.debug(s"watching map: $observers")
     val isKillMsg = msg.isInstanceOf[BeAttacked]
     val deadId = if(isKillMsg) msg.asInstanceOf[BeAttacked].playerId else ""
-    subscribers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
+    subscribers.values.foreach( _ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
     observers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
   }
 

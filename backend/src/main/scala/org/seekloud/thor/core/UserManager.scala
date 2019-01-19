@@ -245,13 +245,17 @@ object UserManager {
                 case _: GenerateFood =>
                   downloadStatistics.update("GenerateFood", downloadStatistics("GenerateFood") + msg.length.toDouble / 1024)
                   downloadStatistics.update("GenerateFood_num", downloadStatistics("GenerateFood_num") + 1)
-                case _ =>
+                case RestartYourInfo =>
+                  downloadStatistics.update("RestartYourInfo", downloadStatistics("RestartYourInfo") + msg.length.toDouble / 1024)
+                  downloadStatistics.update("RestartYourInfo_num", downloadStatistics("RestartYourInfo_num") + 1)
+                case x =>
                   downloadStatistics.update("others", downloadStatistics("others") + msg.length.toDouble / 1024)
 
               }
               if (System.currentTimeMillis() - timer > period) {
                 timer = System.currentTimeMillis()
                 log.info(showStatistics)
+                log.debug(s"showtime: ${System.currentTimeMillis() - timer}")
               }
 
             case Left(e) =>

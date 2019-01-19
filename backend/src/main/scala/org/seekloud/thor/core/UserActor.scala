@@ -213,6 +213,7 @@ object UserActor {
             switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
           case DispatchMsg(m) =>
+            println(s"Dispatch")
 //            import scala.language.implicitConversions
 //            import org.seekloud.byteobject.ByteObject._
 //            import org.seekloud.byteobject.MiddleBufferInJvm
@@ -419,6 +420,7 @@ object UserActor {
             Behaviors.same
 
           case DispatchMsg(m) =>
+//            println(s"DispatchMsg")
             if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) { //玩家死亡
 //              log.debug(s"deadmsg $m")
               frontActor ! m

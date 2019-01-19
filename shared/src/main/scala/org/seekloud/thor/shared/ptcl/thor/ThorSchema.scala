@@ -176,7 +176,7 @@ trait ThorSchema extends KillInformation {
 
           }
         case Left(_) =>
-          println(s"playerId map is incomplete, playerId ${action.playerId} is missing.")
+//          println(s"playerId map is incomplete, playerId ${action.playerId} is missing.")
       }
 
     }
