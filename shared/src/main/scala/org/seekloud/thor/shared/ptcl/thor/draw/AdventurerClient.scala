@@ -15,7 +15,7 @@ import scala.collection.mutable
 
 trait AdventurerClient { this: ThorSchemaClientImpl =>
 
-  private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
+//  private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
 
   def getMoveDistance(adventurer: Adventurer, offSetTime: Long): Point = {
     // 获取当前渲染帧与逻辑帧的偏移量
