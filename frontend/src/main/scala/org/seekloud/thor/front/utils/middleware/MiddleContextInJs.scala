@@ -83,9 +83,11 @@ class MiddleContextInJs extends MiddleContext {
 
   override def fillText(text: String, x: Double, y: Double, z: Double = 500) = context.fillText(text, x, y, z)
 
-  override def setFont(fontFamily: String, fontSize: Double) = context.font = s"${fontSize}px $fontFamily"
+  override def setFont(fontFamily: String, fontSize: Double, wid: String = "normal") = context.font = s"$wid ${fontSize}px $fontFamily"
 
   override def setTextAlign(s: String) = context.textAlign = s
+
+  override def setShadowColor(s: String): Unit = context.shadowColor = s
 
   override def setTextBaseLine(s: String) = context.textBaseline = s
 
@@ -104,4 +106,6 @@ class MiddleContextInJs extends MiddleContext {
   override def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean): Unit = context.arc(x, y, r, sAngle, eAngle, counterclockwise)
 
   override def lineWidth(width: Double): Unit = context.lineWidth = width
+
+  override def measureText(s: String): Double = context.measureText(s).width
 }

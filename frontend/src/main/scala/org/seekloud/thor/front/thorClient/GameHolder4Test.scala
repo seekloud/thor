@@ -34,7 +34,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
     }
     else if (websocketClient.getWsState) {
       println("~~~~~~restart!!!!")
-      websocketClient.sendMsg(RestartGame(name))
+      websocketClient.sendMsg(RestartGame)
     } else {
       JsFunc.alert("网络连接失败，请重新刷新")
     }
@@ -63,7 +63,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
         thorSchemaOpt.foreach { grid =>
           timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
           pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
-          grid.playerIdMap.put(sId, id)
+          grid.playerIdMap.put(sId, (id, name))
         }
         gameState = GameState.play
         nextFrame = dom.window.requestAnimationFrame(gameRender())
@@ -73,7 +73,7 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
 
       case e:BeAttacked =>
         println("attack!!!!!!!!!!!!!"+e)
-        barrage = s"${e.killerName}杀死了${e.name}"
+        barrage = (e.killerName, e.name)
         barrageTime = 300
         if(e.playerId == myId){
           gameState = GameState.stop
@@ -123,11 +123,11 @@ class GameHolder4Test(name: String, user: Option[UserInfo] = None) extends GameH
 
       case e: GameEvent =>
         if (e.isInstanceOf[UserEnterRoom]) {
-          barrage = s"${myName}加入了游戏"
+          barrage = (myName,"join")
           barrageTime = 300
         }
         if (e.isInstanceOf[UserLeftRoom]) {
-          barrage = s"${myName}离开了游戏"
+          barrage = (myName,"left")
           barrageTime = 300
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))

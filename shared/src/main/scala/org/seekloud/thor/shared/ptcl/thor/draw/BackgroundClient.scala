@@ -21,15 +21,40 @@ trait BackgroundClient {
     ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, offset.y * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
     ctx.drawImage(mapImg, offset.x * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
     ctx.drawImage(mapImg, (offset.x + config.boundary.x/2) * canvasUnit, (offset.y + config.boundary.y/2) * canvasUnit, Some(config.boundary.x/2 * canvasUnit, config.boundary.y/2 * canvasUnit))
+    val borderW = 10
+    ctx.setFill("#4A4B49")
+    ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, config.boundary.x * canvasUnit, borderW)
+    ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, borderW, config.boundary.y * canvasUnit)
+    ctx.rect((offset.x + config.boundary.x) * canvasUnit - borderW, offset.y * canvasUnit, borderW, config.boundary.y * canvasUnit)
+    ctx.rect(offset.x * canvasUnit, (offset.y + config.boundary.y) * canvasUnit - borderW, config.boundary.x * canvasUnit, borderW)
+
+    ctx.fill()
     ctx.restore()
   }
 
-  def drawBarrage(s: String): Unit = {
+  def drawBarrage(s: String, t: String): Unit = {
     ctx.save()
-    ctx.setFont("Comic Sans Ms", 30)
+    ctx.setFont("Comic Sans Ms", 25)
     ctx.setTextBaseLine("top")
     ctx.setFill("#ffffff")
-    ctx.fillText(s, window.x * 0.38, window.y * 0.17)
+    if (t == "join") {
+      println("join")
+      val tmp = s + "加入了游戏"
+      ctx.fillText(tmp, window.x * 0.38, window.y * 0.17)
+    }
+    else if (t == "left"){
+      println("left")
+      val tmp = s + "离开了游戏"
+      ctx.fillText(tmp, window.x * 0.38, window.y * 0.17)
+    }
+    else{
+      val hammerImg = drawFrame.createImage(pictureMap("hammer.png"))
+      val start = window.x * 0.5 - (ctx.measureText(s"$s $t") + 80)/2
+      ctx.fillText(s, start, window.y * 0.17)
+      ctx.drawImage(hammerImg, start + ctx.measureText(s) + 25, window.y * 0.15, Some(50, 50))
+      ctx.fillText(t, start + ctx.measureText(s) + 100 , window.y * 0.17)
+    }
+
     ctx.restore()
   }
 
@@ -51,7 +76,7 @@ trait BackgroundClient {
     ctx.restore()
   }
 
-  def drawRank(Rank: List[Score], CurrentOrNot: Boolean, id: String): Unit = {
+  def drawRank(Rank: List[Score], CurrentOrNot: Boolean, shortId: Byte): Unit = {
     val text = "———————排行榜———————"
     val RankBaseLine = 3
     var index = 0
@@ -68,11 +93,12 @@ trait BackgroundClient {
 
     Rank.foreach { score =>
       index += 1
-      if (score.id == id) yourRank = index
-      val name = if (score.n.length <= 4) score.n.take(4) else score.n.take(4) + "..."
+      if (score.bId == shortId) yourRank = index
+      val fullName = playerIdMap(score.bId)._2
+      val name = if (fullName.length <= 4) fullName.take(4) else fullName.take(4) + "..."
       if (index < 10) {
         ctx.setTextAlign("left")
-        if (score.id == id) {
+        if (score.bId == shortId) {
           yourNameIn = true
           drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,3)
           drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,3)
@@ -89,9 +115,10 @@ trait BackgroundClient {
     index += 1
     if (!yourNameIn) {
       ctx.setFill("#FFFF00")
-      Rank.find(_.id == id) match {
+      Rank.find(_.bId == shortId) match {
         case Some(yourScore) =>
-          val name = if (yourScore.n.length <= 4) yourScore.n.take(4) + "   " else yourScore.n.take(4) + "..."
+          val fullName = playerIdMap(yourScore.bId)._2
+          val name = if (fullName.length <= 4) fullName.take(4) + "   " else fullName.take(4) + "..."
           drawTextLine(s"【$yourRank】  $name ", begin + window.x * 0.01, 20, RankBaseLine,3)
           drawTextLine(s" 分数: ${yourScore.e}", begin + window.x * 0.11, 20, RankBaseLine,3)
           drawTextLine(s" 击杀数: ${yourScore.k}", begin + window.x * 0.18, 20, RankBaseLine,3)
@@ -126,7 +153,7 @@ trait BackgroundClient {
     ctx.setFont("Comic Sans Ms", baseFont * 26)
     ctx.setFill("#ffa400")
     ctx.fillText(s"You Dead,Killer is ${killerName.take(5)} ", window.x * 0.4, window.y * 0.48)
-    ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
+    ctx.fillText(s"Your Final level is $level / 21", window.x * 0.4, window.y * 0.55)
     ctx.setFont("Comic Sans Ms", baseFont * 24)
     ctx.setFill("#FFFFFF")
     ctx.fillText("Click to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)
@@ -159,7 +186,7 @@ trait BackgroundClient {
     ctx.setFont("Comic Sans Ms", baseFont * 26)
     ctx.setFill("#ffa400")
     ctx.fillText(s"You Dead,Killer is ${killerName.take(5)} ", window.x * 0.4, window.y * 0.48)
-    ctx.fillText(s"Your Final level is $level / 9", window.x * 0.4, window.y * 0.55)
+    ctx.fillText(s"Your Final level is $level / 20", window.x * 0.4, window.y * 0.55)
     ctx.setFont("Comic Sans Ms", baseFont * 24)
     ctx.setFill("#000000")
     ctx.fillText("Press space to restart", window.x * 0.42, window.y * 0.72, window.x * 0.15)

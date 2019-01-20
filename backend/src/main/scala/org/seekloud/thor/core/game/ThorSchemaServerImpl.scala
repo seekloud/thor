@@ -50,7 +50,8 @@ case class ThorSchemaServerImpl(
   def getUserActor4WatchGameList(uId: String) = watchingMap.get(uId)
 
   override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
-    new AdventurerImpl(config, adventurer)
+    val playerInfo = playerIdMap(adventurer.byteId)
+    new AdventurerImpl(config, adventurer, playerInfo._1, playerInfo._2)
   }
 
   //↓↓↓需要重写的函数↓↓↓
@@ -100,16 +101,16 @@ case class ThorSchemaServerImpl(
 
   private[this] def updateRanks() = {
     currentRankList = adventurerMap.values.map{ a =>
-      Score(a.playerId, a.name, a.killNum, a.energyScore)
+      Score(a.byteId, a.killNum.toShort, a.energyScore.toShort)
     }.toList.sorted
     var historyChange = false
     currentRankList.foreach { cScore =>
-      historyRankMap.get(cScore.id) match {
+      historyRankMap.get(cScore.bId) match {
         case Some(oldScore) if cScore.e > oldScore.e || (cScore.e == oldScore.e && cScore.k > oldScore.k) =>
-          historyRankMap += (cScore.id -> cScore)
+          historyRankMap += (cScore.bId -> cScore)
           historyChange = true
         case None if cScore.e > historyRankThreshold =>
-          historyRankMap += (cScore.id -> cScore)
+          historyRankMap += (cScore.bId -> cScore)
           historyChange = true
         case _ => // do nothing
       }
@@ -118,7 +119,7 @@ case class ThorSchemaServerImpl(
     if (historyChange) {
       historyRank = historyRankMap.values.toList.sorted.take(historyRankLength)
       historyRankThreshold = historyRank.lastOption.map(_.e).getOrElse(-1)
-      historyRankMap = historyRank.map(s => s.id -> s).toMap
+      historyRankMap = historyRank.map(s => s.bId -> s).toMap
     }
   }
 
@@ -188,6 +189,7 @@ case class ThorSchemaServerImpl(
 
   override def leftGame(userId: String, name: String) = {
     val shortId = playerId2ByteId(userId)
+//    playerIdMap.toList.sortBy(_._1).foreach(x => log.info(s"${x._1}->${x._2}"))
     shortId match {
       case Right(sId) =>
         val event = UserLeftRoom(userId, sId, name, systemFrame)
@@ -255,49 +257,70 @@ case class ThorSchemaServerImpl(
 
   override def handleUserEnterRoomNow() = {
 
-    def generateAdventurer(playerId: String, name: String) = {
+    def generateAdventurer(shortId: Byte, playerId: String, name: String) = {
+
+      def isNextToBig(point: Point): Boolean = {
+        var isNextTo = false
+        val bigMap = adventurerMap.filter(_._2.level >= 10).values
+        bigMap.foreach { big =>
+          if (big.position.distance(point) <= 100) {
+            isNextTo = true
+          }
+        }
+        isNextTo
+      }
 
       def genPosition(): Point = {
-        Point(random.nextInt(boundary.x.toInt - 15),
-          random.nextInt(boundary.y.toInt - 15))
+        var x = random.nextInt(boundary.x.toInt - 15)
+        var y = random.nextInt(boundary.y.toInt - 15)
+        while (x < 15) {
+          x = random.nextInt(boundary.x.toInt - 15)
+        }
+        while (y < 15) {
+          y = random.nextInt(boundary.y.toInt - 15)
+        }
+        while (isNextToBig(Point(x, y))) {
+          x = random.nextInt(boundary.x.toInt - 15)
+          y = random.nextInt(boundary.y.toInt - 15)
+        }
+        Point(x, y)
       }
 
       def genAdventurer() = {
         val position = genPosition()
-        var adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
-        //var objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
-        //        while (adventurer.isIntersectsObject(objects)){
-        //          val position = genPosition()
-        //          adventurer = AdventurerServer(roomActorRef, timer, config, playerId, name, position)
-        //          objects = quadTree.retrieveFilter(adventurer).filter(t => t.isInstanceOf[Adventurer])
-        //        }
+        val adventurer = AdventurerServer(roomActorRef, timer, config, shortId, playerId, name, position)
         adventurer
       }
 
       genAdventurer()
     }
 
+    //User和Bot加入房间的统一操作
+    def normalJoin(adventurer: Adventurer, Id: String, name: String, shortId: Byte): Unit = {
+      playerIdMap.put(shortId, (Id, name))
+      adventurerMap.put(adventurer.playerId, adventurer)
+      quadTree.insert(adventurer)
+      newbornAdventurerMap.put(Id, (adventurer, config.newbornFrame))
+//      val event = UserEnterRoom(Id, shortId, name, adventurer.getAdventurerState, systemFrame)
+//      dispatch(event)
+    }
+
     justJoinUser.foreach {
       case (playerId, name, shortId, ref) =>
-        val adventurer = generateAdventurer(playerId, name)
+        val adventurer = generateAdventurer(shortId, playerId, name)
+        normalJoin(adventurer, playerId, name, shortId)
+        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
         val event = UserEnterRoom(playerId, shortId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
-        addGameEvent(event)
-        playerIdMap.put(shortId, playerId)
-        ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
-        adventurerMap.put(playerId, adventurer)
-        quadTree.insert(adventurer)
     }
     justJoinBot.foreach {
       case (botId, name, shortId, ref) =>
-        val adventurer = generateAdventurer(botId, name)
+        val adventurer = generateAdventurer(shortId, botId, name)
+        normalJoin(adventurer, botId, name, shortId)
         val event = UserEnterRoom(botId, shortId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
-        playerIdMap.put(shortId, botId)
         robotMap.put(botId, ref)
-        adventurerMap.put(botId, adventurer)
-        quadTree.insert(adventurer)
     }
 
     justJoinUser = Nil

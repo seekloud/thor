@@ -34,6 +34,8 @@ object RoomActor {
 
   case class JoinRoom(roomId: Long, playerId: String, name: String, userActor: ActorRef[UserActor.Command]) extends Command
 
+  case class reStartJoinRoom(roomId: Long, playerId: String, name: String, userActor: ActorRef[UserActor.Command]) extends Command
+
   case class JoinRoom4Watch(playerId: String,roomId: Long, watchedPlayerId: String, userActor4Watch: ActorRef[UserActor.Command]) extends Command with  RoomManager.Command
 
   case class LeftRoom(playerId: String, name: String, userList: List[(String, String)]) extends Command
@@ -72,7 +74,7 @@ object RoomActor {
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
             for (cnt <- 0 until thorSchema.config.getRobotNumber) {
-              val tmpId = getTmpId(s"robot$cnt", thorSchema)
+              val tmpId = getTmpId(s"robot$cnt", thorSchema.config.getRobotNames(cnt), thorSchema)
               ctx.self ! CreateRobot(s"robot$cnt", tmpId.toByte, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
             }
 
@@ -109,14 +111,18 @@ object RoomActor {
             Behaviors.same
 
           case JoinRoom(roomId, userId, name, userActor) =>
-//            log.debug(s"user $userId join room $roomId")
-            val tmpId = getTmpId(userId, thorSchema)
+            val tmpId = getTmpId(userId, name, thorSchema)
             thorSchema.joinGame(userId, name, tmpId, userActor)
-
+            subscribersMap.put(userId, userActor)
             idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 
+          case reStartJoinRoom(roomId, userId, name, userActor) =>
+            val tmpId = getTmpId(userId, name, thorSchema)
+            thorSchema.joinGame(userId, name, tmpId, userActor)
+            Behaviors.same
+
           case JoinRoom4Watch(uid, _, playerId, userActor4Watch) =>
-            log.debug(s"${ctx.self.path} recv a msg=${msg}")
+//            log.debug(s"${ctx.self.path} recv a msg=${msg}")
             watchingMap.put(uid,userActor4Watch)
             thorSchema.handleJoinRoom4Watch(userActor4Watch,uid,playerId)
             Behaviors.same
@@ -127,7 +133,7 @@ object RoomActor {
             subscribersMap.remove(userId)
 
             thorSchema.playerIdMap.foreach{i =>
-              if(i._2 == userId) {
+              if(i._2._1 == userId) {
                 dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, i._1, name))
                 thorSchema.playerIdMap.remove(i._1)
               }
@@ -141,6 +147,12 @@ object RoomActor {
             thorSchema.leftGame(userId, name)
 //            subscribersMap.remove(userId)
 //            dispatch(subscribersMap, watchingMap)(UserLeftRoom(userId, name))
+
+            thorSchema.playerIdMap.foreach{i =>
+              if(i._2._1 == userId) {
+                thorSchema.playerIdMap.remove(i._1)
+              }
+            }
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
             else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
@@ -168,7 +180,7 @@ object RoomActor {
 
             val gameEvents = thorSchema.getLastGameEvent
             if (AppSettings.gameRecordIsWork) {
-              if (tickCount % 20 == 1) {
+              if (tickCount % 25 == 1) {
                 //排行榜
                 val rankEvent = Ranks(thorSchema.currentRankList)
                 getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(rankEvent :: gameEvents, snapShotOpt)
@@ -176,20 +188,9 @@ object RoomActor {
                 getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame) ! GameRecorder.GameRecord(gameEvents, snapShotOpt)
               }
             }
-
-//            if (tickCount % 40 == 5) {
-//              //生成食物+同步全量adventurer数据+新生成的食物
-//              val newFood = thorSchema.genFood(25)
-//              val data = thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
-//
-////              val data = if(tickCount % 120 == 5) thorSchema.getThorSchemaState()
-////              else thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
-//
-//              dispatch(subscribersMap, watchingMap)(GridSyncState(data))
-//            }
             if (tickCount % 5 == 1) {
               //生成食物+同步全量adventurer数据+新生成的食物
-              val newFood = thorSchema.genFood(25)
+              val newFood = thorSchema.genFood(15)
               val data = thorSchema.getThorSchemaState().copy(food = newFood, isIncrement = true)
 
               //根据userId尾数分批同步数据 每5帧1批 10批一轮 每个用户每50帧受到一次数据
@@ -205,7 +206,7 @@ object RoomActor {
               player =>
                 val thorSchemaData = thorSchema.getThorSchemaState()
                 val actor = thorSchema.getUserActor4WatchGameList(player._1)
-                subscribersMap.put(player._1, player._2)
+//                subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)
             }
             idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
@@ -221,22 +222,21 @@ object RoomActor {
     }
   }
 
-  def getTmpId(playerId: String, thorSchema: ThorSchemaServerImpl): Byte = {
+  def getTmpId(playerId: String, name: String, thorSchema: ThorSchemaServerImpl): Byte = {
     var id: Byte = 0
     val idGenerator = new AtomicLong(1L)
     while(thorSchema.playerIdMap.contains(id)){
       id = idGenerator.getAndIncrement().toByte
     }
-    thorSchema.playerIdMap.put(id, playerId)
+    thorSchema.playerIdMap.put(id, (playerId, name))
     id
   }
 
   //向所有用户发数据
   def dispatch(subscribers: mutable.HashMap[String, ActorRef[UserActor.Command]], observers: mutable.HashMap[String, ActorRef[UserActor.Command]])(msg: WsMsgServer)(implicit sendBuffer: MiddleBufferInJvm) = {
-//    log.debug(s"watching map: $observers")
     val isKillMsg = msg.isInstanceOf[BeAttacked]
     val deadId = if(isKillMsg) msg.asInstanceOf[BeAttacked].playerId else ""
-    subscribers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
+    subscribers.values.foreach( _ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
     observers.values.foreach(_ ! UserActor.DispatchMsg(Wrap(msg.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result(), isKillMsg, deadId)))
   }
 

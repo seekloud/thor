@@ -62,7 +62,7 @@ trait EsRecover {
   }
 
   def rollback4GameEvent(e: GameEvent) = {
-    println(s"roll back to frame=${e.frame},nowFrame=$systemFrame because event:$e")
+    println(s"roll back to frame=${e.frame},nowFrame=$systemFrame because GameEvent:$e")
     gameEventHistoryMap.put(e.frame, e :: gameEventHistoryMap.getOrElse(e.frame, Nil))
 //    rollback(e.frame)
     addRollBackFrame(e.frame)
@@ -70,7 +70,7 @@ trait EsRecover {
   }
 
   def rollback4UserActionEvent(e: UserActionEvent) = {
-    println(s"roll back to frame=${e.frame},nowFrame=$systemFrame because event:$e")
+    println(s"roll back to frame=${e.frame},nowFrame=$systemFrame because UserActionEvent:$e")
     actionEventHistoryMap.put(e.frame, e :: actionEventHistoryMap.getOrElse(e.frame, Nil))
 //    rollback(e.frame)
     addRollBackFrame(e.frame)

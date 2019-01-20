@@ -56,6 +56,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var canvasBoundary = Point(dom.window.innerWidth.toFloat, dom.window.innerHeight.toFloat)
   protected var canvasUnit = canvasWidth / Constants.canvasUnitPerLine
   protected var canvasBounds = canvasBoundary / canvasUnit
+  protected var canvasUnitPerLine = 100
 
   var thorSchemaOpt : Option[ThorSchemaClientImpl] = None
 
@@ -64,7 +65,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   //  var thorSchema = thorSchemaOpt.get
   protected var myId = "test"
   protected var mainId = "test" //主视角ID（方便死亡跟随）
-  protected var shortId = 0
+  protected var shortId: Byte = 0
   protected var myName = "testName"
   protected var killer = "someone"
   protected var startTime = 0l
@@ -97,7 +98,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var nextFrame = 0
   protected var logicFrameTime = System.currentTimeMillis()
 
-  var barrage = ""
+  var barrage: (String,String) = ("", "")
   var barrageTime = 0
 
   protected var killerName = ""
@@ -115,13 +116,15 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     nextFrame = dom.window.requestAnimationFrame(gameRender())
   }
 
-  protected def handleResize = {
+  protected def handleResize(level: Int) = {
     val width = dom.window.innerWidth.toFloat
     val height = dom.window.innerHeight.toFloat
-    if(width != canvasWidth || height != canvasHeight){
+    val perLine = 100 + 5 * level
+    if(width != canvasWidth || height != canvasHeight || perLine != canvasUnitPerLine){
       canvasWidth = width
       canvasHeight = height
-      canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+      canvasUnitPerLine = perLine
+      canvasUnit = canvasWidth / canvasUnitPerLine
       canvasBoundary = Point(canvasWidth, canvasHeight)
       canvasBounds = canvasBoundary / canvasUnit
       canvas.setWidth(canvasWidth)
@@ -171,7 +174,13 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   var lastSendReq = 0L
   protected def gameLoop(): Unit = {
-    handleResize
+    var myLevel = 0
+    thorSchemaOpt.foreach{ thorSchema =>
+      thorSchema.adventurerMap.get(mainId).foreach{
+        ad => myLevel = ad.getAdventurerState.level
+      }
+    }
+    handleResize(myLevel)
     logicFrameTime = System.currentTimeMillis()
     gameState match{
       case GameState.firstCome =>
@@ -202,6 +211,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         logicFrameTime = System.currentTimeMillis()
 
         ping()
+
     }
   }
 
@@ -213,7 +223,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         if(thorSchema.adventurerMap.contains(mainId)){
           val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
-          thorSchema.drawRank(currentRank,true,myId)
+          thorSchema.drawRank(currentRank,true, shortId)
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
             drawTimeLong = drawTime.sum / drawTime.size
@@ -224,9 +234,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
             frameTime = Nil
           }
 //          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
-          thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle)
+          thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle, currentRank.length)
           if (barrageTime > 0){
-            thorSchema.drawBarrage(barrage)
+            thorSchema.drawBarrage(barrage._1, barrage._2)
             barrageTime -= 1
           }
         }
@@ -272,6 +282,10 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     ctx.setFill("rgb(250, 250, 250)")
     ctx.setTextAlign("left")
     ctx.setFont("Helvetica", 36)
-    ctx.fillText("请稍等，正在连接服务器", 150, 180)
+    if(gameState == GameState.stop)
+      ctx.fillText("您观战的玩家已离开房间", 150, 180)
+    else
+      ctx.fillText("请稍等，正在连接服务器", 150, 180)
+
   }
 }

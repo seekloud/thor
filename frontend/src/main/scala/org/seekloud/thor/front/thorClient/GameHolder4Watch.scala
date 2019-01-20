@@ -49,7 +49,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
 //        Shortcut.playMusic("bgm-2")
 
       case e: BeAttacked =>
-        barrage = s"${e.killerName}杀死了${e.name}"
+        barrage = (e.killerName, e.name)
         barrageTime = 300
         if (e.playerId == mainId) {
           mainId = e.killerId

@@ -40,7 +40,9 @@ trait MiddleContext {
 
   def setTextBaseLine(s: String):Unit
 
-  def setFont(fontFamily: String, fontSize: Double): Unit
+  def setFont(fontFamily: String, fontSize: Double, wid: String = "normal"): Unit
+
+  def setShadowColor(s: String) :Unit
 
   def setTextAlign(s: String)
 
@@ -59,4 +61,7 @@ trait MiddleContext {
   def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean)
 
   def lineWidth(width: Double) : Unit
+
+  def measureText(s: String) : Double
+
 }

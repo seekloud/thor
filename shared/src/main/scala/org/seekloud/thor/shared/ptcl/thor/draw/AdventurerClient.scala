@@ -15,10 +15,7 @@ import scala.collection.mutable
 
 trait AdventurerClient { this: ThorSchemaClientImpl =>
 
-//  private  val mapImg = dom.document.createElement("img").asInstanceOf[html.Image]
-//  mapImg.setAttribute("src", s"${Routes.base}/img/logo-sheet0.png")
-
-  private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
+//  private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
 
   def getMoveDistance(adventurer: Adventurer, offSetTime: Long): Point = {
     // 获取当前渲染帧与逻辑帧的偏移量
@@ -27,7 +24,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
     var moveDistance = Point(0, 0)
 
     if(adventurer.isMove && adventurer.isIntersect == 0){
-      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.getAdventurerState.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
+      moveDistance = config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / config.frameDuration
       //如果达到边界 则不再往外走
       if(position.x - r <= 0 || position.x + r >= config.boundary.x) moveDistance = moveDistance.copy(x = 0)
       if(position.y - r <= 0 || position.y + r >= config.boundary.y) moveDistance = moveDistance.copy(y = 0)
@@ -65,8 +62,21 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
           ctx.fill()
           ctx.restore()
         }
-        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, pictureMap(s"char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.85.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
+        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, pictureMap(s"char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.95.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
 //        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
+        //出生保护
+        newbornAdventurerMap.get(adventurer.playerId) match {
+          case Some(s) =>
+            ctx.save()
+            ctx.setFill("rgba(79,148,205,0.4)")
+            ctx.setShadowColor("rgb(255,255,255)")
+            ctx.beginPath()
+            ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 2 * Math.PI,false)
+            ctx.closePath()
+            ctx.fill()
+            ctx.restore()
+          case _ =>
+        }
         //画武器
         var step:Float = 3
         var isAttacking = false
@@ -130,7 +140,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
   def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset:Point, canvasUnit: Float) = {
 
-    if(adventurer.getAdventurerState.isUpdateLevel){
+    if(adventurer.isUpdateLevel){
 
       val img = drawFrame.createImage(pictureMap("level-up.png"))
 
