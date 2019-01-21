@@ -97,6 +97,7 @@ trait ThorSchema extends KillInformation {
 
   final protected def handleUserEnterRoomEvent(e: UserEnterRoom): Unit = {
 //    println(s"user [${e.playerId}] enter room")
+    playerIdMap.put(e.shortId, (e.playerId, e.name))
     val adventurer: Adventurer = e.adventurer
     newbornAdventurerMap.put(e.adventurer.playerId, (adventurer, config.newbornFrame))
     adventurerMap.put(e.adventurer.playerId, adventurer)

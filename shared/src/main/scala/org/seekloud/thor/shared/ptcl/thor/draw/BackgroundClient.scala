@@ -94,22 +94,24 @@ trait BackgroundClient {
     Rank.foreach { score =>
       index += 1
       if (score.bId == shortId) yourRank = index
-      val fullName = playerIdMap(score.bId)._2
-      val name = if (fullName.length <= 4) fullName.take(4) else fullName.take(4) + "..."
-      if (index < 10) {
-        ctx.setTextAlign("left")
-        if (score.bId == shortId) {
-          yourNameIn = true
-          drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,3)
-          drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,3)
-          drawTextLine(s" 击杀数: ${score.k}", begin + window.x * 0.18, index * 2, RankBaseLine,3)
-        }
-        else{
-          drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,2)
-          drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,2)
-          drawTextLine(s" 击杀数: ${score.k}", begin + window.x * 0.18, index * 2, RankBaseLine,2)
-        }
+      if (playerIdMap.exists(_._1 == score.bId)) {
+        val fullName = playerIdMap(score.bId)._2
+        val name = if (fullName.length <= 4) fullName.take(4) else fullName.take(4) + "..."
+        if (index < 10) {
+          ctx.setTextAlign("left")
+          if (score.bId == shortId) {
+            yourNameIn = true
+            drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,3)
+            drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,3)
+            drawTextLine(s" 击杀数: ${score.k}", begin + window.x * 0.18, index * 2, RankBaseLine,3)
+          }
+          else{
+            drawTextLine(s"【$index】  $name ", begin + window.x * 0.01, index * 2, RankBaseLine,2)
+            drawTextLine(s" 分数: ${score.e}", begin + window.x * 0.11, index * 2, RankBaseLine,2)
+            drawTextLine(s" 击杀数: ${score.k}", begin + window.x * 0.18, index * 2, RankBaseLine,2)
+          }
 
+        }
       }
     }
     index += 1
@@ -117,11 +119,13 @@ trait BackgroundClient {
       ctx.setFill("#FFFF00")
       Rank.find(_.bId == shortId) match {
         case Some(yourScore) =>
-          val fullName = playerIdMap(yourScore.bId)._2
-          val name = if (fullName.length <= 4) fullName.take(4) + "   " else fullName.take(4) + "..."
-          drawTextLine(s"【$yourRank】  $name ", begin + window.x * 0.01, 20, RankBaseLine,3)
-          drawTextLine(s" 分数: ${yourScore.e}", begin + window.x * 0.11, 20, RankBaseLine,3)
-          drawTextLine(s" 击杀数: ${yourScore.k}", begin + window.x * 0.18, 20, RankBaseLine,3)
+          if (playerIdMap.exists(_._1 == yourScore.bId)) {
+            val fullName = playerIdMap(yourScore.bId)._2
+            val name = if (fullName.length <= 4) fullName.take(4) + "   " else fullName.take(4) + "..."
+            drawTextLine(s"【$yourRank】  $name ", begin + window.x * 0.01, 20, RankBaseLine,3)
+            drawTextLine(s" 分数: ${yourScore.e}", begin + window.x * 0.11, 20, RankBaseLine,3)
+            drawTextLine(s" 击杀数: ${yourScore.k}", begin + window.x * 0.18, 20, RankBaseLine,3)
+          }
         case None =>
       }
     }
