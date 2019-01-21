@@ -226,7 +226,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         if(thorSchema.adventurerMap.contains(mainId)){
           val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
-          thorSchema.drawRank(currentRank,true, shortId)
+          thorSchema.drawRank(currentRank,CurrentOrNot = true, shortId)
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
             drawTimeLong = drawTime.sum / drawTime.size
@@ -279,7 +279,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   }
 
   def drawGameLoading(): Unit = {
-    println("loading")
+    println("loading...")
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasWidth, canvasHeight)
     ctx.setFill("rgb(250, 250, 250)")
