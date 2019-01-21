@@ -227,6 +227,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
           thorSchema.drawRank(currentRank,CurrentOrNot = true, shortId)
+          thorSchema.drawSmallMap(mainId)
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
             drawTimeLong = drawTime.sum / drawTime.size
