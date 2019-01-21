@@ -54,6 +54,8 @@ object BwClient {
     "UserMap_num" -> 0,
     "GenerateFood" -> 0.0,
     "GenerateFood_num" -> 0,
+    "RestartYourInfo" -> 0.0,
+    "RestartYourInfo_num" -> 0,
     "others" -> 0.0
   )
 
@@ -61,24 +63,46 @@ object BwClient {
   def showStatistics: String = {
     val uploadTotal = uploadStatistics.filterNot(_._1.contains("_num")).values.sum
     val downloadTotal = downloadStatistics.filterNot(_._1.contains("_num")).values.sum
+    val allTotal = uploadTotal + downloadTotal
     var kbDetail = ""
     downloadStatistics.foreach { s =>
       s._1 match {
-        case "MM" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
-        case "MouseClickDownLeft" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
-        case "MouseClickUpRight" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
-        case "MouseClickDownRight" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
-        case "PingPackage" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
-        case "others" => kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb, ${s._2} kb\n"
-        case x: String if !x.contains("_num") => kbDetail = kbDetail + s"${s._1}: ${s._2} kb (${downloadStatistics(s._1 + "_num")}个)\n"
+        case "MM" =>
+          val total = uploadStatistics(s._1) + s._2
+          val percent = (total / allTotal * 100).formatted("%.2f")
+          kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个), $percent %\n"
+        case "MouseClickDownLeft" =>
+          val total = uploadStatistics(s._1) + s._2
+          val percent = (total / allTotal * 100).formatted("%.2f")
+          kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个), $percent %\n"
+        case "MouseClickUpRight" =>
+          val total = uploadStatistics(s._1) + s._2
+          val percent = (total / allTotal * 100).formatted("%.2f")
+          kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个), $percent %\n"
+        case "MouseClickDownRight" =>
+          val total = uploadStatistics(s._1) + s._2
+          val percent = (total / allTotal * 100).formatted("%.2f")
+          kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个), $percent %\n"
+        case "PingPackage" =>
+          val total = uploadStatistics(s._1) + s._2
+          val percent = (total / allTotal * 100).formatted("%.2f")
+          kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb (${uploadStatistics(s._1 + "_num")}个), ${s._2} kb (${downloadStatistics(s._1 + "_num")}个), $percent %\n"
+        case "others" =>
+          val total = uploadStatistics(s._1) + s._2
+          val percent = (total / allTotal * 100).formatted("%.2f")
+          kbDetail = kbDetail + s"${s._1}: ${uploadStatistics(s._1)} kb, ${s._2} kb, $percent %\n"
+        case x: String if !x.contains("_num") =>
+          val percent = (s._2 / allTotal * 100).formatted("%.2f")
+          kbDetail = kbDetail + s"${s._1}: ${s._2} kb (${downloadStatistics(s._1 + "_num")}个), $percent %\n"
         case _ => // do nothing
       }
     }
-    kbDetail = kbDetail + s"RestartGame(up): ${uploadStatistics("RestartGame")} kb (${uploadStatistics("RestartGame_num")} 个)\n"
+    val reStartPercent = (uploadStatistics("RestartGame") / allTotal * 100).formatted("%.2f")
+    kbDetail = kbDetail + s"RestartGame(up): ${uploadStatistics("RestartGame")} kb (${uploadStatistics("RestartGame_num")} 个), $reStartPercent %\n"
 
-    val detail = "\n**************************带宽统计**************************\n" +
+    val detail = "\n*****************************带宽统计*****************************\n" +
                  s"TOTAL: ${uploadTotal + downloadTotal} kb (up: $uploadTotal kb + down: $downloadTotal kb)\n" + kbDetail +
-                 "************************************************************\n"
+                 "******************************************************************\n"
     downloadStatistics.foreach(d => downloadStatistics.update(d._1, 0))
     uploadStatistics.foreach(d => uploadStatistics.update(d._1, 0))
     detail

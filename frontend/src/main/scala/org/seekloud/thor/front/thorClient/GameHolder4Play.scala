@@ -75,7 +75,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.playerIdMap.put(sId, (id, yourName))
-//            println(s"playerIdMap:${grid.playerIdMap}")
           }
         }
         else
@@ -83,7 +82,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
             pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.playerIdMap.put(sId, (id, yourName))
-//            println(s"playerIdMap:${grid.playerIdMap}")
           }
 
         gameState = GameState.play
@@ -160,6 +158,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
                 shortId = msg.shortId
             }
           case msg: UserLeftRoom =>
+//            println(s"${msg.shortId}  ${msg.playerId} ${msg.name} left room...")
             thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(msg.shortId))
           case _ =>
         }

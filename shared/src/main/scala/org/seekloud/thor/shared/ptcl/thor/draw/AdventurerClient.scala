@@ -15,7 +15,7 @@ import scala.collection.mutable
 
 trait AdventurerClient { this: ThorSchemaClientImpl =>
 
-  private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
+//  private val adventurerCanvasCacheMap = mutable.HashMap[(Byte, Boolean), Any]()
 
   def getMoveDistance(adventurer: Adventurer, offSetTime: Long): Point = {
     // 获取当前渲染帧与逻辑帧的偏移量
@@ -94,10 +94,13 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
         CanvasUtils.rotateImage("weapon", drawFrame, ctx, preCanvasWeapon, pictureMap(s"weapon${(adventurer.level-1)/4+1}.png"), weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move,preTime, adventurer.getAdventurerState.level)
 
         //用户昵称
+        ctx.save()
         ctx.setFill("#ffffff")
         ctx.setTextAlign("center")
         ctx.setFont("微软雅黑", 20)
-        ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + dy) * canvasUnit + 20)
+        ctx.setTextBaseLine("top")
+        ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + r) * canvasUnit + 20)
+        ctx.restore()
       }
     }
     adventurerMap.foreach{

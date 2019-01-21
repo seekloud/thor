@@ -152,6 +152,7 @@ class ThorSchemaImpl(
     quadTree.clear()
     tmpAdventurerMap.clear()
     if (!thorSchemaSate.isIncrement) tmpFoodMap.clear()
+//    println(s"update time: ${System.currentTimeMillis()}")
     thorSchemaSate.adventurer.foreach { a =>
       val adventurer = new AdventurerImpl(config, a, playerIdMap(a.byteId)._1, playerIdMap(a.byteId)._2)
       quadTree.insert(adventurer)

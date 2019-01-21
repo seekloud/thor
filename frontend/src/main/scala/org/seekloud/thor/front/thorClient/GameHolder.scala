@@ -106,9 +106,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected var energy = 0
   protected var level = 0
 
-  protected var justPingFrame = 0
-  protected val pingFrequency = 5
-
 
 
   def gameRender(): Double => Unit = { d =>
@@ -122,11 +119,14 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected def handleResize(level: Int) = {
     val width = dom.window.innerWidth.toFloat
     val height = dom.window.innerHeight.toFloat
-    val perLine = 100 + 5 * level
+    val perLine = 100 + 8 * level
     if(width != canvasWidth || height != canvasHeight || perLine != canvasUnitPerLine){
       canvasWidth = width
       canvasHeight = height
-      canvasUnitPerLine = perLine
+      canvasUnitPerLine =
+        if(perLine == canvasUnitPerLine) canvasUnitPerLine
+        else if (perLine < canvasUnitPerLine) canvasUnitPerLine - 1
+        else canvasUnitPerLine + 1
       canvasUnit = canvasWidth / canvasUnitPerLine
       canvasBoundary = Point(canvasWidth, canvasHeight)
       canvasBounds = canvasBoundary / canvasUnit
@@ -194,12 +194,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         thorSchemaOpt.foreach{ _.update()}
         frameTime :+ System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
-        if (thorSchemaOpt.nonEmpty) {
-          if (thorSchemaOpt.get.systemFrame - justPingFrame >= pingFrequency) {
-            ping()
-            justPingFrame = thorSchemaOpt.get.systemFrame
-          }
-        }
+        ping()
       case GameState.replayLoading =>
         thorSchemaOpt.foreach{ _.drawGameLoading()}
       case GameState.play =>
@@ -218,12 +213,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         frameTimeSingle = System.currentTimeMillis() - logicFrameTime
         logicFrameTime = System.currentTimeMillis()
 
-        if (thorSchemaOpt.nonEmpty) {
-          if (thorSchemaOpt.get.systemFrame - justPingFrame >= pingFrequency) {
-            ping()
-            justPingFrame = thorSchemaOpt.get.systemFrame
-          }
-        }
+        ping()
+
     }
   }
 
@@ -235,7 +226,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
         if(thorSchema.adventurerMap.contains(mainId)){
           val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
-          thorSchema.drawRank(currentRank,true, shortId)
+          thorSchema.drawRank(currentRank,CurrentOrNot = true, shortId)
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
             drawTimeLong = drawTime.sum / drawTime.size
@@ -288,7 +279,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   }
 
   def drawGameLoading(): Unit = {
-    println("loading")
+    println("loading...")
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasWidth, canvasHeight)
     ctx.setFill("rgb(250, 250, 250)")

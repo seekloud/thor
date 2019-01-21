@@ -176,7 +176,7 @@ trait ThorSchema extends KillInformation {
 
           }
         case Left(_) =>
-          println(s"playerId map is incomplete, playerId ${action.playerId} is missing.")
+//          println(s"playerId map is incomplete, playerId ${action.playerId} is missing.")
       }
 
     }
@@ -384,6 +384,7 @@ trait ThorSchema extends KillInformation {
 
   protected def handleAdventurerMove(): Unit = {
     adventurerMap.values.foreach { adventurer =>
+      var theOtherAdPoint: Option[Point] = None
       val adRadius = config.getAdventurerRadiusByLevel(adventurer.level)
       val intersectNum = adventurerMap.filterNot(_._1 == adventurer.playerId).values.foldLeft(0) {
         (sum, otherAd) =>
@@ -399,6 +400,7 @@ trait ThorSchema extends KillInformation {
                   adventurer.isIntersect = 0
                 }
               } else {
+                theOtherAdPoint = Some(otherAd.position)
                 adventurer.isIntersect = 1
               }
             } else if (math.abs(relativeTheta) >= 0 && math.abs(relativeTheta) <= (math.Pi / 2)) {
@@ -409,6 +411,7 @@ trait ThorSchema extends KillInformation {
                   adventurer.isIntersect = 0
                 }
               } else {
+                theOtherAdPoint = Some(otherAd.position)
                 adventurer.isIntersect = 1
               }
             }
@@ -416,10 +419,13 @@ trait ThorSchema extends KillInformation {
           } else sum
       }
       if (intersectNum == 0) {
+        theOtherAdPoint = None
         adventurer.isIntersect = 0
       }
-      //      println(s"主体 [${adventurer.name}] isIntersect ${adventurer.isIntersect}")
-      adventurer.move(boundary, quadTree)
+      // println(s"主体 [${adventurer.name}] isIntersect ${adventurer.isIntersect}")
+
+      // theOtherAdPoint: 与之相撞的人的位置Point
+      adventurer.move(boundary, quadTree, theOtherAdPoint)
       if (adventurer.isUpdateLevel) adventurer.updateLevel
     }
   }

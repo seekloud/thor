@@ -39,7 +39,6 @@ with FpsRender{
       adventurerMap.get(mainId) match{
         case Some(adventurer) =>
           //保持自己的adventurer在屏幕中央~
-          val start = System.currentTimeMillis()
           val moveDistance = getMoveDistance(adventurer, offSetTime)
           val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
 
@@ -51,8 +50,6 @@ with FpsRender{
 //          if(ifTest)
 //            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
 
-          val end = System.currentTimeMillis()
-//          if(end-start > 10)println(s"drawTime too Long: ${end-start}")
         case None => println("None!!!!!!")
       }
     }
