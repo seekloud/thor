@@ -186,36 +186,47 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   def setMoveDirection(offsetX: Short, offSetY: Short, isAttacking: Boolean)(implicit config: ThorGameConfig) = {
-    val mouseDistance = math.sqrt(math.pow(offsetX, 2) + math.pow(offSetY, 2))
-    val d = if (offsetX < 0) {
-      if (offSetY < 0) {
-        - (math.Pi - math.atan(math.abs(offSetY).toFloat / math.abs(offsetX).toFloat)).toFloat
-      } else {
-        (math.Pi - math.atan(math.abs(offSetY) / math.abs(offsetX).toFloat)).toFloat
-      }
-
+    val newX = if (offsetX > 5000) {
+      isMove = false
+      mouseStop = true
+      offsetX - 10000
     } else {
-      if (offSetY > 0) {
-        math.atan(math.abs(offSetY) / math.abs(offsetX).toFloat).toFloat
-      } else {
-        - math.atan(math.abs(offSetY) / math.abs(offsetX).toFloat).toFloat
-      }
-
-    }
-    direction = d
-    if (mouseDistance > config.getAdventurerRadiusByLevel(this.level) * 10)
-    {
       if (!isAttacking) {
         isMove = true
         mouseStop = false
       }
+      offsetX
+    }
+//    val mouseDistance = math.sqrt(math.pow(offsetX, 2) + math.pow(offSetY, 2))
+    val d = if (newX < 0) {
+      if (offSetY < 0) {
+        - (math.Pi - math.atan(math.abs(offSetY).toFloat / math.abs(newX).toFloat)).toFloat
+      } else {
+        (math.Pi - math.atan(math.abs(offSetY) / math.abs(newX).toFloat)).toFloat
+      }
+
+    } else {
+      if (offSetY > 0) {
+        math.atan(math.abs(offSetY) / math.abs(newX).toFloat).toFloat
+      } else {
+        - math.atan(math.abs(offSetY) / math.abs(newX).toFloat).toFloat
+      }
 
     }
-    else
-     {
-       isMove = false
-       mouseStop = true
-     }
+    direction = d
+//    if (mouseDistance > config.getAdventurerRadiusByLevel(this.level) * config.getCanvasUnitValueByLevel(level))
+//    {
+//      if (!isAttacking) {
+//        isMove = true
+//        mouseStop = false
+//      }
+//
+//    }
+//    else
+//     {
+//       isMove = false
+//       mouseStop = true
+//     }
 
   }
 
