@@ -22,7 +22,7 @@ object Constants {
 
   val fakeRender = false
 
-  val canvasUnitPerLine = 160 //可视窗口每行显示多少个canvasUnit
+  val canvasUnitPerLine = 120 //可视窗口每行显示多少个canvasUnit
 
   val pictureMap = mutable.HashMap[String,String] (
     "background.png" -> "http://pic.neoap.com/hestia/files/image/OnlyForTest/a6875ca5be6915a1f7b73b70df73bf84.png",
