@@ -76,6 +76,44 @@ trait BackgroundClient {
     ctx.restore()
   }
 
+  def drawSmallMap(mainId: String): Unit ={
+    //获取比例
+    val scale = (window.x * 0.2) / 600.0
+    ctx.save()
+    ctx.setFill("rgba(0,0,0,0.4)")
+    ctx.fillRec(10, window.y - window.x * 0.11, window.x * 0.2, window.x * 0.1)
+    adventurerMap.foreach{
+      case adventurer if adventurer._1 == mainId =>
+        val adventurerMapX = 10 + adventurer._2.position.x * scale
+        val adventurerMapY = window.y - window.x * 0.11 + adventurer._2.position.y * scale
+        ctx.save()
+        ctx.beginPath()
+        ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
+        ctx.lineTo(adventurerMapX + 6.6, adventurerMapY - 2.0)
+        ctx.lineTo(adventurerMapX - 4.0, adventurerMapY + 6.0)
+        ctx.lineTo(adventurerMapX - 0.0, adventurerMapY - 7.0)
+        ctx.lineTo(adventurerMapX + 4.0, adventurerMapY + 6.0)
+        ctx.setFill("#b1cfed")
+        ctx.fill()
+        ctx.restore()
+      case adventurer if adventurer._2.energyScore >= adventurerMap.filterNot(_._1 == mainId).map(_._2.energyScore).max =>
+        val adventurerMapX = 10 + adventurer._2.position.x * scale
+        val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
+        ctx.save()
+        ctx.beginPath()
+        ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
+        ctx.lineTo(adventurerMapX + 6.6, adventurerMapY - 2.0)
+        ctx.lineTo(adventurerMapX - 4.0, adventurerMapY + 6.0)
+        ctx.lineTo(adventurerMapX - 0.0, adventurerMapY - 7.0)
+        ctx.lineTo(adventurerMapX + 4.0, adventurerMapY + 6.0)
+        ctx.setFill("#c7998a")
+        ctx.fill()
+        ctx.restore()
+      case _ => ()
+    }
+    ctx.restore()
+  }
+
   def drawRank(Rank: List[Score], CurrentOrNot: Boolean, shortId: Byte): Unit = {
     val text = "———————排行榜———————"
     val RankBaseLine = 3
@@ -116,7 +154,6 @@ trait BackgroundClient {
     }
     index += 1
     if (!yourNameIn) {
-      ctx.setFill("#FFFF00")
       Rank.find(_.bId == shortId) match {
         case Some(yourScore) =>
           if (playerIdMap.exists(_._1 == yourScore.bId)) {
@@ -135,6 +172,7 @@ trait BackgroundClient {
 
   def drawGameStop(killerName: String, killNum: Int, energy: Int, level: Int): Unit ={
     ctx.save()
+    ctx.beginPath()
     ctx.setFill("rgba(250,250,250,0.6)")
     ctx.fillRec(0,0,canvasSize.x,canvasSize.y)
     ctx.setFill("rgb(250, 250, 250)")
@@ -166,6 +204,7 @@ trait BackgroundClient {
 
   def drawGameStop1(killerName: String, killNum: Int, energy: Int, level: Int): Unit = {
     ctx.save()
+    ctx.beginPath()
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)
 //    ctx.drawImage(logo, window.x * 0.375, 20, Some(window.x * 0.25, window.y * 0.25))

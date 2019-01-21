@@ -43,6 +43,6 @@ trait FpsRender {
     ctx.setTextAlign("start")
     ctx.setFill("#ffffff")
     ctx.fillText(explainStr1,window.x * 0.9,130)
-    ctx.fillText(explainStr2,window.x * 0.9,150)
+    ctx.fillText(explainStr2,window.x * 0.9,155)
   }
 }
