@@ -152,6 +152,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       case e: GameEvent =>
         e match{
           case msg: UserEnterRoom =>
+//            println(s"${msg.name} enter room.")
             thorSchemaOpt.foreach{ thorSchema =>
               thorSchema.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
               if(msg.playerId == myId)
@@ -180,10 +181,15 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId)) {
-//            val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
+            val mouseDistance = math.sqrt(math.pow(e.clientX - dom.window.innerWidth / 2.0, 2) + math.pow(e.clientY - dom.window.innerHeight / 2.0, 2))
+            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(myId).getAdventurerState.level) * canvasUnit
             val direction = thorSchema.adventurerMap(myId).direction
             if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
-              val data = MM(shortId, (e.clientX - dom.window.innerWidth / 2.0).toShort, (e.clientY - dom.window.innerHeight / 2.0).toShort, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+
+              val offsetX = (e.clientX - dom.window.innerWidth / 2.0).toShort
+              val offsetY = (e.clientY - dom.window.innerHeight / 2.0).toShort
+              val data = MM(shortId, if(mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+//              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
               websocketClient.sendMsg(data)
               thorSchema.preExecuteUserEvent(data)
               lastMouseMove = System.currentTimeMillis()

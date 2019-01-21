@@ -43,7 +43,6 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
       val sy = position.y + offset.y + moveDistance.y
       val dx = 2 * r
       val dy = 2 * r
-      if (0 < sx+r && sx-r < canvasBoundary.x && 0 < sy+r && sy-r < canvasBoundary.y) {
         if (adventurer.isSpeedUp) { //加速特效
           val height = config.getAdventurerRadiusByLevel(adventurer.level) * 2 * canvasUnit
           val width = 3 * height
@@ -101,7 +100,6 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
         ctx.setTextBaseLine("top")
         ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + r) * canvasUnit + 20)
         ctx.restore()
-      }
     }
     adventurerMap.foreach{
       adventurer =>

@@ -136,6 +136,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   override def getThorSpeedByLevel(l: Byte, isSpeedUp: Boolean = false): Point = thorGameConfig.getThorSpeedByLevel(l, isSpeedUp)
 
+  override def getCanvasUnitValueByLevel(l: Byte): Int = thorGameConfig.getCanvasUnitValueByLevel(l)
+
   def getAdventurerLevelSize: Int = thorGameConfig.getAdventurerLevelSize
 
   override def speedUpEnergyLoose: Int = thorGameConfig.adventurerParams.speedUpEnergyLoose
