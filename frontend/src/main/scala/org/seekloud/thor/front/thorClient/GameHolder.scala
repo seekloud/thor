@@ -119,7 +119,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   protected def handleResize(level: Int) = {
     val width = dom.window.innerWidth.toFloat
     val height = dom.window.innerHeight.toFloat
-    val perLine = 100 + 8 * level
+    val perLine = 120 + 10 * level
     if(width != canvasWidth || height != canvasHeight || perLine != canvasUnitPerLine){
       canvasWidth = width
       canvasHeight = height
@@ -244,6 +244,8 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           }
         }
         else{
+          println(s"drawGameLoading!mainId: $mainId")
+          thorSchema.adventurerMap.foreach(println)
           drawGameLoading()
         }
 

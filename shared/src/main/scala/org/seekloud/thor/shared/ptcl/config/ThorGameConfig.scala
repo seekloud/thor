@@ -87,8 +87,6 @@ trait ThorGameConfig {
 
   def getMoveDistanceByFrame(l: Byte, isSpeedUp: Boolean = false) = getThorSpeedByLevel(l, isSpeedUp) * frameDuration / 1000
 
-  def getCanvasUnitValueByLevel(l: Byte): Int
-
   def getAdventurerLevelSize: Int
 
   def speedUpEnergyLoose: Int
@@ -157,11 +155,6 @@ case class ThorGameConfigImpl(
   override def getMaxEnergyByLevel(l: Byte): Int = {
     adventurerParams.maxEnergyList(l - 1)
   }
-
-  override def getCanvasUnitValueByLevel(l: Byte): Int = {
-    100 + 8 * l
-  }
-
 
   override def getWeaponLengthByLevel(l: Byte): Float = {
     weaponParams.lengthList(l - 1)
