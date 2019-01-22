@@ -77,6 +77,29 @@ trait BackgroundClient {
   }
 
   def drawSmallMap(mainId: String): Unit ={
+
+    def drawStar(adventurerMapX: Double, adventurerMapY: Double) = {
+      ctx.save()
+      ctx.beginPath()
+      ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
+      ctx.lineTo(adventurerMapX + 6.6, adventurerMapY - 2.0)
+      ctx.lineTo(adventurerMapX - 4.0, adventurerMapY + 6.0)
+      ctx.lineTo(adventurerMapX - 0.0, adventurerMapY - 7.0)
+      ctx.lineTo(adventurerMapX + 4.0, adventurerMapY + 6.0)
+      ctx.setFill("#b1cfed")
+      ctx.fill()
+      ctx.restore()
+    }
+
+    def drawCrown(adventurerMapX: Double, adventurerMapY: Double) = {
+      val img = drawFrame.createImage(pictureMap("crown.png"))
+      ctx.save()
+      ctx.beginPath()
+      ctx.drawImage(img, adventurerMapX - 6, adventurerMapY - 6, Some(12,12))
+      ctx.restore()
+    }
+
+
     //获取比例
     val scale = (window.x * 0.2) / 600.0
     ctx.save()
@@ -84,26 +107,26 @@ trait BackgroundClient {
     ctx.fillRec(10, window.y - window.x * 0.11, window.x * 0.2, window.x * 0.1)
     adventurerMap.foreach{
       case adventurer if adventurer._1 == mainId =>
-        val adventurerMapX = 10 + adventurer._2.position.x * scale
-        val adventurerMapY = window.y - window.x * 0.11 + adventurer._2.position.y * scale
-        ctx.save()
-        ctx.beginPath()
-        ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
-        ctx.lineTo(adventurerMapX + 6.6, adventurerMapY - 2.0)
-        ctx.lineTo(adventurerMapX - 4.0, adventurerMapY + 6.0)
-        ctx.lineTo(adventurerMapX - 0.0, adventurerMapY - 7.0)
-        ctx.lineTo(adventurerMapX + 4.0, adventurerMapY + 6.0)
-        ctx.setFill("#b1cfed")
-        ctx.fill()
-        ctx.restore()
+        if (adventurer._2.energyScore == adventurerMap.map(_._2.energyScore).max) {
+          val adventurerMapX = 10 + adventurer._2.position.x * scale
+          val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
+          drawCrown(adventurerMapX, adventurerMapY)
+        } else {
+          val adventurerMapX = 10 + adventurer._2.position.x * scale
+          val adventurerMapY = window.y - window.x * 0.11 + adventurer._2.position.y * scale
+          drawStar(adventurerMapX, adventurerMapY)
+        }
       case adventurer if adventurer._2.energyScore >= adventurerMap.filterNot(_._1 == mainId).map(_._2.energyScore).max =>
-        val img = drawFrame.createImage(pictureMap("crown.png"))
-        val adventurerMapX = 10 + adventurer._2.position.x * scale
-        val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
-        ctx.save()
-        ctx.beginPath()
-        ctx.drawImage(img, adventurerMapX - 6, adventurerMapY - 6, Some(12,12))
-        ctx.restore()
+        if (adventurer._2.energyScore == adventurerMap.map(_._2.energyScore).max) {
+          val adventurerMapX = 10 + adventurer._2.position.x * scale
+          val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
+          drawCrown(adventurerMapX, adventurerMapY)
+        } else {
+          val adventurerMapX = 10 + adventurer._2.position.x * scale
+          val adventurerMapY = window.y - window.x * 0.11 + adventurer._2.position.y * scale
+          drawStar(adventurerMapX, adventurerMapY)
+        }
+
       case _ => ()
     }
     ctx.restore()
