@@ -36,6 +36,7 @@ object RobotActor {
   private final case object MouseMoveKey
   private final case object MouseMoveGoOnKey
   private final case object MouseLeftDownKey
+  private final case object RobotDeadKey
 
   private final case object AutoMouseMove extends Command
 
@@ -167,12 +168,17 @@ object RobotActor {
           timer.cancel(MouseMoveKey)
           timer.cancel(MouseMoveGoOnKey)
           timer.cancel(MouseLeftDownKey)
-          ctx.system.scheduler.scheduleOnce(2.seconds){
-            roomActor ! RoomActor.ReliveRobot(botId, byteId, botName, ctx.self)
+          if(thorSchema.config.getRobotNumber - thorSchema.adventurerMap.toIndexedSeq.length > 0) {
+            ctx.system.scheduler.scheduleOnce(2.seconds){
+              roomActor ! RoomActor.ReliveRobot(botId, byteId, botName, ctx.self)
+            }
+            ctx.system.scheduler.scheduleOnce(4.seconds){
+              timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
+              timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
+            }
           }
-          ctx.system.scheduler.scheduleOnce(4.seconds){
-            timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
-            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
+          else{
+            timer.startSingleTimer(RobotDeadKey, RobotDead, 5.seconds)
           }
           Behaviors.same
 
