@@ -73,22 +73,22 @@ object RoomActor {
             implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(81920)
             val thorSchema = ThorSchemaServerImpl(AppSettings.thorGameConfig, ctx.self, timer, log, dispatch(subscribersMap, watchingMap), dispatchTo(subscribersMap, watchingMap))
 
-            for (cnt <- 0 until thorSchema.config.getRobotNumber) {
-              val tmpId = getTmpId(s"robot$cnt", thorSchema.config.getRobotNames(cnt), thorSchema)
-              ctx.self ! CreateRobot(s"robot$cnt", tmpId.toByte, thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
-            }
+            val robotTmpIdList = {for (cnt <- 0 until 4) yield {
+              getTmpId(s"robot$cnt", thorSchema.config.getRobotNames(cnt), thorSchema)
+            }}.toList
 
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
             }
             timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
-            idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, 0L)
+            idle(roomId, robotTmpIdList, Nil, subscribersMap, watchingMap, thorSchema, 0L)
         }
     }
   }
 
   def idle(
     roomId: Long,
+    robotTmpIdList: List[Byte],
     newPlayer: List[(String, ActorRef[UserActor.Command])],
     subscribersMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
     watchingMap: mutable.HashMap[String, ActorRef[UserActor.Command]],
@@ -102,8 +102,10 @@ object RoomActor {
       (ctx, msg) =>
         msg match {
           case CreateRobot(botId, byteId, name, level) =>
-            val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, byteId, name, level), botId)
-            thorSchema.robotJoinGame(botId, name, byteId, robot)
+            if(ctx.child(botId).isEmpty){
+              val robot = ctx.spawn(RobotActor.init(ctx.self, thorSchema, botId, byteId, name, level), botId)
+              thorSchema.robotJoinGame(botId, name, byteId, robot)
+            }
             Behaviors.same
 
           case ReliveRobot(botId, byteId, name, botActor) =>
@@ -114,7 +116,7 @@ object RoomActor {
             val tmpId = getTmpId(userId, name, thorSchema)
             thorSchema.joinGame(userId, name, tmpId, userActor)
             subscribersMap.put(userId, userActor)
-            idle(roomId, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
+            idle(roomId, robotTmpIdList, (userId, userActor) :: newPlayer, subscribersMap, watchingMap, thorSchema, tickCount)
 
           case reStartJoinRoom(roomId, userId, name, userActor) =>
             val tmpId = getTmpId(userId, name, thorSchema)
@@ -139,7 +141,7 @@ object RoomActor {
             }
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
-            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
+            else idle(roomId, robotTmpIdList, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
 
           case BeDead(userId, name, userList) =>
 //            log.debug(s"roomactor - ${userId} die")
@@ -154,7 +156,7 @@ object RoomActor {
             }
 
             if (userList.isEmpty && roomId > 1l) Behavior.stopped //有多个房间且该房间空了，停掉这个actor
-            else idle(roomId, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
+            else idle(roomId, robotTmpIdList, newPlayer.filter(_._1 != userId), subscribersMap, watchingMap, thorSchema, tickCount)
 
           case LeftRoom4Watch(uid,playerId) =>
             thorSchema.leftRoom4Watch(uid,playerId)
@@ -173,6 +175,17 @@ object RoomActor {
           case GameLoop =>
             val startTime = System.currentTimeMillis()
             val snapShotOpt = thorSchema.getCurSnapshot
+
+            //生成机器人
+            val dValue = thorSchema.config.getRobotNumber - subscribersMap.toList.length
+            val robotNumber =
+              if(dValue < 0) 0
+              else if(dValue < 4) dValue
+              else 4
+            println(robotNumber)
+            for (cnt <- 0 until robotNumber) {
+              ctx.self ! CreateRobot(s"robot$cnt", robotTmpIdList(cnt), thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
+            }
 
             //thorSchema定时更新
             thorSchema.update()
@@ -208,7 +221,7 @@ object RoomActor {
 //                subscribersMap.put(player._1, player._2)
                 dispatchTo(subscribersMap, watchingMap)(player._1, GridSyncState(thorSchemaData), actor)
             }
-            idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
+            idle(roomId, robotTmpIdList, Nil, subscribersMap, watchingMap, thorSchema, tickCount + 1)
 
           case ChildDead(_, childRef) =>
             ctx.unwatch(childRef)
