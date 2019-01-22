@@ -245,14 +245,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           }
         }
         else{
-          if(gameState == GameState.play){
-            println(s"drawGameLoading!mainId: $mainId $myName")
-            thorSchema.adventurerMap.foreach(a => print(s"id:${a._1} name:${a._2.name} || "))
-            println()
-          }
-          else if(gameState != GameState.loadingPlay){
-            println(s"drawGameLoading! state: $gameState aaaaaaaaaaaaaaaaaa")
-          }
           drawGameLoading()
         }
 

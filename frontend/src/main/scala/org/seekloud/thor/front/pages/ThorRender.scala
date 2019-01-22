@@ -5,6 +5,7 @@ import org.seekloud.thor.front.thorClient.{GameHolder, GameHolder4Play}
 import org.seekloud.thor.front.utils.Shortcut
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame.ThorGameInfo
+import org.seekloud.thor.shared.ptcl.model.Constants.pictureMap
 import mhtml.Var
 import org.scalajs.dom
 import org.scalajs.dom.ext.Color
@@ -26,7 +27,7 @@ class ThorRender(gameInfoList: List[String])extends Page{
     case _ => ThorGameInfo("default")
   }
 
-  private val canvas = <canvas id ="GameView" tabindex="1" style="cursor: url(/thor/static/img/cursor1.png),auto;"></canvas>
+  private val canvas = <canvas id ="GameView" tabindex="1" style={s"cursor: url(${pictureMap("cursor.png")}),auto;"}></canvas>
 
 
   private val modal = Var(emptyHTML)
