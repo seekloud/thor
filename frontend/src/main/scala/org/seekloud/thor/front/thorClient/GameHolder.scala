@@ -249,6 +249,9 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
             println(s"drawGameLoading!mainId: $mainId")
             thorSchema.adventurerMap.foreach(println)
           }
+          else if(gameState != GameState.loadingPlay){
+            println(s"drawGameLoading! state: $gameState")
+          }
           drawGameLoading()
         }
 
@@ -284,7 +287,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   }
 
   def drawGameLoading(): Unit = {
-    println("loading...")
+//    println(s"loading... gameState=$gameState")
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasWidth, canvasHeight)
     ctx.setFill("rgb(250, 250, 250)")
