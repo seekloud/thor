@@ -97,7 +97,7 @@ trait BackgroundClient {
         ctx.fill()
         ctx.restore()
       case adventurer if adventurer._2.energyScore >= adventurerMap.filterNot(_._1 == mainId).map(_._2.energyScore).max =>
-        val img = drawFrame.createImage("static/img/crown.png")
+        val img = drawFrame.createImage(pictureMap("crown.png"))
         val adventurerMapX = 10 + adventurer._2.position.x * scale
         val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
         ctx.save()
