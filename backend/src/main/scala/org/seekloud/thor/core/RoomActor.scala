@@ -182,7 +182,6 @@ object RoomActor {
               if(dValue < 0) 0
               else if(dValue < 4) dValue
               else 4
-            println(robotNumber)
             for (cnt <- 0 until robotNumber) {
               ctx.self ! CreateRobot(s"robot$cnt", robotTmpIdList(cnt), thorSchema.config.getRobotNames(cnt), thorSchema.config.getRobotLevel)
             }
