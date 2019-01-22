@@ -97,17 +97,12 @@ trait BackgroundClient {
         ctx.fill()
         ctx.restore()
       case adventurer if adventurer._2.energyScore >= adventurerMap.filterNot(_._1 == mainId).map(_._2.energyScore).max =>
+        val img = drawFrame.createImage("static/img/crown.png")
         val adventurerMapX = 10 + adventurer._2.position.x * scale
         val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
         ctx.save()
         ctx.beginPath()
-        ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
-        ctx.lineTo(adventurerMapX + 6.6, adventurerMapY - 2.0)
-        ctx.lineTo(adventurerMapX - 4.0, adventurerMapY + 6.0)
-        ctx.lineTo(adventurerMapX - 0.0, adventurerMapY - 7.0)
-        ctx.lineTo(adventurerMapX + 4.0, adventurerMapY + 6.0)
-        ctx.setFill("#c7998a")
-        ctx.fill()
+        ctx.drawImage(img, adventurerMapX - 6, adventurerMapY - 6, Some(12,12))
         ctx.restore()
       case _ => ()
     }
