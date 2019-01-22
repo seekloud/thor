@@ -26,7 +26,7 @@ class ThorRender(gameInfoList: List[String])extends Page{
     case _ => ThorGameInfo("default")
   }
 
-  private val canvas = <canvas id ="GameView" tabindex="1" style="cursor:url(/thor/static/img/cursor.png),auto;"></canvas>
+  private val canvas = <canvas id ="GameView" tabindex="1" style="cursor: url(/thor/static/img/cursor.png),auto;"></canvas>
 
 
   private val modal = Var(emptyHTML)
