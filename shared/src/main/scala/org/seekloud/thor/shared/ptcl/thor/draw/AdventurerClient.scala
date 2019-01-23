@@ -61,7 +61,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
           ctx.fill()
           ctx.restore()
         }
-        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, pictureMap(s"char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 0.95.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
+        CanvasUtils.rotateImage("adventurer", drawFrame, ctx, preCanvasAdventurer, pictureMap(s"char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 1.05.toFloat, 0, adventurer.getAdventurerState.direction,preTime, adventurer.getAdventurerState.level)
 //        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
         //出生保护
         newbornAdventurerMap.get(adventurer.playerId) match {
