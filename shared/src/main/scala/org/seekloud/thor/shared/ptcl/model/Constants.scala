@@ -74,7 +74,8 @@ object Constants {
     "fillBar.png" -> "https://pic.niuapu.com/hestia/files/image/OnlyForTest/e5bc1bca204de6e5f7060d36a25b6547.png",
     "hammer.png" -> "https://pic.niuapu.com/hestia/files/image/OnlyForTest/d714fb295524b0f0bed6aca94b935b53.png",
     "cursor.png" -> "https://pic.niuapu.com/hestia/files/image/OnlyForTest/fe0c24e1f3343ce54880a02bc21aa325.png",
-    "crown.png" -> "https://pic.niuapu.com/hestia/files/image/OnlyForTest/cfdcd09daaab0e2af5315a03917b9419.png"
+    "crown.png" -> "https://pic.niuapu.com/hestia/files/image/OnlyForTest/cfdcd09daaab0e2af5315a03917b9419.png",
+    "cursor3.png" -> "https://pic.niuapu.com/hestia/files/image/OnlyForTest/d949971a38351e7a857381657c6295e9.png"
   )
 
 
