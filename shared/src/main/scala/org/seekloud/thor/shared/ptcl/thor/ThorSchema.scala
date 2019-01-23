@@ -96,7 +96,7 @@ trait ThorSchema extends KillInformation {
   protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer
 
   final protected def handleUserEnterRoomEvent(e: UserEnterRoom): Unit = {
-//    println(s"user [${e.playerId}] enter room")
+//    println(s"handle user [${e.playerId}] enter room.systemFrame: $systemFrame")
     playerIdMap.put(e.shortId, (e.playerId, e.name))
     val adventurer: Adventurer = e.adventurer
     newbornAdventurerMap.put(e.adventurer.playerId, (adventurer, config.newbornFrame))

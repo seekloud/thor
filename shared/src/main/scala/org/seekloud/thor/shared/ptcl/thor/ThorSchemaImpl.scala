@@ -49,14 +49,12 @@ class ThorSchemaImpl(
       addGameEvent(e)
     } else if (esRecoverSupport) {
 //      println(s"rollback-frame=${e.frame}, curFrame=${this.systemFrame},e=$e")
-      if (e.isInstanceOf[EatFood] || e.isInstanceOf[GenerateFood]) {
-        e match {
-          case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
-          case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
-          case _ => println(s"unknown case.")
-        }
-      } else {
-        rollback4GameEvent(e)
+      e match {
+        case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
+        case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
+        case event: UserEnterRoom => addGameEvent(event.copy(frame = systemFrame))
+        case _ => rollback4GameEvent(e)
+
       }
     }
   }
@@ -134,16 +132,19 @@ class ThorSchemaImpl(
   protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState, isRollBack: Boolean = false) = {
     val curFrame = systemFrame
     val startTime = System.currentTimeMillis()
-    (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { _ =>
+    (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { f =>
+      if (systemFrame != f) {
+        systemFrame = f
+      }
       super.update()
       if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
     }
     val endTime = System.currentTimeMillis()
     if (curFrame <= thorSchemaSate.f) {
-      println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
+      println(s"handleThorSchemaState update from $curFrame to ${thorSchemaSate.f} use time=${endTime - startTime}")
       justSyncFrame = thorSchemaSate.f
     } else if (!isRollBack) {
-      println(s"handleThorSchemaState roll back to ${thorSchemaSate.f}.")
+      println(s"handleThorSchemaState from $curFrame roll back to ${thorSchemaSate.f}.")
       justSyncFrame = thorSchemaSate.f
     }
 
