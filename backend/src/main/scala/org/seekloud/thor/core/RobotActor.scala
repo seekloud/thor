@@ -131,8 +131,8 @@ object RobotActor {
 //            val thetaList = increment.scanLeft(direction)(_ + _).map(t => if(t > math.Pi) t - 2 * math.Pi.toFloat else if(t < -math.Pi) t + 2 * math.Pi.toFloat else t)
 
 //            ctx.self ! AutoMouseMoveGoOn(thetaList.toList, 0)
-            val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
-            val data = MM(byteId, (math.cos(theta) * moveDistance).toShort, (math.sin(theta) * moveDistance).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+            val AndMoveDistance = if(thorSchema.config.isRobotMove) 0 else 10000
+            val data = MM(byteId, ((math.cos(theta) * 128) + AndMoveDistance).toShort, (math.sin(theta) * 128).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
             roomActor ! RoomActor.WsMessage(botId, data)
 
             timer.cancel(MouseMoveKey)
@@ -146,8 +146,8 @@ object RobotActor {
 
         case AutoMouseMoveGoOn(thetaList, num) =>
           //moveDistance是否移动
-          val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
-          val data = MM(byteId, (math.cos(thetaList(num)) * moveDistance).toShort, (math.sin(thetaList(num)) * moveDistance).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+          val AndMoveDistance = if(thorSchema.config.isRobotMove) 0 else 10000
+          val data = MM(byteId, ((math.cos(thetaList(num)) * 128) + AndMoveDistance).toShort, (math.sin(thetaList(num)) * 128).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
           roomActor ! RoomActor.WsMessage(botId, data)
           if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 100))
             timer.startSingleTimer(MouseMoveGoOnKey, AutoMouseMoveGoOn(thetaList, num + 1), 100.millis)
