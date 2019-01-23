@@ -36,6 +36,7 @@ object RobotActor {
   private final case object MouseMoveKey
   private final case object MouseMoveGoOnKey
   private final case object MouseLeftDownKey
+  private final case object RobotDeadKey
 
   private final case object AutoMouseMove extends Command
 
@@ -131,7 +132,7 @@ object RobotActor {
 
 //            ctx.self ! AutoMouseMoveGoOn(thetaList.toList, 0)
             val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
-            val data = MM(byteId, (math.cos(theta) * moveDistance).toShort, (math.sin(theta) * moveDistance).toShort, thorSchema.systemFrame + 1, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+            val data = MM(byteId, (math.cos(theta) * moveDistance).toShort, (math.sin(theta) * moveDistance).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
             roomActor ! RoomActor.WsMessage(botId, data)
 
             timer.cancel(MouseMoveKey)
@@ -146,7 +147,7 @@ object RobotActor {
         case AutoMouseMoveGoOn(thetaList, num) =>
           //moveDistance是否移动
           val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
-          val data = MM(byteId, (math.cos(thetaList(num)) * moveDistance).toShort, (math.sin(thetaList(num)) * moveDistance).toShort, thorSchema.systemFrame + 1, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+          val data = MM(byteId, (math.cos(thetaList(num)) * moveDistance).toShort, (math.sin(thetaList(num)) * moveDistance).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
           roomActor ! RoomActor.WsMessage(botId, data)
           if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 100))
             timer.startSingleTimer(MouseMoveGoOnKey, AutoMouseMoveGoOn(thetaList, num + 1), 100.millis)
@@ -156,7 +157,7 @@ object RobotActor {
 
         case AutoMouseLeftDown =>
           if(attack2Player(thorSchema, botId) && thorSchema.config.isRobotAttack){
-            val data = MouseClickDownLeft(byteId, thorSchema.systemFrame + 1, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+            val data = MouseClickDownLeft(byteId, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
             roomActor ! RoomActor.WsMessage(botId, data)
           }
           timer.cancel(MouseLeftDownKey)
@@ -167,12 +168,17 @@ object RobotActor {
           timer.cancel(MouseMoveKey)
           timer.cancel(MouseMoveGoOnKey)
           timer.cancel(MouseLeftDownKey)
-          ctx.system.scheduler.scheduleOnce(2.seconds){
-            roomActor ! RoomActor.ReliveRobot(botId, byteId, botName, ctx.self)
+          if(thorSchema.config.getRobotNumber - thorSchema.adventurerMap.toIndexedSeq.length > 0) {
+            ctx.system.scheduler.scheduleOnce(2.seconds){
+              roomActor ! RoomActor.ReliveRobot(botId, byteId, botName, ctx.self)
+            }
+            ctx.system.scheduler.scheduleOnce(4.seconds){
+              timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
+              timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
+            }
           }
-          ctx.system.scheduler.scheduleOnce(4.seconds){
-            timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
-            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
+          else{
+            timer.startSingleTimer(RobotDeadKey, RobotDead, 5.seconds)
           }
           Behaviors.same
 

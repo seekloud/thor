@@ -184,7 +184,7 @@ class ThorSchemaImpl(
       thorSchemaStateOpt = None
       handleThorSchemaState(thorSchemaState)
     } else {
-      if (systemFrame - thorSchemaState.f < 10) {
+      if (systemFrame - thorSchemaState.f < 10 && thorSchemaState.adventurer.exists(_.playerId == myId)) {
         info(s"收到滞后数据，立即同步，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
         handleThorSchemaState(thorSchemaState)
       } else {
