@@ -81,7 +81,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
                   thorSchema.duringTime = time
                   killerName = e.killerName
                   killNum = my.killNum
-                  energy = my.energy
+                  energyScore = my.energyScore
                   level = my.level
                 }
               case None =>

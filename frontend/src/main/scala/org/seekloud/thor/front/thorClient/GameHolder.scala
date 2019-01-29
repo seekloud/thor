@@ -119,7 +119,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   protected var killerName = ""
   protected var killNum = 0
-  protected var energy = 0
+  protected var energyScore = 0
   protected var level = 0
 
 
@@ -128,7 +128,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
     drawGameByTime(offsetTime, canvasUnit, canvasBounds)
-    if(gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
+    if(gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     nextFrame = dom.window.requestAnimationFrame(gameRender())
   }
 

@@ -125,7 +125,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
                   thorSchema.duringTime = duringTime(endTime - startTime)
                   killerName = e.killerName
                   killNum = my.killNum
-                  energy = my.energy
+                  energyScore = my.energyScore
                   level = my.level
                 }
               case None =>
