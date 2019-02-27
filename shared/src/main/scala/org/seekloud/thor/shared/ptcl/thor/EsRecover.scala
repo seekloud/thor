@@ -16,7 +16,7 @@
 
 package org.seekloud.thor.shared.ptcl.thor
 
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{EatFood, GameEvent, GenerateFood, UserActionEvent}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 
 import scala.collection.mutable
 
@@ -61,8 +61,12 @@ trait EsRecover {
           //同步所有数据
           removeKillInfoByRollback(frame)
           (frame until curFrame).foreach { f =>
-            this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
-            this.rollbackUpdate()
+            gameEventHistoryMap.get(f).foreach { events =>
+              if (!events.exists(_.isInstanceOf[BeAttacked]) || !events.exists(_.isInstanceOf[UserLeftRoom])) {
+                this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
+                this.rollbackUpdate()
+              }
+            }
           }
           val endTime = System.currentTimeMillis()
           println(s"roll back to frame=$frame, nowFrame=$curFrame use Time:${endTime - startTime}")

@@ -69,6 +69,8 @@ class ThorSchemaImpl(
         case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
         case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
         case event: UserEnterRoom => addGameEvent(event.copy(frame = systemFrame))
+        case event: BeAttacked => addGameEvent(event.copy(frame = systemFrame))
+        case event: UserLeftRoom => addGameEvent(event.copy(frame = systemFrame))
         case _ => rollback4GameEvent(e)
 
       }
