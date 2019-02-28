@@ -1,6 +1,22 @@
+/*
+ * Copyright 2018 seekloud (https://github.com/seekloud)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.seekloud.thor.shared.ptcl.thor
 
-import org.seekloud.thor.shared.ptcl.protocol.ThorGame.{EatFood, GameEvent, GenerateFood, UserActionEvent}
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 
 import scala.collection.mutable
 
@@ -45,8 +61,12 @@ trait EsRecover {
           //同步所有数据
           removeKillInfoByRollback(frame)
           (frame until curFrame).foreach { f =>
-            this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
-            this.rollbackUpdate()
+            gameEventHistoryMap.get(f).foreach { events =>
+              if (!events.exists(_.isInstanceOf[BeAttacked]) || !events.exists(_.isInstanceOf[UserLeftRoom])) {
+                this.addGameEvents(f, gameEventHistoryMap.getOrElse(f, Nil), actionEventHistoryMap.getOrElse(f, Nil))
+                this.rollbackUpdate()
+              }
+            }
           }
           val endTime = System.currentTimeMillis()
           println(s"roll back to frame=$frame, nowFrame=$curFrame use Time:${endTime - startTime}")

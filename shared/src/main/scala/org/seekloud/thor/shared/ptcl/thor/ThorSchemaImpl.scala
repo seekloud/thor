@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 seekloud (https://github.com/seekloud)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.seekloud.thor.shared.ptcl.thor
 
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, AdventurerImpl, AdventurerState, Food}
@@ -49,14 +65,14 @@ class ThorSchemaImpl(
       addGameEvent(e)
     } else if (esRecoverSupport) {
 //      println(s"rollback-frame=${e.frame}, curFrame=${this.systemFrame},e=$e")
-      if (e.isInstanceOf[EatFood] || e.isInstanceOf[GenerateFood]) {
-        e match {
-          case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
-          case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
-          case _ => println(s"unknown case.")
-        }
-      } else {
-        rollback4GameEvent(e)
+      e match {
+        case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
+        case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
+        case event: UserEnterRoom => addGameEvent(event.copy(frame = systemFrame))
+        case event: BeAttacked => addGameEvent(event.copy(frame = systemFrame))
+        case event: UserLeftRoom => addGameEvent(event.copy(frame = systemFrame))
+        case _ => rollback4GameEvent(e)
+
       }
     }
   }
@@ -134,16 +150,19 @@ class ThorSchemaImpl(
   protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState, isRollBack: Boolean = false) = {
     val curFrame = systemFrame
     val startTime = System.currentTimeMillis()
-    (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { _ =>
+    (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { f =>
+      if (systemFrame != f) {
+        systemFrame = f
+      }
       super.update()
       if (esRecoverSupport) addGameSnapshot(systemFrame, getThorSchemaState())
     }
     val endTime = System.currentTimeMillis()
     if (curFrame <= thorSchemaSate.f) {
-      println(s"handleThorSchemaState update to now use time=${endTime - startTime}")
+      println(s"handleThorSchemaState update from $curFrame to ${thorSchemaSate.f} use time=${endTime - startTime}")
       justSyncFrame = thorSchemaSate.f
     } else if (!isRollBack) {
-      println(s"handleThorSchemaState roll back to ${thorSchemaSate.f}.")
+      println(s"handleThorSchemaState from $curFrame roll back to ${thorSchemaSate.f}.")
       justSyncFrame = thorSchemaSate.f
     }
 
@@ -184,7 +203,7 @@ class ThorSchemaImpl(
       thorSchemaStateOpt = None
       handleThorSchemaState(thorSchemaState)
     } else {
-      if (systemFrame - thorSchemaState.f < 10) {
+      if (systemFrame - thorSchemaState.f < 10 && thorSchemaState.adventurer.exists(_.playerId == myId)) {
         info(s"收到滞后数据，立即同步，curSystemFrame=$systemFrame, sync thor schema state frame=${thorSchemaState.f}")
         handleThorSchemaState(thorSchemaState)
       } else {

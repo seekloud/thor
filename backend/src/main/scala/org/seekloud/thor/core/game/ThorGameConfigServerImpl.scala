@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 seekloud (https://github.com/seekloud)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.seekloud.thor.core.game
 
 import akka.util.Helpers
@@ -75,6 +91,9 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val foodRadiusLevel = config.getDoubleList("thorGame.food.radius")
     .requiring(_.size() >= 1,"minimum supported food energy size is 1").asScala.map(_.toFloat).toList
 
+  private[this] val scatterAnimation = config.getInt("thorGame.food.scatterAnimation")
+    .requiring(t => t > 1,"minimum supported adventurer scatterAnimation  is 1")
+
   //robot config
   private[this] val robotNames = config.getStringList("thorGame.robot.name")
     .requiring(_.size() >= 1, msg="minimum robot names size is 1").asScala.toList
@@ -98,7 +117,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val adventurerParams = AdventurerParams(AdventurerMoveSpeed(adventurerSpeedLevel), adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel,
     adventurerFacePalstance, adventurerSpeedUpRate, adventurerSpeedUpEnergyLoose, adventurerDyingAnimation, adventurerSpeedUpAnimation, adventurerLevelUpAnimation, adventurerNewbornFrame.toByte)
 
-  private[this] val foodParams = FoodParams(foodMax, foodEnergyLevel, foodRadiusLevel)
+  private[this] val foodParams = FoodParams(foodMax, foodEnergyLevel, foodRadiusLevel, scatterAnimation.toByte)
 
   private[this] val weaponParams = WeaponParams(weaponLengthLevel)
 
@@ -125,6 +144,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   override def getRadiusByFoodLevel(l: Byte): Float = thorGameConfig.getRadiusByFoodLevel(l)
 
   def getEnergyByFoodLevel(l: Byte) = thorGameConfig.getEnergyByFoodLevel(l)
+
+  override def getScatterAnimation: Byte = thorGameConfig.getScatterAnimation
 
   def getEnergyByKillingAdventurerLevel(l: Byte): Int = thorGameConfig.getEnergyByKillingAdventurerLevel(l)
 

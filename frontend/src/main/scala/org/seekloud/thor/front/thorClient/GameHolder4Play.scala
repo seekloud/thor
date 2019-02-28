@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 seekloud (https://github.com/seekloud)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.seekloud.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -109,7 +125,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
                   thorSchema.duringTime = duringTime(endTime - startTime)
                   killerName = e.killerName
                   killNum = my.killNum
-                  energy = my.energy
+                  energyScore = my.energyScore
                   level = my.level
                 }
               case None =>
@@ -153,18 +169,31 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
         e match{
           case msg: UserEnterRoom =>
 //            println(s"${msg.name} enter room.")
-            thorSchemaOpt.foreach{ thorSchema =>
-              thorSchema.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
-              if(msg.playerId == myId)
-                shortId = msg.shortId
+            if (thorSchemaOpt.nonEmpty) {
+              thorSchemaOpt.get.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
+              if(msg.playerId == myId) shortId = msg.shortId
+//              thorSchemaOpt.foreach{ thorSchema =>
+//                thorSchema.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
+//                if(msg.playerId == myId)
+//                  shortId = msg.shortId
+//              }
+            } else {
+              dom.window.setTimeout(() =>
+                thorSchemaOpt.foreach{ thorSchema =>
+                  thorSchema.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
+                  if(msg.playerId == myId) shortId = msg.shortId
+                } , 100)
             }
           case msg: UserLeftRoom =>
-//            println(s"${msg.shortId}  ${msg.playerId} ${msg.name} left room...")
+            if(msg.shortId == shortId) println(s"${msg.shortId}  ${msg.playerId} ${msg.name} left room...")
             thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(msg.shortId))
           case _ =>
         }
-        thorSchemaOpt.foreach(_.receiveGameEvent(e))
-
+        if (thorSchemaOpt.nonEmpty) {
+          thorSchemaOpt.foreach(_.receiveGameEvent(e))
+        } else {
+          dom.window.setTimeout(() => thorSchemaOpt.foreach(_.receiveGameEvent(e)), 100)
+        }
       case x => dom.window.console.log(s"接收到无效消息$x")
     }
   }

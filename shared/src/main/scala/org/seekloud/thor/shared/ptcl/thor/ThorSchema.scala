@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 seekloud (https://github.com/seekloud)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.seekloud.thor.shared.ptcl.thor
 
 import java.awt.event.KeyEvent
@@ -57,6 +73,7 @@ trait ThorSchema extends KillInformation {
   protected var MaybeAttackingAdventureList = List[(String, String, Int)]() // id, killerId, 所在象限
   //playerId -> 攻击执行程度
   val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
+  val bodyFood = mutable.HashMap[Int, (FoodState, Point)]() //fId -> (目标食物状态，当前位置)
 
   /*排行榜*/
   var currentRankList = List.empty[Score]
@@ -96,7 +113,7 @@ trait ThorSchema extends KillInformation {
   protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer
 
   final protected def handleUserEnterRoomEvent(e: UserEnterRoom): Unit = {
-//    println(s"user [${e.playerId}] enter room")
+    //    println(s"handle user [${e.playerId}] enter room.systemFrame: $systemFrame")
     playerIdMap.put(e.shortId, (e.playerId, e.name))
     val adventurer: Adventurer = e.adventurer
     newbornAdventurerMap.put(e.adventurer.playerId, (adventurer, config.newbornFrame))
@@ -116,7 +133,7 @@ trait ThorSchema extends KillInformation {
   //处理新生用户的剩余受保护时间
   protected final def handleNewBornNow() = {
     newbornAdventurerMap.foreach { newborn =>
-//      println(s"newborn: ${newborn._2._1.name} leftFrame: ${newborn._2._2}")
+      //      println(s"newborn: ${newborn._2._1.name} leftFrame: ${newborn._2._2}")
       if (newborn._2._2 <= 0) {
         //新生用户受保护时间结束
         newbornAdventurerMap.remove(newborn._1)
@@ -177,7 +194,7 @@ trait ThorSchema extends KillInformation {
 
           }
         case Left(_) =>
-//          println(s"playerId map is incomplete, playerId ${action.playerId} is missing.")
+        //          println(s"playerId map is incomplete, playerId ${action.playerId} is missing.")
       }
 
     }
@@ -255,7 +272,7 @@ trait ThorSchema extends KillInformation {
   protected final def handleAdventurerAttackingNow(): Unit = {
     attackingAdventureMap.foreach { attacking =>
       if (!newbornAdventurerMap.exists(_._1 == attacking._1)) {
-//        println(s"${adventurerMap(attacking._1).name} is attacking")
+        //        println(s"${adventurerMap(attacking._1).name} is attacking")
         adventurerMap.filter(_._1 == attacking._1).values.foreach { adventurer =>
           val adventurerMaybeAttacked = adventurerMap.filterNot(a => newbornAdventurerMap.exists(_._1 == a._1)).filter(a => a._1 != adventurer.playerId && a._2.position.distance(adventurer.position) < adventurer.radius + config.getWeaponLengthByLevel(adventurer.level) + a._2.radius).values
           //        println(s"潜在攻击列表${adventurerMaybeAttacked.map(_.name)}")
@@ -277,7 +294,7 @@ trait ThorSchema extends KillInformation {
     }
   }
 
-  final protected def handleAdventurerDyingNow(): Unit = {
+  protected def handleAdventurerDyingNow(): Unit = {
     dyingAdventurerMap.foreach { dying =>
       if (dying._2._2 <= 0) {
         //        println(s"remove adventurer: ${dying._1}")
@@ -372,6 +389,43 @@ trait ThorSchema extends KillInformation {
     }
   }
 
+  final protected def handleBodyToFoodEvent(e: BodyToFood): Unit = {
+    e.foods.foreach { f =>
+      bodyFood.put(f.fId, (f, e.startP))
+    }
+  }
+
+  final protected def handleBodyToFoodEvent(l: List[BodyToFood]): Unit = {
+    l foreach handleBodyToFoodEvent
+  }
+
+  final protected def handleBodyToFoodNow(): Unit = {
+    gameEventMap.get(systemFrame).foreach { events =>
+      handleBodyToFoodEvent(events.filter(_.isInstanceOf[BodyToFood]).map(_.asInstanceOf[BodyToFood]).reverse)
+    }
+  }
+
+  final protected def handleBodyFoodMovingNow(): Unit = {
+    bodyFood.foreach { bf =>
+      val foodState = bf._2._1
+      if (bf._2._2 != foodState.position) { //食物没有运动到目标位置
+        if (foodState.scatterStep.get <= 0) {
+          val newPosition = foodState.position
+          bodyFood.update(bf._1, (foodState.copy(scatterStep = None), newPosition))
+        } else {
+          val newFood = foodState.copy(scatterStep = Some((foodState.scatterStep.get - 1).toByte))
+          val newPosition = bf._2._2.moveTo(foodState.position, foodState.scatterStep.get)
+          bodyFood.update(bf._1, (newFood, newPosition))
+        }
+      } else { //食物已到达目标位置
+        val food = Food(bf._2._1)
+        foodMap.put(food.fId, food)
+        quadTree.insert(food)
+        bodyFood.remove(bf._1)
+      }
+    }
+  }
+
   protected def clearEventWhenUpdate(): Unit = {}
 
   def getThorSchemaState(): ThorSchemaState = {
@@ -457,6 +511,8 @@ trait ThorSchema extends KillInformation {
     handleAdventurerAttackedNow()
     handleAdventurerDyingNow()
     handleAdventurerEatFoodNow()
+    handleBodyToFoodNow()
+    handleBodyFoodMovingNow()
     handleGenerateFoodNow()
     handleNewBornNow()
     handleUserEnterRoomNow()

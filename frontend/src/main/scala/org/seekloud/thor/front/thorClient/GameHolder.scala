@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 seekloud (https://github.com/seekloud)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.seekloud.thor.front.thorClient
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -103,7 +119,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
   protected var killerName = ""
   protected var killNum = 0
-  protected var energy = 0
+  protected var energyScore = 0
   protected var level = 0
 
 
@@ -112,7 +128,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
     drawGameByTime(offsetTime, canvasUnit, canvasBounds)
-    if(gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energy, level))
+    if(gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     nextFrame = dom.window.requestAnimationFrame(gameRender())
   }
 
@@ -227,6 +243,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           val start = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
           thorSchema.drawRank(currentRank,CurrentOrNot = true, shortId)
+          thorSchema.drawSmallMap(mainId)
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if(drawTime.length >= drawTimeSize){
             drawTimeLong = drawTime.sum / drawTime.size
@@ -244,8 +261,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
           }
         }
         else{
-          println(s"drawGameLoading!mainId: $mainId")
-          thorSchema.adventurerMap.foreach(println)
           drawGameLoading()
         }
 
@@ -281,7 +296,6 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
   }
 
   def drawGameLoading(): Unit = {
-    println("loading...")
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasWidth, canvasHeight)
     ctx.setFill("rgb(250, 250, 250)")

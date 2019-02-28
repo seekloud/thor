@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 seekloud (https://github.com/seekloud)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.seekloud.thor.core
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -36,6 +52,7 @@ object RobotActor {
   private final case object MouseMoveKey
   private final case object MouseMoveGoOnKey
   private final case object MouseLeftDownKey
+  private final case object RobotDeadKey
 
   private final case object AutoMouseMove extends Command
 
@@ -130,8 +147,8 @@ object RobotActor {
 //            val thetaList = increment.scanLeft(direction)(_ + _).map(t => if(t > math.Pi) t - 2 * math.Pi.toFloat else if(t < -math.Pi) t + 2 * math.Pi.toFloat else t)
 
 //            ctx.self ! AutoMouseMoveGoOn(thetaList.toList, 0)
-            val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
-            val data = MM(byteId, (math.cos(theta) * moveDistance).toShort, (math.sin(theta) * moveDistance).toShort, thorSchema.systemFrame + 1, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+            val AndMoveDistance = if(thorSchema.config.isRobotMove) 0 else 10000
+            val data = MM(byteId, ((math.cos(theta) * 128) + AndMoveDistance).toShort, (math.sin(theta) * 128).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
             roomActor ! RoomActor.WsMessage(botId, data)
 
             timer.cancel(MouseMoveKey)
@@ -145,8 +162,8 @@ object RobotActor {
 
         case AutoMouseMoveGoOn(thetaList, num) =>
           //moveDistance是否移动
-          val moveDistance = if(thorSchema.config.isRobotMove) 128 else 1
-          val data = MM(byteId, (math.cos(thetaList(num)) * moveDistance).toShort, (math.sin(thetaList(num)) * moveDistance).toShort, thorSchema.systemFrame + 1, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+          val AndMoveDistance = if(thorSchema.config.isRobotMove) 0 else 10000
+          val data = MM(byteId, ((math.cos(thetaList(num)) * 128) + AndMoveDistance).toShort, (math.sin(thetaList(num)) * 128).toShort, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
           roomActor ! RoomActor.WsMessage(botId, data)
           if(num < math.min(thetaList.length - 1, (moveFrequency * 1000).toInt / 100))
             timer.startSingleTimer(MouseMoveGoOnKey, AutoMouseMoveGoOn(thetaList, num + 1), 100.millis)
@@ -156,7 +173,7 @@ object RobotActor {
 
         case AutoMouseLeftDown =>
           if(attack2Player(thorSchema, botId) && thorSchema.config.isRobotAttack){
-            val data = MouseClickDownLeft(byteId, thorSchema.systemFrame + 1, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
+            val data = MouseClickDownLeft(byteId, thorSchema.systemFrame + 4, (actionSerialNumGenerator.getAndIncrement() % 127).toByte)
             roomActor ! RoomActor.WsMessage(botId, data)
           }
           timer.cancel(MouseLeftDownKey)
@@ -167,12 +184,17 @@ object RobotActor {
           timer.cancel(MouseMoveKey)
           timer.cancel(MouseMoveGoOnKey)
           timer.cancel(MouseLeftDownKey)
-          ctx.system.scheduler.scheduleOnce(2.seconds){
-            roomActor ! RoomActor.ReliveRobot(botId, byteId, botName, ctx.self)
+          if(thorSchema.config.getRobotNumber - thorSchema.adventurerMap.toIndexedSeq.length > 0) {
+            ctx.system.scheduler.scheduleOnce(2.seconds){
+              roomActor ! RoomActor.ReliveRobot(botId, byteId, botName, ctx.self)
+            }
+            ctx.system.scheduler.scheduleOnce(4.seconds){
+              timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
+              timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
+            }
           }
-          ctx.system.scheduler.scheduleOnce(4.seconds){
-            timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
-            timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
+          else{
+            timer.startSingleTimer(RobotDeadKey, RobotDead, 5.seconds)
           }
           Behaviors.same
 
