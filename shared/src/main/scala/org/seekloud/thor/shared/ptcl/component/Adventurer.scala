@@ -36,7 +36,7 @@ case class AdventurerState(
   killNum: Short,
   isMove: Byte,
   isUpdateLevel: Byte,
-  levelUpExecute: Short,
+  levelUpExecute: Byte,
   isIntersect: Byte
 )
 
@@ -180,7 +180,7 @@ trait Adventurer extends CircleObjectOfGame {
       killNum.toShort,
       if(isMove) 1 else 0,
       if(isUpdateLevel) 1 else 0,
-      levelUpExecute.toShort,
+      levelUpExecute.toByte,
       isIntersect)
   }
 
