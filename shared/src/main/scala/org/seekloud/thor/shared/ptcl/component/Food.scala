@@ -23,7 +23,7 @@ import org.seekloud.thor.shared.ptcl.model
 /**
   * Created by Jingyi on 2018/11/9
   */
-case class FoodState(fId: Int, level:Byte, position: Point, radius: Float, color: Byte)
+case class FoodState(fId: Int, level:Byte, position: Point, radius: Float, color: Byte, scatterStep: Option[Byte] = None)
 
 trait Food extends CircleObjectOfGame {
 
@@ -36,6 +36,8 @@ trait Food extends CircleObjectOfGame {
   override protected var position: Point
 
   override var radius: Float
+
+  var scatterStep: Option[Byte]
 
   def getFoodState: FoodState = {
     FoodState(fId, level, position, radius, color)
@@ -53,5 +55,6 @@ case class AddNormalFood(
                         var level: Byte,
                         var position: model.Point,
                         var radius: Float,
-                        var color: Byte
+                        var color: Byte,
+                        var scatterStep: Option[Byte] = None
                         ) extends Food

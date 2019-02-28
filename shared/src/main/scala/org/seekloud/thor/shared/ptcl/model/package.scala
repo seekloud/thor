@@ -74,6 +74,19 @@ package object model {
     def in(view: Point, extra: Point) = {
       x >= (0 - extra.x) && y >= (0 - extra.y) && x <= (view.x + extra.x) && y <= (view.y + extra.y)
     }
+
+    def moveTo(des: Point, step: Int): Point = {
+      import math._
+
+//      val distance = sqrt(pow(x - des.x, 2) + pow(y - des.y, 2))
+      val xDistance = abs(x - des.x)
+      val yDistance = abs(y - des.y)
+      val moveUnit = Point(xDistance, yDistance) / step
+
+      val newX = if (x >= des.x) x - moveUnit.x else x + moveUnit.x
+      val newY = if (y >= des.y) y - moveUnit.y else y + moveUnit.y
+      Point(newX, newY)
+    }
   }
 
   case class Segment(){

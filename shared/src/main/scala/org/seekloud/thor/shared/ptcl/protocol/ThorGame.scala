@@ -18,7 +18,7 @@ package org.seekloud.thor.shared.ptcl.protocol
 
 import org.seekloud.thor.shared.ptcl.component.{AdventurerState, FoodState}
 import org.seekloud.thor.shared.ptcl.config.{ThorGameConfig, ThorGameConfigImpl}
-import org.seekloud.thor.shared.ptcl.model.Score
+import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaState
 
 import scala.collection.mutable
@@ -100,6 +100,7 @@ object ThorGame {
   /*生成环境元素*/
   final case class GenerateFood(override val frame: Int, food: FoodState) extends EnvironmentEvent with WsMsgServer
 
+  final case class BodyToFood(override val frame: Int,  startP: Point, foods: List[FoodState]) extends EnvironmentEvent with WsMsgServer
 
   final case object RestartGame extends WsMsgFront
 

@@ -91,6 +91,9 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val foodRadiusLevel = config.getDoubleList("thorGame.food.radius")
     .requiring(_.size() >= 1,"minimum supported food energy size is 1").asScala.map(_.toFloat).toList
 
+  private[this] val scatterAnimation = config.getInt("thorGame.food.scatterAnimation")
+    .requiring(t => t > 1,"minimum supported adventurer scatterAnimation  is 1")
+
   //robot config
   private[this] val robotNames = config.getStringList("thorGame.robot.name")
     .requiring(_.size() >= 1, msg="minimum robot names size is 1").asScala.toList
@@ -114,7 +117,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   private[this] val adventurerParams = AdventurerParams(AdventurerMoveSpeed(adventurerSpeedLevel), adventurerRadiusLevel, adventurerMaxEnergyLevel, adventurerContainEnergyLevel,
     adventurerFacePalstance, adventurerSpeedUpRate, adventurerSpeedUpEnergyLoose, adventurerDyingAnimation, adventurerSpeedUpAnimation, adventurerLevelUpAnimation, adventurerNewbornFrame.toByte)
 
-  private[this] val foodParams = FoodParams(foodMax, foodEnergyLevel, foodRadiusLevel)
+  private[this] val foodParams = FoodParams(foodMax, foodEnergyLevel, foodRadiusLevel, scatterAnimation.toByte)
 
   private[this] val weaponParams = WeaponParams(weaponLengthLevel)
 
@@ -141,6 +144,8 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
   override def getRadiusByFoodLevel(l: Byte): Float = thorGameConfig.getRadiusByFoodLevel(l)
 
   def getEnergyByFoodLevel(l: Byte) = thorGameConfig.getEnergyByFoodLevel(l)
+
+  override def getScatterAnimation: Byte = thorGameConfig.getScatterAnimation
 
   def getEnergyByKillingAdventurerLevel(l: Byte): Int = thorGameConfig.getEnergyByKillingAdventurerLevel(l)
 

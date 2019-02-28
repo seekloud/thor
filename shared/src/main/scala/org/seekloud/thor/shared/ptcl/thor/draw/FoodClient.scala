@@ -56,6 +56,12 @@ trait FoodClient { this: ThorSchemaClientImpl =>
     }
   }
 
+  def drawBodyFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+    bodyFood.foreach { bf =>
+      drawAFood(Food(bf._2._1.copy(position = bf._2._2)), offset, canvasUnit, canvasBoundary)
+    }
+  }
+
   def drawAFood(food:Food, offset:Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
     val img = drawFrame.createImage(pictureMap(s"food-sheet0-${food.getFoodState.color}.png"))

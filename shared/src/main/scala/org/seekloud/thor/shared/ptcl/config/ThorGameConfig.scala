@@ -49,7 +49,8 @@ final case class AdventurerParams(
 final case class FoodParams(
   max: Int,
   energyList: List[Int],
-  radiusList: List[Float]
+  radiusList: List[Float],
+  scatterAnimation: Byte
 )
 
 final case class WeaponParams(
@@ -88,6 +89,8 @@ trait ThorGameConfig {
   def getRadiusByFoodLevel(l: Byte): Float
 
   def getEnergyByFoodLevel(l: Byte): Int
+
+  def getScatterAnimation: Byte
 
   def getEnergyByKillingAdventurerLevel(l: Byte): Int
 
@@ -162,6 +165,10 @@ case class ThorGameConfigImpl(
 
   override def getEnergyByFoodLevel(l: Byte): Int = {
     foodParams.energyList(l)
+  }
+
+  override def getScatterAnimation: Byte = {
+    foodParams.scatterAnimation
   }
 
   override def getEnergyByKillingAdventurerLevel(l: Byte): Int = {

@@ -105,6 +105,20 @@ case class ThorSchemaServerImpl(
     }
   }
 
+  override protected def handleAdventurerDyingNow(): Unit = {
+    dyingAdventurerMap.foreach { dying =>
+      if (dying._2._2 <= 0) {
+        dyingAdventurerMap.remove(dying._1)
+        val foods = genBodyFood(dying._2._1)
+        val event = BodyToFood(systemFrame, dying._2._1.position, foods)
+        addGameEvent(event)
+        dispatch(event)
+      } else {
+        dyingAdventurerMap.update(dying._1, (dying._2._1, dying._2._2 - 1))
+      }
+    }
+  }
+
   implicit val scoreOrdering = new Ordering[Score] {
     override def compare(x: Score, y: Score): Int = {
       var r = y.e - x.e
@@ -178,6 +192,25 @@ case class ThorSchemaServerImpl(
         }
     }
     foodList
+  }
+
+  def genBodyFood(adv: Adventurer): List[FoodState] = {
+    var bodyFoods: List[FoodState] = List()
+    val advRadius = config.getAdventurerRadiusByLevel(adv.level)
+    def genPosition(): Point = {
+      Point(random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.x - 1.5.toFloat * advRadius,
+        random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.y - 1.5.toFloat * advRadius
+      )
+    }
+
+    (1 to adv.level * 3).foreach {
+      _ =>
+        val endP = genPosition()
+
+        val food = FoodState(foodIdGenerator.getAndIncrement(), random.nextInt(5).toByte, endP, 2, random.nextInt(8).toByte, Some(config.getScatterAnimation))
+        bodyFoods = bodyFoods :+ food
+    }
+    bodyFoods
   }
 
   def joinGame(userId: String, name: String, shortId: Byte, userActor: ActorRef[UserActor.Command]): Unit = {
