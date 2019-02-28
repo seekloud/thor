@@ -55,7 +55,7 @@ class ThorSchemaImpl(
 
   private var justSyncFrame = 0
 
-  override protected implicit def adventurerState2Impl(adventurer: AdventurerState) :Adventurer = {
+  override protected implicit def adventurerState2Impl(adventurer: AdventurerState): Adventurer = {
     val playerInfo = playerIdMap(adventurer.byteId)
     new AdventurerImpl(config, adventurer, playerInfo._1, playerInfo._2)
   }
@@ -64,13 +64,14 @@ class ThorSchemaImpl(
     if (e.frame >= systemFrame) {
       addGameEvent(e)
     } else if (esRecoverSupport) {
-//      println(s"rollback-frame=${e.frame}, curFrame=${this.systemFrame},e=$e")
+      //      println(s"rollback-frame=${e.frame}, curFrame=${this.systemFrame},e=$e")
       e match {
         case event: EatFood => addGameEvent(event.copy(frame = systemFrame))
         case event: GenerateFood => addGameEvent(event.copy(frame = systemFrame))
         case event: UserEnterRoom => addGameEvent(event.copy(frame = systemFrame))
         case event: BeAttacked => addGameEvent(event.copy(frame = systemFrame))
         case event: UserLeftRoom => addGameEvent(event.copy(frame = systemFrame))
+        case event: BodyToFood => addGameEvent(event.copy(frame = systemFrame))
         case _ => rollback4GameEvent(e)
 
       }
@@ -171,7 +172,7 @@ class ThorSchemaImpl(
     quadTree.clear()
     tmpAdventurerMap.clear()
     if (!thorSchemaSate.isIncrement) tmpFoodMap.clear()
-//    println(s"update time: ${System.currentTimeMillis()}")
+    //    println(s"update time: ${System.currentTimeMillis()}")
     thorSchemaSate.adventurer.foreach { a =>
       val adventurer = new AdventurerImpl(config, a, playerIdMap(a.byteId)._1, playerIdMap(a.byteId)._2)
       quadTree.insert(adventurer)
@@ -224,10 +225,10 @@ class ThorSchemaImpl(
         addGameSnapshot(systemFrame, this.getThorSchemaState())
       }
     } else {
-//      super.update()
+      //      super.update()
       if (esRecoverSupport) {
         if (rollBackFrame.nonEmpty) {
-          rollBackFrame = rollBackFrame.distinct.filterNot(r => r < justSyncFrame || r >= systemFrame).sortWith(_< _)
+          rollBackFrame = rollBackFrame.distinct.filterNot(r => r < justSyncFrame || r >= systemFrame).sortWith(_ < _)
           rollBackFrame.headOption.foreach(rollback)
           super.update()
         } else {
