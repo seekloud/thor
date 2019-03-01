@@ -123,26 +123,13 @@ trait BackgroundClient {
     ctx.fillRec(10, window.y - window.x * 0.11, window.x * 0.2, window.x * 0.1)
     adventurerMap.foreach{
       case adventurer if adventurer._1 == mainId =>
-        if (adventurer._2.energyScore == adventurerMap.map(_._2.energyScore).max) {
-          val adventurerMapX = 10 + adventurer._2.position.x * scale
-          val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
-          drawCrown(adventurerMapX, adventurerMapY)
-        } else {
-          val adventurerMapX = 10 + adventurer._2.position.x * scale
-          val adventurerMapY = window.y - window.x * 0.11 + adventurer._2.position.y * scale
-          drawStar(adventurerMapX, adventurerMapY)
-        }
-      case adventurer if adventurer._2.energyScore >= adventurerMap.filterNot(_._1 == mainId).map(_._2.energyScore).max =>
-        if (adventurer._2.energyScore == adventurerMap.map(_._2.energyScore).max) {
-          val adventurerMapX = 10 + adventurer._2.position.x * scale
-          val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
-          drawCrown(adventurerMapX, adventurerMapY)
-        } else {
-          val adventurerMapX = 10 + adventurer._2.position.x * scale
-          val adventurerMapY = window.y - window.x * 0.11 + adventurer._2.position.y * scale
-          drawStar(adventurerMapX, adventurerMapY)
-        }
-
+        val adventurerMapX = 10 + adventurer._2.position.x * scale
+        val adventurerMapY = window.y - window.x * 0.11 + adventurer._2.position.y * scale
+        drawStar(adventurerMapX, adventurerMapY)
+      case adventurer if adventurer._2.level >= 21 =>
+        val adventurerMapX = 10 + adventurer._2.position.x * scale
+        val adventurerMapY =  window.y - window.x * 0.11 + adventurer._2.position.y * scale
+        drawCrown(adventurerMapX, adventurerMapY)
       case _ => ()
     }
     ctx.restore()

@@ -42,7 +42,7 @@ object TestRender extends Page{
 
   private val random = new Random(System.currentTimeMillis())
   private val gameInfo = ThorGameInfo(name = Main.guestName(random.nextInt(Main.guestName.length)))
-  private val canvas = <canvas id ="GameView" tabindex="1" style="cursor:url(http://pic.neoap.com/hestia/files/image/OnlyForTest/8970e0eb3ae30901488d351953d0df70.png),auto;"> </canvas>
+  private val canvas = <canvas id ="GameView" tabindex="1"> </canvas>
 
   def init() = {
 

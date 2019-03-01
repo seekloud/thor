@@ -42,6 +42,7 @@ case class AdventurerServer(
   var faceDirection: Float = 0,
   var isSpeedUp: Boolean = false,
   var killNum: Int = 0,
+  var stickKillNum : Int = 0,
   var isMove: Boolean = true,
   var isUpdateLevel: Boolean = false,
   var levelUpExecute: Int = 100,

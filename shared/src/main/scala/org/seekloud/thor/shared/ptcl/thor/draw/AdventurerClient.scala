@@ -116,6 +116,15 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
         ctx.setTextBaseLine("top")
         ctx.fillText(s"${adventurer.name}", sx * canvasUnit, (sy + r) * canvasUnit + 20)
         ctx.restore()
+
+        //荣誉星号
+        ctx.save()
+        if (adventurer.stickKillNum > 0) {
+          val starImg = drawFrame.createImage(pictureMap("star.png"))
+          for (i <- 1 to adventurer.stickKillNum)
+            ctx.drawImage(starImg, (sx + i * 2 ) * canvasUnit - 35, (sy + r) * canvasUnit + 45, Some(20, 20))
+        }
+        ctx.restore()
     }
     adventurerMap.foreach{
       adventurer =>

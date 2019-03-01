@@ -318,6 +318,7 @@ trait ThorSchema extends KillInformation {
       adventurerMap.get(e.playerId).foreach { adventurer =>
         //      println(s"handle ${e.playerId} attacked")
         killerOpt.foreach(_.killNum += 1)
+        if (adventurer.level >= 21) killerOpt.foreach(_.stickKillNum += 1)
         quadTree.remove(adventurer)
         adventurerMap.remove(adventurer.playerId)
         attackingAdventureMap.remove(adventurer.playerId)

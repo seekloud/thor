@@ -34,6 +34,7 @@ case class AdventurerState(
   direction: Float,
   isSpeedUp: Byte,
   killNum: Short,
+  stickKillNum: Short,
   isMove: Byte,
   isUpdateLevel: Byte,
   levelUpExecute: Byte,
@@ -52,6 +53,7 @@ trait Adventurer extends CircleObjectOfGame {
   var faceDirection: Float
   var isSpeedUp: Boolean
   var killNum: Int
+  var stickKillNum : Int
   var isMove: Boolean
   var isUpdateLevel: Boolean
   var levelUpExecute: Int
@@ -178,6 +180,7 @@ trait Adventurer extends CircleObjectOfGame {
       direction,
       if(isSpeedUp) 1 else 0,
       killNum.toShort,
+      stickKillNum.toShort,
       if(isMove) 1 else 0,
       if(isUpdateLevel) 1 else 0,
       levelUpExecute.toByte,
@@ -367,6 +370,7 @@ case class AdventurerImpl(
   var faceDirection: Float,
   var isSpeedUp: Boolean,
   var killNum: Int,
+  var stickKillNum: Int,
   var isMove: Boolean,
   var isUpdateLevel: Boolean,
   var levelUpExecute: Int,
@@ -387,6 +391,7 @@ case class AdventurerImpl(
       0,
       if(adventurerState.isSpeedUp == 0) false else true,
       adventurerState.killNum.toInt,
+      adventurerState.stickKillNum.toInt,
       if(adventurerState.isMove == 0) false else true,
       if(adventurerState.isUpdateLevel == 0) false else true,
       adventurerState.levelUpExecute.toInt,
