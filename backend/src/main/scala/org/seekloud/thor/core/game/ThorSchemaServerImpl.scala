@@ -206,7 +206,7 @@ case class ThorSchemaServerImpl(
       var position = Point(random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.x - 1.5.toFloat * advRadius,
         random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.y - 1.5.toFloat * advRadius
       )
-      while (position.x > boundary.x - 5 || position.y > boundary.y - 5) {
+      while (position.x < 5 || position.y < 5 || position.x > boundary.x - 5 || position.y > boundary.y - 5) {
         position = Point(random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.x - 1.5.toFloat * advRadius,
           random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.y - 1.5.toFloat * advRadius
         )
