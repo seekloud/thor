@@ -396,6 +396,10 @@ object UserActor {
           roomActor ! RoomActor.LeftRoom4Watch(playerId, watchedPlayerId)
           Behaviors.stopped
 
+        case JoinRoomSuccess4Watch(watchedPlayer, config, roomActor, state, pMap) =>
+          val ws = RestartYourInfo.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+          frontActor ! Wrap(ws)
+          Behaviors.same
 
         case unknownMsg =>
           log.warn(s"${ctx.self.path} receive an unknown msg=$unknownMsg")

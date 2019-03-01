@@ -71,6 +71,10 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
 
+      case RestartYourInfo =>
+        mainId = myId
+        gameState = GameState.play
+
       case e: BeAttacked =>
         barrage = (e.killerName, e.name)
         barrageTime = 300

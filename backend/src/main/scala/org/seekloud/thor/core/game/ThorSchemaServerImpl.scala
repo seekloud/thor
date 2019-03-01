@@ -29,6 +29,7 @@ import org.seekloud.thor.shared.ptcl.model._
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchema
 import org.seekloud.thor.Boot.eSheepLinkClient
+import org.seekloud.thor.core.UserActor.JoinRoomSuccess4Watch
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 import scala.collection.mutable
@@ -371,6 +372,9 @@ case class ThorSchemaServerImpl(
         val adventurer = generateAdventurer(shortId, playerId, name)
         normalJoin(adventurer, playerId, name, shortId)
         ref ! UserActor.JoinRoomSuccess(adventurer, playerId, shortId, roomActorRef, config.getThorGameConfigImpl(), playerIdMap.toList)
+        watchingMap.find(_._1 == playerId).foreach{ playerWatchMap =>
+          playerWatchMap._2.foreach(_._2 ! JoinRoomSuccess4Watch(adventurer, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()),playerIdMap.toList))
+        }
         val event = UserEnterRoom(playerId, shortId, name, adventurer.getAdventurerState, systemFrame)
         dispatch(event)
         RecordMap.put(playerId, ESheepRecordSimple(System.currentTimeMillis(), 0, 0, 0))
