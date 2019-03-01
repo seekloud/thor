@@ -61,7 +61,7 @@ with FpsRender{
           drawBackground(offset, canvasUnit, canvasBounds)
           drawFood(offset, canvasUnit, canvasBounds)
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
-          drawBodyFood(offset, canvasUnit, canvasBounds)
+          drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
 
 //          if(ifTest)

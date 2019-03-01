@@ -196,14 +196,26 @@ case class ThorSchemaServerImpl(
 
   def genBodyFood(adv: Adventurer): List[FoodState] = {
     var bodyFoods: List[FoodState] = List()
-    val advRadius = config.getAdventurerRadiusByLevel(adv.level)
+    val advRadius = if (adv.level != config.getAdventurerLevelSize) {
+      config.getAdventurerRadiusByLevel(adv.level)
+    } else {
+      config.getAdventurerRadiusByLevel((adv.level - 1).toByte) * 1.5.toFloat
+    }
+//    val advRadius = config.getAdventurerRadiusByLevel(adv.level)
     def genPosition(): Point = {
-      Point(random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.x - 1.5.toFloat * advRadius,
+      var position = Point(random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.x - 1.5.toFloat * advRadius,
         random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.y - 1.5.toFloat * advRadius
       )
+      while (position.x < 5 || position.y < 5 || position.x > boundary.x - 5 || position.y > boundary.y - 5) {
+        position = Point(random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.x - 1.5.toFloat * advRadius,
+          random.nextInt((2 * 1.5 * advRadius).toInt) + adv.position.y - 1.5.toFloat * advRadius
+        )
+      }
+      position
     }
 
-    (1 to adv.level * 3).foreach {
+    val maxNum = if (adv.level != config.getAdventurerLevelSize) adv.level * 2 else adv.level * 5
+    (1 to maxNum).foreach {
       _ =>
         val endP = genPosition()
 
