@@ -67,7 +67,7 @@ object UserActor {
 
   case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, shortId: Byte, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl, playerIdMap: List[(Byte, (String, String))]) extends Command
 
-  final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState) extends Command
+  final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState, playerIdMap: List[(Byte, (String, String))]) extends Command
 
   case class JoinRoomFail4Watch(msg: String) extends Command
 
@@ -314,9 +314,9 @@ object UserActor {
         case ChangeUserInfo(info) =>
           watchInit(playerId, info, roomId, watchedPlayerId, frontActor)
 
-        case JoinRoomSuccess4Watch(watchedPlayer, config, roomActor, state) =>
+        case JoinRoomSuccess4Watch(watchedPlayer, config, roomActor, state, pMap) =>
 //          log.debug(s"$playerId join room 4 watch success")
-          frontActor ! Wrap(YourInfo(config, watchedPlayer.playerId, watchedPlayer.name).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
+          frontActor ! Wrap(YourInfo(config, watchedPlayer.playerId, watchedPlayer.name, watchedPlayer.byteId, pMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! Wrap(state.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayer.playerId, frontActor, roomActor))
 

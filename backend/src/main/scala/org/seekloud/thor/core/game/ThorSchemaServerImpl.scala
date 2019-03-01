@@ -241,7 +241,7 @@ case class ThorSchemaServerImpl(
         playerObserversMap.put(uid, userActor4WatchGame)
         watchingMap.put(playerId, playerObserversMap)
 //        log.debug(s"当前的watchingMaps是${watchingMap}")
-        userActor4WatchGame ! UserActor.JoinRoomSuccess4Watch(adventurer, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()))
+        userActor4WatchGame ! UserActor.JoinRoomSuccess4Watch(adventurer, config.getThorGameConfigImpl(), roomActorRef, GridSyncState(getThorSchemaState()), playerIdMap.toList)
 
       case None =>
         userActor4WatchGame ! UserActor.JoinRoomFail4Watch(s"观战的用户${playerId}不存在")

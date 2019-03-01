@@ -45,24 +45,31 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
   override protected def wsMessageHandler(data: WsMsgServer): Unit = {
     //    println(data.getClass)
     data match {
-      case e: YourInfo =>
-        dom.console.log(s"$e")
+      case YourInfo(config, id, yourName, sId, pMap) =>
+        dom.console.log(s"get YourInfo $id $yourName $pMap")
         startTime = System.currentTimeMillis()
-        myId = e.id
-        mainId = e.id
-        myName = e.name
-        gameConfig = Some(e.config)
-        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, e.config, e.id, name, canvasBoundary, canvasUnit, preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas))
+        myId = id
+        mainId = id
+        shortId = sId
+        myName = yourName
+        gameConfig = Some(config)
+        thorSchemaOpt = Some(ThorSchemaClientImpl(drawFrame, ctx, config, id, yourName, canvasBoundary, canvasUnit, preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas))
+        checkAndChangePreCanvas()
         if (timer != 0) {
           dom.window.clearInterval(timer)
-          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+          thorSchemaOpt.foreach { grid =>
+            timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
+            pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
+          }
         } else {
-          thorSchemaOpt.foreach { grid => timer = Shortcut.schedule(gameLoop, grid.config.frameDuration) }
+          thorSchemaOpt.foreach { grid =>
+            timer = Shortcut.schedule(gameLoop, grid.config.frameDuration)
+            pMap.foreach(p => grid.playerIdMap.put(p._1, p._2))
+          }
         }
         gameState = GameState.play
-        nextFrame = dom.window.requestAnimationFrame(gameRender())
+        if(nextFrame == 0) nextFrame = dom.window.requestAnimationFrame(gameRender())
         firstCome = false
-//        Shortcut.playMusic("bgm-2")
 
       case e: BeAttacked =>
         barrage = (e.killerName, e.name)
@@ -73,12 +80,11 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
             gameState = GameState.stop
             killer = e.killerName
             endTime = System.currentTimeMillis()
-            val time = duringTime(endTime - startTime)
             thorSchemaOpt match {
               case Some(thorSchema: ThorSchemaClientImpl) =>
                 thorSchema.adventurerMap.get(myId).foreach { my =>
                   thorSchema.killerNew = e.killerName
-                  thorSchema.duringTime = time
+                  thorSchema.duringTime = duringTime(endTime - startTime)
                   killerName = e.killerName
                   killNum = my.killNum
                   energyScore = my.energyScore
@@ -99,6 +105,13 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
           **/
         currentRank = e.currentRank
 //        historyRank = e.historyRank
+
+      case UserMap(map) =>
+        println(s"userMap ---- $map")
+        thorSchemaOpt.foreach{grid =>
+          map.foreach(p => grid.playerIdMap.put(p._1, p._2))
+          grid.needUserMap = false
+        }
 
       case e: GridSyncState =>
         //        println(s"still sync.but thorSchema is: $thorSchemaOpt")
@@ -123,9 +136,10 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         e match {
           case event: UserLeftRoom =>
             if (event.playerId == myId) {
-              //              Shortcut.cancelSchedule(timer)
+              //FIXME  Shortcut.cancelSchedule(timer)
               thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经死亡，请重新选择观战对象"))
             }
+            thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(event.shortId))
           case _ =>
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))

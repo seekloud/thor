@@ -136,6 +136,7 @@ object RoomActor {
             val tmpId = getTmpId(userId, name, thorSchema)
             thorSchema.joinGame(userId, name, tmpId, userActor)
             Behaviors.same
+
           case JoinRoom4Watch(uid, _, playerId, userActor4Watch) =>
 //            log.debug(s"${ctx.self.path} recv a msg=${msg}")
             watchingMap.put(uid,userActor4Watch)
