@@ -72,6 +72,7 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         firstCome = false
 
       case RestartYourInfo =>
+        println("restart!!!!")
         mainId = myId
         gameState = GameState.play
 
