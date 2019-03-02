@@ -18,7 +18,7 @@ package org.seekloud.thor.front.thorClient
 
 import org.scalajs.dom
 import org.seekloud.thor.front.common.Routes
-import org.seekloud.thor.front.utils.Shortcut
+import org.seekloud.thor.front.utils.{JsFunc, Shortcut}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.scalajs.dom.raw.{Event, FileReader, MessageEvent, MouseEvent}
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
@@ -141,7 +141,6 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         e match {
           case event: UserLeftRoom =>
             if (event.playerId == myId) {
-              //FIXME  Shortcut.cancelSchedule(timer)
               thorSchemaOpt.foreach(_.drawReplayMsg(s"玩家已经死亡，请重新选择观战对象"))
             }
             thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(event.shortId))
@@ -149,6 +148,19 @@ class GameHolder4Watch(name: String, roomId: Long, playerId: String, accessCode:
         }
         thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
+
+      case WsMsgErrorRsp(errCode, msg) =>
+        if(errCode == 1){
+          ctx.save()
+          ctx.fillRec(0,0,canvasWidth,canvasHeight)
+          ctx.setFill("rgb(250, 250, 250)")
+          ctx.setFont("Helvetica", 50, "bold")
+          ctx.fillText("该用户已经死亡，请重新刷新页面", 100, 100)
+          ctx.restore()
+        }
+        else{
+          JsFunc.alert(s"$msg")
+        }
 
       case x =>dom.window.console.log(s"接收到无效消息:$x")
     }
