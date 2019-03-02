@@ -323,7 +323,6 @@ object UserActor {
         case JoinRoomFail4Watch(error) =>
           log.debug(s"join room 4 watch failed $msg")
           frontActor ! Wrap(WsMsgErrorRsp(1, error).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
-          frontActor ! CompleteMsgServer
           switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
         case DispatchMsg(m) =>
