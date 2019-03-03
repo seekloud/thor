@@ -190,6 +190,9 @@ trait Adventurer extends CircleObjectOfGame {
   def attacking(killedLevel: Byte)(implicit config: ThorGameConfig): Unit ={
 //    println(s"killing $killedLevel Level adventurer")
     this.energy += config.getEnergyByKillingAdventurerLevel(killedLevel)
+    if (this.energy > config.getMaxEnergyByLevel(config.getAdventurerLevelSize.toByte)) {
+      this.energy = config.getMaxEnergyByLevel(this.level)
+    }
     this.energyScore += config.getEnergyByKillingAdventurerLevel(killedLevel)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
       updateLevel
@@ -198,6 +201,9 @@ trait Adventurer extends CircleObjectOfGame {
 
   def eatFood(food: Food)(implicit config: ThorGameConfig): Unit = {
     this.energy += config.getEnergyByFoodLevel(food.level)
+    if (energy > config.getMaxEnergyByLevel(config.getAdventurerLevelSize.toByte)) {
+      this.energy = config.getMaxEnergyByLevel(this.level)
+    }
     this.energyScore += config.getEnergyByFoodLevel(food.level)
     if (energy > config.getMaxEnergyByLevel(this.level)) {
       updateLevel
