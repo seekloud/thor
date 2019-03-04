@@ -149,7 +149,6 @@ object UserActor {
             init(playerId, info)
 
           case LeftRoom(actor) =>
-            log.info("init leftRoom")
             ctx.unwatch(actor)
             Behaviors.stopped
 

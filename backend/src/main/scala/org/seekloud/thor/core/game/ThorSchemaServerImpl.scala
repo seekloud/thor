@@ -246,6 +246,7 @@ case class ThorSchemaServerImpl(
 
       case None =>
         userActor4WatchGame ! UserActor.JoinRoomFail4Watch(s"观战的用户${playerId}不存在")
+        roomActorRef ! RoomActor.LeftRoom4Watch(uid, playerId)
     }
   }
 
