@@ -166,7 +166,7 @@ abstract class GameHolder(canvasName: String) extends NetworkInfo {
 
 
   protected def wsConnectClose(e: Event) = {
-    JsFunc.alert("网络连接失败，请重新刷新")
+    JsFunc.alert("网络连接失败(ws close)，请重新刷新")
     e
   }
 
