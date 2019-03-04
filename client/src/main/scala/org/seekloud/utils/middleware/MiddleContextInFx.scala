@@ -136,9 +136,11 @@ class MiddleContextInFx extends MiddleContext {
 
   override def fillText(text: String, x: Double, y: Double, z: Double = 500) = context.fillText(text, x, y)
 
-  override def setFont(f: String, s: Double) = context.setFont(Font.font(f, s))
+  override def setFont(f: String, s: Double, wid: String = "normal") = context.setFont(Font.font(f, s))
 
   override def setTextAlign(s: String) = context.setTextAlign(s)
+
+  override def setShadowColor(s: String): Unit = {}
 
   override def setTextBaseLine(s: String) = context.setTextBaseline(s)
 
@@ -157,4 +159,6 @@ class MiddleContextInFx extends MiddleContext {
   override def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean): Unit = context.arc(x, y, r, r, sAngle, eAngle)
 
   override def lineWidth(width: Double): Unit = context.setLineWidth(width)
+
+  override def measureText(s: String): Double = 0
 }

@@ -172,11 +172,6 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
             if (thorSchemaOpt.nonEmpty) {
               thorSchemaOpt.get.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
               if(msg.playerId == myId) shortId = msg.shortId
-//              thorSchemaOpt.foreach{ thorSchema =>
-//                thorSchema.playerIdMap.put(msg.shortId, (msg.playerId, msg.name))
-//                if(msg.playerId == myId)
-//                  shortId = msg.shortId
-//              }
             } else {
               dom.window.setTimeout(() =>
                 thorSchemaOpt.foreach{ thorSchema =>

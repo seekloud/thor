@@ -46,6 +46,8 @@ class PlayGameView (context: Context){
   var canvasUnit = canvasWidth / Constants.canvasUnitPerLine
   var canvasBounds = canvasBoundary / canvasUnit
   val canvas = drawFrame.createCanvas(canvasWidth,canvasHeight)
+  protected var canvasUnitPerLine = 100
+
 
   val group = new Group()
   val scene = new Scene(group)
@@ -87,19 +89,41 @@ class PlayGameView (context: Context){
     ctx.fillText("请稍等，正在连接服务器", 150, 180)
   }
 
-  def handleResize = {
-    val width = context.getStageWidth.toFloat
-    val height = context.getStageHeight.toFloat
-    if(width != canvasWidth || height != canvasHeight){
+//  def handleResize = {
+//    val width = context.getStageWidth.toFloat
+//    val height = context.getStageHeight.toFloat
+//    if(width != canvasWidth || height != canvasHeight){
+//      canvasWidth = width
+//      canvasHeight = height
+//      canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+//      canvasBoundary = Point(canvasWidth, canvasHeight)
+//      canvasBounds = canvasBoundary / canvasUnit
+//      canvas.setWidth(canvasWidth)
+//      canvas.setHeight(canvasHeight)
+//      (canvasBoundary, canvasUnit)
+//    } else (Point(0,0), 0.toFloat)
+//  }
+
+  def handleResize(level: Int) = {
+    val width = screen.getWidth.toFloat
+    val height = screen.getHeight.toFloat
+    val perLine = 120 + 10 * level
+    if(width != canvasWidth || height != canvasHeight || perLine != canvasUnitPerLine){
       canvasWidth = width
       canvasHeight = height
-      canvasUnit = canvasWidth / Constants.canvasUnitPerLine
+      canvasUnitPerLine =
+        if(perLine == canvasUnitPerLine) canvasUnitPerLine
+        else if (perLine < canvasUnitPerLine) canvasUnitPerLine - 1
+        else canvasUnitPerLine + 1
+      canvasUnit = canvasWidth / canvasUnitPerLine
       canvasBoundary = Point(canvasWidth, canvasHeight)
       canvasBounds = canvasBoundary / canvasUnit
       canvas.setWidth(canvasWidth)
       canvas.setHeight(canvasHeight)
       (canvasBoundary, canvasUnit)
-    } else (Point(0,0), 0.toFloat)
+    } else {
+      (Point(0,0), 0.toFloat)
+    }
   }
 
   def drawReplayMsg(m: String): Unit = {
