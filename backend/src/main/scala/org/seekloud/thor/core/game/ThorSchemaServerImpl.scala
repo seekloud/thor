@@ -181,8 +181,8 @@ case class ThorSchemaServerImpl(
     var foodList: List[FoodState] = List()
 
     def genPosition(): Point = {
-      Point(random.nextInt(boundary.x.toInt - 10),
-        random.nextInt(boundary.y.toInt - 10))
+      Point(random.nextInt(boundary.x.toInt - 20) + 10,
+        random.nextInt(boundary.y.toInt - 20) + 10)
     }
 
     (1 to num).foreach {
