@@ -175,7 +175,7 @@ class PlayGameController(
   //  def getActionSerialNum: Int = actionSerialNumGenerator.getAndIncrement()
 
 
-  def start() = {
+  def start(): Unit = {
     if (firstCome) {
       firstCome = false
       println("start...")

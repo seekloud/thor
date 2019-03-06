@@ -97,7 +97,7 @@ class LoginView(context: Context){
       oneRoomInfo.edit.get().setOnAction{e =>
         App.pushStack2AppThread{
           val playGameView = new PlayGameView(context)
-          new PlayGameController(playerInfo, gameServerInfo, context, playGameView, Some(t.toString)).start
+          new PlayGameController(playerInfo, gameServerInfo, context, playGameView, Some(t.toString)).start()
           context.switchScene(playGameView.getScene, resize = true, fullScreen = true)
         }
       }

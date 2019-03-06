@@ -64,7 +64,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
     }
   }
 
-  def reStart() = {
+  def reStart(): Unit = {
     //    firstCome = true
 //    start(myName, None, None, None) //重启没有验证accessCode
         websocketClient.sendMsg(RestartGame)
@@ -72,7 +72,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
 
   def getActionSerialNum:Byte = (actionSerialNumGenerator.getAndIncrement() % 127).toByte
 
-  override protected def wsMessageHandler(data: WsMsgServer) = {
+  override protected def wsMessageHandler(data: WsMsgServer): Unit = {
     //    import org.seekloud.thor.front.utils.byteObject.ByteObject._
     data match {
       case YourInfo(config, id, yourName, sId, pMap) =>
@@ -194,7 +194,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
   }
 
 
-  var lastMouseMove = 0l //限制只能发一次mousemove
+  var lastMouseMove = 0l //限制只能发一次mouseMove
   val frequency = 50
   def addActionListenEvent(): Unit = {
     canvas.getCanvas.focus()
@@ -224,7 +224,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       }
       e.preventDefault()
     }
-    canvas.getCanvas.onmousedown = { (e: dom.MouseEvent) =>
+    canvas.getCanvas.onmousedown = { e: dom.MouseEvent =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId)) {
@@ -258,7 +258,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       }
 
     }
-    canvas.getCanvas.onmouseup = { (e: dom.MouseEvent) =>
+    canvas.getCanvas.onmouseup = { e: dom.MouseEvent =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (thorSchema.adventurerMap.contains(myId))
@@ -273,7 +273,7 @@ class GameHolder4Play(name: String, user: Option[UserInfo] = None) extends GameH
       }
 
     }
-    canvas.getCanvas.onkeydown = { (e: dom.KeyboardEvent) =>
+    canvas.getCanvas.onkeydown = { e: dom.KeyboardEvent =>
       thorSchemaOpt match {
         case Some(thorSchema: ThorSchemaClientImpl) =>
           if (!thorSchema.adventurerMap.contains(myId)) {

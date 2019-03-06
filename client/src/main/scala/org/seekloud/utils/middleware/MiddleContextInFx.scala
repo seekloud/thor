@@ -142,7 +142,7 @@ class MiddleContextInFx extends MiddleContext {
 
   override def setShadowColor(s: String): Unit = {
     val shadowColor = new InnerShadow()
-    shadowColor.setColor(Color.BLACK)
+    shadowColor.setColor(Color.WHITE)
     context.setEffect(shadowColor)
   }
 
