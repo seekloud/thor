@@ -136,6 +136,10 @@ lazy val client = project.in(file("client")).enablePlugins(PackPlugin)
   .settings(
     libraryDependencies ++= Dependencies.clientDependencies
   )
+  .settings(
+    PB.targets in Compile := Seq(
+      scalapb.gen() -> (sourceManaged in Compile).value
+    ))
   .dependsOn(sharedJvm)
 
 lazy val root = (project in file("."))

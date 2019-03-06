@@ -69,8 +69,8 @@ object Dependencies {
   val essf = "org.seekloud" %% "essf" % "0.0.1-beta2"
   val byteobject = "org.seekloud" %% "byteobject" % "0.1.2"
   //  val scalaFx = "org.scalafx" %% "scalafx" % "10.0.2-R15"
-//  val grpc = "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion
-//  val scalapbDependency = "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
+  val grpc = "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion
+  val scalapbDependency = "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
 
 
   val backendDependencies =
@@ -94,9 +94,9 @@ object Dependencies {
         Dependencies.asynchttpclient,
         Dependencies.ehcache,
         Dependencies.essf,
-        Dependencies.byteobject
-//        Dependencies.grpc,
-//        Dependencies.scalapbDependency
+        Dependencies.byteobject,
+        Dependencies.grpc,
+        Dependencies.scalapbDependency
         //      ,
         //      Dependencies.scalaFx
       )
@@ -112,9 +112,9 @@ object Dependencies {
         Dependencies.logback,
         Dependencies.asynchttpclient,
         Dependencies.essf,
-        Dependencies.byteobject
-//        Dependencies.grpc,
-//        Dependencies.scalapbDependency
+        Dependencies.byteobject,
+        Dependencies.grpc,
+        Dependencies.scalapbDependency
         //Dependencies.scalajs
       )
 
