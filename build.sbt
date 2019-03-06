@@ -139,7 +139,7 @@ lazy val client = project.in(file("client")).enablePlugins(PackPlugin)
   .dependsOn(sharedJvm)
 
 lazy val root = (project in file("."))
-  .aggregate(frontend,  backend)
+  .aggregate(frontend,  backend, client)
   .settings(
     name := projectName,
   )
