@@ -32,7 +32,7 @@ import javafx.scene.{Group, Scene}
 import javafx.stage.Stage
 import org.seekloud.thor.App
 import org.seekloud.thor.App.loginActor
-import org.seekloud.thor.common.Context
+import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.controller.PlayGameController
 import org.seekloud.thor.core.{TokenActor, LoginActor}
 import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, UserInfo}
@@ -45,7 +45,7 @@ import sun.misc.BASE64Decoder
   * Time: 11:41
   * 存储各种page
   */
-class LoginView(context: Context){
+class LoginView(context: StageContext){
 
   // 房间列表对应的Property类
   case class RoomInfo(

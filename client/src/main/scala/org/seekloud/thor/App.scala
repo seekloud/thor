@@ -32,7 +32,7 @@ import javafx.stage.Stage
 import concurrent.duration._
 import javafx.application.Platform
 import akka.actor.typed.ActorRef
-import org.seekloud.thor.common.Context
+import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.core.{LoginActor, TokenActor}
 import org.seekloud.thor.protocol.ESheepProtocol.LoginUrlRsp
 import org.seekloud.thor.view.LoginView
@@ -45,7 +45,7 @@ class  App extends Application{
   import App._
 
   override def start(primaryStage: Stage): Unit = {
-    val context = new Context(primaryStage)
+    val context = new StageContext(primaryStage)
     val loginPage = new LoginView(context)
 //    val loginPage = new ClientPage(primaryStage) // 处理扫码登录的操作
   }

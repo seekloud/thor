@@ -26,13 +26,32 @@ import javafx.stage.Stage
   * Date: 2018/12/6
   * Time: 16:14
   */
-class Context(stage: Stage) {
+
+object StageContext {
+
+  trait StageListener {
+    def onCloseRequest(): Unit
+  }
+
+}
+
+
+class StageContext(stage: Stage) {
+
+  import StageContext._
+
+  var stageListener: StageListener = _
+
+  stage.setOnCloseRequest(_ => stageListener.onCloseRequest())
+
 
   def getStageWidth = stage.getWidth
+
   def getStageHeight = stage.getHeight
+
   def isFullScreen = stage.isFullScreen
 
-  def switchScene(scene: Scene, title:String = "THOR",resize:Boolean = false,fullScreen:Boolean = false) = {
+  def switchScene(scene: Scene, title: String = "THOR", resize: Boolean = false, fullScreen: Boolean = false) = {
     stage.centerOnScreen()
     stage.setScene(scene)
     stage.sizeToScene()
@@ -40,12 +59,16 @@ class Context(stage: Stage) {
     stage.setTitle(title)
     stage.setFullScreen(fullScreen)
     stage.show()
-//    scene.setOnKeyPressed(new EventHandler[KeyEvent] {
-//      override def handle(event: KeyEvent): Unit = {
-//        if(event.getCode == KeyCode.Z) stage.setFullScreen(fullScreen)
-//        //        else  false
-//      }
-//    })
+  }
+
+  def setStageListener(listener: StageListener): Unit = {
+    stageListener = listener
+  }
+
+  def closeStage(): Unit = {
+//    ClientBoot.sdkServer ! SdkServer.Shutdown
+//    stage.close()
+//    System.exit(0) //TODO
   }
 
 }

@@ -26,7 +26,7 @@ import javafx.scene.input.KeyCode
 import org.seekloud.thor.App
 import org.seekloud.thor.game.NetWorkInfo
 import org.seekloud.thor.App.system
-import org.seekloud.thor.common.Context
+import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.core.PlayGameActor
 import org.seekloud.thor.core.PlayGameActor.DispatchMsg
 import org.seekloud.thor.model.{GameServerInfo, PlayerInfo}
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory
 class PlayGameController(
   playerInfo: PlayerInfo,
   gameServerInfo: GameServerInfo,
-  context: Context,
+  context: StageContext,
   playGameScreen: PlayGameView,
   roomInfo: Option[String] = None
 ) extends NetWorkInfo {
