@@ -20,6 +20,7 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
 import javafx.scene.{Group, Scene}
+import org.seekloud.thor.model.Constants
 
 /**
   * User: TangYaruo
@@ -42,31 +43,30 @@ class ModeScene {
 
   import ModeScene._
 
-  val width = 500
-  val height = 500
+  val width: Int = Constants.PreWindow.width
+  val height: Int = Constants.PreWindow.height
   val group = new Group
   private val scene = new Scene(group, width, height)
 
   scene.getStylesheets.add(
-    this.getClass.getResource("css/modeScene.css").toExternalForm
+    this.getClass.getClassLoader.getResource("css/modeScene.css").toExternalForm
   )
 
-
   val img = new ImageView("img/modeBg.jpg")
-  img.setFitWidth(500)
-  img.setFitHeight(500)
+  img.setFitWidth(width)
+  img.setFitHeight(height)
   group.getChildren.add(img)
 
 
   val humanChoice = new Button("Human")
   val botChoice = new Button("Robot")
 
-  humanChoice.setLayoutX(205)
+  humanChoice.setLayoutX(300)
   humanChoice.setLayoutY(150)
   humanChoice.getStyleClass.add("mode-choice")
-  botChoice.setLayoutX(105)
-  botChoice.setLayoutY(280)
-  botChoice.getStylesheets.add("mode-choice")
+  botChoice.setLayoutX(300)
+  botChoice.setLayoutY(250)
+  botChoice.getStyleClass.add("mode-choice")
 
   val shadow = new DropShadow()
 
@@ -86,11 +86,12 @@ class ModeScene {
     botChoice.setEffect(null)
   })
 
+
+  group.getChildren.addAll(humanChoice, botChoice)
+
   def getScene: Scene = this.scene
 
   var listener: ModeSceneListener = _
-
-  group.getChildren.addAll(humanChoice, botChoice)
 
   humanChoice.setOnAction(_ => listener.gotoHumanScene())
   botChoice.setOnAction(_ => listener.gotoBotScene())

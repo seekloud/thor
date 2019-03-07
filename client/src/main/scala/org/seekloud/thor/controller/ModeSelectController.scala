@@ -16,9 +16,11 @@
 
 package org.seekloud.thor.controller
 
+import akka.actor.typed.ActorRef
 import org.seekloud.thor.ClientBoot
+import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
-import org.seekloud.thor.scene.ModeScene
+import org.seekloud.thor.scene.{LoginScene, ModeScene}
 import org.seekloud.thor.scene.ModeScene.ModeSceneListener
 
 /**
@@ -26,14 +28,16 @@ import org.seekloud.thor.scene.ModeScene.ModeSceneListener
   * Date: 2019/3/7
   * Time: 19:30
   */
-class ModeSelectController(modeScene: ModeScene, context: StageContext) {
+class ModeSelectController(wsClient: ActorRef[WsClient.WsCommand], modeScene: ModeScene, context: StageContext) {
 
 
   modeScene.setListener(new ModeSceneListener {
     override def gotoHumanScene(): Unit = {
-      ClientBoot.addToPlatform(
-        //TODO LOGIN
-      )
+      ClientBoot.addToPlatform{
+        val loginScene = new LoginScene
+        val loginController = new LoginController(wsClient, modeScene, loginScene, context)
+        loginController.showScene()
+      }
     }
 
     override def gotoBotScene(): Unit = {

@@ -17,11 +17,13 @@
 package org.seekloud.thor
 
 import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.typed.scaladsl.adapter._
 import akka.dispatch.MessageDispatcher
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import javafx.application.Platform
 import javafx.stage.Stage
+import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.controller.ModeSelectController
 import org.seekloud.thor.scene.ModeScene
@@ -61,9 +63,11 @@ class ClientBoot extends javafx.application.Application {
 
     val context = new StageContext(primaryStage)
 
+    val wsClient = system.spawn(WsClient.create(), "WsClient")
+
     //TODO
     val modeScene = new ModeScene()
-    val modeSelectController = new ModeSelectController(modeScene, context)
+    val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
     modeSelectController.showScene()
 
 
