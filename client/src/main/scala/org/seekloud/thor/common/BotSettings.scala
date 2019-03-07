@@ -24,9 +24,13 @@ import com.typesafe.config.ConfigFactory
   * Date: 2019/3/7
   * Time: 11:22
   */
-class BotSettings {
+object BotSettings {
 
   val botConfig = ConfigFactory.parseResources("bot.conf").withFallback(ConfigFactory.load())
 
-  val appConfig = botConfig.getConfig("bot")
+  val appConfig = botConfig.getConfig("app")
+
+  //TODO
+
+
 }

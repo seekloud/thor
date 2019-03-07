@@ -21,7 +21,7 @@ import org.seekloud.thor.shared.ptcl.ErrorRsp
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
-import org.seekloud.thor.App.executor
+import org.seekloud.thor.ClientBoot.executor
 import com.neo.sk.utils.{HttpUtil, SecureUtil}
 import org.seekloud.thor.protocol.ESheepProtocol._
 import io.circe._
