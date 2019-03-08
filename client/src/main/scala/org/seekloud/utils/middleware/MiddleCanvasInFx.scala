@@ -18,8 +18,8 @@ package org.seekloud.utils.middleware
 
 import javafx.scene.SnapshotParameters
 import javafx.scene.canvas.Canvas
+import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
-
 import org.seekloud.thor.shared.ptcl.util.middleware._
 
 /**
@@ -40,25 +40,25 @@ class MiddleCanvasInFx private() extends MiddleCanvas {
     setHeight(height)
   }
 
-  def getCanvas = canvas
+  def getCanvas: Canvas = canvas
 
   override def getCtx = MiddleContextInFx(this)
 
-  override def getWidth = canvas.getWidth
+  override def getWidth(): Double = canvas.getWidth
 
-  override def getHeight = canvas.getHeight
+  override def getHeight(): Double = canvas.getHeight
 
-  override def setWidth(h: Any) = h match {
+  override def setWidth(h: Any): Unit = h match {
     case d: Float => canvas.setWidth(d)
     case _ => canvas.setWidth(h.asInstanceOf[Int].toFloat)
   }
 
-  override def setHeight(h: Any) = h match {
+  override def setHeight(h: Any): Unit = h match {
     case d: Float => canvas.setHeight(d)
     case _ => canvas.setHeight(h.asInstanceOf[Int].toFloat)
   }
 
-  override def change2Image = {
+  override def change2Image(): WritableImage = {
     val params = new SnapshotParameters
     params.setFill(Color.TRANSPARENT)
     canvas.snapshot(params, null)

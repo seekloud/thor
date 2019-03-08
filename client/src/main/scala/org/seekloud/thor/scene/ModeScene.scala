@@ -33,7 +33,6 @@ object ModeScene {
 
   trait ModeSceneListener {
     def gotoHumanScene()
-
     def gotoBotScene()
   }
 

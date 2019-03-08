@@ -25,8 +25,9 @@ import javafx.application.Platform
 import javafx.stage.Stage
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
-import org.seekloud.thor.controller.ModeSelectController
-import org.seekloud.thor.scene.ModeScene
+import org.seekloud.thor.controller.{GameController, ModeSelectController}
+import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, UserInfo}
+import org.seekloud.thor.scene.{GameScene, ModeScene}
 import org.slf4j.LoggerFactory
 
 import concurrent.duration._
@@ -62,13 +63,20 @@ class ClientBoot extends javafx.application.Application {
   override def start(primaryStage: Stage): Unit = {
 
     val context = new StageContext(primaryStage)
+    val gameScene = new GameScene
 
-    val wsClient = system.spawn(WsClient.create(), "WsClient")
+//    val wsClient = system.spawn(WsClient.create(gameController), "WsClient")
 
     //TODO
-    val modeScene = new ModeScene()
-    val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
-    modeSelectController.showScene()
+//    val modeScene = new ModeScene()
+//    val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
+//    modeSelectController.showScene()
+    addToPlatform{
+      context.switchScene(gameScene.getScene, title = "Thor Play", true, false)
+    }
+
+    new GameController(PlayerInfo(UserInfo(1000L,"test2","test",949848944L),"test1","test2","asd"),
+      GameServerInfo("",30376L,""),context,gameScene).start()
 
 
   }
