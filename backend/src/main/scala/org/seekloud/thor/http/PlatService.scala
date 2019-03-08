@@ -58,22 +58,18 @@ trait PlatService extends ServiceUtils{
       'playerName.as[String],
       'accessCode.as[String],
       'roomId.as[Long].?) { (id, name, accessCode, roomId) =>
-      val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow(id, name, _, roomId))
+      val VerifyAccessCode: Future[GetPlayerByAccessCodeRsp] = eSheepLinkClient ? (ESheepLinkClient.VerifyAccessCode(accessCode, _))
       dealFutureResult {
-        flowFuture.map(t => handleWebSocketMessages(t))
+        VerifyAccessCode.flatMap {
+          case GetPlayerByAccessCodeRsp(data, 0, "ok") =>
+            println("ws and access ok")
+            val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow(id, name, _, roomId))
+            flowFuture.map(t => handleWebSocketMessages(t))
+          case GetPlayerByAccessCodeRsp(data, _, _) =>
+            println("ws and accessCode error")
+            Future(complete(ErrorGetPlayerByAccessCodeRsp))
+        }
       }
-//      val VerifyAccessCode: Future[GetPlayerByAccessCodeRsp] = eSheepLinkClient ? (ESheepLinkClient.VerifyAccessCode(accessCode, _))
-//      dealFutureResult {
-//        VerifyAccessCode.flatMap {
-//          case GetPlayerByAccessCodeRsp(data, 0, "ok") =>
-//            println("ws and access ok")
-//            val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow(id, name, _, roomId))
-//            flowFuture.map(t => handleWebSocketMessages(t))
-//          case GetPlayerByAccessCodeRsp(data, _, _) =>
-//            println("ws and accessCode error")
-//            Future(complete(ErrorGetPlayerByAccessCodeRsp))
-//        }
-//      }
     }
   }
 

@@ -67,7 +67,7 @@ class WebSocketClient(
 
 
   def setup(url: String): Unit = {
-    println(s"set up ${System.currentTimeMillis()}")
+    println(s"set up ${getWebSocketUri(url)} ${System.currentTimeMillis()}")
 
     val webSocketStream = new WebSocket(getWebSocketUri(url))
     websocketStreamOpt = Some(webSocketStream)

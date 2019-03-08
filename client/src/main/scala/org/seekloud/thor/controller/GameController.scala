@@ -143,9 +143,12 @@ class GameController(
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if (thorSchema.adventurerMap.contains(mainId)) {
           val start = System.currentTimeMillis()
+          val a = System.currentTimeMillis()
           thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
           thorSchema.drawRank(currentRank, CurrentOrNot = true, byteId)
           thorSchema.drawSmallMap(mainId)
+          val b = System.currentTimeMillis()
+          println(s"the span is ${b-a}")
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if (drawTime.length >= drawTimeSize) {
             drawTimeLong = drawTime.sum / drawTime.size
@@ -192,6 +195,7 @@ class GameController(
         case GameState.firstCome =>
           thorSchemaOpt.foreach(_.drawGameLoading())
         case GameState.loadingPlay =>
+          println("loading play")
           thorSchemaOpt.foreach(_.drawGameLoading())
         case GameState.stop =>
           thorSchemaOpt.foreach {
@@ -216,6 +220,7 @@ class GameController(
               lastSendReq = System.currentTimeMillis()
             }
           }
+
           frameTime = frameTime :+ System.currentTimeMillis() - logicFrameTime
           frameTimeSingle = System.currentTimeMillis() - logicFrameTime
           logicFrameTime = System.currentTimeMillis()
@@ -238,7 +243,9 @@ class GameController(
           try {
             thorSchemaOpt = Some(ThorSchemaClientImpl(playGameScreen.drawFrame, playGameScreen.getCanvasContext, e.config, e.id, e.name, playGameScreen.canvasBoundary, playGameScreen.canvasUnit))
             gameConfig = Some(e.config)
+
             e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2)}}
+
             animationTimer.start()
             wsClient ! WsClient.StartGameLoop
             gameState = GameState.play
@@ -276,6 +283,7 @@ class GameController(
                     level = my.level
                   }
                 case None =>
+                  println("there is nothing")
               }
             }
 
@@ -391,7 +399,7 @@ class GameController(
 
     /*鼠标点击事件*/
     playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
-      //      println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+            println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {

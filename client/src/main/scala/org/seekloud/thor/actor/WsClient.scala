@@ -134,8 +134,8 @@ object WsClient {
               .viaMat(webSocketFlow)(Keep.both)
               .toMat(sink)(Keep.both)
               .run()
-
           val connected = response.flatMap { upgrade =>
+
             if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
               ctx.self ! SwitchBehavior("play", play(stream, control))
               Future.successful(s"${ctx.self.path} connect success.")
@@ -143,7 +143,7 @@ object WsClient {
               throw new RuntimeException(s"${ctx.self.path} connection failed: ${upgrade.response.status}")
             }
           } //链接建立时
-          connected.onComplete { i => println(i.toString) }
+          connected.onComplete { i => println(i.toString)}
           closed.onComplete { i =>
             println(s"${ctx.self.path} connect closed! try again 1 minutes later")
             //remind 此处存在失败重试
