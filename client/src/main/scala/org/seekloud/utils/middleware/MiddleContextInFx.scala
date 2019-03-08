@@ -20,9 +20,9 @@ import javafx.geometry.VPos
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
+import javafx.scene.effect.InnerShadow
 import javafx.scene.shape.{StrokeLineCap, StrokeLineJoin}
-import javafx.scene.text.{Font, FontWeight, TextAlignment}
-
+import javafx.scene.text.{Font, FontWeight, Text, TextAlignment}
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleContext
 
 /**
@@ -81,17 +81,17 @@ class MiddleContextInFx extends MiddleContext {
     context = canvas.getCanvas.getGraphicsContext2D
   }
 
-  def getContext = context
+  def getContext: GraphicsContext = context
 
   override def setGlobalAlpha(alpha: Double): Unit = context.setGlobalAlpha(alpha)
 
-  override def setStrokeStyle(color: String) = {
+  override def setStrokeStyle(color: String): Unit = {
     context.setStroke(Color.web(color))
   }
 
-  override def fill = context.fill()
+  override def fill: Unit = context.fill()
 
-  override def setFill(color: String) = context.setFill(Color.web(color))
+  override def setFill(color: String): Unit = context.setFill(Color.web(color))
 
   override def moveTo(x: Double, y: Double): Unit = context.moveTo(x, y)
 
@@ -122,31 +122,35 @@ class MiddleContextInFx extends MiddleContext {
     }
   }
 
-  override def fillRec(x: Double, y: Double, w: Double, h: Double) = context.fillRect(x, y, w, h)
+  override def fillRec(x: Double, y: Double, w: Double, h: Double): Unit = context.fillRect(x, y, w, h)
 
-  override def clearRect(x: Double, y: Double, w: Double, h: Double) = context.clearRect(x, y, w, h)
+  override def clearRect(x: Double, y: Double, w: Double, h: Double): Unit = context.clearRect(x, y, w, h)
 
-  override def beginPath() = context.beginPath()
+  override def beginPath(): Unit = context.beginPath()
 
-  override def closePath() = context.closePath()
+  override def closePath(): Unit = context.closePath()
 
-  override def lineTo(x1: Double, y1: Double) = context.lineTo(x1, y1)
+  override def lineTo(x1: Double, y1: Double): Unit = context.lineTo(x1, y1)
 
-  override def stroke() = context.stroke()
+  override def stroke(): Unit = context.stroke()
 
-  override def fillText(text: String, x: Double, y: Double, z: Double = 500) = context.fillText(text, x, y)
+  override def fillText(text: String, x: Double, y: Double, z: Double = 500): Unit = context.fillText(text, x, y)
 
-  override def setFont(f: String, s: Double, wid: String = "normal") = context.setFont(Font.font(f, s))
+  override def setFont(f: String, s: Double, wid: String = "normal"): Unit = context.setFont(Font.font(f, s))
 
-  override def setTextAlign(s: String) = context.setTextAlign(s)
+  override def setTextAlign(s: String): Unit = context.setTextAlign(s)
 
-  override def setShadowColor(s: String): Unit = {}
+  override def setShadowColor(s: String): Unit = {
+    val shadowColor = new InnerShadow()
+    shadowColor.setColor(Color.WHITE)
+    context.setEffect(shadowColor)
+  }
 
-  override def setTextBaseLine(s: String) = context.setTextBaseline(s)
+  override def setTextBaseLine(s: String): Unit = context.setTextBaseline(s)
 
-  override def rect(x: Double, y: Double, w: Double, h: Double) = context.rect(x, y, w, h)
+  override def rect(x: Double, y: Double, w: Double, h: Double): Unit = context.rect(x, y, w, h)
 
-  override def strokeText(text: String, x: Double, y: Double, maxWidth: Double) = context.strokeText(text, x, y, maxWidth)
+  override def strokeText(text: String, x: Double, y: Double, maxWidth: Double): Unit = context.strokeText(text, x, y, maxWidth)
 
   override def rotate(d: Float): Unit = context.rotate(math.toDegrees(d))
 
@@ -160,5 +164,5 @@ class MiddleContextInFx extends MiddleContext {
 
   override def lineWidth(width: Double): Unit = context.setLineWidth(width)
 
-  override def measureText(s: String): Double = 0
+  override def measureText(s: String): Double = new Text(s).getLayoutBounds.getWidth
 }
