@@ -25,7 +25,10 @@ import java.net.URLEncoder
 object Routes {
   def getJoinGameWebSocketUri(playerId: String, name:String, accessCode: String, domain:String,roomIdOpt:Option[String]):String ={
     val wsProtocol = "ws"
-    s"$wsProtocol://${domain}/thor/${wsJoinGameUrl(playerId, URLEncoder.encode(name,"utf-8"),accessCode,  roomIdOpt)}"
+    val domain = "localhost:30376"
+
+    s"$wsProtocol://${domain}/thor/game/join?name=${URLEncoder.encode(name,"utf-8")}"
+    "ws://flowdev.neoap.com/thor/game/join?name=111"
   }
 
   def wsJoinGameUrl(playerId: String, name:String, accessCode: String, roomIdOpt:Option[String]):String = {

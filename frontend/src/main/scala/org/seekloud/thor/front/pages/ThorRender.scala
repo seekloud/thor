@@ -47,7 +47,7 @@ class ThorRender(gameInfoList: List[String])extends Page{
 
   private val modal = Var(emptyHTML)
 
-  def init() = {
+  def init(): Unit = {
 
     println("ThorRender init")
 

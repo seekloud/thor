@@ -269,7 +269,7 @@ trait BackgroundClient {
   }
 
   def drawGameLoading(): Unit = {
-    println("linking...")
+//    println("linking...")
     ctx.setFill("#000000")
     ctx.fillRec(0, 0, canvasSize.x, canvasSize.y)
     ctx.setFill("rgb(250, 250, 250)")

@@ -58,11 +58,14 @@ with FpsRender{
           val moveDistance = getMoveDistance(adventurer, offSetTime)
           val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
 
+          val a = System.currentTimeMillis()
           drawBackground(offset, canvasUnit, canvasBounds)
-          drawFood(offset, canvasUnit, canvasBounds)
+//          drawFood(offset, canvasUnit, canvasBounds)
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
           drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
+          val b = System.currentTimeMillis()
+          println(s"the span is ${b-a}")
 
 //          if(ifTest)
 //            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))

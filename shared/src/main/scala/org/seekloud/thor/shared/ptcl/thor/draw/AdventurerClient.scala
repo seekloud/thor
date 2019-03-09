@@ -190,7 +190,7 @@ trait AdventurerClient { this: ThorSchemaClientImpl =>
 
   def drawAdventurers(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary:Point): Unit ={
 
-    drawAdventurer(offSetTime, offset, canvasUnit, canvasBoundary)
+//    drawAdventurer(offSetTime, offset, canvasUnit, canvasBoundary)
     drawDying(offset, offSetTime, canvasUnit)
     adventurerMap.get(myId).foreach{
       adventurer =>
