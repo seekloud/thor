@@ -88,7 +88,7 @@ lazy val backend = (project in file("backend")).enablePlugins(PackPlugin)
     packExtraClasspath := Map("thor" -> Seq("."))
   )
   .settings(
-    libraryDependencies ++= Dependencies.backendDependencies
+    libraryDependencies ++= Dependencies.backendDependencies ++ Dependencies.grpcSeq
   )
   .settings {
     (resourceGenerators in Compile) += Def.task {
@@ -134,7 +134,7 @@ lazy val client = project.in(file("client")).enablePlugins(PackPlugin)
     packExtraClasspath := Map("thor" -> Seq("."))
   )
   .settings(
-    libraryDependencies ++= Dependencies.clientDependencies
+    libraryDependencies ++= Dependencies.backendDependencies ++ Dependencies.grpcSeq
   )
   .settings(
     PB.targets in Compile := Seq(

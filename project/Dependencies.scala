@@ -1,5 +1,6 @@
 import sbt._
 
+
 /**
   * User: Taoz
   * Date: 6/13/2017
@@ -11,20 +12,21 @@ object Dependencies {
 
 
   val slickV = "3.2.3"
-  val slickPgV = "0.16.1"
   val akkaV = "2.5.13"
-  val akkaHttpV = "10.1.1"
-
+  //  val akkaV = "2.5.11"
+  val akkaHttpV = "10.1.3"
+  val scalaXmlV = "1.1.0"
   val circeVersion = "0.9.3"
 
-  val scalaJsDomV = "0.9.2"
-  val scalaTagsV = "0.6.5"
+  val scalaJsDomV = "0.9.6"
+  val scalaTagsV = "0.6.7"
+  val monadicHtmlV = "0.4.0-RC1"
+  val scalaCssV = "0.5.5"
   val diodeV = "1.1.2"
 
 
   val akkaSeq = Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaV withSources (),
-    //"com.typesafe.akka" %% "akka-typed" % akkaV withSources (),
     "com.typesafe.akka" %% "akka-actor-typed" % akkaV withSources (),
     "com.typesafe.akka" %% "akka-slf4j" % akkaV,
     "com.typesafe.akka" %% "akka-stream" % akkaV,
@@ -32,7 +34,6 @@ object Dependencies {
   )
 
   val akkaHttpSeq = Seq(
-    "com.typesafe.akka" %% "akka-http-core" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http" % akkaHttpV,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV
   )
@@ -46,15 +47,6 @@ object Dependencies {
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
   val slick = "com.typesafe.slick" %% "slick" % "3.2.1"
   val slickCodeGen = "com.typesafe.slick" %% "slick-codegen" % "3.2.1"
-  val slickLess = Seq(
-    "com.chuusai"        %% "shapeless" % "2.3.3",
-    "io.underscore"      %% "slickless" % "0.3.3"
-  )
-  val slickPg = Seq(
-    "com.github.tminglei" %% "slick-pg" % slickPgV,
-    "com.github.tminglei" %% "slick-pg_circe-json" % slickPgV
-  )
-
   val scalikejdbc = "org.scalikejdbc" %% "scalikejdbc" % "2.5.0"
   val scalikejdbcConfig = "org.scalikejdbc" %% "scalikejdbc-config" % "2.5.0"
 
@@ -64,59 +56,39 @@ object Dependencies {
   val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
   val codec = "commons-codec" % "commons-codec" % "1.10"
   val postgresql = "org.postgresql" % "postgresql" % "9.4.1208"
-  val asynchttpclient = "org.asynchttpclient" % "async-http-client" % "2.0.32"
+  val asynchttpclient = "org.asynchttpclient" % "async-http-client" % "2.5.2"
   val ehcache = "net.sf.ehcache" % "ehcache" % "2.10.4"
-  val essf = "org.seekloud" %% "essf" % "0.0.1-beta2"
-  val byteobject = "org.seekloud" %% "byteobject" % "0.1.2"
-//    val scalaFx = "org.scalafx" %% "scalafx" % "10.0.2-R15"
-  val grpc = "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion
-  val scalapbDependency = "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
+  val essf = "org.seekloud" %% "essf" % "0.0.1-beta3"
 
+  val byteObject = "org.seekloud" %% "byteobject" % "0.1.1"
 
-  val backendDependencies =
+  val grpcSeq = Seq(
+    "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
+    "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
+  )
+
+  val backendDependencies: Seq[ModuleID] =
     Dependencies.akkaSeq ++
-      Dependencies.akkaHttpSeq ++
-      Dependencies.circeSeq ++
-      Dependencies.slickLess ++
-      Dependencies.slickPg ++
-      Seq(
-        Dependencies.scalaXml,
-        Dependencies.slick,
-        Dependencies.slickCodeGen,
-        Dependencies.scalikejdbc,
-        Dependencies.scalikejdbcConfig,
-        Dependencies.scalatags,
-        Dependencies.nscalaTime,
-        Dependencies.hikariCP,
-        Dependencies.logback,
-        Dependencies.codec,
-        Dependencies.postgresql,
-        Dependencies.asynchttpclient,
-        Dependencies.ehcache,
-        Dependencies.essf,
-        Dependencies.byteobject,
-        Dependencies.grpc,
-        Dependencies.scalapbDependency
-        //      ,
-        //      Dependencies.scalaFx
-      )
-
-  val clientDependencies =
-    Dependencies.akkaSeq ++
-      Dependencies.akkaHttpSeq ++
-      Dependencies.circeSeq ++
-      Seq(
-        Dependencies.scalaXml,
-        Dependencies.nscalaTime,
-        Dependencies.codec,
-        Dependencies.logback,
-        Dependencies.asynchttpclient,
-        Dependencies.essf,
-        Dependencies.byteobject,
-        Dependencies.grpc,
-        Dependencies.scalapbDependency
-        //Dependencies.scalajs
-      )
+    Dependencies.akkaHttpSeq ++
+    Dependencies.circeSeq ++
+    Seq(
+      Dependencies.scalaXml,
+      Dependencies.slick,
+      Dependencies.slickCodeGen,
+      Dependencies.scalikejdbc,
+      Dependencies.scalikejdbcConfig,
+      Dependencies.scalatags,
+      Dependencies.nscalaTime,
+      Dependencies.hikariCP,
+      Dependencies.logback,
+      Dependencies.codec,
+      Dependencies.postgresql,
+      Dependencies.asynchttpclient,
+      Dependencies.ehcache,
+      Dependencies.essf,
+      Dependencies.byteObject
+      // "com.lihaoyi" %% "upickle" % "0.6.6"
+    ) ++ Dependencies.grpcSeq
 
 
 }

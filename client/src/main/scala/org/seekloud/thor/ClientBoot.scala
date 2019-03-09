@@ -16,6 +16,7 @@
 
 package org.seekloud.thor
 
+import akka.actor.typed.ActorRef
 import akka.actor.{ActorSystem, Scheduler}
 import akka.actor.typed.scaladsl.adapter._
 import akka.dispatch.MessageDispatcher
@@ -23,11 +24,11 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import javafx.application.Platform
 import javafx.stage.Stage
-import org.seekloud.thor.actor.WsClient
+import org.seekloud.thor.actor.{GameMsgReceiver, WsClient}
 import org.seekloud.thor.common.StageContext
-import org.seekloud.thor.controller.{GameController, ModeSelectController}
-import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, UserInfo}
-import org.seekloud.thor.scene.{GameScene, ModeScene}
+import org.seekloud.thor.controller.ModeSelectController
+import org.seekloud.thor.scene.ModeScene
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.slf4j.LoggerFactory
 
 import concurrent.duration._
@@ -49,6 +50,9 @@ object ClientBoot {
   implicit val scheduler: Scheduler = system.scheduler
   implicit val timeout: Timeout = Timeout(20 seconds)
 
+  lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
+
+
   def addToPlatform(fun: => Unit) = {
     Platform.runLater(() => fun)
   }
@@ -61,22 +65,15 @@ class ClientBoot extends javafx.application.Application {
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
   override def start(primaryStage: Stage): Unit = {
+    println(s"for tao...")
 
     val context = new StageContext(primaryStage)
-    val gameScene = new GameScene
 
-//    val wsClient = system.spawn(WsClient.create(gameController), "WsClient")
+    val wsClient = system.spawn(WsClient.create(gameMsgReceiver, context), "WsClient")
 
-    //TODO
-//    val modeScene = new ModeScene()
-//    val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
-//    modeSelectController.showScene()
-    addToPlatform{
-      context.switchScene(gameScene.getScene, title = "Thor Play", true, false)
-    }
-
-    new GameController(PlayerInfo(UserInfo(1000L,"test2","test",949848944L),"test1","test2","asd"),
-      GameServerInfo("",30376L,""),context,gameScene).start()
+    val modeScene = new ModeScene()
+    val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
+    modeSelectController.showScene()
 
 
   }

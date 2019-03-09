@@ -20,7 +20,7 @@
 //import akka.actor.typed.scaladsl.Behaviors
 //import akka.actor.typed.scaladsl.adapter._
 //import org.seekloud.thor.protocol.ESheepProtocol._
-//import org.seekloud.utils.EsheepClient
+//import EsheepClient
 //import org.seekloud.thor.App.{executor, materializer, pushStack2AppThread, system, tokenActor}
 //import akka.{Done, NotUsed}
 //import akka.http.scaladsl.Http

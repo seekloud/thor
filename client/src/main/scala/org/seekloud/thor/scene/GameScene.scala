@@ -4,7 +4,7 @@ import javafx.scene.{Group, Scene}
 import javafx.scene.input.KeyCode
 import javafx.stage.Screen
 import org.seekloud.thor.shared.ptcl.model.{Constants, Point}
-import org.seekloud.utils.middleware.{MiddleContextInFx, MiddleFrameInFx}
+import org.seekloud.thor.utils.middleware.{MiddleContextInFx, MiddleFrameInFx}
 
 /**
   * User: TangYaruo

@@ -1,35 +1,37 @@
 /*
- * Copyright 2018 seekloud (https://github.com/seekloud)
+ *   Copyright 2018 seekloud (https://github.com/seekloud)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
  */
 
 package org.seekloud.utils
 
 import slick.codegen.SourceCodeGenerator
-import slick.jdbc.{JdbcProfile,PostgresProfile}
+import slick.jdbc.JdbcProfile
+
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
-  * User: Taoz
-  * Date: 7/15/2015
-  * Time: 9:33 AM
-  */
+ * User: Taoz
+ * Date: 7/15/2015
+ * Time: 9:33 AM
+ */
 object MySlickCodeGenerator {
 
 
   import concurrent.ExecutionContext.Implicits.global
+
 
   val slickDriver = "slick.jdbc.PostgresProfile"
   val jdbcDriver = "org.postgresql.Driver"
@@ -41,60 +43,9 @@ object MySlickCodeGenerator {
 
 
   //val dbDriver = MySQLDriver
-  val dbDriver: JdbcProfile = PostgresProfile
-
-  def genDefaultTables() = {
-
-    slick.codegen.SourceCodeGenerator.main(
-      Array(slickDriver, jdbcDriver, url, outputFolder, pkg, user, password)
-    )
 
 
-  }
 
-  def genDatabase() = {
-
-    //    TableQuery[tAdvertisement].schema.create
-    //    TableQuery[tFooter].schema.create
-    //    TableQuery[tSpecificType].schema.create
-    //    TableQuery[tCarousel].schema.create
-    //    TableQuery[tQuicknews].schema.create
-    //    TableQuery[tLabel].schema.create
-    //    TableQuery[tCategory].schema.create
-    //    TableQuery[tRecommendation].schema.create
-
-    //    (
-    //      TableQuery[tApp].schema ++
-    //        TableQuery[tSecure].schema ++
-    //        TableQuery[tPackageReport].schema ++
-    //      TableQuery[tCurrencyReport].schema).create
-
-
-  }
-
-  def genDDL() ={
-    // fetch data model
-    val driver: JdbcProfile =
-      Class.forName("slick.driver.PostgresDriver" + "$").getField("MODULE$").get(null).asInstanceOf[JdbcProfile]
-    val dbFactory = driver.api.Database
-    val db = dbFactory.forURL(url, driver = jdbcDriver,
-      user = user, password = password, keepAliveConnection = true)
-
-    //    db.run(DBIOAction.seq(genDatabase()))
-  }
-
-  def main(args: Array[String]) {
-    //    genDefaultTables()
-    val dbDriver = org.seekloud.utils.MyPostgresDriver
-
-    genCustomTables(dbDriver)
-
-    println(s"Tables.scala generated in $outputFolder")
-
-    //        genDDL()
-    //        Thread.sleep(10000)
-
-  }
 
 
   def genCustomTables(dbDriver: JdbcProfile) = {
@@ -138,24 +89,6 @@ object MySlickCodeGenerator {
                 if(model.name == "SOME_SPECIAL_COLUMN_NAME") "MyCustomType" else super.rawType
             }
           }*/
-      /*val models = new scala.collection.mutable.MutableList[String]
-
-      override def packageCode(profile: String, pkg: String, container: String, parentType: Option[String]): String = {
-        super.packageCode(profile, pkg, container, parentType) + "\n" + outsideCode
-      }
-
-      def outsideCode = s"${indent(models.mkString("\n"))}"
-
-      override def Table = new Table(_) {
-        override def EntityType = new EntityTypeDef {
-          override def docWithCode: String = {
-            models += super.docWithCode.toString + "\n"
-            ""
-          }
-        }
-      }*/
-
-
     })
 
     val codeGenerator = Await.result(codeGenFuture, Duration.Inf)
@@ -163,6 +96,28 @@ object MySlickCodeGenerator {
       slickDriver, outputFolder, pkg, "SlickTables", "SlickTables.scala"
     )
 
+
+  }
+
+
+  def genDefaultTables() = {
+
+    slick.codegen.SourceCodeGenerator.main(
+      Array(slickDriver, jdbcDriver, url, outputFolder, pkg, user, password)
+    )
+
+
+  }
+
+
+
+  def main(args: Array[String]) {
+    //genDefaultTables()
+    val dbDriver = slick.jdbc.PostgresProfile
+
+    genCustomTables(dbDriver)
+
+    println(s"Tables.scala generated in $outputFolder")
 
   }
 

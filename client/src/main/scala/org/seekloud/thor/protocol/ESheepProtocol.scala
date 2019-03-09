@@ -16,7 +16,7 @@
 
 package org.seekloud.thor.protocol
 
-import org.seekloud.thor.model.GameServerInfo
+//import org.seekloud.thor.model.GameServerInfo
 
 /**
   * User: XuSiRan
@@ -61,13 +61,49 @@ object ESheepProtocol {
     gender: Int,
   )
 
-  final case class WsPlayerInfoRsp(
+//  final case class WsPlayerInfoRsp(
+//    data: ClientPlayerInfo,
+//    errCode: Int = 0,
+//    msg: String = "ok"
+//  ) extends ESheepRsp
+
+  sealed trait WsData
+
+//  final case class Ws4AgentRsp(Ws4AgentRsp: WsPlayerInfoRsp) extends WsData
+
+  final case class Ws4AgentRsp(
     data: ClientPlayerInfo,
+    errCode: Int,
+    msg: String,
+  ) extends WsData
+
+  final case object HeartBeat extends WsData
+
+
+  /*邮箱登陆*/
+  final case class LoginByMailReq(
+    email: String,
+    password: String
+  ) extends ESheepReq
+
+  final case class ESheepUserInfoRsp(
+    userName: String,
+    userId: Long,
+    headImg: String,
+    token: String,
+    gender: Int,
     errCode: Int = 0,
     msg: String = "ok"
   ) extends ESheepRsp
 
-  final case class Ws4AgentRsp(Ws4AgentRsp: WsPlayerInfoRsp)
+
+
+  case class GameServerInfo(
+    ip: String,
+    port: Int,
+    domain: String
+  )
+
 
   final case class JoinGameInfo(
     accessCode: String,
