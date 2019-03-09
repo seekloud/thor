@@ -34,7 +34,7 @@ object ThorGame {
 
   trait EnvironmentEvent extends GameEvent
 
-  sealed trait UserActionEvent extends UserEvent {
+  sealed trait UserActionEvent extends UserEvent with WsMsgFront {
     val playerId: Byte
     val serialNum: Byte
   }

@@ -11,6 +11,8 @@ import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.scene.{LoginScene, ModeScene}
+import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
+import org.seekloud.thor.ClientBoot.executor
 import org.slf4j.LoggerFactory
 
 /**
@@ -32,7 +34,21 @@ class LoginController(
       ClientBoot.addToPlatform {
         val userInfo = initLoginDialog()
         if (userInfo.nonEmpty) {
-          //TODO 邮箱登录
+          EsheepClient.loginByMail(userInfo.get._1, userInfo.get._2).map {
+            case Right(rst) =>
+              if (rst.errCode == 0) {
+                //TODO 邮箱登录成功
+              } else {
+                ClientBoot.addToPlatform(
+                  WarningDialog.initWarningDialog(s"${rst.msg}")
+                )
+              }
+            case Left(e) =>
+              log.error(s"login by mail error: $e")
+              ClientBoot.addToPlatform(
+                WarningDialog.initWarningDialog("login error!")
+              )
+          }
         }
       }
     }
@@ -51,17 +67,28 @@ class LoginController(
   }
 
   def init(): Unit = {
-    //TODO 扫码登陆流程重构
+    ClientBoot.addToPlatform {
+      EsheepClient.getLoginInfo.map {
+        case Right(rst) =>
+          val wsUrl = rst.data.wsUrl
+          val scanUrl = rst.data.scanUrl.replaceFirst("data:image/png;base64,", "")
+          loginScene.drawScanUrl(imageFromBase64(scanUrl))
+          wsClient ! WsClient.EstablishConnection2Es(wsUrl)
+
+        case Left(e) =>
+          log.error(s"get login info error: $e")
+      }
+    }
   }
 
-  def imageFromBase64(base64Str: String): ByteArrayInputStream = {
-    import sun.misc.BASE64Decoder
-    val decoder = new BASE64Decoder
-    val bytes: Array[Byte] = decoder.decodeBuffer(base64Str)
-    for (i <- bytes.indices) {
-      if (bytes(i) < 0) bytes(i) = (bytes(i) + 256).toByte
+  def imageFromBase64(base64Str:String): ByteArrayInputStream  = {
+    import java.util.Base64
+    val decoder = Base64.getDecoder
+    val bytes:Array[Byte]= decoder.decode(base64Str)
+    bytes.indices.foreach{ i =>
+      if(bytes(i) < 0) bytes(i)=(bytes(i)+256).toByte
     }
-    val b = new ByteArrayInputStream(bytes)
+    val  b = new ByteArrayInputStream(bytes)
     b
   }
 

@@ -40,9 +40,9 @@ class StageContext(stage: Stage) {
 
   import StageContext._
 
-  var stageListener: StageListener = _
-
-  stage.setOnCloseRequest(_ => stageListener.onCloseRequest())
+//  var stageListener: StageListener = _
+//
+//  stage.setOnCloseRequest(_ => stageListener.onCloseRequest())
 
 
   def getStageWidth = stage.getWidth
@@ -61,9 +61,9 @@ class StageContext(stage: Stage) {
     stage.show()
   }
 
-  def setStageListener(listener: StageListener): Unit = {
-    stageListener = listener
-  }
+//  def setStageListener(listener: StageListener): Unit = {
+//    stageListener = listener
+//  }
 
   def closeStage(): Unit = {
 //    ClientBoot.sdkServer ! SdkServer.Shutdown

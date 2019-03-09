@@ -16,7 +16,7 @@
 //
 //package org.seekloud.thor.view
 //
-//import com.neo.sk.utils.JavaFxUtil
+//import JavaFxUtil
 //import javafx.scene.canvas.GraphicsContext
 //import org.seekloud.thor.App
 //import org.seekloud.thor.common.StageContext

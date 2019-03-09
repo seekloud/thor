@@ -1,28 +1,22 @@
 /*
- * Copyright 2018 seekloud (https://github.com/seekloud)
+ *   Copyright 2018 seekloud (https://github.com/seekloud)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
  */
 
-package com.neo.sk.utils
+package org.seekloud.thor.utils
 
 import java.nio.charset.Charset
-import java.security.KeyStore
-import java.security.cert.X509Certificate
-import javax.net.ssl.{ManagerFactoryParameters, TrustManager, TrustManagerFactory, X509TrustManager}
-
-import io.netty.handler.ssl.util.SimpleTrustManagerFactory
-import io.netty.handler.ssl.{SslContext, SslContextBuilder}
 import org.asynchttpclient._
 import org.slf4j.LoggerFactory
 
@@ -46,16 +40,16 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 object HttpUtil {
 
   //skip ssl check.
-/*  val config: AsyncHttpClientConfig = {
-    val builder = new DefaultAsyncHttpClientConfig.Builder()
-    val sslBuilder = SslContextBuilder.forClient()
-    sslBuilder.trustManager(new TmFactory())
-    val sslContext = sslBuilder.build()
-    builder.setSslContext(sslContext)
-    builder.build()
-  }
+  /*  val config: AsyncHttpClientConfig = {
+      val builder = new DefaultAsyncHttpClientConfig.Builder()
+      val sslBuilder = SslContextBuilder.forClient()
+      sslBuilder.trustManager(new TmFactory())
+      val sslContext = sslBuilder.build()
+      builder.setSslContext(sslContext)
+      builder.build()
+    }
 
-  private val ahClientImp: DefaultAsyncHttpClient = new DefaultAsyncHttpClient(config)*/
+    private val ahClientImp: DefaultAsyncHttpClient = new DefaultAsyncHttpClient(config)*/
   private val ahClientImp: DefaultAsyncHttpClient = new DefaultAsyncHttpClient()
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -100,8 +94,8 @@ trait HttpUtil {
       log.debug("getRequestSend response headers:" + response.getHeaders)
       log.debug("getRequestSend response body:" + body)
     }
-//    log.debug("getRequestSend response headers:" + response.getHeaders)
-//    log.debug("getRequestSend response body:" + body)
+    //    log.debug("getRequestSend response headers:" + response.getHeaders)
+    //    log.debug("getRequestSend response body:" + body)
     if (response.getStatusCode != 200) {
       val uri = response.getUri
       val bodyLength = body.length
@@ -116,7 +110,7 @@ trait HttpUtil {
     request: BoundRequestBuilder,
     charset: Charset,
     needLogRsp:Boolean = true
-                            )(implicit executor: ExecutionContext) = {
+  )(implicit executor: ExecutionContext) = {
     request.scalaExecute().map { response =>
       Right(parseResp(response, charset,needLogRsp))
     }.recover { case e: Throwable => Left(e) }
@@ -172,21 +166,21 @@ trait HttpUtil {
 
 
 
-class TmFactory extends SimpleTrustManagerFactory {
-
-  val tm = new X509TrustManager {
-    override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
-
-    override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
-
-    override def getAcceptedIssuers: Array[X509Certificate] = null
-  }
-
-  override def engineGetTrustManagers(): Array[TrustManager] = Array[TrustManager](tm)
-
-  override def engineInit(keyStore: KeyStore): Unit = {}
-
-  override def engineInit(managerFactoryParameters: ManagerFactoryParameters): Unit = {}
-
-
-}
+//class TmFactory extends SimpleTrustManagerFactory {
+//
+//  val tm = new X509TrustManager {
+//    override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
+//
+//    override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
+//
+//    override def getAcceptedIssuers: Array[X509Certificate] = null
+//  }
+//
+//  override def engineGetTrustManagers(): Array[TrustManager] = Array[TrustManager](tm)
+//
+//  override def engineInit(keyStore: KeyStore): Unit = {}
+//
+//  override def engineInit(managerFactoryParameters: ManagerFactoryParameters): Unit = {}
+//
+//
+//}

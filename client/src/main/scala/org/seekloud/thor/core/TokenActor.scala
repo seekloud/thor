@@ -18,7 +18,7 @@
 //
 //import akka.actor.typed.{ActorRef, Behavior}
 //import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
-//import org.seekloud.utils.EsheepClient
+//import EsheepClient
 //import org.slf4j.{Logger, LoggerFactory}
 //import org.seekloud.thor.App.{executor, loginActor, pushStack2AppThread}
 //import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, UserInfo}

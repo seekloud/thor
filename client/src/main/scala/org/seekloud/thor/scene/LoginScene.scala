@@ -61,19 +61,22 @@ class LoginScene {
   val canvasCtx: GraphicsContext = canvas.getGraphicsContext2D
   group.getChildren.add(canvas)
 
-  val img = new ImageView("img/modeBg.jpg")
-  img.setFitWidth(width)
-  img.setFitHeight(height)
-  group.getChildren.add(img)
+  val img = new Image("img/modeBg.jpg")
+  ClientBoot.addToPlatform(canvasCtx.drawImage(img, 0, 0, width, height))
+
+  //  val img = new ImageView("img/modeBg.jpg")
+  //  img.setFitWidth(width)
+  //  img.setFitHeight(height)
+  //  group.getChildren.add(img)
 
   val emailLogin = new Button("use email")
   val backToPrevious = new Button("back")
 
-  emailLogin.setLayoutX(200)
-  emailLogin.setLayoutY(250)
+  emailLogin.setLayoutX(210)
+  emailLogin.setLayoutY(400)
   emailLogin.getStyleClass.add("mode-choice")
-  backToPrevious.setLayoutX(350)
-  backToPrevious.setLayoutY(250)
+  backToPrevious.setLayoutX(320)
+  backToPrevious.setLayoutY(400)
   backToPrevious.getStyleClass.add("mode-choice")
 
   val shadow = new DropShadow()
@@ -99,7 +102,7 @@ class LoginScene {
   def drawScanUrl(imageStream: ByteArrayInputStream): Unit = {
     ClientBoot.addToPlatform {
       val img = new Image(imageStream)
-      canvasCtx.drawImage(img, 150, 300)
+      canvasCtx.drawImage(img, 150, 80)
     }
   }
 

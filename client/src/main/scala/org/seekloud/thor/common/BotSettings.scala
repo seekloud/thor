@@ -28,7 +28,7 @@ object BotSettings {
 
   val botConfig = ConfigFactory.parseResources("bot.conf").withFallback(ConfigFactory.load())
 
-  val appConfig = botConfig.getConfig("app")
+  val mainConfig = botConfig.getConfig("bot")
 
   //TODO
 

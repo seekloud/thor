@@ -36,6 +36,8 @@ class ModeSelectController(wsClient: ActorRef[WsClient.WsCommand], modeScene: Mo
       ClientBoot.addToPlatform{
         val loginScene = new LoginScene
         val loginController = new LoginController(wsClient, modeScene, loginScene, context)
+        wsClient ! WsClient.GetLoginController(loginController)
+        loginController.init()
         loginController.showScene()
       }
     }
