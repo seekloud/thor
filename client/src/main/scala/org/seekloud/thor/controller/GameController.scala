@@ -16,6 +16,7 @@
 
 package org.seekloud.thor.controller
 
+import java.util.{Timer, TimerTask}
 import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.typed.scaladsl.adapter._
@@ -34,6 +35,7 @@ import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
+import org.seekloud.thor.scene.PreDraw
 import org.slf4j.LoggerFactory
 
 /**
@@ -61,6 +63,7 @@ class GameController(
 
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
 
+  protected val preDrawFrame = new PreDraw
   //  private var recYourInfo: Boolean = false
   //  private var recSyncGameState: Option[ThorGame.GridSyncState] = None
 
@@ -128,6 +131,7 @@ class GameController(
       println("start...")
       wsClient ! WsClient.ConnectGame(playerInfo, gameServerInfo, roomInfo)
       addUserActionListenEvent
+      checkAndChangePreCanvas()
       logicFrameTime = System.currentTimeMillis()
     } else {
       println(s"restart...")
@@ -138,7 +142,9 @@ class GameController(
       }
     }
   }
+  var a = 0
   def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasBounds: Point): Unit = {
+    a += 1
     thorSchemaOpt match {
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if (thorSchema.adventurerMap.contains(mainId)) {
@@ -148,7 +154,7 @@ class GameController(
           thorSchema.drawRank(currentRank, CurrentOrNot = true, byteId)
           thorSchema.drawSmallMap(mainId)
           val b = System.currentTimeMillis()
-          println(s"the span is ${b-a}")
+//          println(s"the span is ${b-a}")
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if (drawTime.length >= drawTimeSize) {
             drawTimeLong = drawTime.sum / drawTime.size
@@ -166,6 +172,7 @@ class GameController(
           }
         }
         else {
+          if (a % 100 == 0) println("loading")
           thorSchema.drawGameLoading()
         }
 
@@ -175,6 +182,7 @@ class GameController(
   }
 
   var lastSendReq = 0L
+
   def logicLoop(): Unit ={
     var myLevel = 0
     thorSchemaOpt.foreach { thorSchema =>
@@ -195,7 +203,7 @@ class GameController(
         case GameState.firstCome =>
           thorSchemaOpt.foreach(_.drawGameLoading())
         case GameState.loadingPlay =>
-          println("loading play")
+//          println("loading play")
           thorSchemaOpt.foreach(_.drawGameLoading())
         case GameState.stop =>
           thorSchemaOpt.foreach {
@@ -243,9 +251,8 @@ class GameController(
           try {
             thorSchemaOpt = Some(ThorSchemaClientImpl(playGameScreen.drawFrame, playGameScreen.getCanvasContext, e.config, e.id, e.name, playGameScreen.canvasBoundary, playGameScreen.canvasUnit))
             gameConfig = Some(e.config)
-
+            checkAndChangePreCanvas()
             e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2)}}
-
             animationTimer.start()
             wsClient ! WsClient.StartGameLoop
             gameState = GameState.play
@@ -258,7 +265,8 @@ class GameController(
           }
 
 
-        case RestartYourInfo =>
+        case x@RestartYourInfo =>
+          println(x)
           mainId = playerInfo.playerId
           gameState = GameState.play
 
@@ -266,7 +274,7 @@ class GameController(
           println(s"receive attacked msg:\n $e")
           barrage = (e.killerName, e.name)
           barrageTime = 300
-          println(s"be attacked by $e.killerName")
+          println(s"be attacked by ${e.killerName}")
           if (e.playerId == mainId) {
             mainId = e.killerId //跟随凶手视角
             if (e.playerId == playerInfo.playerId) {
@@ -413,11 +421,13 @@ class GameController(
             mouseLeft = false
             val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
+//            println(preExecuteAction)
             wsClient ! WsClient.DispatchMsg(preExecuteAction)
           }
           else ()
-        } else {
-          start
+        }
+        else {
+          start()
         }
       }
     }
@@ -441,7 +451,8 @@ class GameController(
       thorSchemaOpt.foreach { thorSchema =>
         if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.getCode == KeyCode.SPACE) {
-            start
+            print("space")
+            start()
           } else if (e.getCode == KeyCode.M) {
             if (needBgm) {
               gameMusicPlayer.pause()
@@ -455,6 +466,29 @@ class GameController(
       }
     }
 
+  }
+
+  def checkAndChangePreCanvas(): Unit ={
+    val timer = new Timer
+    def timerTask(fun: => Unit) = new TimerTask {
+      override def run(): Unit = fun
+    }
+
+    (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas) match{
+      case (Nil, Nil, Nil) =>
+        timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
+      case (foodCanvas, Nil, Nil) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, Nil, Nil))
+        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, Nil, Nil))
+        timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
+      case (foodCanvas, adventurerCanvas, Nil) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, Nil))
+        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, Nil))
+        timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
+      case (foodCanvas, adventurerCanvas, weaponCanvas) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas))
+        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, weaponCanvas))
+    }
   }
 
   def duringTime(time: Long): String = {

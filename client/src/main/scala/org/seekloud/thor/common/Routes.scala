@@ -26,9 +26,7 @@ object Routes {
   def getJoinGameWebSocketUri(playerId: String, name:String, accessCode: String, domain:String,roomIdOpt:Option[String]):String ={
     val wsProtocol = "ws"
     val domain = "localhost:30376"
-
-    s"$wsProtocol://${domain}/thor/game/join?name=${URLEncoder.encode(name,"utf-8")}"
-    "ws://flowdev.neoap.com/thor/game/join?name=111"
+    s"$wsProtocol://${domain}/thor/${wsJoinGameUrl(playerId, URLEncoder.encode(name,"utf-8"),accessCode,  roomIdOpt)}"
   }
 
   def wsJoinGameUrl(playerId: String, name:String, accessCode: String, roomIdOpt:Option[String]):String = {

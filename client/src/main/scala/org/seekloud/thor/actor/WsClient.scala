@@ -19,6 +19,7 @@ import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.model.{GameServerInfo, PlayerInfo, WsSendMsg}
 import org.seekloud.thor.ClientBoot.{executor, materializer, scheduler, system}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.PingPackage
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future

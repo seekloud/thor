@@ -24,6 +24,7 @@ import javafx.scene.effect.InnerShadow
 import javafx.scene.shape.{StrokeLineCap, StrokeLineJoin}
 import javafx.scene.text.{Font, FontWeight, Text, TextAlignment}
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleContext
+import org.seekloud.utils.middleware.MiddleCanvasInFx
 
 /**
   * copied from tank
@@ -118,6 +119,18 @@ class MiddleContextInFx extends MiddleContext {
         }
         else{
           context.drawImage(js, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
+        }
+      case js: MiddleCanvasInFx =>
+        if(imgOffsetX.isEmpty){
+          if (size.isEmpty) {
+            context.drawImage(js.change2Image(), offsetX, offsetY)
+          } else {
+
+            context.drawImage(js.change2Image(), offsetX, offsetY, size.get._1, size.get._2)
+          }
+        }
+        else{
+          context.drawImage(js.change2Image(), imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
     }
   }
