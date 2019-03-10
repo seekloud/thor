@@ -36,6 +36,7 @@ import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.scene.PreDraw
+import org.seekloud.thor.scene.DrawScene
 import org.slf4j.LoggerFactory
 
 /**
@@ -150,7 +151,8 @@ class GameController(
         if (thorSchema.adventurerMap.contains(mainId)) {
           val start = System.currentTimeMillis()
           val a = System.currentTimeMillis()
-          thorSchema.drawGame(mainId, offsetTime, canvasUnit, canvasBounds)
+          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
+          val drawScene: DrawScene = new DrawScene(thorSchema)
           thorSchema.drawRank(currentRank, CurrentOrNot = true, byteId)
           thorSchema.drawSmallMap(mainId)
           val b = System.currentTimeMillis()

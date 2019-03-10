@@ -83,6 +83,29 @@ with FpsRender{
     }
   }
 
+  def drawGame4Client(mainId: String, offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
+    if(!waitSyncData){
+      adventurerMap.get(mainId) match{
+        case Some(adventurer) =>
+          //保持自己的adventurer在屏幕中央~
+          val moveDistance = getMoveDistance(adventurer, offSetTime)
+          val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
+
+          val a = System.currentTimeMillis()
+          drawBackground(offset, canvasUnit, canvasBounds)
+          drawEnergyBar(adventurer)
+          val b = System.currentTimeMillis()
+          if (b-a>5)
+            println(s"the span all is ${b-a}")
+
+        case None => println("None!!!!!!")
+      }
+    }
+    else{
+      println("waitSyncData!!!!")
+    }
+  }
+
   def updateSize(bounds: Point, unit: Float): Unit ={
     canvasSize = bounds
     canvasUnit = unit

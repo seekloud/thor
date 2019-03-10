@@ -69,7 +69,7 @@ trait ThorSchema extends KillInformation {
   protected val actionEventMap = mutable.HashMap[Int, List[UserActionEvent]]() //frame -> List[UserActionEvent]
   protected val myAdventurerAction = mutable.HashMap[Int, List[UserActionEvent]]()
 
-  protected val attackingAdventureMap = mutable.HashMap[String, Int]() // id -> 程度
+  val attackingAdventureMap = mutable.HashMap[String, Int]() // id -> 程度
   protected var MaybeAttackingAdventureList = List[(String, String, Int)]() // id, killerId, 所在象限
   //playerId -> 攻击执行程度
   val dyingAdventurerMap = mutable.HashMap[String, (Adventurer, Int)]() //playerId -> (adventurer, 死亡执行程度)
