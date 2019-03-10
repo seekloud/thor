@@ -17,12 +17,16 @@ import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.byteobject.MiddleBufferInJvm
-import org.seekloud.thor.common.StageContext
+import org.seekloud.thor.ClientBoot
+import org.seekloud.thor.common.{Routes, StageContext}
 import org.seekloud.thor.controller.LoginController
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
 import org.seekloud.thor.protocol.ESheepProtocol
 import org.seekloud.thor.protocol.ESheepProtocol.{HeartBeat, Ws4AgentRsp}
+import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame
+import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -44,18 +48,25 @@ object WsClient {
 
   final case class GetLoginInfo(playerId: String, name: String, token: String, tokenExistTime: Int) extends WsCommand
 
+  final case class GetSender(stream: ActorRef[ThorGame.WsMsgFrontSource]) extends WsCommand
+
+  final case class StartGame(roomId: Long) extends WsCommand
+
+  final case class CreateRoom(psw: Option[String]) extends WsCommand
+
   final case object Stop extends WsCommand
 
   def create(gameMsgReceiver: ActorRef[WsMsgSource], stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { _ =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
-        working(gameMsgReceiver, None, stageContext)
+        working(gameMsgReceiver, gameMsgSender = null, None, stageContext)
       }
     }
 
 
   private def working(
     gameMsgReceiver: ActorRef[WsMsgSource],
+    gameMsgSender: ActorRef[WsMsgFrontSource],
     loginController: Option[LoginController],
     stageContext: StageContext
   )(
@@ -63,14 +74,24 @@ object WsClient {
   ): Behavior[WsCommand] =
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
+        case msg: StartGame =>
+          gameMsgSender ! GAStartGame(msg.roomId)
+          //TODO GameController
+          Behaviors.same
+
+        case msg: CreateRoom =>
+          gameMsgSender ! GACreateRoom(msg.psw)
+          //TODO GameController
+          Behaviors.same
+
         case msg: GetLoginController =>
-          working(gameMsgReceiver, Some(msg.loginController), stageContext)
+          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), stageContext)
 
         case msg: EstablishConnection2Es =>
           log.info(s"get msg: $msg")
           val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(msg.wsUrl))
           val source = getSource(ctx.self)
-          val sink = getSink(ctx.self)
+          val sink = getLoginSink(ctx.self)
           val response =
             source
               .viaMat(webSocketFlow)(Keep.right)
@@ -88,8 +109,46 @@ object WsClient {
 
         case msg: GetLoginInfo =>
           log.info(s"get msg: $msg")
-          //TODO switch & sendReq
+          EsheepClient.linkGame(msg.token, msg.playerId).map {
+            case Right(rst) =>
+              if (rst.errCode == 0) {
+                log.info(s"link game accessCode: ${rst.data.accessCode}")
+                //TODO 与game server建立ws连接 连接已建立，sender向server发送，receiver接收server消息
+                val url = Routes.clientLinkGame(msg.playerId, msg.name, rst.data.accessCode)
+                val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
+                val source = getSource(ctx.self)
+                val sink = getSink4Server(gameMsgReceiver)
+                val (stream, response) =
+                  source
+                    .viaMat(webSocketFlow)(Keep.both)
+                    .toMat(sink)(Keep.left)
+                    .run()
+                val connected = response.flatMap { upgrade =>
+                  if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
+                    ctx.self ! GetSender(stream)
+                    Future.successful(s"link game server success.")
+                  } else {
+                    throw new RuntimeException(s"link game server failed: ${upgrade.response.status}")
+                  }
+                } //链接建立时
+                connected.onComplete(i => log.info(i.toString))
+
+              } else {
+                ClientBoot.addToPlatform {
+                  WarningDialog.initWarningDialog(s"${rst.msg}")
+                }
+              }
+            case Left(e) =>
+              log.error(s"link game server error: $e")
+          }
+          loginController.foreach(_.switchToRoomScene(
+            ClientUserInfo(msg.playerId, msg.name, msg.token, Some(msg.tokenExistTime)),
+            ctx.self
+          ))
           Behaviors.same
+
+        case msg: GetSender =>
+          working(gameMsgReceiver, msg.stream, loginController, stageContext)
 
         case Stop =>
           log.info(s"wsClient stopped.")
@@ -106,7 +165,7 @@ object WsClient {
     ActorSource.actorRef[WsMsgFrontSource](
       completionMatcher = {
         case CompleteMsgFrontServer =>
-          log.info("WebSocket Complete")
+          log.info("WebSocket Complete.")
           wsClient ! Stop
       },
       failureMatcher = {
@@ -115,7 +174,7 @@ object WsClient {
       bufferSize = 8,
       overflowStrategy = OverflowStrategy.fail
     ).collect {
-      case message: UserActionEvent =>
+      case message: GaUserAction =>
         //println(message)
         val sendBuffer = new MiddleBufferInJvm(409600)
         BinaryMessage.Strict(ByteString(
@@ -124,8 +183,7 @@ object WsClient {
     }
 
 
-
-  def getSink(self: ActorRef[WsClient.WsCommand]): Sink[Message, Future[Done]] =
+  def getLoginSink(self: ActorRef[WsClient.WsCommand]): Sink[Message, Future[Done]] =
     Sink.foreach[Message] {
       case TextMessage.Strict(msg) =>
         import io.circe.generic.auto._
@@ -153,6 +211,40 @@ object WsClient {
         }
       case x =>
         log.debug(s"receive unknown msg: $x")
+
+    }
+
+  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgSource]): Sink[Message, Future[Done]] =
+    Sink.foreach[Message] {
+      case TextMessage.Strict(msg) =>
+        gameMsgReceiver ! ThorGame.TextMsg(msg)
+
+      case BinaryMessage.Strict(bMsg) =>
+        val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
+        val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
+          case Right(rst) => rst
+          case Left(e) =>
+            log.error(s"decode bMsg error: $e")
+            ThorGame.DecodeError()
+        }
+        gameMsgReceiver ! message
+
+      case msg: BinaryMessage.Streamed =>
+        val futureMsg = msg.dataStream.runFold(new ByteStringBuilder().result()) {
+          case (s, str) => s.++(str)
+        }
+        futureMsg.map { bMsg =>
+          val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
+          val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
+            case Right(rst) => rst
+            case Left(e) =>
+              println(s"decode streamed bMsg error: $e")
+              ThorGame.DecodeError()
+          }
+          gameMsgReceiver ! message
+        }
+
+      case _ => //do nothing
 
     }
 

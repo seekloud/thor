@@ -32,8 +32,11 @@ import org.seekloud.thor.model.Constants
 object ModeScene {
 
   trait ModeSceneListener {
+
     def gotoHumanScene()
+
     def gotoBotScene()
+
   }
 
 }
@@ -48,7 +51,7 @@ class ModeScene {
   private val scene = new Scene(group, width, height)
 
   scene.getStylesheets.add(
-    this.getClass.getClassLoader.getResource("css/modeScene.css").toExternalForm
+    this.getClass.getClassLoader.getResource("css/scene.css").toExternalForm
   )
 
   val img = new ImageView("img/modeBg.jpg")

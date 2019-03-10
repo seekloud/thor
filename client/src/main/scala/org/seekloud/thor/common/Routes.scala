@@ -23,13 +23,9 @@ import java.net.URLEncoder
   * @version 创建时间：2018/12/3
   */
 object Routes {
-  def getJoinGameWebSocketUri(playerId: String, name:String, accessCode: String, domain:String,roomIdOpt:Option[String]):String ={
-    val wsProtocol = "ws"
-    val domain = "localhost:30376"
 
-    s"$wsProtocol://${domain}/thor/game/join?name=${URLEncoder.encode(name,"utf-8")}"
-    "ws://flowdev.neoap.com/thor/game/join?name=111"
-  }
+  val baseUrl = AppSettings.baseUrl
+  val gameName = AppSettings.esheepGameName
 
   def wsJoinGameUrl(playerId: String, name:String, accessCode: String, roomIdOpt:Option[String]):String = {
     s"game/playGame/userJoin?playerId=$playerId&playerName=$name&accessCode=$accessCode" +
@@ -40,4 +36,11 @@ object Routes {
           ""
       })
   }
+
+  def clientLinkGame(playerId: String, name: String, accessCode: String): String = {
+    baseUrl + "/" + gameName + s"game/playGame/clientLinkGame?playerId=$playerId&playerName=$name&accessCode=$accessCode"
+  }
+
+
+
 }

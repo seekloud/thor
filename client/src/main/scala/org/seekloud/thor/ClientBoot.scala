@@ -53,7 +53,7 @@ object ClientBoot {
   lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
 
 
-  def addToPlatform(fun: => Unit) = {
+  def addToPlatform(fun: => Unit): Unit = {
     Platform.runLater(() => fun)
   }
 }

@@ -73,8 +73,28 @@ trait PlatService extends ServiceUtils{
     }
   }
 
+  private val clientLinkGame: Route = path("clientLinkGame") {
+    parameter(
+      'playerId.as[String],
+      'playerName.as[String],
+      'accessCode.as[String]
+    ) { (playerId, playerName, accessCode) =>
+      val verifyAccessCode: Future[GetPlayerByAccessCodeRsp] = eSheepLinkClient ? (ESheepLinkClient.VerifyAccessCode(accessCode, _))
+      verifyAccessCode.map { rsp =>
+        if (rsp.errCode == 0) {
+          val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow4GA(playerId, playerName, _))
+          flowFuture.map(handleWebSocketMessages)
+        } else {
+          println("clientLinkGame verify accessCode error.")
+          Future(complete(ErrorGetPlayerByAccessCodeRsp))
+        }
+      }
+      complete("")
+    }
+  }
+
   val platGameRoutes: Route = pathPrefix("playGame") {
-    platUserJoin
+    platUserJoin ~ clientLinkGame
   }
 
 }

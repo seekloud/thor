@@ -34,7 +34,7 @@ object ThorGame {
 
   trait EnvironmentEvent extends GameEvent
 
-  sealed trait UserActionEvent extends UserEvent with WsMsgFront {
+  sealed trait UserActionEvent extends UserEvent {
     val playerId: Byte
     val serialNum: Byte
   }
@@ -97,6 +97,14 @@ object ThorGame {
   final case class WsMsgErrorRsp(errCode:Int, msg:String) extends WsMsgServer
 
 
+  /*Game Agent*/
+  sealed trait GaUserAction extends WsMsgFront
+
+  final case class GAStartGame(roomId: Long) extends GaUserAction
+
+  final case class GACreateRoom(pswOpt: Option[String] = None) extends GaUserAction
+
+
   /*生成环境元素*/
   final case class GenerateFood(override val frame: Int, food: FoodState) extends EnvironmentEvent with WsMsgServer
 
@@ -132,6 +140,8 @@ object ThorGame {
   final case class EventData(list: List[WsMsgServer]) extends WsMsgServer
 
   final case class DecodeError() extends WsMsgServer
+
+  final case class TextMsg(m: String) extends WsMsgServer
 
 
 

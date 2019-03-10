@@ -38,7 +38,8 @@ import scala.collection.mutable
   * User: XuSiRan
   * Date: 2018/11/15
   * Time: 11:37
-  */
+  *
+  **/
 case class ThorSchemaServerImpl(
   config: ThorGameConfig,
   roomActorRef: ActorRef[RoomActor.Command],

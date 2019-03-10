@@ -21,3 +21,9 @@
     -fx-font: 15 arial;
     -fx-base: #307CF0;
 }
+
+
+.room-choice {
+    -fx-background-radius: 10;
+    -fx-font: 15 arial;
+}

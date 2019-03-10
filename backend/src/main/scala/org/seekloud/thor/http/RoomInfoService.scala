@@ -26,6 +26,8 @@ import akka.util.Timeout
 import org.seekloud.thor.Boot.{eSheepLinkClient, executor, roomManager, userManager}
 import org.seekloud.thor.core.{ESheepLinkClient, RoomManager, UserManager}
 import org.seekloud.thor.protocol.ESheepProtocol._
+import org.seekloud.thor.shared.ptcl.SuccessRsp
+import org.seekloud.thor.shared.ptcl.protocol.CommonProtocol.{GetRoom4GARsp, VerifyPsw, VerifyPswRsp}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -56,6 +58,30 @@ trait RoomInfoService extends ServiceUtils{
     }
   }
 
+  private val getRoomList4GA: Route = (path("getRoomList4GA") & post) {
+    dealGetReq {
+      val roomListRsp: Future[GetRoom4GARsp] = roomManager ? (t => RoomManager.GetRoom4GA(t))
+      roomListRsp.map{ rsp =>
+        complete(rsp)
+      }.recover{
+        case e: Exception =>
+          log.debug(s"getRoomList error in Service: $e")
+          complete(ErrorGetRoomList)
+      }
+    }
+  }
+
+  private val verifyPwd: Route = (path("verifyPsw") & post) {
+    dealPostReq[VerifyPsw] { req =>
+      val verifyPwdRsp: Future[VerifyPswRsp] = roomManager ? (RoomManager.VerifyPwd(req.roomId, req.psw, _))
+      verifyPwdRsp.map {
+        rsp =>
+          complete(rsp)
+      }
+    }
+
+  }
+
   private val getRoomById: Route = (path("getRoomId") & post){
     dealPostReq[GetRoomIdReq]{ req =>
       val roomIdRsp: Future[GetRoomIdRsp] = roomManager ? (t => RoomManager.GetRoomByPlayer(req.playerId, t))
@@ -83,6 +109,6 @@ trait RoomInfoService extends ServiceUtils{
   }
 
 
-  val roomInfoRoutes: Route =  getRoomList ~ getRoomById ~ getPlayerByRoom
+  val roomInfoRoutes: Route =  getRoomList ~ getRoomById ~ getPlayerByRoom ~ getRoomList4GA ~ verifyPwd
 
 }
