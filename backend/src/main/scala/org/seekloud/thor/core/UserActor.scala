@@ -129,11 +129,7 @@ object UserActor {
         },
         bufferSize = 256,
         overflowStrategy = OverflowStrategy.dropHead
-      ).mapMaterializedValue{
-        outActor =>
-          log.debug(s"flow get outActor success!")
-          actor ! UserFrontActor(outActor)
-      }
+      ).mapMaterializedValue { outActor => actor ! UserFrontActor(outActor) }
     Flow.fromSinkAndSource(in, out)
   }
 
@@ -157,7 +153,6 @@ object UserActor {
       (ctx, msg) =>
         msg match {
           case UserFrontActor(frontActor) =>
-            log.debug(s"user-$playerId get frontActor!")
             ctx.watchWith(frontActor, LeftRoom(frontActor))
             switchBehavior(ctx, "idle", idle(playerId, userInfo, System.currentTimeMillis(), frontActor))
 
