@@ -88,6 +88,7 @@ object UserManager {
             Behaviors.same
 
           case msg: GetWebSocketFlow4GA =>
+            log.debug(s"get msg: GetWebSocketFlow4GA-${msg.playerId}")
             getUserActorOpt(ctx, msg.playerId).foreach(_ ! UserActor.ChangeBehaviorToInit)
             val userActor = getUserActor(ctx, msg.playerId, UserInfo(msg.playerId, msg.name))
             msg.replyTo ! getWebSocketFlow(userActor)

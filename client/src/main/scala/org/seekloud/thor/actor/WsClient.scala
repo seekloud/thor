@@ -33,6 +33,9 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 
+import scala.concurrent.duration._
+
+
 /**
   * User: TangYaruo
   * Date: 2019/3/7
@@ -56,6 +59,8 @@ object WsClient {
 
   final case class StartGame(roomId: Long) extends WsCommand
 
+  final case object TimerKey4StartGame
+
   final case class CreateRoom(psw: Option[String]) extends WsCommand
 
   final case class JoinRoomFail(error: String) extends WsCommand
@@ -67,14 +72,14 @@ object WsClient {
   def create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
-        val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMsgReceiver")
+        val gameMsgReceiver: ActorRef[ThorGame.WsMsgServer] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMessageReceiver")
         working(gameMsgReceiver, gameMsgSender = null, None, None, stageContext)
       }
     }
 
 
   private def working(
-    gameMsgReceiver: ActorRef[WsMsgSource],
+    gameMsgReceiver: ActorRef[WsMsgServer],
     gameMsgSender: ActorRef[WsMsgFrontSource],
     loginController: Option[LoginController],
     roomController: Option[RoomController],
@@ -86,7 +91,11 @@ object WsClient {
       msg match {
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
-          gameMsgSender ! GAStartGame(msg.roomId)
+          if (gameMsgSender != null) {
+            gameMsgSender ! GAStartGame(msg.roomId)
+          } else {
+            timer.startSingleTimer(TimerKey4StartGame, msg, 3.seconds)
+          }
           //TODO GameController
           Behaviors.same
 
@@ -152,9 +161,11 @@ object WsClient {
                     .run()
                 val connected = response.flatMap { upgrade =>
                   if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
+                    log.debug(s"link game server Success")
                     ctx.self ! GetSender(stream)
                     Future.successful(s"link game server success.")
                   } else {
+                    log.debug(s"link game server failed")
                     throw new RuntimeException(s"link game server failed: ${upgrade.response.status}")
                   }
                 } //链接建立时
@@ -175,6 +186,7 @@ object WsClient {
           Behaviors.same
 
         case msg: GetSender =>
+          log.debug(s"get sender success.")
           working(gameMsgReceiver, msg.stream, loginController, roomController, stageContext)
 
         case Stop =>
@@ -241,7 +253,7 @@ object WsClient {
 
     }
 
-  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgSource]): Sink[Message, Future[Done]] =
+  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer]): Sink[Message, Future[Done]] =
     Sink.foreach[Message] {
       case TextMessage.Strict(msg) =>
         gameMsgReceiver ! ThorGame.TextMsg(msg)

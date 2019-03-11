@@ -17,19 +17,19 @@ object GameMsgReceiver {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
-  private[this] def switchBehavior(ctx: ActorContext[WsMsgSource],
+  private[this] def switchBehavior(ctx: ActorContext[WsMsgServer],
     behaviorName: String,
-    behavior: Behavior[WsMsgSource])
-    (implicit stashBuffer: StashBuffer[WsMsgSource]) = {
+    behavior: Behavior[WsMsgServer])
+    (implicit stashBuffer: StashBuffer[WsMsgServer]) = {
     log.debug(s"${ctx.self.path} becomes $behaviorName behavior.")
     stashBuffer.unstashAll(ctx, behavior)
   }
 
-  def create(wsClient: ActorRef[WsClient.WsCommand]): Behavior[WsMsgSource] = {
-    Behaviors.setup[WsMsgSource] { ctx =>
-      Behaviors.withTimers[WsMsgSource] { t =>
-        implicit val stashBuffer: StashBuffer[WsMsgSource] = StashBuffer[WsMsgSource](Int.MaxValue)
-        implicit val timer: TimerScheduler[WsMsgSource] = t
+  def create(wsClient: ActorRef[WsClient.WsCommand]): Behavior[WsMsgServer] = {
+    Behaviors.setup[WsMsgServer] { ctx =>
+      Behaviors.withTimers[WsMsgServer] { t =>
+        implicit val stashBuffer: StashBuffer[WsMsgServer] = StashBuffer[WsMsgServer](Int.MaxValue)
+        implicit val timer: TimerScheduler[WsMsgServer] = t
         switchBehavior(ctx, "waiting", waiting(wsClient))
       }
     }
@@ -43,10 +43,10 @@ object GameMsgReceiver {
   private def waiting(
     wsClient: ActorRef[WsClient.WsCommand]
   )(
-    implicit stashBuffer: StashBuffer[WsMsgSource],
-    timer: TimerScheduler[WsMsgSource]
-  ): Behavior[WsMsgSource] =
-    Behaviors.receive[WsMsgSource] { (ctx, msg) =>
+    implicit stashBuffer: StashBuffer[WsMsgServer],
+    timer: TimerScheduler[WsMsgServer]
+  ): Behavior[WsMsgServer] =
+    Behaviors.receive[WsMsgServer] { (ctx, msg) =>
       msg match {
         case msg: JoinRoomFail =>
           wsClient ! WsClient.JoinRoomFail(msg.error)
@@ -68,10 +68,10 @@ object GameMsgReceiver {
     *
     * */
   def running()(
-    implicit stashBuffer: StashBuffer[WsMsgSource],
-    timer: TimerScheduler[WsMsgSource]
-  ): Behavior[WsMsgSource] =
-    Behaviors.receive[WsMsgSource] { (ctx, msg) =>
+    implicit stashBuffer: StashBuffer[WsMsgServer],
+    timer: TimerScheduler[WsMsgServer]
+  ): Behavior[WsMsgServer] =
+    Behaviors.receive[WsMsgServer] { (ctx, msg) =>
       msg match {
         case x =>
           log.warn(s"unknown msg: $x")
