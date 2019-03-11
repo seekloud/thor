@@ -94,7 +94,7 @@ object WsClient {
           if (gameMsgSender != null) {
             gameMsgSender ! GAStartGame(msg.roomId)
           } else {
-            timer.startSingleTimer(TimerKey4StartGame, msg, 3.seconds)
+            timer.startSingleTimer(TimerKey4StartGame, msg, 2.seconds)
           }
           //TODO GameController
           Behaviors.same

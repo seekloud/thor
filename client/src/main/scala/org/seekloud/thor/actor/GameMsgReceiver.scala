@@ -48,6 +48,7 @@ object GameMsgReceiver {
   ): Behavior[WsMsgServer] =
     Behaviors.receive[WsMsgServer] { (ctx, msg) =>
       msg match {
+          /*TODO 收到YourInfo切换到running*/
         case msg: JoinRoomFail =>
           wsClient ! WsClient.JoinRoomFail(msg.error)
           Behaviors.same
