@@ -70,10 +70,11 @@ object UserActor {
   //TODO 消息处理
   case class JoinRoomFail(error: String) extends Command
 
+  case class CreateRoom(playerId: String, name: String, pwd: Option[String], replyTo: ActorRef[UserActor.Command]) extends Command with RoomManager.Command
+
   case class CreateRoomSuccess(roomId: Long) extends Command
 
-  case class CreateRoomFail(error: String) extends Command
-
+  //  case class CreateRoomFail(error: String) extends Command
 
 
   final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState, playerIdMap: List[(Byte, (String, String))]) extends Command
@@ -162,7 +163,7 @@ object UserActor {
             Behaviors.stopped
 
           case msg: GetUserInRecordMsg =>
-//            log.debug(s"--------------------$userInfo")
+            //            log.debug(s"--------------------$userInfo")
             getGameReplay(ctx, msg.recordId) ! msg
             Behaviors.same
 
@@ -201,18 +202,30 @@ object UserActor {
 
 
           case msg@StartReplay(rid, uid, f) =>
-//            log.info(s"UserActor [$playerId] get msg $msg.")
+            //            log.info(s"UserActor [$playerId] get msg $msg.")
             getGameReplay(ctx, rid) ! GameReplay.InitReplay(frontActor, uid, f)
             switchBehavior(ctx, "replay", replay(uid, rid, userInfo, startTime, frontActor))
 
           case JoinRoomSuccess(adventurer, playerId, shortId, roomActor, config, playerIdMap) =>
-//            log.debug(s"$playerId join room success")
+            log.debug(s"$playerId join room success")
             val ws = YourInfo(config, playerId, userInfo.name, shortId, playerIdMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             switchBehavior(ctx, "play", play(playerId, userInfo, adventurer, startTime, frontActor, roomActor))
 
+          case msg: JoinRoomFail =>
+            log.debug(s"$playerId join room fail.")
+            val wsMsg = ThorGame.JoinRoomFail(msg.error).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            frontActor ! Wrap(wsMsg)
+            Behaviors.same
+
+          case msg: CreateRoomSuccess =>
+            log.debug(s"$playerId create room success.")
+            val wsMsg = ThorGame.CreateRoomRsp(msg.roomId).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            frontActor ! Wrap(wsMsg)
+            Behaviors.same
+
           case StartWatching(roomId, watchedUserId) =>
-//            log.debug(s"start watching $watchedUserId")
+            //            log.debug(s"start watching $watchedUserId")
             roomManager ! RoomActor.JoinRoom4Watch(playerId, roomId, watchedUserId, ctx.self)
             switchBehavior(ctx, "watchInit", watchInit(playerId, userInfo, roomId, watchedUserId, frontActor))
 
@@ -225,17 +238,18 @@ object UserActor {
               case Some(req) =>
                 req match {
                   case msg: GACreateRoom =>
-                    //TODO RoomManager处理创建房间流程
-
+                    log.debug(s"get ws msg: $msg")
+                    roomManager ! CreateRoom(playerId, userInfo.name, msg.pswOpt, ctx.self)
                     Behaviors.same
 
                   case msg: GAStartGame =>
+                    log.debug(s"get ws msg: $msg")
                     roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, Some(msg.roomId))
                     Behaviors.same
 
                   case RestartGame =>
                     //TODO 此处reStart未修改，因为用途不明
-                  roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
+                    roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
                     idle(userInfo.playerId, userInfo.copy(name = userInfo.name), startTime, frontActor)
 
                   case _ =>
@@ -287,7 +301,7 @@ object UserActor {
           switchBehavior(ctx, "init", init(uId, userInfo), InitTime, TimeOut("init"))
 
         case msg: GetUserInRecordMsg =>
-//          log.debug(s"${ctx.self.path} receives a msg=$msg")
+          //          log.debug(s"${ctx.self.path} receives a msg=$msg")
           if (msg.recordId != recordId) {
             msg.replyTo ! ErrorRsp(10002, "you are watching the other record")
           } else {
@@ -301,7 +315,7 @@ object UserActor {
           switchBehavior(ctx, "idle", idle(uId, userInfo, startTime, frontActor))
 
         case msg: GetRecordFrameMsg =>
-//          log.debug(s"${ctx.self.path} receives a msg=$msg")
+          //          log.debug(s"${ctx.self.path} receives a msg=$msg")
           if (msg.recordId != recordId) {
             msg.replyTo ! ErrorRsp(10002, "you are watching the other record")
           } else {
@@ -326,7 +340,7 @@ object UserActor {
           watchInit(playerId, info, roomId, watchedPlayerId, frontActor)
 
         case JoinRoomSuccess4Watch(watchedPlayer, config, roomActor, state, pMap) =>
-//          log.debug(s"$playerId join room 4 watch success")
+          //          log.debug(s"$playerId join room 4 watch success")
           frontActor ! Wrap(YourInfo(config, watchedPlayer.playerId, watchedPlayer.name, watchedPlayer.byteId, pMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           frontActor ! Wrap(state.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
           switchBehavior(ctx, "watch", watch(playerId, userInfo, roomId, watchedPlayer.playerId, frontActor, roomActor))
@@ -334,7 +348,7 @@ object UserActor {
         case JoinRoomFail4Watch(error) =>
           log.debug(s"join room 4 watch failed $msg")
           frontActor ! Wrap(WsMsgErrorRsp(1, error).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
-//          frontActor ! CompleteMsgServer
+          //          frontActor ! CompleteMsgServer
           switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
         case DispatchMsg(m) =>
@@ -439,8 +453,8 @@ object UserActor {
               case Some(event: UserActionEvent) =>
                 roomActor ! RoomActor.WsMessage(playerId, event)
               case Some(RestartGame) =>
-//                log.debug(s"restartGame ${userInfo.name}")
-//                JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
+                //                log.debug(s"restartGame ${userInfo.name}")
+                //                JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
                 roomManager ! RoomManager.reStartJoinRoom(userInfo.playerId, userInfo.name, ctx.self)
               case Some(UserMapReq) =>
                 roomActor ! RoomActor.UserMap(ctx.self)
@@ -451,13 +465,13 @@ object UserActor {
             Behaviors.same
 
           case DispatchMsg(m) =>
-//            println(s"DispatchMsg")
+            //            println(s"DispatchMsg")
             if (m.asInstanceOf[Wrap].isKillMsg && m.asInstanceOf[Wrap].deadId == playerId) { //玩家死亡
-//              log.debug(s"deadmsg $m")
+              //              log.debug(s"deadmsg $m")
               frontActor ! m
               roomManager ! RoomManager.BeDead(playerId, userInfo.name)
-//              roomManager ! RoomManager.BeDead(playerId, userInfo.name)
-//              switchBehavior(ctx, "idle", idle(playerId, userInfo, startTime, frontActor))
+              //              roomManager ! RoomManager.BeDead(playerId, userInfo.name)
+              //              switchBehavior(ctx, "idle", idle(playerId, userInfo, startTime, frontActor))
               Behaviors.same
             } else {
               frontActor ! m
@@ -481,8 +495,8 @@ object UserActor {
             switchBehavior(ctx, "init", init(playerId, userInfo), InitTime, TimeOut("init"))
 
           case JoinRoomSuccess(adventurer, playerId, shortId, roomActor, config, playerIdMap) =>
-//            log.debug(s"$playerId join room success")
-//            val ws = YourInfo(config, playerId, userInfo.name, shortId, playerIdMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
+            //            log.debug(s"$playerId join room success")
+            //            val ws = YourInfo(config, playerId, userInfo.name, shortId, playerIdMap).asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             val ws = RestartYourInfo.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result()
             frontActor ! Wrap(ws)
             Behaviors.same

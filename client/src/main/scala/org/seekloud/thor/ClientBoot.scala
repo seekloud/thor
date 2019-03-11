@@ -50,7 +50,7 @@ object ClientBoot {
   implicit val scheduler: Scheduler = system.scheduler
   implicit val timeout: Timeout = Timeout(20 seconds)
 
-  lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
+//  lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
 
 
   def addToPlatform(fun: => Unit): Unit = {
@@ -68,7 +68,7 @@ class ClientBoot extends javafx.application.Application {
 
     val context = new StageContext(primaryStage)
 
-    val wsClient = system.spawn(WsClient.create(gameMsgReceiver, context), "WsClient")
+    val wsClient = system.spawn(WsClient.create(context), "WsClient")
 
     val modeScene = new ModeScene()
     val modeSelectController = new ModeSelectController(wsClient, modeScene, context)

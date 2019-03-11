@@ -21,6 +21,7 @@ import org.seekloud.thor.actor.WsClient.StartGame
 class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCommand], loginScene: LoginScene, roomScene: RoomScene, stateContext: StageContext) {
 
   private val log = LoggerFactory.getLogger(this.getClass)
+  var finalRoomId: Long = -1L
 
   updateRoomList()
 
@@ -50,6 +51,13 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
 
     }
   }
+
+  def callBackWarning(msg: String): Unit = {
+    ClientBoot.addToPlatform(
+      WarningDialog.initWarningDialog(s"$msg")
+    )
+  }
+
 
   def inputPwd: Option[String] = {
     val dialog = new TextInputDialog()
@@ -94,7 +102,15 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
     }
 
     override def gotoCreateRoomScene(): Unit = {
-      //TODO 创建时密码不能为空
+      val pwd = inputPwd
+      if (pwd.nonEmpty) {
+        if (pwd.get.nonEmpty) {
+          wsClient ! WsClient.CreateRoom(Some(pwd.get))
+        } else {
+          wsClient ! WsClient.CreateRoom(None)
+        }
+      }
+
     }
 
     override def refreshRoomList(): Unit = {
