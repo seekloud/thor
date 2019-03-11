@@ -41,7 +41,9 @@ object Routes {
   }
 
   def clientLinkGame(playerId: String, name: String, accessCode: String): String = {
-    s"$wsProtocol://$wsDomain/" + gameName + s"/game/playGame/clientLinkGame?playerId=$playerId&playerName=$name&accessCode=$accessCode"
+    val playerIdEncoder =URLEncoder.encode(playerId, "UTF-8")
+    val playerNameEncoder = URLEncoder.encode(name, "UTF-8")
+    s"$wsProtocol://$wsDomain/" + gameName + s"/game/playGame/clientLinkGame?playerId=$playerIdEncoder&playerName=$playerNameEncoder&accessCode=$accessCode"
   }
 
 

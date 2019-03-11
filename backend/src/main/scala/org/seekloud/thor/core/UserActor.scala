@@ -117,6 +117,7 @@ object UserActor {
   )
 
   def flow(actor: ActorRef[UserActor.Command]): Flow[WsMessage, WsMsgSource, Any] = {
+    log.debug(s"get flow...")
     val in = Flow[WsMessage].to(sink(actor))
     val out =
       ActorSource.actorRef[WsMsgSource](
