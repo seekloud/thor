@@ -85,7 +85,10 @@ trait PlatService extends ServiceUtils{
         if (rsp.errCode == 0) {
           log.debug(s"client-$playerId link game success...")
           val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow4GA(playerId, playerName, _))
-          flowFuture.map(handleWebSocketMessages)
+          flowFuture.map {flow =>
+            log.debug(s"client-$playerId get flow successful!")
+            handleWebSocketMessages(flow)
+          }
         } else {
           println("clientLinkGame verify accessCode error.")
           Future(complete(ErrorGetPlayerByAccessCodeRsp))

@@ -69,7 +69,7 @@ object WsClient {
 
   final case object Stop extends WsCommand
 
-  def create(stageContext: StageContext): Behavior[WsCommand] =
+  def  create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
         val gameMsgReceiver: ActorRef[ThorGame.WsMsgServer] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMessageReceiver")
@@ -160,13 +160,12 @@ object WsClient {
                     .viaMat(webSocketFlow)(Keep.both)
                     .toMat(sink)(Keep.left)
                     .run()
+
                 val connected = response.flatMap { upgrade =>
                   if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
-                    log.debug(s"link game server Success")
                     ctx.self ! GetSender(stream)
                     Future.successful(s"link game server success.")
                   } else {
-                    log.debug(s"link game server failed")
                     throw new RuntimeException(s"link game server failed: ${upgrade.response.status}")
                   }
                 } //链接建立时
@@ -255,37 +254,40 @@ object WsClient {
     }
 
   def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer]): Sink[Message, Future[Done]] =
-    Sink.foreach[Message] {
-      case TextMessage.Strict(msg) =>
-        gameMsgReceiver ! ThorGame.TextMsg(msg)
+    {
+      log.debug(s"getSink4Server...")
+      Sink.foreach[Message] {
+        case TextMessage.Strict(msg) =>
+          gameMsgReceiver ! ThorGame.TextMsg(msg)
 
-      case BinaryMessage.Strict(bMsg) =>
-        val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
-        val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
-          case Right(rst) => rst
-          case Left(e) =>
-            log.error(s"decode bMsg error: $e")
-            ThorGame.DecodeError()
-        }
-        gameMsgReceiver ! message
-
-      case msg: BinaryMessage.Streamed =>
-        val futureMsg = msg.dataStream.runFold(new ByteStringBuilder().result()) {
-          case (s, str) => s.++(str)
-        }
-        futureMsg.map { bMsg =>
+        case BinaryMessage.Strict(bMsg) =>
           val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
           val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
             case Right(rst) => rst
             case Left(e) =>
-              println(s"decode streamed bMsg error: $e")
+              log.error(s"decode bMsg error: $e")
               ThorGame.DecodeError()
           }
           gameMsgReceiver ! message
-        }
 
-      case _ => //do nothing
+        case msg: BinaryMessage.Streamed =>
+          val futureMsg = msg.dataStream.runFold(new ByteStringBuilder().result()) {
+            case (s, str) => s.++(str)
+          }
+          futureMsg.map { bMsg =>
+            val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
+            val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
+              case Right(rst) => rst
+              case Left(e) =>
+                println(s"decode streamed bMsg error: $e")
+                ThorGame.DecodeError()
+            }
+            gameMsgReceiver ! message
+          }
 
+        case _ => //do nothing
+
+      }
     }
 
 
