@@ -14,4 +14,10 @@ object ThorClientProtocol {
     tokenExistTime: Option[Int] = None
   )
 
+  case class PlayerInfo(
+    playerId:String,
+    nickName:String,
+    roomId: Long
+  )
+
 }

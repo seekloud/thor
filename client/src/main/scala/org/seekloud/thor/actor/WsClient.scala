@@ -15,7 +15,6 @@ import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
 import akka.actor.typed.scaladsl.adapter._
-
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.byteobject.MiddleBufferInJvm
@@ -25,9 +24,10 @@ import org.seekloud.thor.controller.{GameController, LoginController}
 import org.seekloud.thor.controller.{LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
-import org.seekloud.thor.protocol.ESheepProtocol
+import org.seekloud.thor.protocol.{ESheepProtocol, ThorClientProtocol}
 import org.seekloud.thor.protocol.ESheepProtocol.{HeartBeat, Ws4AgentRsp}
 import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
+import org.seekloud.thor.scene.GameScene
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
 import org.slf4j.LoggerFactory
@@ -63,13 +63,16 @@ object WsClient {
 
   final case class CreateRoomRsp(roomId: Long) extends WsCommand
 
+  final case class DispatchMsg(msg: ThorGame.WsMsgFront) extends WsCommand
+
   final case object Stop extends WsCommand
 
   def create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
-        val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMsgReceiver")
-        working(gameMsgReceiver, gameMsgSender = null, None, None, stageContext)
+        println("creating")
+        val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(ctx.self), "gameController")
+        working(gameMsgReceiver, gameMsgSender = null, None, None, None, stageContext)
       }
     }
 
@@ -78,6 +81,7 @@ object WsClient {
     gameMsgReceiver: ActorRef[WsMsgSource],
     gameMsgSender: ActorRef[WsMsgFrontSource],
     loginController: Option[LoginController],
+    playerInfo: Option[(String,String)],
     roomController: Option[RoomController],
     stageContext: StageContext
   )(
@@ -89,13 +93,41 @@ object WsClient {
           log.debug(s"get msg: $msg")
           gameMsgSender ! GAStartGame(msg.roomId)
           //TODO GameController
-          new GameController()
+          ClientBoot.addToPlatform {
+            playerInfo.foreach{ p =>
+              roomController.foreach{r =>
+                val gameScene = new GameScene
+                stageContext.switchScene(gameScene.getScene)
+                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
+              }
+            }
+          }
+//          playerInfo.foreach{ p =>
+//            roomController.foreach{r =>
+//              val gameScene = new GameScene
+//              stageContext.switchScene(gameScene.getScene)
+//              new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
+//            }
+//          }
           Behaviors.same
 
         case msg: CreateRoom =>
           log.debug(s"get msg: $msg")
           gameMsgSender ! GACreateRoom(msg.psw)
+          ClientBoot.addToPlatform {
+            playerInfo.foreach{ p =>
+              roomController.foreach{r =>
+                val gameScene = new GameScene
+                stageContext.switchScene(gameScene.getScene)
+                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
+              }
+            }
+          }
           //TODO GameController
+          Behaviors.same
+
+        case msg: DispatchMsg =>
+          gameMsgSender ! msg.msg
           Behaviors.same
 
         case msg: JoinRoomFail =>
@@ -111,10 +143,10 @@ object WsClient {
           Behaviors.same
 
         case msg: GetLoginController =>
-          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), roomController, stageContext)
+          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), None, roomController, stageContext)
 
         case msg: GetRoomController =>
-          working(gameMsgReceiver, gameMsgSender, loginController, Some(msg.roomController), stageContext)
+          working(gameMsgReceiver, gameMsgSender, loginController, None, Some(msg.roomController), stageContext)
 
         case msg: EstablishConnection2Es =>
           log.info(s"get msg: $msg")
@@ -161,7 +193,6 @@ object WsClient {
                   }
                 } //链接建立时
                 connected.onComplete(i => log.info(i.toString))
-
               } else {
                 ClientBoot.addToPlatform {
                   WarningDialog.initWarningDialog(s"${rst.msg}")
@@ -174,10 +205,11 @@ object WsClient {
             ClientUserInfo(msg.playerId, msg.name, msg.token, Some(msg.tokenExistTime)),
             ctx.self
           ))
-          Behaviors.same
+
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(msg.playerId,msg.name) , roomController, stageContext)
 
         case msg: GetSender =>
-          working(gameMsgReceiver, msg.stream, loginController, roomController, stageContext)
+          working(gameMsgReceiver, msg.stream, loginController, None, roomController, stageContext)
 
         case Stop =>
           log.info(s"wsClient stopped.")

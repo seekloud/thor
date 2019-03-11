@@ -29,6 +29,10 @@ class LoginController(
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
+  private val ws = wsClient
+
+  def getWs: ActorRef[WsClient.WsCommand] = ws
+
 
   loginScene.setLoginSceneListener(new LoginScene.LoginSceneListener {
     override def emailLogin(): Unit = {

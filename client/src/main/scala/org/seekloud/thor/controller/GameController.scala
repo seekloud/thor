@@ -19,6 +19,7 @@ package org.seekloud.thor.controller
 import java.util.{Timer, TimerTask}
 import java.util.concurrent.atomic.AtomicInteger
 
+import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import javafx.animation.AnimationTimer
 import javafx.scene.input.KeyCode
@@ -27,7 +28,8 @@ import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.game.NetWorkInfo
-import org.seekloud.thor.model.{GameServerInfo, PlayerInfo}
+import org.seekloud.thor.model.GameServerInfo
+import org.seekloud.thor.protocol.ThorClientProtocol
 import org.seekloud.thor.scene.GameScene
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
@@ -45,18 +47,23 @@ import org.slf4j.LoggerFactory
   * Time: 20:53
   */
 class GameController(
-  playerInfo: PlayerInfo,
-  gameServerInfo: GameServerInfo,
+  wsClient: ActorRef[WsClient.WsCommand],
+  playerInfo: ThorClientProtocol.PlayerInfo,
   context: StageContext,
-  playGameScreen: GameScene,
-  roomInfo: Option[String] = None
+  playGameScreen: GameScene
 ) extends NetWorkInfo{
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
-  val wsClient = ClientBoot.system.spawn(WsClient.create(this), "WsClient")
+  def getPlayer: ThorClientProtocol.PlayerInfo = playerInfo
 
-  def getPlayer: PlayerInfo = playerInfo
+  private val ws = wsClient
+
+  def getWs: ActorRef[WsClient.WsCommand] = ws
+
+  private val gameScene = playGameScreen
+
+  def getGs: GameScene = gameScene
 
   protected var firstCome = true
 
@@ -130,7 +137,7 @@ class GameController(
     if (firstCome) {
       firstCome = false
       println("start...")
-      wsClient ! WsClient.ConnectGame(playerInfo, gameServerInfo, roomInfo)
+      wsClient ! WsClient.StartGame(playerInfo.roomId)
       addUserActionListenEvent
       checkAndChangePreCanvas()
       logicFrameTime = System.currentTimeMillis()
@@ -139,7 +146,7 @@ class GameController(
       thorSchemaOpt.foreach { r =>
         wsClient ! WsClient.DispatchMsg(ThorGame.RestartGame)
         setGameState(GameState.loadingPlay)
-        wsClient ! WsClient.StartGameLoop
+//        wsClient ! WsClient.StartGameLoop
       }
     }
   }
@@ -255,7 +262,7 @@ class GameController(
             checkAndChangePreCanvas()
             e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2)}}
             animationTimer.start()
-            wsClient ! WsClient.StartGameLoop
+//            wsClient ! WsClient.StartGameLoop
             gameState = GameState.play
 
           } catch {
@@ -351,7 +358,7 @@ class GameController(
                 thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                 if (event.playerId == playerInfo.playerId) byteId = event.shortId
               } else {
-                wsClient ! WsClient.UserEnterRoom(event)
+//                wsClient ! WsClient.UserEnterRoom(event)
               }
             case event: UserLeftRoom =>
               if (event.shortId == byteId) println(s"${event.shortId}  ${event.playerId} ${event.name} left room...")
@@ -370,7 +377,7 @@ class GameController(
   private def closeHolder: Unit = {
     animationTimer.stop()
     //remind 此处关闭WebSocket
-    wsClient ! WsClient.StopGameActor
+    wsClient ! WsClient.Stop
   }
 
   def getActionSerialNum: Byte = (actionSerialNumGenerator.getAndIncrement() % 127).toByte

@@ -18,7 +18,7 @@ package org.seekloud.thor.scene
 
 import java.util.Timer
 import java.util.TimerTask
-import org.seekloud.utils.middleware.MiddleFrameInFx
+import org.seekloud.thor.utils.middleware.MiddleFrameInFx
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleContext, MiddleImage}
 import org.seekloud.thor.shared.ptcl.model.Constants._
 

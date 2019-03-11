@@ -24,7 +24,8 @@ import javafx.scene.effect.InnerShadow
 import javafx.scene.shape.{StrokeLineCap, StrokeLineJoin}
 import javafx.scene.text.{Font, FontWeight, Text, TextAlignment}
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleContext
-import org.seekloud.utils.middleware.MiddleCanvasInFx
+//import org.seekloud.thor.utils.middleware.MiddleCanvasInFx
+import scala.language.implicitConversions
 
 /**
   * copied from tank

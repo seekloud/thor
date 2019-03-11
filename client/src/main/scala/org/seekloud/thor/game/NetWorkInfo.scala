@@ -45,7 +45,7 @@ trait NetWorkInfo { this: GameController =>
   }
 
   private def startPing(): Unit = {
-    this.wsClient ! WsClient.DispatchMsg(ThorGame.PingPackage(System.currentTimeMillis()))
+    this.getWs ! WsClient.DispatchMsg(ThorGame.PingPackage(System.currentTimeMillis()))
   }
 
   protected def receivePingPackage(p: ThorGame.PingPackage): Unit = {
