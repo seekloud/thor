@@ -14,12 +14,15 @@ import akka.http.scaladsl.model.ws._
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
+import akka.actor.typed.scaladsl.adapter._
+
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.common.{Routes, StageContext}
 import org.seekloud.thor.controller.{GameController, LoginController}
+import org.seekloud.thor.controller.{LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
 import org.seekloud.thor.protocol.ESheepProtocol
@@ -44,6 +47,8 @@ object WsClient {
 
   final case class GetLoginController(loginController: LoginController) extends WsCommand
 
+  final case class GetRoomController(roomController: RoomController) extends WsCommand
+
   final case class EstablishConnection2Es(wsUrl: String) extends WsCommand
 
   final case class GetLoginInfo(playerId: String, name: String, token: String, tokenExistTime: Int) extends WsCommand
@@ -54,12 +59,17 @@ object WsClient {
 
   final case class CreateRoom(psw: Option[String]) extends WsCommand
 
+  final case class JoinRoomFail(error: String) extends WsCommand
+
+  final case class CreateRoomRsp(roomId: Long) extends WsCommand
+
   final case object Stop extends WsCommand
 
-  def create(gameMsgReceiver: ActorRef[WsMsgSource], stageContext: StageContext): Behavior[WsCommand] =
-    Behaviors.setup[WsCommand] { _ =>
+  def create(stageContext: StageContext): Behavior[WsCommand] =
+    Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
-        working(gameMsgReceiver, gameMsgSender = null, None, stageContext)
+        val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMsgReceiver")
+        working(gameMsgReceiver, gameMsgSender = null, None, None, stageContext)
       }
     }
 
@@ -68,6 +78,7 @@ object WsClient {
     gameMsgReceiver: ActorRef[WsMsgSource],
     gameMsgSender: ActorRef[WsMsgFrontSource],
     loginController: Option[LoginController],
+    roomController: Option[RoomController],
     stageContext: StageContext
   )(
     implicit timer: TimerScheduler[WsCommand]
@@ -75,18 +86,35 @@ object WsClient {
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
         case msg: StartGame =>
+          log.debug(s"get msg: $msg")
           gameMsgSender ! GAStartGame(msg.roomId)
           //TODO GameController
           new GameController()
           Behaviors.same
 
         case msg: CreateRoom =>
+          log.debug(s"get msg: $msg")
           gameMsgSender ! GACreateRoom(msg.psw)
           //TODO GameController
           Behaviors.same
 
+        case msg: JoinRoomFail =>
+          ClientBoot.addToPlatform {
+            roomController.foreach(_.callBackWarning(msg.error))
+          }
+          Behaviors.same
+
+        case msg: CreateRoomRsp =>
+          ClientBoot.addToPlatform {
+            roomController.foreach(_.finalRoomId == msg.roomId)
+          }
+          Behaviors.same
+
         case msg: GetLoginController =>
-          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), stageContext)
+          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), roomController, stageContext)
+
+        case msg: GetRoomController =>
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(msg.roomController), stageContext)
 
         case msg: EstablishConnection2Es =>
           log.info(s"get msg: $msg")
@@ -149,7 +177,7 @@ object WsClient {
           Behaviors.same
 
         case msg: GetSender =>
-          working(gameMsgReceiver, msg.stream, loginController, stageContext)
+          working(gameMsgReceiver, msg.stream, loginController, roomController, stageContext)
 
         case Stop =>
           log.info(s"wsClient stopped.")

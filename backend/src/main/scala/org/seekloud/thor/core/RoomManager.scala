@@ -20,12 +20,12 @@ import java.util.concurrent.atomic.AtomicLong
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
-import org.seekloud.thor.core.UserActor.{JoinRoom, JoinRoomFail}
+import org.seekloud.thor.core.UserActor.{CreateRoom, JoinRoom, JoinRoomFail}
 import org.slf4j.LoggerFactory
 import org.seekloud.thor.common.AppSettings.personLimit
 import org.seekloud.thor.protocol.ESheepProtocol._
 import org.seekloud.thor.shared.ptcl.SuccessRsp
-import org.seekloud.thor.shared.ptcl.protocol.CommonProtocol.{GeneralRoom, GetRoom4GARsp, VerifyPswRsp, RoomNotExist, PswError}
+import org.seekloud.thor.shared.ptcl.protocol.CommonProtocol.{GeneralRoom, GetRoom4GARsp, PswError, RoomNotExist, VerifyPswRsp}
 
 import scala.collection.mutable
 
@@ -94,12 +94,11 @@ object RoomManager {
                         getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, userId, name, userActor)
 
                       } else {
-                        // TODO 房间人满
-                        userActor ! JoinRoomFail(s"房间-${roomId}人已满！")
+                        userActor ! UserActor.JoinRoomFail(s"房间-${roomId}人已满！")
                       }
 
-                    } else { //TODO 加入房间密码错误
-                      userActor ! JoinRoomFail(s"房间-${roomId}密码错误！")
+                    } else {
+                      userActor ! UserActor.JoinRoomFail(s"房间-${roomId}密码错误！")
                     }
                   case None => //指定房间不存在直接创建
                     roomInUse.put(roomId, ("", List((userId, name))))
@@ -123,13 +122,14 @@ object RoomManager {
             //              log.debug(s"$name joinRoom. roomInUse after: $roomInUse")
             Behaviors.same
 
-            //TODO 创建房间流程
-//          case msg: CreateRoom =>
-//            var roomId = roomIdGenerator.getAndIncrement()
-//            while (roomInUse.exists(_._1 == roomId)) roomId = roomIdGenerator.getAndIncrement()
-//            roomInUse.put(roomId, (msg.pswOpt.getOrElse(""), List((msg.playerId, msg.name))))
-//            getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, msg.playerId, msg.name, msg.userActor)
-//            Behaviors.same
+          case msg: CreateRoom =>
+            log.debug(s"get msg: $msg")
+            var roomId = roomIdGenerator.getAndIncrement()
+            while (roomInUse.exists(_._1 == roomId)) roomId = roomIdGenerator.getAndIncrement()
+            roomInUse.put(roomId, (msg.pwd.getOrElse(""), List((msg.playerId, msg.name))))
+            getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, msg.playerId, msg.name, msg.replyTo)
+            msg.replyTo ! UserActor.CreateRoomSuccess(roomId)
+            Behaviors.same
 
           case msg: VerifyPwd =>
             roomInUse.get(msg.roomId) match {
@@ -219,7 +219,7 @@ object RoomManager {
             Behaviors.same
 
           case msg: GetRoom4GA =>
-            val roomList = roomInUse.map{ r =>
+            val roomList = roomInUse.map { r =>
               val hasPsw = if (r._2._1.isEmpty) 0 else 1
               s"${r._1}-${r._2._2.length}-$hasPsw"
             }.toList

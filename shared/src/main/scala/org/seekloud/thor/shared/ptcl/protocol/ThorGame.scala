@@ -105,6 +105,15 @@ object ThorGame {
   final case class GACreateRoom(pswOpt: Option[String] = None) extends GaUserAction
 
 
+  final case class JoinRoomFail(error: String) extends WsMsgServer
+
+  final case class CreateRoomRsp(roomId: Long) extends WsMsgServer
+
+//  final case class CreateRoomFail(error: String) extends WsMsgServer
+
+
+
+
   /*生成环境元素*/
   final case class GenerateFood(override val frame: Int, food: FoodState) extends EnvironmentEvent with WsMsgServer
 

@@ -71,7 +71,9 @@ class LoginController(
   def switchToRoomScene(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCommand]): Unit = {
     ClientBoot.addToPlatform {
       val roomScene = new RoomScene(userInfo)
-      new RoomController(userInfo, wsClient, loginScene, roomScene, stageContext).showScene()
+      val roomController = new RoomController(userInfo, wsClient, loginScene, roomScene, stageContext)
+      roomController.showScene()
+      wsClient ! WsClient.GetRoomController(roomController)
     }
   }
 
