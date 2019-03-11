@@ -61,11 +61,20 @@ object UserActor {
 
   case class StartGame(roomId: Option[Long]) extends Command
 
-  case class JoinRoom(playerId: String, name: String, userActor: ActorRef[UserActor.Command], roomIdOpt: Option[Long] = None) extends Command with RoomManager.Command
+  case class JoinRoom(playerId: String, name: String, userActor: ActorRef[UserActor.Command], roomIdOpt: Option[Long] = None, pswOpt: Option[String] = None) extends Command with RoomManager.Command
 
   case class LeftRoom[U](actorRef: ActorRef[U]) extends Command
 
   case class JoinRoomSuccess(adventurer: AdventurerServer, playerId: String, shortId: Byte, roomActor: ActorRef[RoomActor.Command], config: ThorGameConfigImpl, playerIdMap: List[(Byte, (String, String))]) extends Command
+
+  //TODO 消息处理
+  case class JoinRoomFail(error: String) extends Command
+
+  case class CreateRoomSuccess(roomId: Long) extends Command
+
+  case class CreateRoomFail(error: String) extends Command
+
+
 
   final case class JoinRoomSuccess4Watch(watchedPlayer: Adventurer, config: ThorGameConfigImpl, roomActor: ActorRef[RoomActor.Command], gameState: GridSyncState, playerIdMap: List[(Byte, (String, String))]) extends Command
 
@@ -213,14 +222,26 @@ object UserActor {
 
           case WsMessage(reqOpt) =>
             reqOpt match {
-              //TODO 此处reStart未修改，因为用途不明
-              case Some(RestartGame) =>
-//                log.debug(s"restart")
-                roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
-                idle(userInfo.playerId, userInfo.copy(name = userInfo.name), startTime, frontActor)
+              case Some(req) =>
+                req match {
+                  case msg: GACreateRoom =>
+                    //TODO RoomManager处理创建房间流程
 
-              case _ =>
-                Behaviors.same
+                    Behaviors.same
+
+                  case msg: GAStartGame =>
+                    roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, Some(msg.roomId))
+                    Behaviors.same
+
+                  case RestartGame =>
+                    //TODO 此处reStart未修改，因为用途不明
+                  roomManager ! JoinRoom(userInfo.playerId, userInfo.name, ctx.self)
+                    idle(userInfo.playerId, userInfo.copy(name = userInfo.name), startTime, frontActor)
+
+                  case _ =>
+                    Behaviors.same
+                }
+              case None => Behaviors.same
             }
 
           case ChangeBehaviorToInit =>
@@ -230,16 +251,6 @@ object UserActor {
 
           case DispatchMsg(m) =>
             println(s"Dispatch")
-//            import scala.language.implicitConversions
-//            import org.seekloud.byteobject.ByteObject._
-//            import org.seekloud.byteobject.MiddleBufferInJvm
-//
-//            val buffer = new MiddleBufferInJvm(m.asInstanceOf[Wrap].ws)
-//            bytesDecode[PingPackage](buffer) match {
-//              case Right(req) => log.debug(s"$req")
-//              case Left(e) =>
-//                log.error(s"decode binaryMessage failed,error:${e.message}")
-//            }
 
             Behaviors.same
 

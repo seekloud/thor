@@ -47,6 +47,8 @@ object UserManager {
 
   final case class GetWebSocketFlow(id: String, name: String, replyTo: ActorRef[Flow[Message, Message, Any]], roomId: Option[Long] = None) extends Command
 
+  final case class GetWebSocketFlow4GA(playerId: String, name: String, replyTo: ActorRef[Flow[Message, Message, Any]]) extends Command
+
   final case class GetWebSocketFlow4Watch(roomId: Long, watchedPlayerId: String, replyTo: ActorRef[Flow[Message, Message, Any]], watchingId: String, name: String) extends Command
 
   final case class GetWebSocketFlow4Replay(recordId: Long, frame: Long, watchedPlayerId: String, replyTo: ActorRef[Flow[Message, Message, Any]], watchingId: String, name: String) extends Command
@@ -83,6 +85,12 @@ object UserManager {
             val userActor = getUserActor(ctx, playerInfo.playerId, playerInfo)
             replyTo ! getWebSocketFlow(userActor)
             userActor ! UserActor.StartGame(roomIdOpt)
+            Behaviors.same
+
+          case msg: GetWebSocketFlow4GA =>
+            getUserActorOpt(ctx, msg.playerId).foreach(_ ! UserActor.ChangeBehaviorToInit)
+            val userActor = getUserActor(ctx, msg.playerId, UserInfo(msg.playerId, msg.name))
+            msg.replyTo ! getWebSocketFlow(userActor)
             Behaviors.same
 
           case GetWebSocketFlow4Watch(roomId, watchedPlayerId, replyTo, watchingId, name) =>

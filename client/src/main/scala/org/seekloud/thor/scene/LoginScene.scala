@@ -35,6 +35,7 @@ import org.seekloud.thor.scene.ModeScene.ModeSceneListener
 object LoginScene {
 
   trait LoginSceneListener {
+
     def emailLogin()
 
     def backToPrevious()
@@ -54,7 +55,7 @@ class LoginScene {
 
 
   scene.getStylesheets.add(
-    this.getClass.getClassLoader.getResource("css/modeScene.css").toExternalForm
+    this.getClass.getClassLoader.getResource("css/scene.css").toExternalForm
   )
 
   val canvas = new Canvas(width, height)
@@ -69,8 +70,8 @@ class LoginScene {
   //  img.setFitHeight(height)
   //  group.getChildren.add(img)
 
-  val emailLogin = new Button("use email")
-  val backToPrevious = new Button("back")
+  val emailLogin = new Button("Use Email")
+  val backToPrevious = new Button("Back")
 
   emailLogin.setLayoutX(210)
   emailLogin.setLayoutY(400)

@@ -10,9 +10,10 @@ import javafx.scene.layout.GridPane
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
-import org.seekloud.thor.scene.{LoginScene, ModeScene}
+import org.seekloud.thor.scene.{LoginScene, ModeScene, RoomScene}
 import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
 import org.seekloud.thor.ClientBoot.executor
+import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
 import org.slf4j.LoggerFactory
 
 /**
@@ -37,7 +38,8 @@ class LoginController(
           EsheepClient.loginByMail(userInfo.get._1, userInfo.get._2).map {
             case Right(rst) =>
               if (rst.errCode == 0) {
-                //TODO 邮箱登录成功
+                val playerId = s"user${rst.userId}"
+                switchToRoomScene(ClientUserInfo(playerId, rst.userName, rst.token), wsClient)
               } else {
                 ClientBoot.addToPlatform(
                   WarningDialog.initWarningDialog(s"${rst.msg}")
@@ -60,9 +62,16 @@ class LoginController(
     }
   })
 
-  def showScene() {
+  def showScene(): Unit = {
     ClientBoot.addToPlatform {
-      stageContext.switchScene(loginScene.getScene, "Login")
+      stageContext.switchScene(loginScene.getScene, "LoginScene")
+    }
+  }
+
+  def switchToRoomScene(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCommand]): Unit = {
+    ClientBoot.addToPlatform {
+      val roomScene = new RoomScene(userInfo)
+      new RoomController(userInfo, wsClient, loginScene, roomScene, stageContext).showScene()
     }
   }
 

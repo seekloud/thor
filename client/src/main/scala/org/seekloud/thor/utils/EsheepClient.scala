@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import org.seekloud.thor.ClientBoot.executor
+import org.seekloud.thor.common.AppSettings
 import org.seekloud.thor.protocol.ESheepProtocol._
 
 /**
@@ -35,10 +36,9 @@ object EsheepClient extends HttpUtil {
   private val log = LoggerFactory.getLogger(this.getClass)
 
   //  private val baseUrl = s"${AppSettings.esheepProtocol}://${AppSettings.esheepHost}:${AppSettings.esheepPort}"
-  private val gsKey = "?"
-  private val gameName = "thor"
-  private val gameId = 1000000006l
-  private val baseUrl = s"http://flowdev.neoap.com"
+  private val gsKey = AppSettings.esheepSecureKey
+  private val gameName = AppSettings.esheepGameName
+  private val gameId = AppSettings.esheepAppId
 
   def genPostEnvelopeStr(data: String, appId: String, secureKey: String): String =
     SecureUtil.genPostEnvelope(appId,
@@ -48,7 +48,7 @@ object EsheepClient extends HttpUtil {
     ).asJson.noSpaces
 
   def getLoginInfo: Future[Either[Throwable, LoginUrlRsp]] = {
-    val methodName = "GET"
+    val methodName = "getLoginInfo"
     val url = esheepProtocol + "://" + esheepDomain + "/esheep/api/gameAgent/login"
 
     getRequestSend(methodName, url, Nil).map {
@@ -61,8 +61,8 @@ object EsheepClient extends HttpUtil {
     }
   }
 
-  def loginByMail(email:String, pwd:String): Future[Either[Throwable, ESheepUserInfoRsp]] = {
-    val methodName = "POST"
+  def loginByMail(email: String, pwd: String): Future[Either[Throwable, ESheepUserInfoRsp]] = {
+    val methodName = "loginByMail"
     val url = esheepProtocol + "://" + esheepDomain + "/esheep/rambler/login"
 
     val data = LoginByMailReq(email, pwd).asJson.noSpaces
@@ -77,9 +77,26 @@ object EsheepClient extends HttpUtil {
     }
   }
 
+//  def getRoomList(ip: String, port: Long, domain: String) = {
+//    val methodName = s"getRoomList"
+//    //    val url = appP + "://" + esheepDomain + s"/$gameName/getRoomList"
+//    val url = baseUrl + "/" + gameName + "/" + "getRoomList"
+//    val postEnvelope = genPostEnvelopeStr("", gameId.toString, gsKey)
+//
+//    postJsonRequestSend(methodName, url, Nil, postEnvelope).map {
+//      case Right(jsonRsp) =>
+//        decode[GetRoomListRsp](jsonRsp)
+//      case Left(e) =>
+//        log.debug(s"$methodName failed: $e")
+//        e.printStackTrace()
+//        Left(e)
+//    }
+//  }
+
+
   def linkGame(token: String, playerId: String): Future[Either[Throwable, ClientJoinGameRsp]] = {
     val methodName = "ESheepLink: linkGame(getAccessCode)"
-    val url = baseUrl + s"/esheep/api/gameAgent/joinGame?token=$token"
+    val url = esheepProtocol + "://" + esheepDomain + s"/esheep/api/gameAgent/joinGame?token=$token"
 
     postJsonRequestSend(methodName, url, Nil, JoinGameReq(gameId, playerId).asJson.noSpaces).map {
       case Right(rsp) =>
@@ -105,21 +122,5 @@ object EsheepClient extends HttpUtil {
     }
   }
 
-  def getRoomList(ip: String, port: Long, domain: String) = {
-    val methodName = s"getRoomList-$gameName"
-    val url = baseUrl + "/" + gameName + "/" + "getRoomList"
-    //    val url = baseUrl + "/" + gameName + "/" + "getRoomList"
-    val postEnvelope = genPostEnvelopeStr("", gameId.toString, gsKey)
-
-    postJsonRequestSend(methodName, url, Nil, postEnvelope).map {
-      case Right(jsonRsp) =>
-        decode[GetRoomListRsp](jsonRsp)
-      case Left(e) =>
-        log.debug(s"$methodName failed: $e")
-        e.printStackTrace()
-        Left(e)
-    }
-
-  }
 
 }

@@ -53,7 +53,7 @@ object ClientBoot {
   lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
 
 
-  def addToPlatform(fun: => Unit) = {
+  def addToPlatform(fun: => Unit): Unit = {
     Platform.runLater(() => fun)
   }
 }
@@ -65,7 +65,6 @@ class ClientBoot extends javafx.application.Application {
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
   override def start(primaryStage: Stage): Unit = {
-    println(s"for tao...")
 
     val context = new StageContext(primaryStage)
 

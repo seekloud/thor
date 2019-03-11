@@ -24,10 +24,16 @@ object AppSettings {
   val config = ConfigFactory.parseResources(" product.conf").withFallback(ConfigFactory.load())
 
   val appConfig = config.getConfig("app")
-  val dependence = config.getConfig("dependence")
 
-  val personLimit = appConfig.getInt("RoomConfig.personLimit")
-//  val thorGameConfig:ThorGameConfig = ThorGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
+  val httpInterface = appConfig.getString("http.interface")
+  val httpPort = appConfig.getInt("http.port")
+
+  /*thor server*/
+  val serverProtocol = appConfig.getString("server.protocol")
+  val serverHost = appConfig.getString("server.host")
+  val rootPath = appConfig.getString("server.rootPath")
+  val baseUrl = serverProtocol + "://" + serverHost
+
 
   val testPsw = appConfig.getString("testPsw")
   val version = appConfig.getString("version")
@@ -35,7 +41,9 @@ object AppSettings {
 
   val dependenceConfig = config.getConfig("dependence")
 
+  /*esheep server*/
   private val eSheepConfig = dependenceConfig.getConfig("esheep.config")
+  val esheepGameName = eSheepConfig.getString("gameName")
   val esheepAppId = eSheepConfig.getLong("appId")
   val esheepSecureKey = eSheepConfig.getString("gsKey")
   val esheepProtocol = eSheepConfig.getString("protocol")
