@@ -19,7 +19,7 @@ import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.common.{Routes, StageContext}
-import org.seekloud.thor.controller.LoginController
+import org.seekloud.thor.controller.{GameController, LoginController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
 import org.seekloud.thor.protocol.ESheepProtocol
@@ -77,6 +77,7 @@ object WsClient {
         case msg: StartGame =>
           gameMsgSender ! GAStartGame(msg.roomId)
           //TODO GameController
+          new GameController()
           Behaviors.same
 
         case msg: CreateRoom =>
