@@ -38,7 +38,7 @@ object Routes {
   }
 
   def clientLinkGame(playerId: String, name: String, accessCode: String): String = {
-    baseUrl + "/" + gameName + s"game/playGame/clientLinkGame?playerId=$playerId&playerName=$name&accessCode=$accessCode"
+    baseUrl + "/" + gameName + s"game/playGame/clientLinkGame?playerId=$playerId&playerName=${URLEncoder.encode(name,"utf-8")}&accessCode=$accessCode"
   }
 
 
