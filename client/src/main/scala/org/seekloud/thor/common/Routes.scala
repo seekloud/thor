@@ -27,6 +27,9 @@ object Routes {
   val baseUrl = AppSettings.baseUrl
   val gameName = AppSettings.esheepGameName
 
+  val wsProtocol = AppSettings.gameServerProtocol
+  val wsDomain = AppSettings.gameServerDomain
+
   def wsJoinGameUrl(playerId: String, name:String, accessCode: String, roomIdOpt:Option[String]):String = {
     s"game/playGame/userJoin?playerId=$playerId&playerName=$name&accessCode=$accessCode" +
       (roomIdOpt match {
@@ -38,7 +41,7 @@ object Routes {
   }
 
   def clientLinkGame(playerId: String, name: String, accessCode: String): String = {
-    baseUrl + "/" + gameName + s"game/playGame/clientLinkGame?playerId=$playerId&playerName=$name&accessCode=$accessCode"
+    s"$wsProtocol://$wsDomain/" + gameName + s"/game/playGame/clientLinkGame?playerId=$playerId&playerName=$name&accessCode=$accessCode"
   }
 
 

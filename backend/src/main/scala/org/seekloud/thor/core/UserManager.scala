@@ -277,11 +277,11 @@ object UserManager {
                   downloadStatistics.update("others", downloadStatistics("others") + msg.length.toDouble / 1024)
 
               }
-              if (System.currentTimeMillis() - timer > period) {
-                timer = System.currentTimeMillis()
-                log.info(showStatistics)
-                log.debug(s"showtime: ${System.currentTimeMillis() - timer}")
-              }
+//              if (System.currentTimeMillis() - timer > period) {
+//                timer = System.currentTimeMillis()
+//                log.info(showStatistics)
+//                log.debug(s"showtime: ${System.currentTimeMillis() - timer}")
+//              }
 
             case Left(e) =>
           }

@@ -151,6 +151,7 @@ object WsClient {
                 log.info(s"link game accessCode: ${rst.data.accessCode}")
                 //TODO 与game server建立ws连接 连接已建立，sender向server发送，receiver接收server消息
                 val url = Routes.clientLinkGame(msg.playerId, msg.name, rst.data.accessCode)
+                log.debug(s"link game url: $url")
                 val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                 val source = getSource(ctx.self)
                 val sink = getSink4Server(gameMsgReceiver)

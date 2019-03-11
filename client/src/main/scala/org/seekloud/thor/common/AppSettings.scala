@@ -34,6 +34,9 @@ object AppSettings {
   val rootPath = appConfig.getString("server.rootPath")
   val baseUrl = serverProtocol + "://" + serverHost
 
+  val gameServerProtocol = appConfig.getString("gameServer.protocol")
+  val gameServerDomain = appConfig.getString("gameServer.domain")
+
 
   val testPsw = appConfig.getString("testPsw")
   val version = appConfig.getString("version")
