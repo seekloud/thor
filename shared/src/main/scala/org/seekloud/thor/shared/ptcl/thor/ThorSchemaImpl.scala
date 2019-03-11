@@ -49,7 +49,7 @@ class ThorSchemaImpl(
 
   private var thorSchemaStateOpt: Option[ThorSchemaState] = None
 
-  protected var waitSyncData: Boolean = true
+  var waitSyncData: Boolean = true
 
   private val preExecuteFrameOffset = org.seekloud.thor.shared.ptcl.model.Constants.preExecuteFrameOffset
 

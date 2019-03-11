@@ -144,13 +144,13 @@ case class ThorGameConfigImpl(
 
   def getThorGameConfigImpl(): ThorGameConfigImpl = this
 
-  def boundary = gridBoundary.getBoundary
+  def boundary: Point = gridBoundary.getBoundary
 
   def facePalstance: Float = adventurerParams.facePalstance
 
   def newbornFrame: Byte = adventurerParams.newbornFrame
 
-  def getAdventurerRadiusByLevel(l: Byte) = {
+  def getAdventurerRadiusByLevel(l: Byte): Float = {
     adventurerParams.radius(l - 1)
   }
 

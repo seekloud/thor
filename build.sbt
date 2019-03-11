@@ -49,7 +49,7 @@ lazy val frontend = (project in file("frontend"))
   .settings(skip in packageJSDependencies := false)
   .settings(
     scalaJSUseMainModuleInitializer := false,
-//    mainClass := Some("org.seekloud.virgour.front.Main"),
+    //    mainClass := Some("org.seekloud.virgour.front.Main"),
     libraryDependencies ++= Seq(
       "io.circe" %%% "circe-core" % "0.8.0",
       "io.circe" %%% "circe-generic" % "0.8.0",
@@ -110,11 +110,11 @@ lazy val backend = (project in file("backend")).enablePlugins(PackPlugin)
   //      )
   //    }.taskValue)
   .settings((resourceGenerators in Compile) += Def.task {
-    Seq(
-      (packageJSDependencies in Compile in frontend).value
-      //(packageMinifiedJSDependencies in Compile in frontend).value
-    )
-  }.taskValue)
+  Seq(
+    (packageJSDependencies in Compile in frontend).value
+    //(packageMinifiedJSDependencies in Compile in frontend).value
+  )
+}.taskValue)
   .settings(
     (resourceDirectories in Compile) += (crossTarget in frontend).value,
     watchSources ++= (watchSources in frontend).value

@@ -25,7 +25,7 @@ trait BackgroundClient {
 
 
   def window = Point((canvasSize.x - 12).toFloat, (canvasSize.y - 12).toFloat)
-  def baseFont = window.x / 1440
+  def baseFont: Float = window.x / 1440
   private val mapImg = drawFrame.createImage(pictureMap("background.png"))
 
   def drawBackground(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
@@ -75,7 +75,7 @@ trait BackgroundClient {
   }
 
 
-  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp:Int) = {
+  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp:Int): Unit = {
     ctx.save()
     ctx.setTextBaseLine("top")
     if (tp == 1)

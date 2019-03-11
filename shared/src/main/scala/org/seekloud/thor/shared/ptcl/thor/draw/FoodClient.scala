@@ -33,28 +33,35 @@ trait FoodClient {
   //绘制食物
 
   def drawFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
-
-    preCanvasFood match {
+    this.preFoodImage match {
       case Nil =>
-        foodMap.foreach { food =>
-          drawAFood(food._2, offset, canvasUnit, canvasBoundary)
-          //          if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("no Pre first")
-        }
-      case _ =>
-        if (System.currentTimeMillis() - preTime < 2000) {
-          foodMap.foreach { food =>
-            drawAFood(food._2, offset, canvasUnit, canvasBoundary)
-            //            if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("no Pre")
-          }
-        }
-        else {
-          foodMap.foreach { food =>
-            drawFoodByPre(food._2, offset, canvasUnit, canvasBoundary)
-            //            if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("Pre !!!")
-          }
+        preCanvasFood match {
+          case Nil =>
+            foodMap.foreach { food =>
+              drawAFood(food._2, offset, canvasUnit, canvasBoundary)
+              //          if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("no Pre first")
+            }
+          case _ =>
+            if (System.currentTimeMillis() - preTime < 2000) {
+              foodMap.foreach { food =>
+                //            drawAFood(food._2, offset, canvasUnit, canvasBoundary)
+                //            if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("no Pre")
+              }
+            }
+            else {
+              foodMap.foreach { food =>
+                drawFoodByPre(food._2, offset, canvasUnit, canvasBoundary)
+                //            if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("Pre !!!")
+              }
 
+            }
         }
+      case _ => foodMap.foreach { food =>
+        drawFoodByPreImage(food._2, offset, canvasUnit, canvasBoundary)
+        //          if((System.currentTimeMillis() - preTime) % 2000 <= 30) println("no Pre first")
+      }
     }
+
   }
 
   def drawBodyFood(offset: Point, offsetTime: Long, canvasUnit: Float, canvasBoundary: Point): Unit = {
@@ -110,6 +117,24 @@ trait FoodClient {
       //只绘制视角窗口内的食物
       ctx.save()
       ctx.drawImage(preCanvasFood(color), sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
+      ctx.restore()
+    }
+  }
+
+  def drawFoodByPreImage(food: Food, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+
+    val color = food.getFoodState.color
+
+    val r = config.getRadiusByFoodLevel(food.getFoodState.level)
+    val sx = food.getFoodState.position.x - r + offset.x
+    val sy = food.getFoodState.position.y - r + offset.y
+    val dx = 2 * r
+    val dy = 2 * r
+
+    if (0 < sx && sx < canvasBoundary.x && 0 < sy && sy < canvasBoundary.y) {
+      //只绘制视角窗口内的食物
+      ctx.save()
+      ctx.drawImage(this.preFoodImage(color), sx * canvasUnit, sy * canvasUnit, Some(dx * canvasUnit, dy * canvasUnit))
       ctx.restore()
     }
   }

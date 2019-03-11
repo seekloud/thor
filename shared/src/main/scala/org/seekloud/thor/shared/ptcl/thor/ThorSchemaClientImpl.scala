@@ -16,6 +16,7 @@
 
 package org.seekloud.thor.shared.ptcl.thor
 
+import javafx.scene.image.WritableImage
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model.Point
@@ -45,6 +46,11 @@ with BackgroundClient
 with DrawOtherClient
 with FpsRender{
 
+  var preCanvasDeath: List[MiddleCanvas] = Nil
+  var preFoodImage:List[WritableImage] = List.empty
+  var preAdventurerImage:List[WritableImage] = List.empty
+  var preWeaponImage:List[WritableImage] = List.empty
+  var preDeathImage:List[WritableImage] = List.empty
   var killerNew : String = "?"
   var duringTime : String = "0"
   val ifTest: Boolean = false
@@ -60,15 +66,39 @@ with FpsRender{
 
           val a = System.currentTimeMillis()
           drawBackground(offset, canvasUnit, canvasBounds)
-//          drawFood(offset, canvasUnit, canvasBounds)
+          drawFood(offset, canvasUnit, canvasBounds)
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
           drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
           val b = System.currentTimeMillis()
-          println(s"the span is ${b-a}")
+          if (b-a>5)
+          println(s"the span all is ${b-a}")
 
 //          if(ifTest)
 //            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
+
+        case None => println("None!!!!!!")
+      }
+    }
+    else{
+      println("waitSyncData!!!!")
+    }
+  }
+
+  def drawGame4Client(mainId: String, offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
+    if(!waitSyncData){
+      adventurerMap.get(mainId) match{
+        case Some(adventurer) =>
+          //保持自己的adventurer在屏幕中央~
+          val moveDistance = getMoveDistance(adventurer, offSetTime)
+          val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
+
+          val a = System.currentTimeMillis()
+          drawBackground(offset, canvasUnit, canvasBounds)
+          drawEnergyBar(adventurer)
+          val b = System.currentTimeMillis()
+          if (b-a>5)
+            println(s"the span all is ${b-a}")
 
         case None => println("None!!!!!!")
       }
@@ -86,11 +116,22 @@ with FpsRender{
   def changePreCanvas(
   preFood: List[MiddleCanvas] = Nil,
   preAdventurer: List[MiddleCanvas] = Nil,
-  preWeapon: List[MiddleCanvas] = Nil
+  preWeapon: List[MiddleCanvas] = Nil, preDeath: List[MiddleCanvas] = Nil
   ): Unit ={
     preCanvasFood = preFood
     preCanvasAdventurer = preAdventurer
     preCanvasWeapon = preWeapon
+    preCanvasDeath = preDeath
+    println(preAdventurer.map(_.getHeight()),preFood.map(_.getHeight()),preWeapon.map(_.getHeight()))
   }
 
+  def changePreImage(preFood: List[MiddleCanvas] = Nil,
+    preAdventurer: List[MiddleCanvas] = Nil,
+    preWeapon: List[MiddleCanvas] = Nil,
+    preDeath: List[MiddleCanvas] = Nil): Unit = {
+    preFoodImage = preFood.map(_.change2Image().asInstanceOf[WritableImage])
+    preAdventurerImage = preAdventurer.map(_.change2Image().asInstanceOf[WritableImage])
+    preWeaponImage = preWeapon.map(_.change2Image().asInstanceOf[WritableImage])
+    preDeathImage = preDeath.map(_.change2Image().asInstanceOf[WritableImage])
+  }
 }
