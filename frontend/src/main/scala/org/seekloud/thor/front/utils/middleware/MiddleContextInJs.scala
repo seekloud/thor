@@ -19,6 +19,7 @@ package org.seekloud.thor.front.utils.middleware
 import org.scalajs.dom
 import org.scalajs.dom.html.Canvas
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleContext
+import scala.language.implicitConversions
 
 /**
   * copied from tank
@@ -35,15 +36,15 @@ class MiddleContextInJs extends MiddleContext {
     context = canvas.getCanvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
   }
 
-  def getContext = context
+  def getContext: dom.CanvasRenderingContext2D = context
 
   override def setGlobalAlpha(alpha: Double): Unit = context.globalAlpha = alpha
 
   override def setStrokeStyle(color: String): Unit = context.strokeStyle = color
 
-  override def fill = context.fill()
+  override def fill(): Unit = context.fill()
 
-  override def setFill(color: String) = context.fillStyle = color
+  override def setFill(color: String): Unit = context.fillStyle = color
 
   override def moveTo(x: Double, y: Double): Unit = context.moveTo(x, y)
 
