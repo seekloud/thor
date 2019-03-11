@@ -18,7 +18,7 @@ package org.seekloud.utils.middleware
 
 import javafx.geometry.VPos
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.image.WritableImage
+import javafx.scene.image.{Image, WritableImage}
 import javafx.scene.paint.Color
 import javafx.scene.effect.InnerShadow
 import javafx.scene.shape.{StrokeLineCap, StrokeLineJoin}
@@ -110,6 +110,18 @@ class MiddleContextInFx extends MiddleContext {
           context.drawImage(js.getImage, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
       case js: WritableImage =>
+        if(imgOffsetX.isEmpty) {
+          if (size.isEmpty) {
+            context.drawImage(js, offsetX, offsetY)
+          } else {
+            context.drawImage(js, offsetX, offsetY, size.get._1, size.get._2)
+          }
+        }
+        else{
+          context.drawImage(js, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
+        }
+
+      case js: Image =>
         if(imgOffsetX.isEmpty) {
           if (size.isEmpty) {
             context.drawImage(js, offsetX, offsetY)

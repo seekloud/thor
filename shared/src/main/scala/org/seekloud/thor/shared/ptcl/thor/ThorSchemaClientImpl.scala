@@ -46,9 +46,11 @@ with BackgroundClient
 with DrawOtherClient
 with FpsRender{
 
+  var preCanvasDeath: List[MiddleCanvas] = Nil
   var preFoodImage:List[WritableImage] = List.empty
   var preAdventurerImage:List[WritableImage] = List.empty
   var preWeaponImage:List[WritableImage] = List.empty
+  var preDeathImage:List[WritableImage] = List.empty
   var killerNew : String = "?"
   var duringTime : String = "0"
   val ifTest: Boolean = false
@@ -114,19 +116,22 @@ with FpsRender{
   def changePreCanvas(
   preFood: List[MiddleCanvas] = Nil,
   preAdventurer: List[MiddleCanvas] = Nil,
-  preWeapon: List[MiddleCanvas] = Nil
+  preWeapon: List[MiddleCanvas] = Nil, preDeath: List[MiddleCanvas] = Nil
   ): Unit ={
     preCanvasFood = preFood
     preCanvasAdventurer = preAdventurer
     preCanvasWeapon = preWeapon
+    preCanvasDeath = preDeath
     println(preAdventurer.map(_.getHeight()),preFood.map(_.getHeight()),preWeapon.map(_.getHeight()))
   }
 
   def changePreImage(preFood: List[MiddleCanvas] = Nil,
     preAdventurer: List[MiddleCanvas] = Nil,
-    preWeapon: List[MiddleCanvas] = Nil): Unit = {
+    preWeapon: List[MiddleCanvas] = Nil,
+    preDeath: List[MiddleCanvas] = Nil): Unit = {
     preFoodImage = preFood.map(_.change2Image().asInstanceOf[WritableImage])
     preAdventurerImage = preAdventurer.map(_.change2Image().asInstanceOf[WritableImage])
     preWeaponImage = preWeapon.map(_.change2Image().asInstanceOf[WritableImage])
+    preDeathImage = preDeath.map(_.change2Image().asInstanceOf[WritableImage])
   }
 }

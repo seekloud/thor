@@ -143,19 +143,18 @@ class GameController(
       }
     }
   }
-  var a = 0
   def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasBounds: Point): Unit = {
-    a += 1
     thorSchemaOpt match {
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if (thorSchema.adventurerMap.contains(mainId)) {
           val start = System.currentTimeMillis()
-          val a = System.currentTimeMillis()
-          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
+//          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
           val drawScene: DrawScene = new DrawScene(thorSchema)
+          drawScene.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
+          val a = System.currentTimeMillis()
           thorSchema.drawRank(currentRank, CurrentOrNot = true, byteId)
           thorSchema.drawSmallMap(mainId)
-          val b = System.currentTimeMillis()
+
 //          println(s"the span is ${b-a}")
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if (drawTime.length >= drawTimeSize) {
@@ -169,12 +168,12 @@ class GameController(
           //          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
           thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle, currentRank.length)
           if (barrageTime > 0) {
-            thorSchema.drawBarrage(barrage._1, barrage._2)
+
+            drawScene.drawBarrage(barrage._1, barrage._2)
             barrageTime -= 1
           }
         }
         else {
-          if (a % 100 == 0) println("loading")
           thorSchema.drawGameLoading()
         }
 
@@ -476,20 +475,23 @@ class GameController(
       override def run(): Unit = fun
     }
 
-    (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas) match{
-      case (Nil, Nil, Nil) =>
+    (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas, preDrawFrame.deathCanvas) match{
+      case (Nil, Nil, Nil, Nil) =>
         timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
-      case (foodCanvas, Nil, Nil) =>
-        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, Nil, Nil))
-        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, Nil, Nil))
+      case (foodCanvas, Nil, Nil, Nil) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, Nil, Nil, Nil))
+        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, Nil, Nil, Nil))
         timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
-      case (foodCanvas, adventurerCanvas, Nil) =>
-        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, Nil))
-        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, Nil))
+      case (foodCanvas, adventurerCanvas, Nil, Nil) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, Nil, Nil))
+        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, Nil, Nil))
         timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
-      case (foodCanvas, adventurerCanvas, weaponCanvas) =>
-        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas))
-        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, weaponCanvas))
+      case (foodCanvas, adventurerCanvas, weaponCanvas, Nil) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas, Nil))
+        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, weaponCanvas, Nil))
+      case (foodCanvas, adventurerCanvas, weaponCanvas, deathCanvas) =>
+        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas, deathCanvas))
+        thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, weaponCanvas, deathCanvas))
     }
   }
 
