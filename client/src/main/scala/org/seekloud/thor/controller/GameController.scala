@@ -144,7 +144,7 @@ class GameController(
       startGameLoop()
       addUserActionListenEvent
       checkAndChangePreCanvas()
-      logicFrameTime = System.currentTimeMillis()
+//      logicFrameTime = System.currentTimeMillis()
     } else {
       println(s"restart...")
       thorSchemaOpt.foreach { r =>
@@ -177,11 +177,9 @@ class GameController(
 //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
           val drawScene: DrawScene = new DrawScene(thorSchema)
           drawScene.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
-          val a = System.currentTimeMillis()
           thorSchema.drawRank(currentRank, CurrentOrNot = true, byteId)
           thorSchema.drawSmallMap(mainId)
 
-//          println(s"the span is ${b-a}")
           drawTime = drawTime :+ System.currentTimeMillis() - start
           if (drawTime.length >= drawTimeSize) {
             drawTimeLong = drawTime.sum / drawTime.size
@@ -233,7 +231,6 @@ class GameController(
         case GameState.firstCome =>
           thorSchemaOpt.foreach(_.drawGameLoading())
         case GameState.loadingPlay =>
-//          println("loading play")
           thorSchemaOpt.foreach(_.drawGameLoading())
         case GameState.stop =>
           thorSchemaOpt.foreach {

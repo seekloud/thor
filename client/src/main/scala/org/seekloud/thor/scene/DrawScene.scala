@@ -18,7 +18,7 @@ package org.seekloud.thor.scene
 
 import javafx.scene.image.{Image, WritableImage}
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, Food, FoodState}
-import org.seekloud.thor.shared.ptcl.model.Constants.pictureMap
+import org.seekloud.thor.model.Constants.pictureMap
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleCanvas
@@ -42,19 +42,12 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         val moveDistance = getMoveDistance(adventurer, offSetTime)
         val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
 
-        val a = System.currentTimeMillis()
         impl.drawBackground(offset, canvasUnit, canvasBounds)
         drawFood(offset, canvasUnit, canvasBounds)
-        val d = System.currentTimeMillis()
         drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
-        val c = System.currentTimeMillis()
-        if (c-d>5) println(s"span 5 is ${c-d}")
         drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
 
         impl.drawEnergyBar(adventurer)
-        val b = System.currentTimeMillis()
-        if (b-a>5)
-          println(s"the span all is ${b-a}")
 
       case None => println("None!!!!!!")
     }
@@ -141,7 +134,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         case Some(s) =>
           impl.ctx.save()
           impl.ctx.setFill("rgba(79,148,205,0.4)")
-          impl.ctx.setShadowColor("rgb(255,255,255)")
+          impl.ctx.setGlobalAlpha(0.5)
           impl.ctx.beginPath()
           impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 2 * Math.PI,false)
           impl.ctx.closePath()

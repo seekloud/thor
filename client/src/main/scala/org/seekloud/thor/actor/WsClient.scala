@@ -152,19 +152,6 @@ object WsClient {
               stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
             }
           }
-//          ClientBoot.addToPlatform {
-//            println("already")
-//            gameController.foreach{ p =>
-//              println("already have playerInfo")
-//              roomController.foreach{r =>
-//                println("creating new scene")
-//                val gameScene = new GameScene
-//                stageContext.switchScene(gameScene.getScene, fullScreen = true)
-//                println("creating new controller")
-//                new GameController(ctx.self, PlayerInfo(p.playerId, p.name), stageContext, gameScene ).start()
-//              }
-//            }
-//          }
           //TODO GameController
           Behaviors.same
 
@@ -211,7 +198,6 @@ object WsClient {
           Behaviors.same
 
         case msg: GetLoginInfo =>
-          println("creating new scene")
           val a = System.currentTimeMillis()
           val gameScene = new GameScene
           val gc = new GameController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, gameScene)
@@ -255,6 +241,7 @@ object WsClient {
             ClientUserInfo(msg.playerId, msg.name, msg.token, Some(msg.tokenExistTime)),
             ctx.self
           ))
+          gc.checkAndChangePreCanvas()
           println(s"has player Info ${(msg.playerId,msg.name)}")
 //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc) , roomController, stageContext)

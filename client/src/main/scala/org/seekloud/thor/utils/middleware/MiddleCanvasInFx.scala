@@ -64,7 +64,7 @@ class MiddleCanvasInFx private() extends MiddleCanvas {
     params.setFill(Color.TRANSPARENT)
     val c = canvas.snapshot(params, null)
     val b = System.currentTimeMillis()
-//    println(s"span 2 is ${b-a}")
+    println(s"span 2 is ${b-a}")
     c
   }
 }

@@ -20,7 +20,7 @@ import java.util.Timer
 import java.util.TimerTask
 import org.seekloud.thor.utils.middleware.MiddleFrameInFx
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleContext, MiddleImage}
-import org.seekloud.thor.shared.ptcl.model.Constants._
+import org.seekloud.thor.model.Constants._
 
 /**
   * User: Jason

@@ -91,7 +91,7 @@ class MiddleContextInFx extends MiddleContext {
     context.setStroke(Color.web(color))
   }
 
-  override def fill: Unit = context.fill()
+  override def fill(): Unit = context.fill()
 
   override def setFill(color: String): Unit = context.setFill(Color.web(color))
 
@@ -167,6 +167,7 @@ class MiddleContextInFx extends MiddleContext {
   override def setTextAlign(s: String): Unit = context.setTextAlign(s)
 
   override def setShadowColor(s: String): Unit = {
+    println("set Shadow color")
     val shadowColor = new InnerShadow()
     shadowColor.setColor(Color.WHITE)
     context.setEffect(shadowColor)

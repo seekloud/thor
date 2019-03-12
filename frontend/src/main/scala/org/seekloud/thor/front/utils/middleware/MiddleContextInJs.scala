@@ -90,7 +90,7 @@ class MiddleContextInJs extends MiddleContext {
 
   override def clearRect(x: Double, y: Double, w: Double, h: Double) = context.clearRect(x, y, w, h)
 
-  override def beginPath() = context.beginPath()
+  override def beginPath(): Unit = context.beginPath()
 
   override def closePath() = context.closePath()
 
