@@ -71,7 +71,7 @@ object WsClient {
 
   final case class DispatchMsg(msg: ThorGame.WsMsgFront) extends WsCommand
 
-  final case class PlayerInfo(playerId: String, name: String) extends WsCommand
+  final case class PlayerIdName(playerId: String, name: String) extends WsCommand
 
   final case object Stop extends WsCommand
 
@@ -97,7 +97,7 @@ object WsClient {
     gameMsgReceiver: ActorRef[WsMsgServer],
     gameMsgSender: ActorRef[WsMsgFrontSource],
     loginController: Option[LoginController],
-    playerInfo: Option[PlayerInfo],
+    playerInfo: Option[PlayerIdName],
     roomController: Option[RoomController],
     stageContext: StageContext
   )(
@@ -105,11 +105,9 @@ object WsClient {
   ): Behavior[WsCommand] =
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
-        case msg: PlayerInfo =>
+        case msg: PlayerIdName =>
           println(s"get player info $msg")
-          ctx.self ! msg
          working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
-
 
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
@@ -124,9 +122,9 @@ object WsClient {
               roomController.foreach { r =>
                 println("creating new scene")
                 val gameScene = new GameScene
-                stageContext.switchScene(gameScene.getScene)
+                stageContext.switchScene(gameScene.getScene, fullScreen = true)
                 println("creating new controller")
-                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene )
+                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene ).start()
               }
             }
           }
@@ -147,9 +145,9 @@ object WsClient {
               roomController.foreach{r =>
                 println("creating new scene")
                 val gameScene = new GameScene
-                stageContext.switchScene(gameScene.getScene)
+                stageContext.switchScene(gameScene.getScene, fullScreen = true)
                 println("creating new controller")
-                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene )
+                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene ).start()
               }
             }
           }
@@ -173,10 +171,10 @@ object WsClient {
           Behaviors.same
 
         case msg: GetLoginController =>
-          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), None, roomController, stageContext)
+          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), playerInfo, roomController, stageContext)
 
         case msg: GetRoomController =>
-          working(gameMsgReceiver, gameMsgSender, loginController, None, Some(msg.roomController), stageContext)
+          working(gameMsgReceiver, gameMsgSender, loginController, playerInfo, Some(msg.roomController), stageContext)
 
         case msg: EstablishConnection2Es =>
           log.info(s"get msg: $msg")
@@ -238,12 +236,12 @@ object WsClient {
             ctx.self
           ))
           println(s"has player Info ${(msg.playerId,msg.name)}")
-          ctx.self ! PlayerInfo(msg.playerId,msg.name)
-          working(gameMsgReceiver, gameMsgSender, loginController, Some(PlayerInfo(msg.playerId,msg.name)) , roomController, stageContext)
+//          ctx.self ! PlayerInfo(msg.playerId,msg.name)
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(PlayerIdName(msg.playerId,msg.name)) , roomController, stageContext)
 
         case msg: GetSender =>
           log.debug(s"get sender success.")
-          working(gameMsgReceiver, msg.stream, loginController, None, roomController, stageContext)
+          working(gameMsgReceiver, msg.stream, loginController, playerInfo, roomController, stageContext)
 
         case Stop =>
           log.info(s"wsClient stopped.")
