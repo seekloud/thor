@@ -137,7 +137,7 @@ class GameController(
     if (firstCome) {
       firstCome = false
       println("start...")
-      wsClient ! WsClient.StartGame(playerInfo.roomId)
+//      wsClient ! WsClient.StartGame(playerInfo.roomId)
       addUserActionListenEvent
       checkAndChangePreCanvas()
       logicFrameTime = System.currentTimeMillis()
