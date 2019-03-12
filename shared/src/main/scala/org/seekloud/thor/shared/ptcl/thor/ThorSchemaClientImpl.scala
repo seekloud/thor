@@ -71,8 +71,8 @@ with FpsRender{
           drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
           val b = System.currentTimeMillis()
-          if (b-a>5)
-          println(s"the span all is ${b-a}")
+//          if (b-a>5)
+//          println(s"the span all is ${b-a}")
 
 //          if(ifTest)
 //            drawAttacking(offset, adventurer, attackingAdventureMap.getOrElse(adventurer.playerId, 3))
@@ -97,8 +97,8 @@ with FpsRender{
           drawBackground(offset, canvasUnit, canvasBounds)
           drawEnergyBar(adventurer)
           val b = System.currentTimeMillis()
-          if (b-a>5)
-            println(s"the span all is ${b-a}")
+//          if (b-a>5)
+//            println(s"the span all is ${b-a}")
 
         case None => println("None!!!!!!")
       }

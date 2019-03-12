@@ -48,13 +48,13 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         val d = System.currentTimeMillis()
         drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
         val c = System.currentTimeMillis()
-        if (c-d>5) println(s"span 5 is ${c-d}")
+//        if (c-d>5) println(s"span 5 is ${c-d}")
         drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
 
         impl.drawEnergyBar(adventurer)
         val b = System.currentTimeMillis()
-        if (b-a>5)
-          println(s"the span all is ${b-a}")
+//        if (b-a>5)
+//          println(s"the span all is ${b-a}")
 
       case None => println("None!!!!!!")
     }

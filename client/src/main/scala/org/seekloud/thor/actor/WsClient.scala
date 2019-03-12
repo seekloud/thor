@@ -107,7 +107,6 @@ object WsClient {
 //        case msg: PlayerIdName =>
 //          println(s"get player info $msg")
 //         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
-
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
           if (gameMsgSender != null) {
