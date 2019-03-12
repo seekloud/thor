@@ -23,10 +23,10 @@ trait FpsRender {
   this:ThorSchemaClientImpl =>
 
   private var lastRenderTime = System.currentTimeMillis()
-  private var lastRenderTimes = 0
+  var lastRenderTimes = 0
   private var renderTimes = 0
 
-  private def addFps() = {
+  def addFps() = {
     val time = System.currentTimeMillis()
     renderTimes += 1
     if (time - lastRenderTime > 1000){

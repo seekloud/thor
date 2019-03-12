@@ -12,8 +12,10 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.{BorderPane, HBox, VBox}
 import javafx.scene.text.Font
 import javafx.scene.{Group, Scene}
+import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.model.Constants
 import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
+import org.seekloud.thor.utils.WarningDialog
 
 import scala.collection.mutable
 
@@ -200,8 +202,16 @@ class RoomScene(userInfo: ClientUserInfo) {
 
   confirmBtn.setOnAction { _ =>
     val selectedInfo = roomTable.getSelectionModel.selectedItemProperty().get()
-    val roomId = selectedInfo.roomId.get().toInt
-    listener.confirmRoom(roomId, roomMap(roomId)._2)
+    val roomId = try {
+      selectedInfo.roomId.get().toInt
+    } catch {
+      case _: Exception =>
+        ClientBoot.addToPlatform {
+          WarningDialog.initWarningDialog("请选择要加入的房间！")
+        }
+        -1
+    }
+    if (roomId != -1) listener.confirmRoom(roomId, roomMap(roomId)._2)
   }
   roomBtn.setOnAction(_ => listener.gotoCreateRoomScene())
   refreshBtn.setOnAction(_ => listener.refreshRoomList())

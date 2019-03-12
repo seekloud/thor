@@ -19,10 +19,11 @@ package org.seekloud.thor.scene
 import javafx.scene.image.{Image, WritableImage}
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, Food, FoodState}
 import org.seekloud.thor.model.Constants.pictureMap
-import org.seekloud.thor.shared.ptcl.model.Point
+import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleCanvas
 import org.seekloud.utils.CanvasUtils
+
 /**
   * User: Jason
   * Date: 2019/3/10
@@ -30,43 +31,51 @@ import org.seekloud.utils.CanvasUtils
   */
 class DrawScene(impl: ThorSchemaClientImpl) {
 
+  /*energyBar conf*/
+  private val barLength = 500
+  private val barHeight = 25
+  private val r = barHeight / 2
+
+  private def barLeft = (impl.canvasSize.x - barLength) / 2
+
+  private def barTop = impl.canvasSize.y - barHeight - 50
+
   val mapImg = new Image("img/background.png")
-
   val hammerImg = new Image("img/hammer.png")
-
   val starImg = new Image("img/star.png")
 
-  def drawGame4Client(mainId: String, offSetTime:Long, canvasUnit: Float, canvasBounds: Point): Unit ={
-  if(!impl.waitSyncData){
-    impl.adventurerMap.get(mainId) match{
-      case Some(adventurer) =>
-        //保持自己的adventurer在屏幕中央~
-        val moveDistance = getMoveDistance(adventurer, offSetTime)
-        val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
+  def drawGame4Client(mainId: String, offSetTime: Long, canvasUnit: Float, canvasBounds: Point): Unit = {
+    if (!impl.waitSyncData) {
+      impl.adventurerMap.get(mainId) match {
+        case Some(adventurer) =>
+          //保持自己的adventurer在屏幕中央~
+          val moveDistance = getMoveDistance(adventurer, offSetTime)
+          val offset = canvasBounds / 2 - (adventurer.getAdventurerState.position + moveDistance)
 
-        drawBackground(offset, canvasUnit, canvasBounds)
-        drawFood(offset, canvasUnit, canvasBounds)
-        drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
-        drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
+          drawBackground(offset, canvasUnit, canvasBounds)
+          drawFood(offset, canvasUnit, canvasBounds)
+          drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
+          drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
 
-        impl.drawEnergyBar(adventurer)
+          drawEnergyBar(adventurer)
 
-      case None => println("None!!!!!!")
+        case None => println("None!!!!!!")
+      }
+    }
+    else {
+      println("waitSyncData!!!!")
     }
   }
-  else{
-    println("waitSyncData!!!!")
-  }
-}
+
   def drawBackground(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
     impl.ctx.save()
     impl.ctx.setFill("#171b1f")
     impl.ctx.fillRec(0, 0, canvasBoundary.x * canvasUnit, canvasBoundary.y * canvasUnit)
     impl.ctx.fill()
-    impl.ctx.drawImage(mapImg, offset.x * canvasUnit, offset.y * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
-    impl.ctx.drawImage(mapImg, (offset.x + impl.config.boundary.x/2) * canvasUnit, offset.y * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
-    impl.ctx.drawImage(mapImg, offset.x * canvasUnit, (offset.y + impl.config.boundary.y/2) * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
-    impl.ctx.drawImage(mapImg, (offset.x + impl.config.boundary.x/2) * canvasUnit, (offset.y + impl.config.boundary.y/2) * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
+    impl.ctx.drawImage(mapImg, offset.x * canvasUnit, offset.y * canvasUnit, Some(impl.config.boundary.x / 2 * canvasUnit, impl.config.boundary.y / 2 * canvasUnit))
+    impl.ctx.drawImage(mapImg, (offset.x + impl.config.boundary.x / 2) * canvasUnit, offset.y * canvasUnit, Some(impl.config.boundary.x / 2 * canvasUnit, impl.config.boundary.y / 2 * canvasUnit))
+    impl.ctx.drawImage(mapImg, offset.x * canvasUnit, (offset.y + impl.config.boundary.y / 2) * canvasUnit, Some(impl.config.boundary.x / 2 * canvasUnit, impl.config.boundary.y / 2 * canvasUnit))
+    impl.ctx.drawImage(mapImg, (offset.x + impl.config.boundary.x / 2) * canvasUnit, (offset.y + impl.config.boundary.y / 2) * canvasUnit, Some(impl.config.boundary.x / 2 * canvasUnit, impl.config.boundary.y / 2 * canvasUnit))
     val borderW = 10
     impl.ctx.setFill("#4A4B49")
     impl.ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, impl.config.boundary.x * canvasUnit, borderW)
@@ -81,23 +90,23 @@ class DrawScene(impl: ThorSchemaClientImpl) {
   def drawBarrage(s: String, t: String): Unit = {
     impl.ctx.save()
     impl.ctx.setFont("Comic Sans Ms", 25)
-    impl. ctx.setTextBaseLine("top")
-    impl. ctx.setFill("#ffffff")
+    impl.ctx.setTextBaseLine("top")
+    impl.ctx.setFill("#ffffff")
     if (t == "join") {
       println("join")
       val tmp = s + "加入了游戏"
-      impl. ctx.fillText(tmp, impl.window.x * 0.38, impl.window.y * 0.17)
+      impl.ctx.fillText(tmp, impl.window.x * 0.38, impl.window.y * 0.17)
     }
-    else if (t == "left"){
+    else if (t == "left") {
       println("left")
       val tmp = s + "离开了游戏"
-      impl. ctx.fillText(tmp, impl.window.x * 0.38, impl.window.y * 0.17)
+      impl.ctx.fillText(tmp, impl.window.x * 0.38, impl.window.y * 0.17)
     }
-    else{
-      val start = impl.window.x * 0.5 - (impl.ctx.measureText(s"$s $t") + 80)/2
+    else {
+      val start = impl.window.x * 0.5 - (impl.ctx.measureText(s"$s $t") + 80) / 2
       impl.ctx.fillText(s, start, impl.window.y * 0.17)
       impl.ctx.drawImage(hammerImg, start + impl.ctx.measureText(s) + 25, impl.window.y * 0.15, Some(50, 50))
-      impl.ctx.fillText(t, start + impl.ctx.measureText(s) + 100 , impl.window.y * 0.17)
+      impl.ctx.fillText(t, start + impl.ctx.measureText(s) + 150, impl.window.y * 0.17)
     }
 
     impl.ctx.restore()
@@ -109,16 +118,16 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     val position = adventurer.getAdventurerState.position
     var moveDistance = Point(0, 0)
 
-    if(adventurer.isMove && adventurer.isIntersect == 0){
+    if (adventurer.isMove && adventurer.isIntersect == 0) {
       moveDistance = impl.config.getMoveDistanceByFrame(adventurer.getAdventurerState.level, adventurer.isSpeedUp).rotate(adventurer.getAdventurerState.direction) * offSetTime.toFloat / impl.config.frameDuration
       //如果达到边界 则不再往外走
-      if(position.x - r <= 0 || position.x + r >= impl.config.boundary.x) moveDistance = moveDistance.copy(x = 0)
-      if(position.y - r <= 0 || position.y + r >= impl.config.boundary.y) moveDistance = moveDistance.copy(y = 0)
+      if (position.x - r <= 0 || position.x + r >= impl.config.boundary.x) moveDistance = moveDistance.copy(x = 0)
+      if (position.y - r <= 0 || position.y + r >= impl.config.boundary.y) moveDistance = moveDistance.copy(y = 0)
     }
     moveDistance
   }
 
-  def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit ={
+  def drawAdventurer(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
     def drawAnAdventurer(adventurer: Adventurer): Unit = {
       val r = impl.config.getAdventurerRadiusByLevel(adventurer.level)
@@ -134,51 +143,50 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         val height = impl.config.getAdventurerRadiusByLevel(adventurer.level) * 2 * canvasUnit
         val width = 3 * height
 
-        CanvasUtils.rotateImage("speed",impl.drawFrame, impl.ctx, Nil, Nil, "img/speedparticles.png",  Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction,impl.preTime, adventurer.getAdventurerState.level)
+        CanvasUtils.rotateImage("speed", impl.drawFrame, impl.ctx, Nil, Nil, "img/speedparticles.png", Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction, impl.preTime, adventurer.getAdventurerState.level)
       }
 
       //画人物
       //      val drawX = if(systemFrame%6 < 3) dx * 0.98.toFloat else dx
-      if(impl.ifTest){
+      if (impl.ifTest) {
         impl.ctx.save()
         impl.ctx.setFill("#FF0000")
         impl.ctx.beginPath()
-        impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit, 0, 2*Math.PI, false)
+        impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit, 0, 2 * Math.PI, false)
         impl.ctx.closePath()
         impl.ctx.fill()
         impl.ctx.restore()
       }
-      CanvasUtils.rotateImage("adventurer", impl.drawFrame, impl.ctx, impl.preCanvasAdventurer, impl.preAdventurerImage, pictureMap(s"char${(adventurer.level % 21 - 1)/4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 1.1.toFloat, 0, adventurer.getAdventurerState.direction,impl.preTime, adventurer.getAdventurerState.level)
+      CanvasUtils.rotateImage("adventurer", impl.drawFrame, impl.ctx, impl.preCanvasAdventurer, impl.preAdventurerImage, pictureMap(s"char${(adventurer.level % 21 - 1) / 4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 1.1.toFloat, 0, adventurer.getAdventurerState.direction, impl.preTime, adventurer.getAdventurerState.level)
       //        println(s"arc:${r * canvasUnit} img:${dx * canvasUnit * 0.85.toFloat}")
       //出生保护
       impl.newbornAdventurerMap.get(adventurer.playerId) match {
         case Some(s) =>
-          println(s"画出生保护！！！！")
           impl.ctx.save()
           impl.ctx.setFill("rgba(79,148,205,0.4)")
           impl.ctx.setGlobalAlpha(0.5)
           impl.ctx.beginPath()
-          impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 2 * Math.PI,false)
+          impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 2 * Math.PI, false)
           impl.ctx.closePath()
           impl.ctx.fill()
           impl.ctx.restore()
         case _ =>
       }
       //画武器
-      var step:Float = 3
+      var step: Float = 3
       var isAttacking = false
       impl.attackingAdventureMap.filterNot(_._2 < 0).get(adventurer.playerId) match {
         case Some(s) =>
           step = s
-          if(step != 0)isAttacking = true
+          if (step != 0) isAttacking = true
         case _ =>
       }
       val weaponLength = impl.config.getWeaponLengthByLevel(adventurer.getAdventurerState.level) * 1.2.toFloat
-      val angle = adventurer.getAdventurerState.direction - math.Pi.toFloat * (3*step + 1) / 10  //武器旋转角度
+      val angle = adventurer.getAdventurerState.direction - math.Pi.toFloat * (3 * step + 1) / 10 //武器旋转角度
       val gap: Float = 0 // 武器离人物的距离
       val move: Float = if (isAttacking) math.Pi.toFloat * 3 / 10 * offSetTime.toFloat / impl.config.frameDuration else 0 //该渲染帧的角度偏移量，攻击中禁止移动
       val weaponPosition = Point(sx, sy) + Point(weaponLength / 2, r).rotate(angle + move)
-      CanvasUtils.rotateImage("weapon", impl.drawFrame, impl.ctx, impl.preCanvasWeapon, impl.preWeaponImage, pictureMap(s"weapon${(adventurer.level-1)/4+1}.png"), weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move,impl.preTime, adventurer.getAdventurerState.level)
+      CanvasUtils.rotateImage("weapon", impl.drawFrame, impl.ctx, impl.preCanvasWeapon, impl.preWeaponImage, pictureMap(s"weapon${(adventurer.level - 1) / 4 + 1}.png"), weaponPosition * canvasUnit, Point(0, 0), weaponLength * canvasUnit, 0, angle + move, impl.preTime, adventurer.getAdventurerState.level)
       //用户昵称
       impl.ctx.save()
       impl.ctx.setFill("#ffffff")
@@ -192,11 +200,12 @@ class DrawScene(impl: ThorSchemaClientImpl) {
       impl.ctx.save()
       if (adventurer.stickKillNum > 0) {
         for (i <- 1 to adventurer.stickKillNum)
-          impl.ctx.drawImage(starImg, (sx + i * 2 ) * canvasUnit - 35, (sy + r) * canvasUnit + 45, Some(20, 20))
+          impl.ctx.drawImage(starImg, (sx + i * 2) * canvasUnit - 35, (sy + r) * canvasUnit + 45, Some(20, 20))
       }
       impl.ctx.restore()
     }
-    impl.adventurerMap.foreach{
+
+    impl.adventurerMap.foreach {
       adventurer =>
         if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
           drawAnAdventurer(adventurer._2)
@@ -204,14 +213,14 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     }
   }
 
-  def drawDying(offset: Point, offsetTime:Long, canvasUnit: Float,preCanvas: List[MiddleCanvas] = Nil, preImage: List[WritableImage] = Nil): Any = {
+  def drawDying(offset: Point, offsetTime: Long, canvasUnit: Float, preCanvas: List[MiddleCanvas] = Nil, preImage: List[WritableImage] = Nil): Any = {
 
     def drawADying(adventurer: Adventurer, step: Int): Any = {
 
       val position = adventurer.getAdventurerState.position
       val r = impl.config.getAdventurerRadiusByLevel(adventurer.level)
 
-      val o = if(offsetTime.toFloat/impl.config.frameDuration > 0.5) 1 else 0
+      val o = if (offsetTime.toFloat / impl.config.frameDuration > 0.5) 1 else 0
 
       //根据进度选取死亡动画 step -> 2,1,0 img -> 1~6
 
@@ -219,7 +228,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         case Nil =>
           preCanvas match {
             case Nil =>
-              val img = impl.drawFrame.createImage(pictureMap(s"kill${5 - step*2 + o}.png"))
+              val img = impl.drawFrame.createImage(pictureMap(s"kill${5 - step * 2 + o}.png"))
 
               val width = img.width
               val height = img.height
@@ -227,35 +236,35 @@ class DrawScene(impl: ThorSchemaClientImpl) {
               //      val canvasCache = impl.drawFrame.createCanvas(math.ceil(width * canvasUnit).toInt, math.ceil(height * canvasUnit).toInt)
               //      val impl.ctxCache = canvasCache.getCtx
 
-              impl.ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width/2, (position.y + offset.y) * canvasUnit - height/2)
+              impl.ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width / 2, (position.y + offset.y) * canvasUnit - height / 2)
             case _ =>
-              val img = preCanvas(5 - step*2 + o - 1)
-//                impl.drawFrame.createImage(pictureMap(s"kill${5 - step*2 + o}.png"))
+              val img = preCanvas(5 - step * 2 + o - 1)
+              //                impl.drawFrame.createImage(pictureMap(s"kill${5 - step*2 + o}.png"))
               val width = img.getWidth()
               val height = img.getHeight()
 
-              impl.ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width/2, (position.y + offset.y) * canvasUnit - height/2)
+              impl.ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width / 2, (position.y + offset.y) * canvasUnit - height / 2)
           }
         case _ =>
-          val img = preImage(5 - step*2 + o - 1)
+          val img = preImage(5 - step * 2 + o - 1)
           //                impl.drawFrame.createImage(pictureMap(s"kill${5 - step*2 + o}.png"))
           val width = img.getWidth
           val height = img.getHeight
 
-          impl.ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width/2, (position.y + offset.y) * canvasUnit - height/2)
+          impl.ctx.drawImage(img, (position.x + offset.x) * canvasUnit - width / 2, (position.y + offset.y) * canvasUnit - height / 2)
       }
       //      canvasCache.change2Image()
     }
 
-    impl.dyingAdventurerMap.foreach{
+    impl.dyingAdventurerMap.foreach {
       adventurer =>
         drawADying(adventurer._2._1, adventurer._2._2)
     }
   }
 
-  def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset:Point, canvasUnit: Float): Unit = {
+  def drawLevelUp(adventurer: Adventurer, step: Int, offSetTime: Long, offset: Point, canvasUnit: Float): Unit = {
 
-    if(adventurer.isUpdateLevel){
+    if (adventurer.isUpdateLevel) {
 
       val img = impl.drawFrame.createImage("img/level-up.png")
 
@@ -266,27 +275,63 @@ class DrawScene(impl: ThorSchemaClientImpl) {
       val moveDistance = getMoveDistance(adventurer, offSetTime)
 
       val movePerStep = 15 //每个逻辑帧的高度位移
-      val offsetHeight =  - 200 + movePerStep * (step - offSetTime.toFloat/impl.config.frameDuration) //每个渲染帧的高度偏移量
+      val offsetHeight = -200 + movePerStep * (step - offSetTime.toFloat / impl.config.frameDuration) //每个渲染帧的高度偏移量
       val opacity = 0.1 * step //透明度逐渐增加
 
       impl.ctx.save()
       impl.ctx.setGlobalAlpha(opacity)
-      impl.ctx.drawImage(img, (position.x + offset.x + moveDistance.x) * canvasUnit - width/2, (position.y + offset.y + moveDistance.y - r) * canvasUnit - height/2 + offsetHeight)
+      impl.ctx.drawImage(img, (position.x + offset.x + moveDistance.x) * canvasUnit - width / 2, (position.y + offset.y + moveDistance.y - r) * canvasUnit - height / 2 + offsetHeight)
       impl.ctx.restore()
     }
   }
 
 
-  def drawAdventurers(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary:Point): Unit ={
+  def drawAdventurers(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
 
     drawAdventurer(offSetTime, offset, canvasUnit, canvasBoundary)
 
-    drawDying(offset, offSetTime, canvasUnit, impl.preCanvasDeath,impl.preDeathImage)
+    drawDying(offset, offSetTime, canvasUnit, impl.preCanvasDeath, impl.preDeathImage)
 
-    impl.adventurerMap.get(impl.myId).foreach{
+    impl.adventurerMap.get(impl.myId).foreach {
       adventurer =>
         drawLevelUp(adventurer, adventurer.getAdventurerState.levelUpExecute, offSetTime, offset, canvasUnit)
     }
+  }
+
+  def drawArcRect(r: Double, width: Double, height: Double, left: Double, top: Double): Unit = {
+    if (width >= 2 * r) {
+      impl.ctx.save()
+      impl.ctx.beginPath()
+      impl.ctx.arc(left + r, top + r, r, 90, 270, counterclockwise = false)
+      impl.ctx.lineTo(left + width - r, top + height)
+      impl.ctx.arc(left + width - r, top + r, r, 270, 450, counterclockwise = false)
+      impl.ctx.lineTo(left + r, top)
+      impl.ctx.closePath()
+      impl.ctx.fill()
+      impl.ctx.restore()
+    }
+  }
+
+  def drawEnergyBar(adventurer: Adventurer): Unit = {
+    impl.ctx.save()
+
+    impl.ctx.setFill("#FFFFFF")
+    drawArcRect(r, barLength, barHeight, barLeft, barTop)
+
+    impl.ctx.setFill("#FF0000")
+    val preLevel = if (adventurer.level == 1) 0 else impl.config.getMaxEnergyByLevel((adventurer.level - 1).toByte)
+    val nowLevel = impl.config.getMaxEnergyByLevel(adventurer.level)
+    val fillLength = math.min((adventurer.energy - preLevel).toFloat / (nowLevel - preLevel) * barLength, barLength)
+    drawArcRect(r - 1, fillLength - 2, barHeight - 2, barLeft + 1, barTop + 1)
+
+    impl.ctx.setFill("#FFFFFF")
+    impl.ctx.setTextAlign("center")
+    impl.ctx.setFont("Comic Sans Ms", 36)
+    impl.ctx.setTextBaseLine("top")
+    impl.ctx.fillText(adventurer.level.toString, barLeft - 32, barTop)
+    impl.ctx.restore()
+
+    impl.ctx.restore()
   }
 
   def drawFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
@@ -404,4 +449,79 @@ class DrawScene(impl: ThorSchemaClientImpl) {
       impl.ctx.restore()
     }
   }
+
+  def baseFont: Float = impl.window.x / 1440
+
+  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp:Int): Unit = {
+    impl.ctx.save()
+    impl.ctx.setTextBaseLine("top")
+    if (tp == 1)
+      impl.ctx.setFont("Comic Sans MS", baseFont * 20)
+    else if (tp == 2){
+      impl.ctx.setFont("Comic Sans MS", baseFont * 16)
+      impl.ctx.setFill("#fdffff")}
+    else{
+      impl.ctx.setFont("Comic Sans MS", baseFont * 16)
+      impl.ctx.setFill("#ffff00")
+    }
+
+    impl.ctx.fillText(str, x, (lineNum + lineBegin) * impl.window.x * 0.01)
+    impl.ctx.restore()
+  }
+
+  def drawRank(Rank: List[Score], CurrentOrNot: Boolean, shortId: Byte): Unit = {
+    val text = "———————排行榜———————"
+    val RankBaseLine = 3
+    var index = 0
+    var yourRank = 100
+    var yourNameIn = false
+    val begin = if (CurrentOrNot) 10 else impl.window.x * 0.78
+    var last = ""
+    impl.ctx.save()
+    impl.ctx.setFill("rgba(0,0,0,0.6)")
+    impl.ctx.fillRec(begin, 0, impl.window.x * 0.25, impl.window.x * 0.25)
+    impl.ctx.setFill("#fdffff")
+    impl.ctx.setTextAlign("start")
+    drawTextLine(s"   $text", 150 + impl.window.x * 0.01, 0, 2, 1)
+
+    Rank.foreach { score =>
+      index += 1
+      if (score.bId == shortId) yourRank = index
+      if (impl.playerIdMap.exists(_._1 == score.bId)) {
+        val fullName = impl.playerIdMap(score.bId)._2
+        val name = if (fullName.length <= 4) fullName.take(4) else fullName.take(4) + "..."
+        if (index < 10) {
+          impl.ctx.setTextAlign("left")
+          if (score.bId == shortId) {
+            yourNameIn = true
+            drawTextLine(s"【$index】  $name ", begin + impl.window.x * 0.01, index * 2, RankBaseLine, 3)
+            drawTextLine(s" 分数: ${score.e}", begin + impl.window.x * 0.11, index * 2, RankBaseLine, 3)
+            drawTextLine(s" 击杀数: ${score.k}", begin + impl.window.x * 0.18, index * 2, RankBaseLine, 3)
+          }
+          else {
+            drawTextLine(s"【$index】  $name ", begin + impl.window.x * 0.01, index * 2, RankBaseLine, 2)
+            drawTextLine(s" 分数: ${score.e}", begin + impl.window.x * 0.11, index * 2, RankBaseLine, 2)
+            drawTextLine(s" 击杀数: ${score.k}", begin + impl.window.x * 0.18, index * 2, RankBaseLine, 2)
+          }
+
+        }
+      }
+    }
+    index += 1
+    if (!yourNameIn) {
+      Rank.find(_.bId == shortId) match {
+        case Some(yourScore) =>
+          if (impl.playerIdMap.exists(_._1 == yourScore.bId)) {
+            val fullName = impl.playerIdMap(yourScore.bId)._2
+            val name = if (fullName.length <= 4) fullName.take(4) + "   " else fullName.take(4) + "..."
+            drawTextLine(s"【$yourRank】  $name ", begin + impl.window.x * 0.01, 20, RankBaseLine, 3)
+            drawTextLine(s" 分数: ${yourScore.e}", begin + impl.window.x * 0.11, 20, RankBaseLine, 3)
+            drawTextLine(s" 击杀数: ${yourScore.k}", begin + impl.window.x * 0.18, 20, RankBaseLine, 3)
+          }
+        case None =>
+      }
+    }
+    impl.ctx.restore()
+  }
+
 }

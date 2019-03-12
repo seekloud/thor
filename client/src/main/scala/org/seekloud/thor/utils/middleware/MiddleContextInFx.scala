@@ -21,7 +21,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.{Image, WritableImage}
 import javafx.scene.paint.Color
 import javafx.scene.effect.InnerShadow
-import javafx.scene.shape.{StrokeLineCap, StrokeLineJoin}
+import javafx.scene.shape.{ArcType, StrokeLineCap, StrokeLineJoin}
 import javafx.scene.text.{Font, FontWeight, Text, TextAlignment}
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleContext
 //import org.seekloud.thor.utils.middleware.MiddleCanvasInFx
@@ -100,41 +100,41 @@ class MiddleContextInFx extends MiddleContext {
   override def drawImage(image: Any, offsetX: Double, offsetY: Double, size: Option[(Double, Double)] = None, imgOffsetX: Option[Double] = None, imgOffsetY: Option[Double] = None, imgSize: Option[(Double, Double)] = None): Unit = {
     image match {
       case js: MiddleImageInFx =>
-        if(imgOffsetX.isEmpty){
+        if (imgOffsetX.isEmpty) {
           if (size.isEmpty) {
             context.drawImage(js.getImage, offsetX, offsetY)
           } else {
             context.drawImage(js.getImage, offsetX, offsetY, size.get._1, size.get._2)
           }
         }
-        else{
+        else {
           context.drawImage(js.getImage, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
       case js: WritableImage =>
-        if(imgOffsetX.isEmpty) {
+        if (imgOffsetX.isEmpty) {
           if (size.isEmpty) {
             context.drawImage(js, offsetX, offsetY)
           } else {
             context.drawImage(js, offsetX, offsetY, size.get._1, size.get._2)
           }
         }
-        else{
+        else {
           context.drawImage(js, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
 
       case js: Image =>
-        if(imgOffsetX.isEmpty) {
+        if (imgOffsetX.isEmpty) {
           if (size.isEmpty) {
             context.drawImage(js, offsetX, offsetY)
           } else {
             context.drawImage(js, offsetX, offsetY, size.get._1, size.get._2)
           }
         }
-        else{
+        else {
           context.drawImage(js, imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
       case js: MiddleCanvasInFx =>
-        if(imgOffsetX.isEmpty){
+        if (imgOffsetX.isEmpty) {
           if (size.isEmpty) {
             context.drawImage(js.change2Image(), offsetX, offsetY)
           } else {
@@ -142,7 +142,7 @@ class MiddleContextInFx extends MiddleContext {
             context.drawImage(js.change2Image(), offsetX, offsetY, size.get._1, size.get._2)
           }
         }
-        else{
+        else {
           context.drawImage(js.change2Image(), imgOffsetX.get, imgOffsetY.get, imgSize.get._1, imgSize.get._2, offsetX, offsetY, size.get._1, size.get._2)
         }
     }
@@ -187,7 +187,9 @@ class MiddleContextInFx extends MiddleContext {
 
   override def restore(): Unit = context.restore()
 
-  override def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean): Unit = context.arc(x, y, r, r, sAngle, eAngle)
+  override def arc(x: Double, y: Double, r: Double, sAngle: Double, eAngle: Double, counterclockwise: Boolean): Unit = {
+    context.arc(x, y, r, r, sAngle, eAngle - sAngle)
+  }
 
   override def lineWidth(width: Double): Unit = context.setLineWidth(width)
 

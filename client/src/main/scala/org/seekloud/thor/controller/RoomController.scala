@@ -72,7 +72,7 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
   }
 
 
-  roomScene.setListener(new RoomScene.RoomSceneListener {
+  roomScene.setListener(listener = new RoomScene.RoomSceneListener {
     override def confirmRoom(roomId: Int, hasPwd: Boolean): Unit = {
       if (hasPwd) {
         val pwd = inputPwd

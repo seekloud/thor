@@ -180,7 +180,7 @@ class GameController(
 //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
           val drawScene: DrawScene = new DrawScene(thorSchema)
           drawScene.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
-          thorSchema.drawRank(currentRank, CurrentOrNot = true, byteId)
+          drawScene.drawRank(currentRank, CurrentOrNot = true, byteId)
           thorSchema.drawSmallMap(mainId)
 
           drawTime = drawTime :+ System.currentTimeMillis() - start
