@@ -400,7 +400,6 @@ object UserActor {
         case WsMessage(reqOpt) =>
           reqOpt match {
             case Some(t: UserActionEvent) =>
-              log.debug(s"$t : ${t.playerId}")
               roomActor ! RoomActor.WsMessage(playerId, t)
             case Some(t: PingPackage) =>
               frontActor ! Wrap(t.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
@@ -453,6 +452,7 @@ object UserActor {
           case WsMessage(m) =>
             m match {
               case Some(event: UserActionEvent) =>
+                log.debug(s"$event : ${event.playerId}")
                 roomActor ! RoomActor.WsMessage(playerId, event)
               case Some(RestartGame) =>
                 //                log.debug(s"restartGame ${userInfo.name}")
