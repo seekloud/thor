@@ -462,7 +462,7 @@ object UserActor {
                 roomActor ! RoomActor.UserMap(ctx.self)
               case Some(event: PingPackage) =>
                 frontActor ! Wrap(event.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())
-              case _ =>
+              case _ => log.debug(s"get ws msg in play: $m")
             }
             Behaviors.same
 

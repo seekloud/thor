@@ -170,7 +170,11 @@ object WsClient {
 
         case msg: DispatchMsg =>
           log.debug(s"get msg: $msg")
-          gameMsgSender ! msg.msg
+          if (gameMsgSender != null) {
+            gameMsgSender ! msg.msg
+          } else {
+            log.debug(s"gameMsgSender is null!!!")
+          }
           Behaviors.same
 
         case msg: JoinRoomFail =>
