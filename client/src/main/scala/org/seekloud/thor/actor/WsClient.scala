@@ -169,12 +169,7 @@ object WsClient {
           Behaviors.same
 
         case msg: DispatchMsg =>
-          log.debug(s"get msg: $msg")
-          if (gameMsgSender != null) {
-            gameMsgSender ! msg.msg
-          } else {
-            log.debug(s"gameMsgSender is null!!!")
-          }
+          gameMsgSender ! msg.msg
           Behaviors.same
 
         case msg: JoinRoomFail =>
@@ -292,7 +287,7 @@ object WsClient {
       bufferSize = 8,
       overflowStrategy = OverflowStrategy.fail
     ).collect {
-      case message: GaUserAction =>
+      case message: WsMsgFront =>
         //println(message)
         val sendBuffer = new MiddleBufferInJvm(409600)
         BinaryMessage.Strict(ByteString(
