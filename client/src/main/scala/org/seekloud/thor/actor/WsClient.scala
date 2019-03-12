@@ -86,7 +86,6 @@ object WsClient {
   def  create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
-        println("creating")
         val gameMsgReceiver: ActorRef[ThorGame.WsMsgServer] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMessageReceiver")
         working(gameMsgReceiver, gameMsgSender = null, None, None, None, stageContext)
       }
@@ -108,7 +107,6 @@ object WsClient {
 //        case msg: PlayerIdName =>
 //          println(s"get player info $msg")
 //         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
-
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
           if (gameMsgSender != null) {
@@ -117,7 +115,6 @@ object WsClient {
             timer.startSingleTimer(TimerKey4StartGame, msg, 2.seconds)
           }
           ClientBoot.addToPlatform{
-            println("game controller start")
             gameController.foreach{ gc =>
               gc.start()
               stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
@@ -139,14 +136,12 @@ object WsClient {
 
         case msg: CreateRoom =>
           log.debug(s"get msg: $msg")
-          println(s"user Info $gameController")
           if (gameMsgSender != null) {
             gameMsgSender ! GACreateRoom(msg.psw)
           } else {
             timer.startSingleTimer(TimerKey4CreateGame, msg, 2.seconds)
           }
           ClientBoot.addToPlatform{
-            println("game controller start create" )
             gameController.foreach{ gc =>
               gc.start()
               stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
