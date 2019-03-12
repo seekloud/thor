@@ -21,9 +21,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
-import javafx.animation.AnimationTimer
+import javafx.animation.{Animation, AnimationTimer, KeyFrame, Timeline}
 import javafx.scene.input.KeyCode
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
+import javafx.util.Duration
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
@@ -38,6 +39,7 @@ import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.scene.PreDraw
+import org.seekloud.thor.ClientBoot.{executor, scheduler}
 import org.seekloud.thor.scene.DrawScene
 import org.slf4j.LoggerFactory
 
@@ -48,14 +50,14 @@ import org.slf4j.LoggerFactory
   */
 class GameController(
   wsClient: ActorRef[WsClient.WsCommand],
-  playerInfo: ThorClientProtocol.PlayerInfo,
+  playerInfo: WsClient.PlayerInfo,
   context: StageContext,
   playGameScreen: GameScene
 ) extends NetWorkInfo{
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
-  def getPlayer: ThorClientProtocol.PlayerInfo = playerInfo
+  def getPlayer: WsClient.PlayerInfo = playerInfo
 
   private val ws = wsClient
 
@@ -109,6 +111,7 @@ class GameController(
   gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE)
   private val attackMusic = new AudioClip(getClass.getResource("/music/sound-4.mp3").toString)
   private var needBgm = true
+  private val timeline = new Timeline()
 
   /*视角跟随id*/
   protected var mainId = "test"
@@ -138,6 +141,7 @@ class GameController(
       firstCome = false
       println("start...")
 //      wsClient ! WsClient.StartGame(playerInfo.roomId)
+      startGameLoop()
       addUserActionListenEvent
       checkAndChangePreCanvas()
       logicFrameTime = System.currentTimeMillis()
@@ -150,6 +154,21 @@ class GameController(
       }
     }
   }
+  import scala.concurrent.duration._
+  def startGameLoop(): Unit = { //渲染帧
+    logicFrameTime = System.currentTimeMillis()
+    timeline.setCycleCount(Animation.INDEFINITE)
+//    val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
+//      logicLoop()
+//    })
+    scheduler.schedule(10.millis, 150.millis) {
+      logicLoop()
+    }
+//    timeline.getKeyFrames.add(keyFrame)
+    animationTimer.start()
+    timeline.play()
+  }
+
   def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasBounds: Point): Unit = {
     thorSchemaOpt match {
       case Some(thorSchema: ThorSchemaClientImpl) =>
@@ -261,7 +280,7 @@ class GameController(
             gameConfig = Some(e.config)
             checkAndChangePreCanvas()
             e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2)}}
-            animationTimer.start()
+            startGameLoop()
 //            wsClient ! WsClient.StartGameLoop
             gameState = GameState.play
 

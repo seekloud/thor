@@ -71,7 +71,7 @@ object WsClient {
 
   final case class DispatchMsg(msg: ThorGame.WsMsgFront) extends WsCommand
 
-  final case class PlayerIdName(playerId: String, name: String) extends WsCommand
+  final case class PlayerInfo(playerId: String, name: String) extends WsCommand
 
   final case object Stop extends WsCommand
 
@@ -97,7 +97,7 @@ object WsClient {
     gameMsgReceiver: ActorRef[WsMsgServer],
     gameMsgSender: ActorRef[WsMsgFrontSource],
     loginController: Option[LoginController],
-    playerInfo: Option[PlayerIdName],
+    gameController: Option[GameController],
     roomController: Option[RoomController],
     stageContext: StageContext
   )(
@@ -105,9 +105,9 @@ object WsClient {
   ): Behavior[WsCommand] =
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
-        case msg: PlayerIdName =>
-          println(s"get player info $msg")
-         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
+//        case msg: PlayerIdName =>
+//          println(s"get player info $msg")
+//         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
 
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
@@ -116,41 +116,55 @@ object WsClient {
           } else {
             timer.startSingleTimer(TimerKey4StartGame, msg, 2.seconds)
           }
-          //TODO GameController
-          ClientBoot.addToPlatform {
-            playerInfo.foreach{ p =>
-              roomController.foreach { r =>
-                println("creating new scene")
-                val gameScene = new GameScene
-                stageContext.switchScene(gameScene.getScene, fullScreen = true)
-                println("creating new controller")
-                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene ).start()
-              }
+          ClientBoot.addToPlatform{
+            println("game controller start")
+            gameController.foreach{ gc =>
+              gc.start()
+              stageContext.switchScene(gc.getGs.getScene, fullScreen = true)
             }
           }
+          //TODO GameController
+//          ClientBoot.addToPlatform {
+//            gameController.foreach{ p =>
+//              roomController.foreach { r =>
+//                println("creating new scene")
+//                val gameScene = new GameScene
+//                stageContext.switchScene(gameScene.getScene, fullScreen = true)
+//                println("creating new controller")
+//                new GameController(ctx.self, PlayerInfo(p.playerId, p.name), stageContext, gameScene ).start()
+//              }
+//            }
+//          }
           Behaviors.same
 
         case msg: CreateRoom =>
           log.debug(s"get msg: $msg")
-          println(s"user Info $playerInfo")
-          if (playerInfo.isDefined) {
+          println(s"user Info $gameController")
+          if (gameMsgSender != null) {
             gameMsgSender ! GACreateRoom(msg.psw)
           } else {
             timer.startSingleTimer(TimerKey4CreateGame, msg, 2.seconds)
           }
-          ClientBoot.addToPlatform {
-            println("already")
-            playerInfo.foreach{ p =>
-              println("already have playerInfo")
-              roomController.foreach{r =>
-                println("creating new scene")
-                val gameScene = new GameScene
-                stageContext.switchScene(gameScene.getScene, fullScreen = true)
-                println("creating new controller")
-                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene ).start()
-              }
+          ClientBoot.addToPlatform{
+            println("game controller start create" )
+            gameController.foreach{ gc =>
+              gc.start()
+              stageContext.switchScene(gc.getGs.getScene, fullScreen = true)
             }
           }
+//          ClientBoot.addToPlatform {
+//            println("already")
+//            gameController.foreach{ p =>
+//              println("already have playerInfo")
+//              roomController.foreach{r =>
+//                println("creating new scene")
+//                val gameScene = new GameScene
+//                stageContext.switchScene(gameScene.getScene, fullScreen = true)
+//                println("creating new controller")
+//                new GameController(ctx.self, PlayerInfo(p.playerId, p.name), stageContext, gameScene ).start()
+//              }
+//            }
+//          }
           //TODO GameController
           Behaviors.same
 
@@ -171,10 +185,10 @@ object WsClient {
           Behaviors.same
 
         case msg: GetLoginController =>
-          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), playerInfo, roomController, stageContext)
+          working(gameMsgReceiver, gameMsgSender, Some(msg.loginController), gameController, roomController, stageContext)
 
         case msg: GetRoomController =>
-          working(gameMsgReceiver, gameMsgSender, loginController, playerInfo, Some(msg.roomController), stageContext)
+          working(gameMsgReceiver, gameMsgSender, loginController, gameController, Some(msg.roomController), stageContext)
 
         case msg: EstablishConnection2Es =>
           log.info(s"get msg: $msg")
@@ -197,6 +211,9 @@ object WsClient {
           Behaviors.same
 
         case msg: GetLoginInfo =>
+          println("creating new scene")
+          val gameScene = new GameScene
+          val gc = new GameController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, gameScene)
           log.info(s"get msg: $msg")
           EsheepClient.linkGame(msg.token, msg.playerId).map {
             case Right(rst) =>
@@ -207,7 +224,7 @@ object WsClient {
                 log.debug(s"link game url: $url")
                 val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                 val source = getSource(ctx.self)
-                val sink = getSink4Server(gameMsgReceiver)
+                val sink = getSink4Server(gameMsgReceiver, gc)
                 val (stream, response) =
                   source
                     .viaMat(webSocketFlow)(Keep.both)
@@ -237,11 +254,11 @@ object WsClient {
           ))
           println(s"has player Info ${(msg.playerId,msg.name)}")
 //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
-          working(gameMsgReceiver, gameMsgSender, loginController, Some(PlayerIdName(msg.playerId,msg.name)) , roomController, stageContext)
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc) , roomController, stageContext)
 
         case msg: GetSender =>
           log.debug(s"get sender success.")
-          working(gameMsgReceiver, msg.stream, loginController, playerInfo, roomController, stageContext)
+          working(gameMsgReceiver, msg.stream, loginController, gameController, roomController, stageContext)
 
         case Stop =>
           log.info(s"wsClient stopped.")
@@ -307,11 +324,12 @@ object WsClient {
 
     }
 
-  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer]): Sink[Message, Future[Done]] =
+  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer], gameController: GameController): Sink[Message, Future[Done]] =
     {
       log.debug(s"getSink4Server...")
       Sink.foreach[Message] {
         case TextMessage.Strict(msg) =>
+          gameController.wsMessageHandle(ThorGame.TextMsg(msg))
           gameMsgReceiver ! ThorGame.TextMsg(msg)
 
         case BinaryMessage.Strict(bMsg) =>
@@ -322,6 +340,7 @@ object WsClient {
               log.error(s"decode bMsg error: $e")
               ThorGame.DecodeError()
           }
+          gameController.wsMessageHandle(message)
           gameMsgReceiver ! message
 
         case msg: BinaryMessage.Streamed =>
@@ -336,6 +355,7 @@ object WsClient {
                 println(s"decode streamed bMsg error: $e")
                 ThorGame.DecodeError()
             }
+            gameController.wsMessageHandle(message)
             gameMsgReceiver ! message
           }
 
