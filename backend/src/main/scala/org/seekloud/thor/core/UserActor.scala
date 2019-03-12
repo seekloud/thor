@@ -117,6 +117,7 @@ object UserActor {
   )
 
   def flow(actor: ActorRef[UserActor.Command]): Flow[WsMessage, WsMsgSource, Any] = {
+    log.debug(s"get flow...")
     val in = Flow[WsMessage].to(sink(actor))
     val out =
       ActorSource.actorRef[WsMsgSource](
@@ -128,7 +129,7 @@ object UserActor {
         },
         bufferSize = 256,
         overflowStrategy = OverflowStrategy.dropHead
-      ).mapMaterializedValue(outActor => actor ! UserFrontActor(outActor))
+      ).mapMaterializedValue { outActor => actor ! UserFrontActor(outActor) }
     Flow.fromSinkAndSource(in, out)
   }
 

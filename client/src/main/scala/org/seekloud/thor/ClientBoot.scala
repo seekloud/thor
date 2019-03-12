@@ -24,7 +24,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import javafx.application.Platform
 import javafx.stage.Stage
-import org.seekloud.thor.actor.{GameMsgReceiver, WsClient}
+import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.controller.ModeSelectController
 import org.seekloud.thor.scene.ModeScene
@@ -50,7 +50,7 @@ object ClientBoot {
   implicit val scheduler: Scheduler = system.scheduler
   implicit val timeout: Timeout = Timeout(20 seconds)
 
-//  lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
+  //  lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
 
 
   def addToPlatform(fun: => Unit): Unit = {

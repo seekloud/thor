@@ -16,6 +16,8 @@
 
 package org.seekloud.thor.http
 
+import java.net.URLDecoder
+
 import akka.http.scaladsl.model.ws.Message
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -83,17 +85,25 @@ trait PlatService extends ServiceUtils{
       'playerName.as[String],
       'accessCode.as[String]
     ) { (playerId, playerName, accessCode) =>
+      val id =URLDecoder.decode(playerId, "UTF-8")
+      val name = URLDecoder.decode(playerName, "UTF-8")
+
+      log.debug(s"client-$id link game...")
+
       val verifyAccessCode: Future[GetPlayerByAccessCodeRsp] = eSheepLinkClient ? (ESheepLinkClient.VerifyAccessCode(accessCode, _))
-      verifyAccessCode.map { rsp =>
-        if (rsp.errCode == 0) {
-          val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow4GA(playerId, playerName, _))
-          flowFuture.map(handleWebSocketMessages)
-        } else {
-          println("clientLinkGame verify accessCode error.")
-          Future(complete(ErrorGetPlayerByAccessCodeRsp))
+      dealFutureResult {
+        verifyAccessCode.flatMap { rsp =>
+          if (rsp.errCode == 0) {
+            val flowFuture: Future[Flow[Message, Message, Any]] = userManager ? (UserManager.GetWebSocketFlow4GA(id, name, _))
+            flowFuture.map {flow =>
+              handleWebSocketMessages(flow)
+            }
+          } else {
+            println("clientLinkGame verify accessCode error.")
+            Future(complete(ErrorGetPlayerByAccessCodeRsp))
+          }
         }
       }
-      complete("")
     }
   }
 
