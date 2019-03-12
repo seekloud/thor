@@ -161,7 +161,7 @@ class GameController(
 //    val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
 //      logicLoop()
 //    })
-    scheduler.schedule(10.millis, 150.millis) {
+    scheduler.schedule(0.millis, 100.millis) {
       logicLoop()
     }
 //    timeline.getKeyFrames.add(keyFrame)
@@ -210,7 +210,10 @@ class GameController(
 
   var lastSendReq = 0L
 
+  var a = 0
   def logicLoop(): Unit ={
+//    if (a % 50 == 0)
+//    println("looping")
     var myLevel = 0
     thorSchemaOpt.foreach { thorSchema =>
       thorSchema.adventurerMap.get(mainId).foreach {

@@ -400,6 +400,7 @@ object UserActor {
         case WsMessage(reqOpt) =>
           reqOpt match {
             case Some(t: UserActionEvent) =>
+              log.debug(s"$t : ${t.playerId}")
               roomActor ! RoomActor.WsMessage(playerId, t)
             case Some(t: PingPackage) =>
               frontActor ! Wrap(t.asInstanceOf[WsMsgServer].fillMiddleBuffer(sendBuffer).result())

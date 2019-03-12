@@ -169,6 +169,7 @@ object WsClient {
           Behaviors.same
 
         case msg: DispatchMsg =>
+          log.debug(s"get msg: $msg")
           gameMsgSender ! msg.msg
           Behaviors.same
 
@@ -212,8 +213,11 @@ object WsClient {
 
         case msg: GetLoginInfo =>
           println("creating new scene")
+          val a = System.currentTimeMillis()
           val gameScene = new GameScene
           val gc = new GameController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, gameScene)
+          val b = System.currentTimeMillis()
+          println(s"create time is ${b - a}")
           log.info(s"get msg: $msg")
           EsheepClient.linkGame(msg.token, msg.playerId).map {
             case Right(rst) =>
