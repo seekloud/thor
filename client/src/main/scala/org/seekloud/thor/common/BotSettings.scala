@@ -30,7 +30,18 @@ object BotSettings {
 
   val mainConfig = botConfig.getConfig("bot")
 
-  //TODO
+  val isLayer = mainConfig.getBoolean("isLayer")
+  val isViewObservation = mainConfig.getBoolean("isViewObservation")
+  val isGray = mainConfig.getBoolean("isGray")
+  val botServerPort = mainConfig.getInt("5321")
+
+  /*botSecure*/
+  val playerId = mainConfig.getString("botSecure.playerId")
+  val apiToken = mainConfig.getString("botSecure.apiToken")
+
+  /*botInfo*/
+  val botId = mainConfig.getString("botInfo.botId")
+  val botKey = mainConfig.getString("botInfo.botKey")
 
 
 }
