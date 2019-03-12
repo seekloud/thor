@@ -1,0 +1,148 @@
+//  Copyright 2018 seekloud (https://github.com/seekloud)
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+
+syntax = "proto3";
+
+import "actions.proto";
+import "observations.proto";
+
+package org.seekloud.esheepapi.pb;
+
+
+
+enum State {
+  init_game = 0;
+  in_game = 1;
+  killed = 2;
+  in_replay = 3;
+  ended = 4;
+  unknown = 15;
+}
+
+
+
+message Credit{
+  string api_token = 1;
+}
+
+message CreateRoomReq{
+  Credit credit = 1;
+  string password = 2;
+}
+
+message CreateRoomRsp {
+  string room_id = 1;
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
+
+message JoinRoomReq {
+  Credit credit = 1;
+  string password = 2;
+  string room_id = 3;
+}
+
+
+message ActionReq {
+  Move move = 1;
+  Swing swing = 2;
+  int32 fire = 3;
+  int32 apply = 4;
+
+  Credit credit = 15;
+}
+
+message ActionRsp {
+  int64 frame_index = 12;
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
+
+
+message ObservationRsp {
+  LayeredObservation layered_observation = 1;
+  ImgData human_observation = 2;
+
+  int64 frame_index = 12;
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
+
+message ObservationWithInfoRsp {
+  LayeredObservation layered_observation = 1;
+  ImgData human_observation = 2;
+  int32 score = 3;
+  int32 kills = 4;
+  int32 heath = 5;
+
+  int64 frame_index = 12;
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
+
+
+message InformRsp {
+  int32 score = 1;
+  int32 kills = 2;
+  int32 heath = 3;
+
+  int64 frame_index = 12;
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
+
+
+
+message ActionSpaceRsp {
+  repeated Move move = 1;
+  bool swing = 2;
+  repeated int32 fire = 3;
+  repeated int32 apply = 4;
+
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
+
+message SystemInfoRsp {
+  int32 frame_period = 1;
+
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
+
+//message CurrentFrameRsp {
+//  int64 frame = 1;
+//
+//  int32 err_code = 13;
+//  State state = 14;
+//  string msg = 15;
+//}
+
+message CurrentFrameRsp {
+  int64 frame = 1;
+}
+
+message SimpleRsp{
+  int32 err_code = 13;
+  State state = 14;
+  string msg = 15;
+}
