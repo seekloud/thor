@@ -3,7 +3,7 @@ package org.seekloud.thor.actor
 import akka.Done
 import akka.actor.typed._
 import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.{Behaviors, TimerScheduler}
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.ws.{BinaryMessage, WebSocketRequest}
@@ -33,7 +33,6 @@ import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
-
 import scala.concurrent.duration._
 
 
@@ -72,7 +71,17 @@ object WsClient {
 
   final case class DispatchMsg(msg: ThorGame.WsMsgFront) extends WsCommand
 
+  final case class PlayerInfo(playerId: String, name: String) extends WsCommand
+
   final case object Stop extends WsCommand
+
+  private[this] def switchBehavior(ctx: ActorContext[WsCommand],
+    behaviorName: String,
+    behavior: Behavior[WsCommand])
+    (implicit stashBuffer: StashBuffer[WsCommand]) = {
+    log.debug(s"${ctx.self.path} becomes $behaviorName behavior.")
+    stashBuffer.unstashAll(ctx, behavior)
+  }
 
   def  create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
@@ -88,7 +97,7 @@ object WsClient {
     gameMsgReceiver: ActorRef[WsMsgServer],
     gameMsgSender: ActorRef[WsMsgFrontSource],
     loginController: Option[LoginController],
-    playerInfo: Option[(String,String)],
+    playerInfo: Option[PlayerInfo],
     roomController: Option[RoomController],
     stageContext: StageContext
   )(
@@ -96,6 +105,12 @@ object WsClient {
   ): Behavior[WsCommand] =
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
+        case msg: PlayerInfo =>
+          println(s"get player info $msg")
+          ctx.self ! msg
+         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
+
+
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
           if (gameMsgSender != null) {
@@ -106,27 +121,20 @@ object WsClient {
           //TODO GameController
           ClientBoot.addToPlatform {
             playerInfo.foreach{ p =>
-              roomController.foreach{r =>
+              roomController.foreach { r =>
                 println("creating new scene")
                 val gameScene = new GameScene
                 stageContext.switchScene(gameScene.getScene)
                 println("creating new controller")
-                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
+                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene )
               }
             }
           }
-//          playerInfo.foreach{ p =>
-//            roomController.foreach{r =>
-//              val gameScene = new GameScene
-//              stageContext.switchScene(gameScene.getScene)
-//              new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
-//            }
-//          }
           Behaviors.same
 
         case msg: CreateRoom =>
           log.debug(s"get msg: $msg")
-          println(s"user Info ${playerInfo}")
+          println(s"user Info $playerInfo")
           if (playerInfo.isDefined) {
             gameMsgSender ! GACreateRoom(msg.psw)
           } else {
@@ -141,7 +149,7 @@ object WsClient {
                 val gameScene = new GameScene
                 stageContext.switchScene(gameScene.getScene)
                 println("creating new controller")
-                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
+                new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p.playerId, p.name, r.finalRoomId), stageContext, gameScene )
               }
             }
           }
@@ -230,7 +238,8 @@ object WsClient {
             ctx.self
           ))
           println(s"has player Info ${(msg.playerId,msg.name)}")
-          working(gameMsgReceiver, gameMsgSender, loginController, Some(msg.playerId,msg.name) , roomController, stageContext)
+          ctx.self ! PlayerInfo(msg.playerId,msg.name)
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(PlayerInfo(msg.playerId,msg.name)) , roomController, stageContext)
 
         case msg: GetSender =>
           log.debug(s"get sender success.")
