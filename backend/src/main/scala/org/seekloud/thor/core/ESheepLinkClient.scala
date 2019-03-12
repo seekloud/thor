@@ -88,16 +88,16 @@ object ESheepLinkClient {
     Behaviors.receive[Command]{ (ctx, msg) =>
       msg match{
         case UpdateToken =>
-//          ESheepClient.gsKey2Token().map{
-//            case Right(rsp) =>
-//              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, (rsp.data.expireTime/2).seconds)
-//              println(s"start work token: ${rsp.data.token}")
-//              ctx.self ! SwitchBehavior("idle", idle(rsp.data.token))
-//            case Left(e) =>
-//              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, 20.seconds)
-//              log.debug(s"init error, get token error: $e. retry after 20s.")
-//              ctx.self ! SwitchBehavior("init", init())
-//          }
+          ESheepClient.gsKey2Token().map{
+            case Right(rsp) =>
+              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, (rsp.data.expireTime/2).seconds)
+              println(s"start work token: ${rsp.data.token}")
+              ctx.self ! SwitchBehavior("idle", idle(rsp.data.token))
+            case Left(e) =>
+              timer.startSingleTimer(TimerUpdateTokenKey, UpdateToken, 20.seconds)
+              log.debug(s"init error, get token error: $e. retry after 20s.")
+              ctx.self ! SwitchBehavior("init", init())
+          }
           switchBehavior(ctx, "busy", busy(), Some(initTime))
 
         case unknown =>
