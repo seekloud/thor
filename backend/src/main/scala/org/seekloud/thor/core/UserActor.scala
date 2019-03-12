@@ -452,7 +452,7 @@ object UserActor {
           case WsMessage(m) =>
             m match {
               case Some(event: UserActionEvent) =>
-                log.debug(s"$event : ${event.playerId}")
+//                log.debug(s"$event : ${event.playerId}")
                 roomActor ! RoomActor.WsMessage(playerId, event)
               case Some(RestartGame) =>
                 //                log.debug(s"restartGame ${userInfo.name}")
