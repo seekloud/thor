@@ -16,8 +16,7 @@ object ThorClientProtocol {
 
   case class PlayerInfo(
     playerId:String,
-    nickName:String,
-    roomId: Long
+    nickName:String
   )
 
 }
