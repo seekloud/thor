@@ -64,6 +64,8 @@ object WsClient {
 
   final case class CreateRoom(psw: Option[String]) extends WsCommand
 
+  final case object TimerKey4CreateGame
+
   final case class JoinRoomFail(error: String) extends WsCommand
 
   final case class CreateRoomRsp(roomId: Long) extends WsCommand
@@ -105,8 +107,10 @@ object WsClient {
           ClientBoot.addToPlatform {
             playerInfo.foreach{ p =>
               roomController.foreach{r =>
+                println("creating new scene")
                 val gameScene = new GameScene
                 stageContext.switchScene(gameScene.getScene)
+                println("creating new controller")
                 new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
               }
             }
@@ -122,12 +126,21 @@ object WsClient {
 
         case msg: CreateRoom =>
           log.debug(s"get msg: $msg")
-          gameMsgSender ! GACreateRoom(msg.psw)
+          println(s"user Info ${playerInfo}")
+          if (playerInfo.isDefined) {
+            gameMsgSender ! GACreateRoom(msg.psw)
+          } else {
+            timer.startSingleTimer(TimerKey4CreateGame, msg, 2.seconds)
+          }
           ClientBoot.addToPlatform {
+            println("already")
             playerInfo.foreach{ p =>
+              println("already have playerInfo")
               roomController.foreach{r =>
+                println("creating new scene")
                 val gameScene = new GameScene
                 stageContext.switchScene(gameScene.getScene)
+                println("creating new controller")
                 new GameController(ctx.self, ThorClientProtocol.PlayerInfo(p._1, p._2, r.finalRoomId), stageContext, gameScene )
               }
             }
@@ -216,7 +229,7 @@ object WsClient {
             ClientUserInfo(msg.playerId, msg.name, msg.token, Some(msg.tokenExistTime)),
             ctx.self
           ))
-
+          println(s"has player Info ${(msg.playerId,msg.name)}")
           working(gameMsgReceiver, gameMsgSender, loginController, Some(msg.playerId,msg.name) , roomController, stageContext)
 
         case msg: GetSender =>

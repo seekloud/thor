@@ -196,7 +196,7 @@ object GameMsgReceiver {
 //          thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
         case x =>
-          log.warn(s"unknown msg: $x")
+//          log.warn(s"unknown msg: $x")
           Behaviors.unhandled
       }
     }
