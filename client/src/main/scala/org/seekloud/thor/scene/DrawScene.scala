@@ -30,6 +30,8 @@ import org.seekloud.utils.CanvasUtils
   */
 class DrawScene(impl: ThorSchemaClientImpl) {
 
+  val mapImg = new Image("img/background.png")
+
   val hammerImg = new Image("img/hammer.png")
 
   val starImg = new Image("img/star.png")
@@ -42,7 +44,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         val moveDistance = getMoveDistance(adventurer, offSetTime)
         val offset = canvasBounds/2 - (adventurer.getAdventurerState.position + moveDistance)
 
-        impl.drawBackground(offset, canvasUnit, canvasBounds)
+        drawBackground(offset, canvasUnit, canvasBounds)
         drawFood(offset, canvasUnit, canvasBounds)
         drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
         drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
@@ -56,6 +58,25 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     println("waitSyncData!!!!")
   }
 }
+  def drawBackground(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+    impl.ctx.save()
+    impl.ctx.setFill("#171b1f")
+    impl.ctx.fillRec(0, 0, canvasBoundary.x * canvasUnit, canvasBoundary.y * canvasUnit)
+    impl.ctx.fill()
+    impl.ctx.drawImage(mapImg, offset.x * canvasUnit, offset.y * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
+    impl.ctx.drawImage(mapImg, (offset.x + impl.config.boundary.x/2) * canvasUnit, offset.y * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
+    impl.ctx.drawImage(mapImg, offset.x * canvasUnit, (offset.y + impl.config.boundary.y/2) * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
+    impl.ctx.drawImage(mapImg, (offset.x + impl.config.boundary.x/2) * canvasUnit, (offset.y + impl.config.boundary.y/2) * canvasUnit, Some(impl.config.boundary.x/2 * canvasUnit, impl.config.boundary.y/2 * canvasUnit))
+    val borderW = 10
+    impl.ctx.setFill("#4A4B49")
+    impl.ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, impl.config.boundary.x * canvasUnit, borderW)
+    impl.ctx.rect(offset.x * canvasUnit, offset.y * canvasUnit, borderW, impl.config.boundary.y * canvasUnit)
+    impl.ctx.rect((offset.x + impl.config.boundary.x) * canvasUnit - borderW, offset.y * canvasUnit, borderW, impl.config.boundary.y * canvasUnit)
+    impl.ctx.rect(offset.x * canvasUnit, (offset.y + impl.config.boundary.y) * canvasUnit - borderW, impl.config.boundary.x * canvasUnit, borderW)
+
+    impl.ctx.fill()
+    impl.ctx.restore()
+  }
 
   def drawBarrage(s: String, t: String): Unit = {
     impl.ctx.save()
