@@ -120,7 +120,7 @@ object WsClient {
             println("game controller start")
             gameController.foreach{ gc =>
               gc.start()
-              stageContext.switchScene(gc.getGs.getScene, fullScreen = true)
+              stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
             }
           }
           //TODO GameController
@@ -149,7 +149,7 @@ object WsClient {
             println("game controller start create" )
             gameController.foreach{ gc =>
               gc.start()
-              stageContext.switchScene(gc.getGs.getScene, fullScreen = true)
+              stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
             }
           }
 //          ClientBoot.addToPlatform {

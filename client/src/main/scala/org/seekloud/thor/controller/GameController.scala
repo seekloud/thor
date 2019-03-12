@@ -154,17 +154,17 @@ class GameController(
       }
     }
   }
-  import scala.concurrent.duration._
+//  import scala.concurrent.duration._
   def startGameLoop(): Unit = { //渲染帧
     logicFrameTime = System.currentTimeMillis()
     timeline.setCycleCount(Animation.INDEFINITE)
-//    val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
-//      logicLoop()
-//    })
-    scheduler.schedule(0.millis, 100.millis) {
+    val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
       logicLoop()
-    }
-//    timeline.getKeyFrames.add(keyFrame)
+    })
+//    scheduler.schedule(0.millis, 100.millis) {
+//      logicLoop()
+//    }
+    timeline.getKeyFrames.add(keyFrame)
     animationTimer.start()
     timeline.play()
   }
@@ -283,7 +283,7 @@ class GameController(
             gameConfig = Some(e.config)
             checkAndChangePreCanvas()
             e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2)}}
-            startGameLoop()
+//            startGameLoop()
 //            wsClient ! WsClient.StartGameLoop
             gameState = GameState.play
 
