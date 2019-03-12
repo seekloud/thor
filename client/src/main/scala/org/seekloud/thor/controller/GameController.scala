@@ -18,6 +18,8 @@ package org.seekloud.thor.controller
 
 import java.util.{Timer, TimerTask}
 import java.util.concurrent.atomic.AtomicInteger
+import scala.concurrent.duration._
+
 
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
@@ -129,6 +131,7 @@ class GameController(
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
       drawGameByTime(System.currentTimeMillis() - logicFrameTime, playGameScreen.canvasUnit, playGameScreen.canvasBounds)
+      if (gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     }
   }
 
@@ -323,25 +326,6 @@ class GameController(
             }
 
           }
-          //          if (e.playerId == playerInfo.playerId) {
-          ////            gameState = GameState.stop
-          //            wsActor ! PlayGameActor.StopGameLater
-          //            endTime = System.currentTimeMillis()
-          //            val time = duringTime(endTime - startTime)
-          //            thorSchemaOpt.foreach { thorSchema =>
-          //              if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-          //                thorSchema.adventurerMap.get(playerInfo.playerId).foreach { my =>
-          //                  thorSchema.killerNew = e.killerName
-          //                  thorSchema.duringTime = time
-          //                  killerName = e.killerName
-          //                  killNum = my.killNum
-          //                  energy = my.energy
-          //                  level = my.level
-          //                }
-          //
-          //              }
-          //            }
-          //          }
           thorSchemaOpt.foreach(_.receiveGameEvent(e))
 
 
@@ -378,6 +362,11 @@ class GameController(
                 if (event.playerId == playerInfo.playerId) byteId = event.shortId
               } else {
 //                wsClient ! WsClient.UserEnterRoom(event)
+                scheduler.scheduleOnce(100.millis) {
+                  thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
+                  if (event.playerId == playerInfo.playerId) byteId = event.shortId
+                }
+
               }
             case event: UserLeftRoom =>
               if (event.shortId == byteId) println(s"${event.shortId}  ${event.playerId} ${event.name} left room...")
@@ -434,7 +423,7 @@ class GameController(
 
     /*鼠标点击事件*/
     playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
-            println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+//            println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {

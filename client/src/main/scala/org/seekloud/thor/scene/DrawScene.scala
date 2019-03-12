@@ -153,6 +153,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
       //出生保护
       impl.newbornAdventurerMap.get(adventurer.playerId) match {
         case Some(s) =>
+          println(s"画出生保护！！！！")
           impl.ctx.save()
           impl.ctx.setFill("rgba(79,148,205,0.4)")
           impl.ctx.setGlobalAlpha(0.5)
