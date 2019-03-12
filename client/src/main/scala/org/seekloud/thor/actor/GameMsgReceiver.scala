@@ -33,13 +33,7 @@ object GameMsgReceiver {
       Behaviors.withTimers[WsMsgServer] { t =>
         implicit val stashBuffer: StashBuffer[WsMsgServer] = StashBuffer[WsMsgServer](Int.MaxValue)
         implicit val timer: TimerScheduler[WsMsgServer] = t
-        switchBehavior(ctx, "waiting", waiting(wsClient))
-  def create(wsClient: ActorRef[WsClient.WsCommand]): Behavior[WsMsgSource] = {
-    Behaviors.setup[WsMsgSource] { ctx =>
-      Behaviors.withTimers[WsMsgSource] { t =>
-        implicit val stashBuffer: StashBuffer[WsMsgSource] = StashBuffer[WsMsgSource](Int.MaxValue)
-        implicit val timer: TimerScheduler[WsMsgSource] = t
-        switchBehavior(ctx, "waiting", waiting("",0L,wsClient))
+        switchBehavior(ctx, "waiting", waiting("", 0L, wsClient))
       }
     }
   }
@@ -49,7 +43,7 @@ object GameMsgReceiver {
     * 接收游戏开始前game server发来的消息
     *
     * */
-  private def waiting(
+  def waiting(
     myId: String, myRoomId: Long,
     wsClient: ActorRef[WsClient.WsCommand]
   )(
@@ -78,14 +72,8 @@ object GameMsgReceiver {
     * 接收游戏过程中，game server发来的消息
     *
     * */
-  def running(
-    myId: String, myRoomId: Long
-  )(
-    implicit stashBuffer: StashBuffer[WsMsgSource],
-    timer: TimerScheduler[WsMsgSource]
-  ): Behavior[WsMsgSource] =
-    Behaviors.receive[WsMsgSource] { (ctx, msg) =>
-  def running()(
+
+  def running(myId: String, myRoomId: Long)(
     implicit stashBuffer: StashBuffer[WsMsgServer],
     timer: TimerScheduler[WsMsgServer]
   ): Behavior[WsMsgServer] =

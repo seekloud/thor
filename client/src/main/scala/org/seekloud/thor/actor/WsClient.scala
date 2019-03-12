@@ -75,10 +75,8 @@ object WsClient {
   def  create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
-        val gameMsgReceiver: ActorRef[ThorGame.WsMsgServer] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMessageReceiver")
-        working(gameMsgReceiver, gameMsgSender = null, None, None, stageContext)
         println("creating")
-        val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(ctx.self), "gameController")
+        val gameMsgReceiver: ActorRef[ThorGame.WsMsgServer] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMessageReceiver")
         working(gameMsgReceiver, gameMsgSender = null, None, None, None, stageContext)
       }
     }
@@ -222,9 +220,8 @@ object WsClient {
           working(gameMsgReceiver, gameMsgSender, loginController, Some(msg.playerId,msg.name) , roomController, stageContext)
 
         case msg: GetSender =>
-          working(gameMsgReceiver, msg.stream, loginController, None, roomController, stageContext)
           log.debug(s"get sender success.")
-          working(gameMsgReceiver, msg.stream, loginController, roomController, stageContext)
+          working(gameMsgReceiver, msg.stream, loginController, None, roomController, stageContext)
 
         case Stop =>
           log.info(s"wsClient stopped.")
