@@ -189,7 +189,7 @@ class GameController(
             drawScene.get.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
             val b = System.currentTimeMillis()
             drawScene.get.drawRank(currentRank, CurrentOrNot = true, byteId)
-            thorSchema.drawSmallMap(mainId)
+            drawScene.get.drawSmallMap(mainId)
             drawTime = drawTime :+ System.currentTimeMillis() - start
             if (drawTime.length >= drawTimeSize) {
               drawTimeLong = drawTime.sum / drawTime.size

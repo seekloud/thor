@@ -523,4 +523,47 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     impl.ctx.restore()
   }
 
+  def drawSmallMap(mainId: String): Unit ={
+
+    def drawStar(adventurerMapX: Double, adventurerMapY: Double) = {
+      impl.ctx.save()
+      impl.ctx.beginPath()
+      impl.ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
+      impl.ctx.lineTo(adventurerMapX + 6.6, adventurerMapY - 2.0)
+      impl.ctx.lineTo(adventurerMapX - 4.0, adventurerMapY + 6.0)
+      impl.ctx.lineTo(adventurerMapX - 0.0, adventurerMapY - 7.0)
+      impl.ctx.lineTo(adventurerMapX + 4.0, adventurerMapY + 6.0)
+      impl.ctx.setFill("#b1cfed")
+      impl.ctx.fill()
+      impl.ctx.restore()
+    }
+
+    def drawCrown(adventurerMapX: Double, adventurerMapY: Double) = {
+      val img = impl.drawFrame.createImage(pictureMap("crown.png"))
+      impl.ctx.save()
+      impl.ctx.beginPath()
+      impl.ctx.drawImage(img, adventurerMapX - 6, adventurerMapY - 6, Some(12,12))
+      impl.ctx.restore()
+    }
+
+
+    //获取比例
+    val scale = (impl.window.x * 0.2) / 600.0
+    impl.ctx.save()
+    impl.ctx.setFill("rgba(0,0,0,0.4)")
+    impl.ctx.fillRec(10, impl.window.y - impl.window.x * 0.11, impl.window.x * 0.2, impl.window.x * 0.1)
+    impl.adventurerMap.foreach{
+      case adventurer if adventurer._1 == mainId =>
+        val adventurerMapX = 10 + adventurer._2.position.x * scale
+        val adventurerMapY = impl.window.y - impl.window.x * 0.11 + adventurer._2.position.y * scale
+        drawStar(adventurerMapX, adventurerMapY)
+      case adventurer if adventurer._2.level >= 21 =>
+        val adventurerMapX = 10 + adventurer._2.position.x * scale
+        val adventurerMapY =  impl.window.y - impl.window.x * 0.11 + adventurer._2.position.y * scale
+        drawCrown(adventurerMapX, adventurerMapY)
+      case _ => ()
+    }
+    impl.ctx.restore()
+  }
+
 }
