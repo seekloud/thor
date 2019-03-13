@@ -27,3 +27,10 @@
     -fx-background-radius: 10;
     -fx-font: 15 arial;
 }
+
+.bot-label {
+    -fx-font:17 Helvetica;
+    -fx-font-weight: bold;
+    -fx-font-posture:italic;
+    -fx-text-fill: white;
+}

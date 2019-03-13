@@ -20,7 +20,7 @@ import akka.actor.typed.ActorRef
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
-import org.seekloud.thor.scene.{LoginScene, ModeScene}
+import org.seekloud.thor.scene.{BotScene, LoginScene, ModeScene}
 import org.seekloud.thor.scene.ModeScene.ModeSceneListener
 
 /**
@@ -43,9 +43,11 @@ class ModeSelectController(wsClient: ActorRef[WsClient.WsCommand], modeScene: Mo
     }
 
     override def gotoBotScene(): Unit = {
-      ClientBoot.addToPlatform(
-        //TODO BOT
-      )
+      ClientBoot.addToPlatform{
+        val botScene = new BotScene
+        val botSceneController = new BotSceneController(wsClient, modeScene, botScene, context)
+        botSceneController.showScene()
+      }
     }
   })
 

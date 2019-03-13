@@ -73,6 +73,8 @@ object WsClient {
 
   final case class PlayerInfo(playerId: String, name: String) extends WsCommand
 
+  final case class BotLogin(botId: String, botKey: String) extends WsCommand
+
   final case object Stop extends WsCommand
 
   private[this] def switchBehavior(ctx: ActorContext[WsCommand],
@@ -83,7 +85,7 @@ object WsClient {
     stashBuffer.unstashAll(ctx, behavior)
   }
 
-  def  create(stageContext: StageContext): Behavior[WsCommand] =
+  def create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
         val gameMsgReceiver: ActorRef[ThorGame.WsMsgServer] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMessageReceiver")
@@ -104,9 +106,9 @@ object WsClient {
   ): Behavior[WsCommand] =
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
-//        case msg: PlayerIdName =>
-//          println(s"get player info $msg")
-//         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
+        //        case msg: PlayerIdName =>
+        //          println(s"get player info $msg")
+        //         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
           if (gameMsgSender != null) {
@@ -114,24 +116,24 @@ object WsClient {
           } else {
             timer.startSingleTimer(TimerKey4StartGame, msg, 2.seconds)
           }
-          ClientBoot.addToPlatform{
-            gameController.foreach{ gc =>
+          ClientBoot.addToPlatform {
+            gameController.foreach { gc =>
               gc.start()
               stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
             }
           }
           //TODO GameController
-//          ClientBoot.addToPlatform {
-//            gameController.foreach{ p =>
-//              roomController.foreach { r =>
-//                println("creating new scene")
-//                val gameScene = new GameScene
-//                stageContext.switchScene(gameScene.getScene, fullScreen = true)
-//                println("creating new controller")
-//                new GameController(ctx.self, PlayerInfo(p.playerId, p.name), stageContext, gameScene ).start()
-//              }
-//            }
-//          }
+          //          ClientBoot.addToPlatform {
+          //            gameController.foreach{ p =>
+          //              roomController.foreach { r =>
+          //                println("creating new scene")
+          //                val gameScene = new GameScene
+          //                stageContext.switchScene(gameScene.getScene, fullScreen = true)
+          //                println("creating new controller")
+          //                new GameController(ctx.self, PlayerInfo(p.playerId, p.name), stageContext, gameScene ).start()
+          //              }
+          //            }
+          //          }
           Behaviors.same
 
         case msg: CreateRoom =>
@@ -141,8 +143,8 @@ object WsClient {
           } else {
             timer.startSingleTimer(TimerKey4CreateGame, msg, 2.seconds)
           }
-          ClientBoot.addToPlatform{
-            gameController.foreach{ gc =>
+          ClientBoot.addToPlatform {
+            gameController.foreach { gc =>
               gc.start()
               stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
             }
@@ -237,9 +239,14 @@ object WsClient {
             ctx.self
           ))
           gc.checkAndChangePreCanvas()
-          println(s"has player Info ${(msg.playerId,msg.name)}")
-//          ctx.self ! PlayerInfo(msg.playerId,msg.name)
-          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc) , roomController, stageContext)
+          println(s"has player Info ${(msg.playerId, msg.name)}")
+          //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), roomController, stageContext)
+
+        case msg: BotLogin =>
+
+          Behaviors.same
+
 
         case msg: GetSender =>
           log.debug(s"get sender success.")
@@ -309,45 +316,44 @@ object WsClient {
 
     }
 
-  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer], gameController: GameController): Sink[Message, Future[Done]] =
-    {
-      log.debug(s"getSink4Server...")
-      Sink.foreach[Message] {
-        case TextMessage.Strict(msg) =>
-          gameController.wsMessageHandle(ThorGame.TextMsg(msg))
-          gameMsgReceiver ! ThorGame.TextMsg(msg)
+  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer], gameController: GameController): Sink[Message, Future[Done]] = {
+    log.debug(s"getSink4Server...")
+    Sink.foreach[Message] {
+      case TextMessage.Strict(msg) =>
+        gameController.wsMessageHandle(ThorGame.TextMsg(msg))
+        gameMsgReceiver ! ThorGame.TextMsg(msg)
 
-        case BinaryMessage.Strict(bMsg) =>
+      case BinaryMessage.Strict(bMsg) =>
+        val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
+        val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
+          case Right(rst) => rst
+          case Left(e) =>
+            log.error(s"decode bMsg error: $e")
+            ThorGame.DecodeError()
+        }
+        gameController.wsMessageHandle(message)
+        gameMsgReceiver ! message
+
+      case msg: BinaryMessage.Streamed =>
+        val futureMsg = msg.dataStream.runFold(new ByteStringBuilder().result()) {
+          case (s, str) => s.++(str)
+        }
+        futureMsg.map { bMsg =>
           val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
           val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
             case Right(rst) => rst
             case Left(e) =>
-              log.error(s"decode bMsg error: $e")
+              println(s"decode streamed bMsg error: $e")
               ThorGame.DecodeError()
           }
           gameController.wsMessageHandle(message)
           gameMsgReceiver ! message
+        }
 
-        case msg: BinaryMessage.Streamed =>
-          val futureMsg = msg.dataStream.runFold(new ByteStringBuilder().result()) {
-            case (s, str) => s.++(str)
-          }
-          futureMsg.map { bMsg =>
-            val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
-            val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
-              case Right(rst) => rst
-              case Left(e) =>
-                println(s"decode streamed bMsg error: $e")
-                ThorGame.DecodeError()
-            }
-            gameController.wsMessageHandle(message)
-            gameMsgReceiver ! message
-          }
+      case _ => //do nothing
 
-        case _ => //do nothing
-
-      }
     }
+  }
 
 
 }
