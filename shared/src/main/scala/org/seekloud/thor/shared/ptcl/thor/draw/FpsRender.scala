@@ -26,7 +26,7 @@ trait FpsRender {
   var lastRenderTimes = 0
   private var renderTimes = 0
 
-  def addFps() = {
+  def addFps(): Unit = {
     val time = System.currentTimeMillis()
     renderTimes += 1
     if (time - lastRenderTime > 1000){
@@ -37,11 +37,10 @@ trait FpsRender {
   }
 
 
-  def drawNetInfo(networkLatency:Long, drawTime: Long, frameTime: Long, peopleNum: Int) = {
+  def drawNetInfo(networkLatency:Long, drawTime: Long, frameTime: Long, peopleNum: Int): Unit = {
     addFps()
     ctx.setFont("Helvetica", baseFont * 15)
     ctx.setTextAlign("start")
-    ctx.setFill("#ffffff")
     val fpsStr =  s"fps   : $lastRenderTimes"
     val pingStr = s"ping : ${networkLatency}ms"
     val drawStr = s"drawTime : ${drawTime}ms"
@@ -50,8 +49,13 @@ trait FpsRender {
     val explainStr2 = s"左键挥刀"
     val explainStr1 = s"右键加速"
     ctx.setTextBaseLine("top")
+    if (networkLatency > 100) ctx.setFill("#ff0000")
+    else ctx.setFill("#ffffff")
     ctx.fillText(pingStr,window.x * 0.9,10)
+    if (lastRenderTimes < 30) ctx.setFill("#ff0000")
+    else ctx.setFill("#ffffff")
     ctx.fillText(fpsStr,window.x * 0.9,30)
+    ctx.setFill("#ffffff")
     ctx.fillText(drawStr,window.x * 0.9,50)
     ctx.fillText(frameStr,window.x * 0.9,70)
     ctx.fillText(peopleNumStr,window.x * 0.9,100)

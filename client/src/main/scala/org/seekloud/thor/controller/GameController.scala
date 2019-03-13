@@ -23,6 +23,7 @@ import scala.concurrent.duration._
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import javafx.animation.{Animation, AnimationTimer, KeyFrame, Timeline}
+import javafx.scene.input.{KeyCode, MouseButton}
 import javafx.scene.control.ButtonType
 import javafx.scene.input.{KeyCode, MouseButton}
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
@@ -68,6 +69,8 @@ class GameController(
   private val gameScene = playGameScreen
 
   def getGs: GameScene = gameScene
+
+  private var drawScene: Option[DrawScene] = None
 
   protected var firstCome = true
 
@@ -178,28 +181,31 @@ class GameController(
     thorSchemaOpt match {
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if (thorSchema.adventurerMap.contains(mainId)) {
-          val start = System.currentTimeMillis()
-          //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
-          val drawScene: DrawScene = new DrawScene(thorSchema)
-          drawScene.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
-          drawScene.drawRank(currentRank, CurrentOrNot = true, byteId)
-          thorSchema.drawSmallMap(mainId)
+          if (drawScene.isDefined) {
+            val start = System.currentTimeMillis()
+            //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
+            val a = System.currentTimeMillis()
+//            println(s"draw create scene span: ${a-start}")
+            drawScene.get.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
+            val b = System.currentTimeMillis()
+            drawScene.get.drawRank(currentRank, CurrentOrNot = true, byteId)
+            thorSchema.drawSmallMap(mainId)
+            drawTime = drawTime :+ System.currentTimeMillis() - start
+            if (drawTime.length >= drawTimeSize) {
+              drawTimeLong = drawTime.sum / drawTime.size
+              drawTime = Nil
+            }
+            if (frameTime.length >= frameTimeSize) {
+              frameTimeLong = frameTime.sum / frameTime.size
+              frameTime = Nil
+            }
+            //          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
+            thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle, currentRank.length)
+            if (barrageTime > 0) {
 
-          drawTime = drawTime :+ System.currentTimeMillis() - start
-          if (drawTime.length >= drawTimeSize) {
-            drawTimeLong = drawTime.sum / drawTime.size
-            drawTime = Nil
-          }
-          if (frameTime.length >= frameTimeSize) {
-            frameTimeLong = frameTime.sum / frameTime.size
-            frameTime = Nil
-          }
-          //          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
-          thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle, currentRank.length)
-          if (barrageTime > 0) {
-
-            drawScene.drawBarrage(barrage._1, barrage._2)
-            barrageTime -= 1
+              drawScene.get.drawBarrage(barrage._1, barrage._2)
+              barrageTime -= 1
+            }
           }
         }
         else {
@@ -213,11 +219,7 @@ class GameController(
 
   var lastSendReq = 0L
 
-  var a = 0
-
-  def logicLoop(): Unit = {
-    //    if (a % 50 == 0)
-    //    println("looping")
+  def logicLoop(): Unit ={
     var myLevel = 0
     thorSchemaOpt.foreach { thorSchema =>
       thorSchema.adventurerMap.get(mainId).foreach {
@@ -283,6 +285,7 @@ class GameController(
           mainId = e.id
           try {
             thorSchemaOpt = Some(ThorSchemaClientImpl(playGameScreen.drawFrame, playGameScreen.getCanvasContext, e.config, e.id, e.name, playGameScreen.canvasBoundary, playGameScreen.canvasUnit))
+            drawScene = Some(new DrawScene(thorSchemaOpt.get))
             gameConfig = Some(e.config)
             checkAndChangePreCanvas()
             e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2) } }
@@ -456,7 +459,6 @@ class GameController(
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.getButton == MouseButton.SECONDARY) { //右键
-//            mouseRight = false
             val preExecuteAction = MouseClickUpRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             wsClient ! WsClient.DispatchMsg(preExecuteAction)

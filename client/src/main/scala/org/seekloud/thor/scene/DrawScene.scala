@@ -51,7 +51,6 @@ class DrawScene(impl: ThorSchemaClientImpl) {
           //保持自己的adventurer在屏幕中央~
           val moveDistance = getMoveDistance(adventurer, offSetTime)
           val offset = canvasBounds / 2 - (adventurer.getAdventurerState.position + moveDistance)
-
           drawBackground(offset, canvasUnit, canvasBounds)
           drawFood(offset, canvasUnit, canvasBounds)
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)

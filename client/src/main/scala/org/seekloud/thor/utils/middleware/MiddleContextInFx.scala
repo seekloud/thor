@@ -167,7 +167,7 @@ class MiddleContextInFx extends MiddleContext {
   override def setTextAlign(s: String): Unit = context.setTextAlign(s)
 
   override def setShadowColor(s: String): Unit = {
-    println("set Shadow color")
+//    println("set Shadow color")
     val shadowColor = new InnerShadow()
     shadowColor.setColor(Color.WHITE)
     context.setEffect(shadowColor)
