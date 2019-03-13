@@ -16,7 +16,7 @@
 
 package org.seekloud.thor.shared.ptcl.thor
 
-import javafx.scene.image.WritableImage
+import javafx.scene.image.{Image, WritableImage}
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model.Point
@@ -47,10 +47,10 @@ with DrawOtherClient
 with FpsRender{
 
   var preCanvasDeath: List[MiddleCanvas] = Nil
-  var preFoodImage:List[WritableImage] = List.empty
-  var preAdventurerImage:List[WritableImage] = List.empty
-  var preWeaponImage:List[WritableImage] = List.empty
-  var preDeathImage:List[WritableImage] = List.empty
+  var preFoodImage:List[Image] = List.empty
+  var preAdventurerImage:List[Image] = List.empty
+  var preWeaponImage:List[Image] = List.empty
+  var preDeathImage:List[Image] = List.empty
   var killerNew : String = "?"
   var duringTime : String = "0"
   val ifTest: Boolean = false
@@ -125,13 +125,13 @@ with FpsRender{
     println(preAdventurer.map(_.getHeight()),preFood.map(_.getHeight()),preWeapon.map(_.getHeight()))
   }
 
-  def changePreImage(preFood: List[MiddleCanvas] = Nil,
-    preAdventurer: List[MiddleCanvas] = Nil,
-    preWeapon: List[MiddleCanvas] = Nil,
-    preDeath: List[MiddleCanvas] = Nil): Unit = {
-    preFoodImage = preFood.map(_.change2Image().asInstanceOf[WritableImage])
-    preAdventurerImage = preAdventurer.map(_.change2Image().asInstanceOf[WritableImage])
-    preWeaponImage = preWeapon.map(_.change2Image().asInstanceOf[WritableImage])
-    preDeathImage = preDeath.map(_.change2Image().asInstanceOf[WritableImage])
+  def changePreImage(preFood: List[Image] = Nil,
+    preAdventurer: List[Image] = Nil,
+    preWeapon: List[Image] = Nil,
+    preDeath: List[Image] = Nil): Unit = {
+    preFoodImage = preFood
+    preAdventurerImage = preAdventurer
+    preWeaponImage = preWeapon
+    preDeathImage = preDeath
   }
 }

@@ -25,6 +25,12 @@ import scala.collection.mutable
   */
 object Constants {
 
+  val CanvasWidth = 800
+  val CanvasHeight = 400
+
+  val layeredCanvasWidth = 400
+  val layeredCanvasHeight = 200
+
   object PreWindow {
     val width = 900
     val height = 500

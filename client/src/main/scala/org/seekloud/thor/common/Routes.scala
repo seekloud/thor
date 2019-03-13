@@ -29,6 +29,7 @@ object Routes {
 
   val wsProtocol = AppSettings.gameServerProtocol
   val wsDomain = AppSettings.gameServerDomain
+  val wsHost = AppSettings.gameServerHost
 
   def wsJoinGameUrl(playerId: String, name:String, accessCode: String, roomIdOpt:Option[String]):String = {
     s"game/playGame/userJoin?playerId=$playerId&playerName=$name&accessCode=$accessCode" +
@@ -43,7 +44,7 @@ object Routes {
   def clientLinkGame(playerId: String, name: String, accessCode: String): String = {
     val playerIdEncoder =URLEncoder.encode(playerId, "UTF-8")
     val playerNameEncoder = URLEncoder.encode(name, "UTF-8")
-    s"$wsProtocol://$wsDomain/" + gameName + s"/game/playGame/clientLinkGame?playerId=$playerIdEncoder&playerName=$playerNameEncoder&accessCode=$accessCode"
+    s"$wsProtocol://$wsHost/" + gameName + s"/game/playGame/clientLinkGame?playerId=$playerIdEncoder&playerName=$playerNameEncoder&accessCode=$accessCode"
   }
 
 

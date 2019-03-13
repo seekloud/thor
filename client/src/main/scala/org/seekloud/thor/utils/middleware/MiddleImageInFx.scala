@@ -37,9 +37,9 @@ class MiddleImageInFx extends MiddleImage {
     image = new Image(url)
   }
 
-  def getImage = image
+  def getImage: Image = image
 
-  override def isComplete: Boolean = true
+  override def isComplete: Boolean = image.isBackgroundLoading
 
   override def height: Double = image.getHeight
 

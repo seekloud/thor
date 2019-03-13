@@ -33,7 +33,6 @@ import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions
 import org.seekloud.byteobject.ByteObject._
-import org.seekloud.thor.core.RoomActor.Command
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 
 /**

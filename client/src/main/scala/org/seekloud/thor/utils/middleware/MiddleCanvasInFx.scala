@@ -58,6 +58,17 @@ class MiddleCanvasInFx private() extends MiddleCanvas {
     case _ => canvas.setHeight(h.asInstanceOf[Int].toFloat)
   }
 
+  def setX(x: Any): Unit = x match {
+    case d: Float => canvas.setLayoutX(d)
+    case _ => canvas.setLayoutX(x.asInstanceOf[Int].toFloat)
+  }
+
+  def setY(y: Any): Unit = y match {
+    case d: Float => canvas.setLayoutX(d)
+    case _ => canvas.setLayoutY(y.asInstanceOf[Int].toFloat)
+  }
+
+
   override def change2Image(): WritableImage = {
     val a = System.currentTimeMillis()
     val params = new SnapshotParameters

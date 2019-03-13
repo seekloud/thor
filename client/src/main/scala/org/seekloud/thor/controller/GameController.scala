@@ -21,10 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import scala.concurrent.duration._
 import akka.actor.typed.ActorRef
-import akka.actor.typed.scaladsl.adapter._
 import javafx.animation.{Animation, AnimationTimer, KeyFrame, Timeline}
-import javafx.scene.input.{KeyCode, MouseButton}
-import javafx.scene.control.ButtonType
 import javafx.scene.input.{KeyCode, MouseButton}
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
 import javafx.util.Duration
@@ -32,8 +29,6 @@ import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.game.NetWorkInfo
-import org.seekloud.thor.model.GameServerInfo
-import org.seekloud.thor.protocol.ThorClientProtocol
 import org.seekloud.thor.scene.GameScene
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
@@ -83,8 +78,8 @@ class GameController(
   //  private var recSyncGameState: Option[ThorGame.GridSyncState] = None
 
   var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
-  private val window = Point(playGameScreen.canvasBoundary.x - 12, playGameScreen.canvasBoundary.y - 12.toFloat)
-  var gameState = GameState.loadingPlay
+  //  private val window = Point(playGameScreen.canvasBoundary.x - 12, playGameScreen.canvasBoundary.y - 12.toFloat)
+  var gameState: Int = GameState.loadingPlay
   private var logicFrameTime = System.currentTimeMillis()
 
   protected var currentRank = List.empty[Score]
@@ -134,7 +129,11 @@ class GameController(
 
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
+      val a = System.currentTimeMillis()
       drawGameByTime(System.currentTimeMillis() - logicFrameTime, playGameScreen.canvasUnit, playGameScreen.canvasBounds)
+      val b = System.currentTimeMillis()
+      if (b-a>10)
+        println(s"draw all time span: ${b-a}")
       if (gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     }
   }
@@ -149,7 +148,7 @@ class GameController(
       println("start...")
       //      wsClient ! WsClient.StartGame(playerInfo.roomId)
       startGameLoop()
-      addUserActionListenEvent
+      addUserActionListenEvent()
       checkAndChangePreCanvas()
       //      logicFrameTime = System.currentTimeMillis()
     } else {
@@ -162,7 +161,6 @@ class GameController(
     }
   }
 
-  //  import scala.concurrent.duration._
   def startGameLoop(): Unit = { //渲染帧
     logicFrameTime = System.currentTimeMillis()
     timeline.setCycleCount(Animation.INDEFINITE)
@@ -185,9 +183,8 @@ class GameController(
             val start = System.currentTimeMillis()
             //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
             val a = System.currentTimeMillis()
-//            println(s"draw create scene span: ${a-start}")
+            //            println(s"draw create scene span: ${a-start}")
             drawScene.get.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
-            val b = System.currentTimeMillis()
             drawScene.get.drawRank(currentRank, CurrentOrNot = true, byteId)
             drawScene.get.drawSmallMap(mainId)
             drawTime = drawTime :+ System.currentTimeMillis() - start
@@ -295,7 +292,7 @@ class GameController(
 
           } catch {
             case e: Exception =>
-              closeHolder
+              closeHolder()
               println(e.getMessage)
               println("client is stop!!!")
           }
@@ -355,7 +352,7 @@ class GameController(
 
         case RebuildWebSocket =>
           thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录"))
-          closeHolder
+          closeHolder()
 
         case e: ThorGame.UserActionEvent =>
           thorSchemaOpt.foreach(_.receiveUserEvent(e))
@@ -388,7 +385,7 @@ class GameController(
 
   }
 
-  private def closeHolder: Unit = {
+  private def closeHolder(): Unit = {
     animationTimer.stop()
     //remind 此处关闭WebSocket
     wsClient ! WsClient.Stop
@@ -399,7 +396,7 @@ class GameController(
   var lastMouseMove = 0l //限制只能发一次mousemove
   val frequency = 50
 
-  private def addUserActionListenEvent: Unit = {
+  private def addUserActionListenEvent(): Unit = {
     playGameScreen.canvas.getCanvas.requestFocus()
 
     /*鼠标移动操作*/
@@ -497,23 +494,21 @@ class GameController(
       override def run(): Unit = fun
     }
 
-    (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas, preDrawFrame.deathCanvas) match {
+    (preDrawFrame.foodImg, preDrawFrame.adventurerImg, preDrawFrame.weaponImg, preDrawFrame.deathImg) match {
       case (Nil, Nil, Nil, Nil) =>
         timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
       case (foodCanvas, Nil, Nil, Nil) =>
-        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, Nil, Nil, Nil))
         thorSchemaOpt.foreach(_.changePreImage(foodCanvas, Nil, Nil, Nil))
         timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
       case (foodCanvas, adventurerCanvas, Nil, Nil) =>
-        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, Nil, Nil))
         thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, Nil, Nil))
         timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
       case (foodCanvas, adventurerCanvas, weaponCanvas, Nil) =>
-        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas, Nil))
         thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, weaponCanvas, Nil))
+        timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
       case (foodCanvas, adventurerCanvas, weaponCanvas, deathCanvas) =>
-        thorSchemaOpt.foreach(_.changePreCanvas(foodCanvas, adventurerCanvas, weaponCanvas, deathCanvas))
         thorSchemaOpt.foreach(_.changePreImage(foodCanvas, adventurerCanvas, weaponCanvas, deathCanvas))
+        timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
     }
   }
 

@@ -35,43 +35,34 @@ object CanvasUtils {
     //height 图片的渲染高度 如果为0 则根据宽度等比例缩放
     //angle 旋转角度
 
+    val img = drawFrame.createImage(src)
+    val imgWidth = img.width
+    val imgHeight = img.height
+    val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
+
     ctx.save()
     ctx.translate(position.x, position.y)
     ctx.rotate(angle)
-    preImage match {
+    preCanvas match {
       case Nil =>
-        preCanvas match {
-          case Nil =>
-            val img = drawFrame.createImage(src)
-            val imgWidth = img.width
-            val imgHeight = img.height
-            val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
-            ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, Some(width, drawHeight))
-          case _ =>
-            val imgWidth = preCanvas.head.getWidth()
-            val imgHeight = preCanvas.head.getHeight()
-            val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
-            typ match {
-              case "adventurer" => drawAdventurerByPreCanvas(ctx, preCanvas, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
-              case "weapon" => drawWeaponByPreCanvas(ctx, preCanvas, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
-              case _ => ()
-            }
-            if(System.currentTimeMillis() - preTime < 2000) {
-//              val img = drawFrame.createImage(src)
-//              ctx.drawImage(img, -width / 2 + offset.x, -drawHeight / 2 + offset.y, Some(width, drawHeight))
-            }
-            else{
+        ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, Some(width, drawHeight))
+      case _ =>
 
-            }
+        typ match {
+          case "adventurer" => drawAdventurerByPreCanvas(ctx, preCanvas, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
+          case "weapon" => drawWeaponByPreCanvas(ctx, preCanvas, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
+          case _ => ()
+        }
+        if(System.currentTimeMillis() - preTime < 2000) {
+          val img = drawFrame.createImage(src)
+          ctx.drawImage(img, -width / 2 + offset.x, -drawHeight / 2 + offset.y, Some(width, drawHeight))
+        }
+        else{
 
         }
-      case _ =>
+
     }
     if(typ != "adventurer" && typ != "weapon") {
-      val img = drawFrame.createImage(src)
-      val imgWidth = img.width
-      val imgHeight = img.height
-      val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
       ctx.drawImage(img, -width / 2 + offset.x, -drawHeight / 2 + offset.y, Some(width, drawHeight))
     }
 

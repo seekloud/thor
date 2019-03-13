@@ -26,5 +26,5 @@ import org.seekloud.thor.shared.ptcl.util.middleware._
 class MiddleFrameInFx extends MiddleFrame {
   override def createCanvas(width: Double, height: Double): MiddleCanvasInFx = MiddleCanvasInFx(width.toFloat, height.toFloat)
 
-  override def createImage(url: String): MiddleImage = MiddleImageInFx(url)
+  override def createImage(url: String): MiddleImageInFx = MiddleImageInFx(url)
 }

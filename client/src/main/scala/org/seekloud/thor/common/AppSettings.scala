@@ -36,6 +36,7 @@ object AppSettings {
 
   val gameServerProtocol = appConfig.getString("gameServer.protocol")
   val gameServerDomain = appConfig.getString("gameServer.domain")
+  val gameServerHost = appConfig.getString("gameServer.host")
 
 
   val testPsw = appConfig.getString("testPsw")

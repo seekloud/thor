@@ -18,6 +18,8 @@ package org.seekloud.thor.scene
 
 import java.util.Timer
 import java.util.TimerTask
+
+import javafx.scene.image.Image
 import org.seekloud.thor.utils.middleware.MiddleFrameInFx
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleContext, MiddleImage}
 import org.seekloud.thor.model.Constants._
@@ -32,7 +34,7 @@ class PreDraw {
   // 食物预渲染Canvas
   val drawFood = new MiddleFrameInFx
   
-  val foodImg: List[MiddleImage] = for(a <- (0 to 7).toList) yield drawFood.createImage(pictureMap(s"food-sheet0-$a.png"))
+  val foodImg: List[Image] = for(a <- (0 to 7).toList) yield drawFood.createImage(pictureMap(s"food-sheet0-$a.png")).getImage
 
   var foodCanvas: List[MiddleCanvas] = Nil
 
@@ -40,21 +42,11 @@ class PreDraw {
 
   canvasDrawFood()
 
-  // 加速特效预渲染Canvas
-  val drawSpeedUp = new MiddleFrameInFx
-  
-  val speedUpImg: List[MiddleImage] = for(a <- (0 to 7).toList) yield drawSpeedUp.createImage(pictureMap(s"speedParticles.png"))
-
-  var speedUpCanvas: List[MiddleCanvas] = Nil
-
-  var speedUpCtx: List[MiddleContext] = Nil
-
-  canvasDrawSpeedUp()
 
   // 死亡特效预渲染Canvas
   val drawDeath = new MiddleFrameInFx
   
-  val deathImg: List[MiddleImage] = for(a <- (1 to 6).toList) yield drawDeath.createImage(pictureMap(s"kill$a.png"))
+  val deathImg: List[Image] = for(a <- (1 to 6).toList) yield drawDeath.createImage(pictureMap(s"kill$a.png")).getImage
 
   var deathCanvas: List[MiddleCanvas] = Nil
 
@@ -65,7 +57,7 @@ class PreDraw {
   //预渲染人物
   val drawAdventurer = new MiddleFrameInFx
   
-  val adventurerImg: List[MiddleImage] = for(a <- (0 to 19).toList) yield drawAdventurer.createImage(pictureMap(s"char${a/4 + 1}-${a%4}.png"))
+  val adventurerImg: List[Image] = for(a <- (0 to 19).toList) yield drawAdventurer.createImage(pictureMap(s"char${a/4 + 1}-${a%4}.png")).getImage
 
   var adventurerCanvas: List[MiddleCanvas] = Nil
 
@@ -76,7 +68,7 @@ class PreDraw {
   //预渲染武器
   val drawWeapon = new MiddleFrameInFx
   
-  val weaponImg: List[MiddleImage] = for(a <- (0 to 5).toList) yield drawWeapon.createImage(pictureMap(s"weapon${a + 1}.png"))
+  val weaponImg: List[Image] = for(a <- (0 to 5).toList) yield drawWeapon.createImage(pictureMap(s"weapon${a + 1}.png")).getImage
 
   var weaponCanvas: List[MiddleCanvas] = Nil
 
@@ -85,17 +77,7 @@ class PreDraw {
   canvasDrawWeapon()
 
   def canvasDrawWeapon(): Unit ={
-    var cnt = 0
-    if(weaponImg.forall(t => t.isComplete)){
-      val weaponHeight = for(a <- (0 to 5).toList) yield 250.0 / weaponImg(a).width * weaponImg(a).height
-      for(a <- (0 to 5).toList) {weaponCanvas = weaponCanvas :+ drawWeapon.createCanvas(250.0, weaponHeight(a).toInt)}
-      for(a <- (0 to 5).toList) {weaponCtx = weaponCtx :+ weaponCanvas(a).getCtx}
-      weaponCtx.foreach{ t =>
-        t.drawImage(weaponImg(cnt),0 ,0, Some(250.0, weaponHeight(cnt)))
-        cnt += 1
-      }
-    }
-    else {
+    if(!weaponImg.forall(t => t.isBackgroundLoading)){
       val timer = new Timer
       val timerTask = new TimerTask {
         override def run(): Unit = canvasDrawWeapon()
@@ -104,16 +86,7 @@ class PreDraw {
     }
   }
   def canvasDrawAdventurer(): Unit ={
-    var cnt = 0
-    if(adventurerImg.forall(t => t.isComplete)){
-      for(a <- (0 to 19).toList) {adventurerCanvas = adventurerCanvas :+ drawAdventurer.createCanvas(150.0, 150.0)}
-      for(a <- (0 to 19).toList) {adventurerCtx = adventurerCtx :+ adventurerCanvas(a).getCtx}
-      adventurerCtx.foreach{ t =>
-        t.drawImage(adventurerImg(cnt),0 ,0, Some(150 ,150))
-        cnt += 1
-      }
-    }
-    else {
+    if(!adventurerImg.forall(t => t.isBackgroundLoading)){
       val timer = new Timer
       val timerTask = new TimerTask {
         override def run(): Unit = canvasDrawAdventurer()
@@ -122,16 +95,7 @@ class PreDraw {
     }
   }
   def canvasDrawFood(): Unit ={
-    var cnt = 0
-    if(foodImg.forall(t => t.isComplete)){
-      for(a <- (0 to 7).toList) {foodCanvas = foodCanvas :+ drawFood.createCanvas(48.0, 48.0)}
-      for(a <- (0 to 7).toList) {foodCtx = foodCtx :+ foodCanvas(a).getCtx}
-      foodCtx.foreach{ t =>
-        t.drawImage(foodImg(cnt),0 ,0, Some(48 ,48))
-        cnt += 1
-      }
-    }
-    else {
+    if(!foodImg.forall(t => t.isBackgroundLoading)){
       val timer = new Timer
       val timerTask = new TimerTask {
         override def run(): Unit = canvasDrawFood()
@@ -140,36 +104,9 @@ class PreDraw {
     }
   }
 
-  def canvasDrawSpeedUp(): Unit ={
-    var cnt = 0
-    if(speedUpImg.forall(t => t.isComplete)){
-      for(a <- (0 to 7).toList) {speedUpCanvas = speedUpCanvas :+ drawSpeedUp.createCanvas(48.0, 48.0)}
-      for(a <- (0 to 7).toList) {speedUpCtx = speedUpCtx :+ speedUpCanvas(a).getCtx}
-      speedUpCtx.foreach{ t =>
-        t.drawImage(speedUpImg(cnt),0 ,0, Some(140 ,160))
-        cnt += 1
-      }
-    }
-    else {
-      val timer = new Timer
-      val timerTask = new TimerTask {
-        override def run(): Unit = canvasDrawFood()
-      }
-      timer.schedule(timerTask, 1000)
-    }
-  }
 
   def canvasDrawDeath(): Unit ={
-    var cnt = 0
-    if(deathImg.forall(t => t.isComplete)){
-      for(a <- (0 to 5).toList) {deathCanvas = deathCanvas :+ drawDeath.createCanvas(200,190)}
-      for(a <- (0 to 5).toList) {deathCtx = deathCtx :+ deathCanvas(a).getCtx}
-      deathCtx.foreach{ t =>
-        t.drawImage(deathImg(cnt),0 ,0, Some(200,190))
-        cnt += 1
-      }
-    }
-    else {
+    if(!deathImg.forall(t => t.isBackgroundLoading)){
       val timer = new Timer
       val timerTask = new TimerTask {
         override def run(): Unit = canvasDrawFood()

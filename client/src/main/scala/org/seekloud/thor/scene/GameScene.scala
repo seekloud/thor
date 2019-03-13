@@ -1,10 +1,11 @@
 package org.seekloud.thor.scene
 
+import javafx.geometry.Rectangle2D
 import javafx.scene.{Group, Scene}
 import javafx.scene.input.KeyCode
 import javafx.stage.Screen
 import org.seekloud.thor.shared.ptcl.model.{Constants, Point}
-import org.seekloud.thor.utils.middleware.{MiddleContextInFx, MiddleFrameInFx}
+import org.seekloud.thor.utils.middleware.{MiddleCanvasInFx, MiddleContextInFx, MiddleFrameInFx}
 
 /**
   * User: TangYaruo
@@ -26,14 +27,14 @@ class GameScene() {
 
   var gameSceneListener: GameSceneListener = _
 
-  val screen= Screen.getPrimary.getVisualBounds
+  val screen: Rectangle2D= Screen.getPrimary.getVisualBounds
   val drawFrame = new MiddleFrameInFx
-  protected var canvasWidth = screen.getMaxX.toFloat
-  protected var canvasHeight = screen.getMaxY.toFloat
+  protected var canvasWidth: Float = screen.getMaxX.toFloat
+  protected var canvasHeight: Float = screen.getMaxY.toFloat
   var canvasBoundary = Point(canvasWidth,canvasHeight)
-  var canvasUnit = canvasWidth / Constants.canvasUnitPerLine
-  var canvasBounds = canvasBoundary / canvasUnit
-  val canvas = drawFrame.createCanvas(canvasWidth,canvasHeight)
+  var canvasUnit: Float = canvasWidth / Constants.canvasUnitPerLine
+  var canvasBounds: Point = canvasBoundary / canvasUnit
+  val canvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   protected var canvasUnitPerLine = 100
 
   val group = new Group()

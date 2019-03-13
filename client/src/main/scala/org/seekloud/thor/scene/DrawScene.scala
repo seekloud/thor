@@ -51,12 +51,28 @@ class DrawScene(impl: ThorSchemaClientImpl) {
           //保持自己的adventurer在屏幕中央~
           val moveDistance = getMoveDistance(adventurer, offSetTime)
           val offset = canvasBounds / 2 - (adventurer.getAdventurerState.position + moveDistance)
+          val a = System.currentTimeMillis()
           drawBackground(offset, canvasUnit, canvasBounds)
+          val b = System.currentTimeMillis()
+          if (b-a>5)
+          println(s"draw background time span: ${b-a}")
           drawFood(offset, canvasUnit, canvasBounds)
+          val c = System.currentTimeMillis()
+          if (c-b>5)
+            println(s"draw food time span: ${c-b}")
           drawAdventurers(offSetTime, offset, canvasUnit, canvasBounds)
+          val d = System.currentTimeMillis()
+          if (d-c>5)
+            println(s"draw adventurer time span: ${d-c}")
           drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
+          val e = System.currentTimeMillis()
+          if (e-d>5)
+            println(s"draw body food time span: ${e-d}")
 
           drawEnergyBar(adventurer)
+          val f = System.currentTimeMillis()
+          if (f-e>5)
+            println(s"draw bar time span: ${f-e}")
 
         case None => println("None!!!!!!")
       }
@@ -212,7 +228,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     }
   }
 
-  def drawDying(offset: Point, offsetTime: Long, canvasUnit: Float, preCanvas: List[MiddleCanvas] = Nil, preImage: List[WritableImage] = Nil): Any = {
+  def drawDying(offset: Point, offsetTime: Long, canvasUnit: Float, preCanvas: List[MiddleCanvas] = Nil, preImage: List[Image] = Nil): Any = {
 
     def drawADying(adventurer: Adventurer, step: Int): Any = {
 

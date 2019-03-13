@@ -16,7 +16,7 @@
 
 package org.seekloud.utils
 
-import javafx.scene.image.WritableImage
+import javafx.scene.image.{Image, WritableImage}
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleContext, MiddleFrame}
 
@@ -27,7 +27,7 @@ import org.seekloud.thor.shared.ptcl.util.middleware.{MiddleCanvas, MiddleContex
   */
 object CanvasUtils {
 
-  def rotateImage(typ: String, drawFrame: MiddleFrame, ctx: MiddleContext, preCanvas: List[MiddleCanvas] = Nil, preImage: List[WritableImage] = Nil, src:String, position: Point, offset:Point,
+  def rotateImage(typ: String, drawFrame: MiddleFrame, ctx: MiddleContext, preCanvas: List[MiddleCanvas] = Nil, preImage: List[Image] = Nil, src:String, position: Point, offset:Point,
     width: Float, height: Float, angle: Float, preTime: Long, level: Int): Unit = {
     //position 旋转的中心点
     //offset 图片中心点距离旋转中心点的偏移量（以自身旋转则为Point(0,0)）
@@ -70,12 +70,20 @@ object CanvasUtils {
 
         }
       case _ =>
-        val imgWidth = preImage.head.getWidth
-        val imgHeight = preImage.head.getHeight
-        val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
         typ match {
-          case "adventurer" => drawAdventurerByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
-          case "weapon" => drawWeaponByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
+          case "adventurer" =>
+            val imgWidth = preImage((level - 1) % 20).getWidth
+            val imgHeight = preImage((level - 1) % 20).getHeight
+            val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
+            val a = System.currentTimeMillis()
+            drawAdventurerByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
+            val b = System.currentTimeMillis()
+            if (b-a>5) println(s"draw single adv time span: ${b-a}")
+          case "weapon" =>
+            val imgWidth = preImage((level - 1) / 4).getWidth
+            val imgHeight = preImage((level - 1) / 4).getHeight
+            val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
+            drawWeaponByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
           case _ => ()
         }
         if(System.currentTimeMillis() - preTime < 2000) {
@@ -109,7 +117,7 @@ object CanvasUtils {
 
   }
 
-  def drawAdventurerByPreImage(ctx: MiddleContext, preImageAdventurer: List[WritableImage],  level: Int, offset: Point, size: Point): Unit ={
+  def drawAdventurerByPreImage(ctx: MiddleContext, preImageAdventurer: List[Image],  level: Int, offset: Point, size: Point): Unit ={
 
     ctx.save()
     ctx.drawImage(preImageAdventurer((level - 1) % 20), offset.x, offset.y, Some(size.x, size.y))
@@ -124,7 +132,7 @@ object CanvasUtils {
     ctx.restore()
 
   }
-  def drawWeaponByPreImage(ctx: MiddleContext, preImageWeapon: List[WritableImage], level: Int, offset: Point, size: Point): Unit ={
+  def drawWeaponByPreImage(ctx: MiddleContext, preImageWeapon: List[Image], level: Int, offset: Point, size: Point): Unit ={
 
     ctx.save()
     ctx.drawImage(preImageWeapon((level - 1) / 4), offset.x, offset.y, Some(size.x, size.y))
