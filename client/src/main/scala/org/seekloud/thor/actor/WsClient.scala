@@ -244,6 +244,40 @@ object WsClient {
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), roomController, stageContext)
 
         case msg: BotLogin =>
+          EsheepClient.getBotToken(msg.botId, msg.botKey).map {
+            case Right(tokenRst) =>
+              if (tokenRst.errCode == 0) {
+                val botToken = tokenRst.data.token
+                val botName = tokenRst.data.botName
+                val playerId = s"bot${msg.botId}"
+                EsheepClient.linkGame(botToken, playerId).map {
+                  case Right(linkRst) =>
+                    if (linkRst.errCode == 0) {
+                      val accessCode = linkRst.data.accessCode
+                      val url = Routes.clientLinkGame(playerId, botName, accessCode)
+                      val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
+                      val source = getSource(ctx.self)
+                      //TODO 创建bot的server sink
+//                      val sink = getSink4Server(gameMsgReceiver, )
+//                      val (stream, response) =
+//                        source
+//                          .viaMat(webSocketFlow)(Keep.both)
+//                          .toMat(sink)(Keep.left)
+//                          .run()
+
+                    } else {
+                      WarningDialog.initWarningDialog(s"${linkRst.msg}")
+                    }
+                  case Left(e) =>
+                    log.error(s"bot [${msg.botId}] link game error: $e")
+                }
+
+              } else {
+                WarningDialog.initWarningDialog(s"${tokenRst.msg}")
+              }
+            case Left(e) =>
+              log.error(s"bot [${msg.botId}] get token error: $e")
+          }
 
           Behaviors.same
 

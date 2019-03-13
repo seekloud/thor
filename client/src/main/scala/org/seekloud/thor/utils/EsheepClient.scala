@@ -77,21 +77,35 @@ object EsheepClient extends HttpUtil {
     }
   }
 
-//  def getRoomList(ip: String, port: Long, domain: String) = {
-//    val methodName = s"getRoomList"
-//    //    val url = appP + "://" + esheepDomain + s"/$gameName/getRoomList"
-//    val url = baseUrl + "/" + gameName + "/" + "getRoomList"
-//    val postEnvelope = genPostEnvelopeStr("", gameId.toString, gsKey)
-//
-//    postJsonRequestSend(methodName, url, Nil, postEnvelope).map {
-//      case Right(jsonRsp) =>
-//        decode[GetRoomListRsp](jsonRsp)
-//      case Left(e) =>
-//        log.debug(s"$methodName failed: $e")
-//        e.printStackTrace()
-//        Left(e)
-//    }
-//  }
+  def getBotToken(botId: String, botKey: String): Future[Either[Throwable, BotKeyRes]] = {
+    val methodName = "getBotToken"
+    val url = esheepProtocol + "://" + esheepHost + "/esheep/api/sdk/botKey2Token"
+    val data = BotKeyReq(botId, botKey).asJson.noSpaces
+    postJsonRequestSend(methodName, url, Nil, data).map {
+      case Right(jsonStr) =>
+        decode[BotKeyRes](jsonStr)
+      case Left(e) =>
+        log.debug(s"getBotToken error: $e")
+        e.printStackTrace()
+        Left(e)
+    }
+  }
+
+  //  def getRoomList(ip: String, port: Long, domain: String) = {
+  //    val methodName = s"getRoomList"
+  //    //    val url = appP + "://" + esheepDomain + s"/$gameName/getRoomList"
+  //    val url = baseUrl + "/" + gameName + "/" + "getRoomList"
+  //    val postEnvelope = genPostEnvelopeStr("", gameId.toString, gsKey)
+  //
+  //    postJsonRequestSend(methodName, url, Nil, postEnvelope).map {
+  //      case Right(jsonRsp) =>
+  //        decode[GetRoomListRsp](jsonRsp)
+  //      case Left(e) =>
+  //        log.debug(s"$methodName failed: $e")
+  //        e.printStackTrace()
+  //        Left(e)
+  //    }
+  //  }
 
 
   def linkGame(token: String, playerId: String): Future[Either[Throwable, ClientJoinGameRsp]] = {
