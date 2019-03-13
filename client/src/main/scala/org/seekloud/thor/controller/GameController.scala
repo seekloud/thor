@@ -101,6 +101,8 @@ class GameController(
   protected var energy = 0
   protected var level = 0
   protected var energyScore = 0
+  private var stageWidth = context.getStageWidth.toInt
+  private var stageHeight = context.getStageHeight.toInt
 
 
 //  private var mouseLeft = true
@@ -224,7 +226,7 @@ class GameController(
       }
     }
     ClientBoot.addToPlatform {
-      val (boundary, unit) = playGameScreen.handleResize(myLevel)
+      val (boundary, unit) = playGameScreen.handleResize(myLevel, context)
       if (unit != 0) {
         thorSchemaOpt.foreach { r =>
           r.updateSize(boundary, unit)
@@ -406,13 +408,13 @@ class GameController(
       thorSchemaOpt.foreach { thorSchema =>
 
         if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-          val mouseDistance = math.sqrt(math.pow(e.getX - playGameScreen.screen.getWidth / 2.0, 2) + math.pow(e.getY - playGameScreen.screen.getHeight / 2.0, 2))
+          val mouseDistance = math.sqrt(math.pow(e.getX - context.getStageWidth.toFloat / 2.0, 2) + math.pow(e.getY - context.getStageHeight.toFloat / 2.0, 2))
           val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * playGameScreen.canvasUnit
           val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
           if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
 
-            val offsetX = (e.getX - playGameScreen.screen.getWidth / 2.0).toShort
-            val offsetY = (e.getY - playGameScreen.screen.getHeight / 2.0).toShort
+            val offsetX = (e.getX - context.getStageWidth.toFloat / 2.0).toShort
+            val offsetY = (e.getY - context.getStageHeight.toFloat / 2.0).toShort
             val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
             thorSchema.preExecuteUserEvent(preExecuteAction)
@@ -425,19 +427,21 @@ class GameController(
     }
 
     /*鼠标点击事件*/
+
+
     playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
-      //            println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+    //         println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
             attackMusic.play()
-//            mouseLeft = true
+          //            mouseLeft = true
             val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             wsClient ! WsClient.DispatchMsg(preExecuteAction)
           }
           else if (e.isSecondaryButtonDown) {
-//            mouseRight = true
+          //            mouseRight = true
             val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             //            println(preExecuteAction)
@@ -460,7 +464,6 @@ class GameController(
             thorSchema.preExecuteUserEvent(preExecuteAction)
             wsClient ! WsClient.DispatchMsg(preExecuteAction)
           }
-
         }
       }
     }
