@@ -18,13 +18,13 @@ package org.seekloud.thor.controller
 
 import java.util.{Timer, TimerTask}
 import java.util.concurrent.atomic.AtomicInteger
+
 import scala.concurrent.duration._
-
-
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import javafx.animation.{Animation, AnimationTimer, KeyFrame, Timeline}
-import javafx.scene.input.KeyCode
+import javafx.scene.control.ButtonType
+import javafx.scene.input.{KeyCode, MouseButton}
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
 import javafx.util.Duration
 import org.seekloud.thor.ClientBoot
@@ -55,7 +55,7 @@ class GameController(
   playerInfo: WsClient.PlayerInfo,
   context: StageContext,
   playGameScreen: GameScene
-) extends NetWorkInfo{
+) extends NetWorkInfo {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
@@ -105,7 +105,8 @@ class GameController(
   protected var energyScore = 0
 
 
-  private var mouseLeft = true
+//  private var mouseLeft = true
+//  private var mouseRight = false
 
   /*BGM*/
   private val gameMusic = new Media(getClass.getResource("/music/bgm-2.mp3").toString)
@@ -143,30 +144,31 @@ class GameController(
     if (firstCome) {
       firstCome = false
       println("start...")
-//      wsClient ! WsClient.StartGame(playerInfo.roomId)
+      //      wsClient ! WsClient.StartGame(playerInfo.roomId)
       startGameLoop()
       addUserActionListenEvent
       checkAndChangePreCanvas()
-//      logicFrameTime = System.currentTimeMillis()
+      //      logicFrameTime = System.currentTimeMillis()
     } else {
       println(s"restart...")
       thorSchemaOpt.foreach { r =>
         wsClient ! WsClient.DispatchMsg(ThorGame.RestartGame)
         setGameState(GameState.loadingPlay)
-//        wsClient ! WsClient.StartGameLoop
+        //        wsClient ! WsClient.StartGameLoop
       }
     }
   }
-//  import scala.concurrent.duration._
+
+  //  import scala.concurrent.duration._
   def startGameLoop(): Unit = { //渲染帧
     logicFrameTime = System.currentTimeMillis()
     timeline.setCycleCount(Animation.INDEFINITE)
     val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
       logicLoop()
     })
-//    scheduler.schedule(0.millis, 100.millis) {
-//      logicLoop()
-//    }
+    //    scheduler.schedule(0.millis, 100.millis) {
+    //      logicLoop()
+    //    }
     timeline.getKeyFrames.add(keyFrame)
     animationTimer.start()
     timeline.play()
@@ -177,7 +179,7 @@ class GameController(
       case Some(thorSchema: ThorSchemaClientImpl) =>
         if (thorSchema.adventurerMap.contains(mainId)) {
           val start = System.currentTimeMillis()
-//          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
+          //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
           val drawScene: DrawScene = new DrawScene(thorSchema)
           drawScene.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
           drawScene.drawRank(currentRank, CurrentOrNot = true, byteId)
@@ -212,9 +214,10 @@ class GameController(
   var lastSendReq = 0L
 
   var a = 0
-  def logicLoop(): Unit ={
-//    if (a % 50 == 0)
-//    println("looping")
+
+  def logicLoop(): Unit = {
+    //    if (a % 50 == 0)
+    //    println("looping")
     var myLevel = 0
     thorSchemaOpt.foreach { thorSchema =>
       thorSchema.adventurerMap.get(mainId).foreach {
@@ -272,7 +275,7 @@ class GameController(
 
   def wsMessageHandle(data: ThorGame.WsMsgServer): Unit = {
 
-    ClientBoot.addToPlatform{
+    ClientBoot.addToPlatform {
       data match {
         case e: ThorGame.YourInfo =>
           println(s"start---------")
@@ -282,9 +285,9 @@ class GameController(
             thorSchemaOpt = Some(ThorSchemaClientImpl(playGameScreen.drawFrame, playGameScreen.getCanvasContext, e.config, e.id, e.name, playGameScreen.canvasBoundary, playGameScreen.canvasUnit))
             gameConfig = Some(e.config)
             checkAndChangePreCanvas()
-            e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2)}}
-//            startGameLoop()
-//            wsClient ! WsClient.StartGameLoop
+            e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2) } }
+            //            startGameLoop()
+            //            wsClient ! WsClient.StartGameLoop
             gameState = GameState.play
 
           } catch {
@@ -361,7 +364,7 @@ class GameController(
                 thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                 if (event.playerId == playerInfo.playerId) byteId = event.shortId
               } else {
-//                wsClient ! WsClient.UserEnterRoom(event)
+                //                wsClient ! WsClient.UserEnterRoom(event)
                 scheduler.scheduleOnce(100.millis) {
                   thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                   if (event.playerId == playerInfo.playerId) byteId = event.shortId
@@ -423,21 +426,21 @@ class GameController(
 
     /*鼠标点击事件*/
     playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
-//            println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+      //            println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
             attackMusic.play()
-            mouseLeft = true
+//            mouseLeft = true
             val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             wsClient ! WsClient.DispatchMsg(preExecuteAction)
           }
           else if (e.isSecondaryButtonDown) {
-            mouseLeft = false
+//            mouseRight = true
             val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
-//            println(preExecuteAction)
+            //            println(preExecuteAction)
             wsClient ! WsClient.DispatchMsg(preExecuteAction)
           }
           else ()
@@ -452,12 +455,13 @@ class GameController(
     playGameScreen.canvas.getCanvas.setOnMouseReleased { e =>
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
-          if (!mouseLeft) { //右键
+          if (e.getButton == MouseButton.SECONDARY) { //右键
+//            mouseRight = false
             val preExecuteAction = MouseClickUpRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
             wsClient ! WsClient.DispatchMsg(preExecuteAction)
           }
-          else ()
+
         }
       }
     }
@@ -484,13 +488,14 @@ class GameController(
 
   }
 
-  def checkAndChangePreCanvas(): Unit ={
+  def checkAndChangePreCanvas(): Unit = {
     val timer = new Timer
+
     def timerTask(fun: => Unit) = new TimerTask {
       override def run(): Unit = fun
     }
 
-    (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas, preDrawFrame.deathCanvas) match{
+    (preDrawFrame.foodCanvas, preDrawFrame.adventurerCanvas, preDrawFrame.weaponCanvas, preDrawFrame.deathCanvas) match {
       case (Nil, Nil, Nil, Nil) =>
         timer.schedule(timerTask(checkAndChangePreCanvas()), 1000)
       case (foodCanvas, Nil, Nil, Nil) =>
