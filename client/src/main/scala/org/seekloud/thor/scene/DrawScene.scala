@@ -164,9 +164,9 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         case Some(s) =>
           impl.ctx.save()
           impl.ctx.setFill("rgba(79,148,205,0.4)")
-          impl.ctx.setGlobalAlpha(0.5)
+          impl.ctx.setGlobalAlpha(0.8)
           impl.ctx.beginPath()
-          impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 2 * Math.PI, false)
+          impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 360, false)
           impl.ctx.closePath()
           impl.ctx.fill()
           impl.ctx.restore()
