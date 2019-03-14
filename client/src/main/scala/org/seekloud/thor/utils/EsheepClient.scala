@@ -79,7 +79,7 @@ object EsheepClient extends HttpUtil {
 
   def getBotToken(botId: String, botKey: String): Future[Either[Throwable, BotKeyRes]] = {
     val methodName = "getBotToken"
-    val url = esheepProtocol + "://" + esheepHost + "/esheep/api/sdk/botKey2Token"
+    val url = esheepProtocol + "://" + esheepDomain + "/esheep/api/sdk/botKey2Token"
     val data = BotKeyReq(botId, botKey).asJson.noSpaces
     postJsonRequestSend(methodName, url, Nil, data).map {
       case Right(jsonStr) =>

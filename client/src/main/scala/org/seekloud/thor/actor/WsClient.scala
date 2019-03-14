@@ -19,15 +19,14 @@ import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.thor.ClientBoot
-import org.seekloud.thor.common.{Routes, StageContext}
-import org.seekloud.thor.controller.{GameController, LoginController}
-import org.seekloud.thor.controller.{LoginController, RoomController}
+import org.seekloud.thor.common.{AppSettings, BotSettings, Routes, StageContext}
+import org.seekloud.thor.controller.{BotController, GameController, LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
 import org.seekloud.thor.protocol.{ESheepProtocol, ThorClientProtocol}
 import org.seekloud.thor.protocol.ESheepProtocol.{HeartBeat, Ws4AgentRsp}
 import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
-import org.seekloud.thor.scene.GameScene
+import org.seekloud.thor.scene.{BotScene, GameScene}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
 import org.slf4j.LoggerFactory
@@ -94,6 +93,10 @@ object WsClient {
     }
 
 
+  /**
+    * @param gameMsgReceiver 接收来自game server的消息
+    * @param gameMsgSender  向game server发送消息
+    * */
   private def working(
     gameMsgReceiver: ActorRef[WsMsgServer],
     gameMsgSender: ActorRef[WsMsgFrontSource],
@@ -205,12 +208,11 @@ object WsClient {
             case Right(rst) =>
               if (rst.errCode == 0) {
                 log.info(s"link game accessCode: ${rst.data.accessCode}")
-                //TODO 与game server建立ws连接 连接已建立，sender向server发送，receiver接收server消息
                 val url = Routes.clientLinkGame(msg.playerId, msg.name, rst.data.accessCode)
                 log.debug(s"link game url: $url")
                 val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                 val source = getSource(ctx.self)
-                val sink = getSink4Server(gameMsgReceiver, gc)
+                val sink = getSink4Server(gameMsgReceiver, Right(gc))
                 val (stream, response) =
                   source
                     .viaMat(webSocketFlow)(Keep.both)
@@ -244,6 +246,7 @@ object WsClient {
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), roomController, stageContext)
 
         case msg: BotLogin =>
+          val botController = new BotController //TODO 具体化
           EsheepClient.getBotToken(msg.botId, msg.botKey).map {
             case Right(tokenRst) =>
               if (tokenRst.errCode == 0) {
@@ -257,13 +260,27 @@ object WsClient {
                       val url = Routes.clientLinkGame(playerId, botName, accessCode)
                       val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                       val source = getSource(ctx.self)
-                      //TODO 创建bot的server sink
-//                      val sink = getSink4Server(gameMsgReceiver, )
-//                      val (stream, response) =
-//                        source
-//                          .viaMat(webSocketFlow)(Keep.both)
-//                          .toMat(sink)(Keep.left)
-//                          .run()
+                      val sink = getSink4Server(gameMsgReceiver, Left(botController))
+                      val (stream, response) =
+                        source
+                          .viaMat(webSocketFlow)(Keep.both)
+                          .toMat(sink)(Keep.left)
+                          .run()
+                      val connected = response.flatMap { upgrade =>
+                        if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
+                          ctx.self ! GetSender(stream)
+
+                          //启动bot相关服务
+                          val botActor = system.spawn(BotActor.create(ctx.self), "botActor")
+                          val port = BotSettings.botServerPort
+                          ClientBoot.sdkServerHandler ! SdkServerHandler.BuildBotServer(port, executor, botActor, botController)
+
+                          Future.successful(s"link game server success.")
+                        } else {
+                          throw new RuntimeException(s"link game server failed: ${upgrade.response.status}")
+                        }
+                      } //链接建立时
+                      connected.onComplete(i => log.info(i.toString))
 
                     } else {
                       WarningDialog.initWarningDialog(s"${linkRst.msg}")
@@ -350,11 +367,15 @@ object WsClient {
 
     }
 
-  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer], gameController: GameController): Sink[Message, Future[Done]] = {
+  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer], gameController: Either[BotController, GameController]): Sink[Message, Future[Done]] = {
     log.debug(s"getSink4Server...")
     Sink.foreach[Message] {
       case TextMessage.Strict(msg) =>
-        gameController.wsMessageHandle(ThorGame.TextMsg(msg))
+        gameController match {
+          case Right(gc) =>
+            gc.wsMessageHandle(ThorGame.TextMsg(msg))
+          case Left(bc) =>
+        }
         gameMsgReceiver ! ThorGame.TextMsg(msg)
 
       case BinaryMessage.Strict(bMsg) =>
@@ -365,7 +386,11 @@ object WsClient {
             log.error(s"decode bMsg error: $e")
             ThorGame.DecodeError()
         }
-        gameController.wsMessageHandle(message)
+        gameController match {
+          case Right(gc)=>
+            gc.wsMessageHandle(message)
+          case Left(bc) =>
+        }
         gameMsgReceiver ! message
 
       case msg: BinaryMessage.Streamed =>
@@ -380,7 +405,12 @@ object WsClient {
               println(s"decode streamed bMsg error: $e")
               ThorGame.DecodeError()
           }
-          gameController.wsMessageHandle(message)
+          gameController match {
+            case Right(gc) =>
+              gc.wsMessageHandle(message)
+            case Left(bc) =>
+
+          }
           gameMsgReceiver ! message
         }
 

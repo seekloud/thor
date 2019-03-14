@@ -19,8 +19,7 @@ class BotSceneController(wsClient: ActorRef[WsClient.WsCommand], modeScene: Mode
   botScene.setListener(new BotSceneListener {
     override def confirm(botId: String, botKey: String): Unit = {
       if (botId.nonEmpty && botKey.nonEmpty) {
-        //TODO 给wsClient发送BotLogin的消息
-
+        wsClient ! WsClient.BotLogin(botId, botKey)
       } else {
         ClientBoot.addToPlatform {
           WarningDialog.initWarningDialog("请输入完整信息！")
