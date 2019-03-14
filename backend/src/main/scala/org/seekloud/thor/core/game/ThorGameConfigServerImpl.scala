@@ -125,7 +125,7 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   private val thorGameConfig = ThorGameConfigImpl(gridBoundary, gameFameDuration, gamePlayRate, gameReplayRate, adventurerParams, foodParams, weaponParams, robotParams)
 
-  def getThorGameConfigImpl: ThorGameConfigImpl = thorGameConfig
+  def getThorGameConfigImpl(): ThorGameConfigImpl = thorGameConfig
 
   def boundary:Point = thorGameConfig.boundary
 
@@ -143,17 +143,17 @@ case class ThorGameConfigServerImpl(config: Config) extends ThorGameConfig {
 
   override def getRadiusByFoodLevel(l: Byte): Float = thorGameConfig.getRadiusByFoodLevel(l)
 
-  def getEnergyByFoodLevel(l: Byte) = thorGameConfig.getEnergyByFoodLevel(l)
+  def getEnergyByFoodLevel(l: Byte): Int = thorGameConfig.getEnergyByFoodLevel(l)
 
   override def getScatterAnimation: Byte = thorGameConfig.getScatterAnimation
 
   def getEnergyByKillingAdventurerLevel(l: Byte): Int = thorGameConfig.getEnergyByKillingAdventurerLevel(l)
 
-  def getMaxEnergyByLevel(l: Byte) = thorGameConfig.getMaxEnergyByLevel(l)
+  def getMaxEnergyByLevel(l: Byte): Int = thorGameConfig.getMaxEnergyByLevel(l)
 
 //  def getWeaponLevelByLevel(l: Byte) = thorGameConfig.getWeaponLevelByLevel(l)
 
-  def getWeaponLengthByLevel(l: Byte) = thorGameConfig.getWeaponLengthByLevel(l)
+  def getWeaponLengthByLevel(l: Byte): Float = thorGameConfig.getWeaponLengthByLevel(l)
 
   override def getThorSpeedByLevel(l: Byte, isSpeedUp: Boolean = false): Point = thorGameConfig.getThorSpeedByLevel(l, isSpeedUp)
 

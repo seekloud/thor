@@ -349,6 +349,10 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
     }
 
     def drawAState(adventurer: Adventurer): Unit = {
+      val isSpeedUp = adventurer.isSpeedUp
+      val radius = adventurer.radius
+      val speedByLevel = impl.config.getThorSpeedByLevel(adventurer.level)
+      val speedUp = impl.config.getThorGameConfigImpl().adventurerParams.speedUpRate
       println(adventurer.radius, adventurer.faceDirection)
     }
   }
