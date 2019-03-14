@@ -1,6 +1,6 @@
 package org.seekloud.thor.actor
 
-import akka.actor.typed.Behavior
+import akka.actor.typed.{Behavior, ActorRef}
 import akka.actor.typed.scaladsl.Behaviors
 import org.slf4j.LoggerFactory
 
@@ -15,10 +15,20 @@ object BotActor {
 
   sealed trait Command
 
-//  def create(): Behavior[Command] =
-//    Behaviors.setup[Command] { ctx =>
-//
-//    }
+  def create(wsClient: ActorRef[WsClient.WsCommand]): Behavior[Command] =
+    Behaviors.setup[Command] { ctx =>
+      working(wsClient)
+    }
+
+
+  def working(wsClient: ActorRef[WsClient.WsCommand]): Behavior[Command] =
+    Behaviors.receive[Command] { (ctx, msg) =>
+      msg match {
+        case x =>
+          log.warn(s"unknown msg: $x")
+          Behaviors.unhandled
+      }
+    }
 
 
 

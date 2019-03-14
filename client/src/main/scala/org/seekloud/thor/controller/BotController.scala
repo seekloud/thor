@@ -49,7 +49,6 @@ class BotController(
   wsClient: ActorRef[WsClient.WsCommand],
   playerInfo: WsClient.PlayerInfo,
   context: StageContext,
-  gameScreen: GameScene,
   layerScreen: LayerScene
 )  {
 
@@ -59,11 +58,7 @@ class BotController(
 
   def getWs: ActorRef[WsClient.WsCommand] = wsClient
 
-  def getGs: GameScene = gameScreen
-
   def getLs: LayerScene = layerScreen
-
-  private var drawScene: Option[DrawScene] = None
 
   private var drawLayerScene: Option[DrawLayerScene] = None
 
@@ -192,9 +187,6 @@ class BotController(
             //            println(s"draw create scene span: ${a-start}")
             drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasBounds, thorSchema.getMousePoint())
 
-            //            drawLayerScene.get.drawFood.drawRank(currentRank, CurrentOrNot = true, byteId)
-            //            drawLayerScene.get.drawFood.drawSmallMap(mainId)
-            //            drawLayerScene.get.drawFood.drawFood()
             drawTime = drawTime :+ System.currentTimeMillis() - start
             if (drawTime.length >= drawTimeSize) {
               drawTimeLong = drawTime.sum / drawTime.size
@@ -214,42 +206,6 @@ class BotController(
       case None =>
 
     }
-    //    thorSchemaOpt match {
-    //      case Some(thorSchema: ThorSchemaClientImpl) =>
-    //        if (thorSchema.adventurerMap.contains(mainId)) {
-    //          if (drawScene.isDefined) {
-    //            val start = System.currentTimeMillis()
-    //            //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
-    //            val a = System.currentTimeMillis()
-    //            //            println(s"draw create scene span: ${a-start}")
-    //            drawScene.get.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
-    //            drawScene.get.drawRank(currentRank, CurrentOrNot = true, byteId)
-    //            drawScene.get.drawSmallMap(mainId)
-    //            drawTime = drawTime :+ System.currentTimeMillis() - start
-    //            if (drawTime.length >= drawTimeSize) {
-    //              drawTimeLong = drawTime.sum / drawTime.size
-    //              drawTime = Nil
-    //            }
-    //            if (frameTime.length >= frameTimeSize) {
-    //              frameTimeLong = frameTime.sum / frameTime.size
-    //              frameTime = Nil
-    //            }
-    //            //          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
-    //            thorSchema.drawNetInfo(getNetworkLatency, drawTimeLong, frameTimeSingle, currentRank.length)
-    //            if (barrageTime > 0) {
-    //
-    //              drawScene.get.drawBarrage(barrage._1, barrage._2)
-    //              barrageTime -= 1
-    //            }
-    //          }
-    //        }
-    //        else {
-    //          thorSchema.drawGameLoading()
-    //        }
-    //
-    //      case None =>
-    //
-    //    }
   }
 
   var lastSendReq = 0L

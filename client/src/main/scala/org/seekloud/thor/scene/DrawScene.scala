@@ -22,7 +22,7 @@ import org.seekloud.thor.model.Constants.pictureMap
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleCanvas
-import org.seekloud.utils.CanvasUtils
+import org.seekloud.thor.utils.CanvasUtils
 
 /**
   * User: Jason

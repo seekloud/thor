@@ -135,4 +135,22 @@ object ESheepProtocol {
     msg: String = "ok"
   ) extends ESheepRsp
 
+  /*bot*/
+  case class BotKeyReq(
+    botId:String,
+    botKey: String
+  )
+
+  case class BotKeyRes(
+    data: BotInfo,
+    errCode:Int=0,
+    msg:String="ok"
+  )
+
+  case class BotInfo(
+    botName:String,
+    token:String,
+    expireTime:Long
+  )
+
 }

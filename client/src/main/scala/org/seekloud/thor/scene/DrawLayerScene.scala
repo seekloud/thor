@@ -8,7 +8,7 @@ import org.seekloud.thor.model.Constants._
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, Food, FoodState}
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.utils.middleware.MiddleContextInFx
-import org.seekloud.utils.CanvasUtils
+import org.seekloud.thor.utils.CanvasUtils
 
 /**
   * User: Jason

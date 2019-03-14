@@ -20,6 +20,7 @@ import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.common.{Routes, StageContext}
+import org.seekloud.thor.common.{AppSettings, BotSettings, Routes, StageContext}
 import org.seekloud.thor.controller.{BotController, GameController, LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
@@ -27,6 +28,7 @@ import org.seekloud.thor.protocol.{ESheepProtocol, ThorClientProtocol}
 import org.seekloud.thor.protocol.ESheepProtocol.{HeartBeat, Ws4AgentRsp}
 import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
 import org.seekloud.thor.scene.{GameScene, LayerScene}
+import org.seekloud.thor.scene.{BotScene, GameScene}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
 import org.slf4j.LoggerFactory
@@ -72,6 +74,8 @@ object WsClient {
 
   final case class PlayerInfo(playerId: String, name: String) extends WsCommand
 
+  final case class BotLogin(botId: String, botKey: String) extends WsCommand
+
   final case object Stop extends WsCommand
 
   private[this] def switchBehavior(ctx: ActorContext[WsCommand],
@@ -82,7 +86,7 @@ object WsClient {
     stashBuffer.unstashAll(ctx, behavior)
   }
 
-  def  create(stageContext: StageContext): Behavior[WsCommand] =
+  def create(stageContext: StageContext): Behavior[WsCommand] =
     Behaviors.setup[WsCommand] { ctx =>
       Behaviors.withTimers[WsCommand] { implicit timer =>
         val gameMsgReceiver: ActorRef[ThorGame.WsMsgServer] = system.spawn(GameMsgReceiver.create(ctx.self), "gameMessageReceiver")
@@ -91,6 +95,10 @@ object WsClient {
     }
 
 
+  /**
+    * @param gameMsgReceiver 接收来自game server的消息
+    * @param gameMsgSender  向game server发送消息
+    * */
   private def working(
     gameMsgReceiver: ActorRef[WsMsgServer],
     gameMsgSender: ActorRef[WsMsgFrontSource],
@@ -104,9 +112,9 @@ object WsClient {
   ): Behavior[WsCommand] =
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
-//        case msg: PlayerIdName =>
-//          println(s"get player info $msg")
-//         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
+        //        case msg: PlayerIdName =>
+        //          println(s"get player info $msg")
+        //         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
           if (gameMsgSender != null) {
@@ -114,8 +122,8 @@ object WsClient {
           } else {
             timer.startSingleTimer(TimerKey4StartGame, msg, 2.seconds)
           }
-          ClientBoot.addToPlatform{
-            botController.foreach{ gc =>
+          ClientBoot.addToPlatform {
+            botController.foreach { gc =>
               gc.start()
               stageContext.switchScene(gc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
             }
@@ -127,17 +135,6 @@ object WsClient {
 //            }
 //          }
           //TODO GameController
-//          ClientBoot.addToPlatform {
-//            gameController.foreach{ p =>
-//              roomController.foreach { r =>
-//                println("creating new scene")
-//                val gameScene = new GameScene
-//                stageContext.switchScene(gameScene.getScene, fullScreen = true)
-//                println("creating new controller")
-//                new GameController(ctx.self, PlayerInfo(p.playerId, p.name), stageContext, gameScene ).start()
-//              }
-//            }
-//          }
           Behaviors.same
 
         case msg: CreateRoom =>
@@ -209,7 +206,7 @@ object WsClient {
           val gameScene = new GameScene
           val layerScene = new LayerScene
           val gc = new GameController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, gameScene)
-          val bc = new BotController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, gameScene, layerScene)
+          val bc = new BotController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, layerScene)
           val b = System.currentTimeMillis()
           println(s"create time is ${b - a}")
           log.info(s"get msg: $msg")
@@ -217,12 +214,12 @@ object WsClient {
             case Right(rst) =>
               if (rst.errCode == 0) {
                 log.info(s"link game accessCode: ${rst.data.accessCode}")
-                //TODO 与game server建立ws连接 连接已建立，sender向server发送，receiver接收server消息
                 val url = Routes.clientLinkGame(msg.playerId, msg.name, rst.data.accessCode)
                 log.debug(s"link game url: $url")
                 val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                 val source = getSource(ctx.self)
-                val sink = getSink4Server(gameMsgReceiver, gc, bc)
+                val sink = getSink4Server(gameMsgReceiver, Right(gc), bc)
+//                val sink = getSink4Server(gameMsgReceiver, Right(gc))
                 val (stream, response) =
                   source
                     .viaMat(webSocketFlow)(Keep.both)
@@ -254,6 +251,62 @@ object WsClient {
           println(s"has player Info ${(msg.playerId,msg.name)}")
 //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc) , Some(bc), roomController, stageContext)
+
+        case msg: BotLogin =>
+          val layerScene = new LayerScene
+          val bc = new BotController(ctx.self, PlayerInfo("", ""), stageContext, layerScene)
+//          val botController = new BotController() //TODO 具体化
+          EsheepClient.getBotToken(msg.botId, msg.botKey).map {
+            case Right(tokenRst) =>
+              if (tokenRst.errCode == 0) {
+                val botToken = tokenRst.data.token
+                val botName = tokenRst.data.botName
+                val playerId = s"bot${msg.botId}"
+                EsheepClient.linkGame(botToken, playerId).map {
+                  case Right(linkRst) =>
+                    if (linkRst.errCode == 0) {
+                      val accessCode = linkRst.data.accessCode
+                      val url = Routes.clientLinkGame(playerId, botName, accessCode)
+                      val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
+                      val source = getSource(ctx.self)
+                      val sink = getSink4Server(gameMsgReceiver, Left(bc), bc)
+                      val (stream, response) =
+                        source
+                          .viaMat(webSocketFlow)(Keep.both)
+                          .toMat(sink)(Keep.left)
+                          .run()
+                      val connected = response.flatMap { upgrade =>
+                        if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
+                          ctx.self ! GetSender(stream)
+
+                          //启动bot相关服务
+                          val botActor = system.spawn(BotActor.create(ctx.self), "botActor")
+                          val port = BotSettings.botServerPort
+                          ClientBoot.sdkServerHandler ! SdkServerHandler.BuildBotServer(port, executor, botActor, bc)
+
+                          Future.successful(s"link game server success.")
+                        } else {
+                          throw new RuntimeException(s"link game server failed: ${upgrade.response.status}")
+                        }
+                      } //链接建立时
+                      connected.onComplete(i => log.info(i.toString))
+
+                    } else {
+                      WarningDialog.initWarningDialog(s"${linkRst.msg}")
+                    }
+                  case Left(e) =>
+                    log.error(s"bot [${msg.botId}] link game error: $e")
+                }
+
+              } else {
+                WarningDialog.initWarningDialog(s"${tokenRst.msg}")
+              }
+            case Left(e) =>
+              log.error(s"bot [${msg.botId}] get token error: $e")
+          }
+
+          Behaviors.same
+
 
         case msg: GetSender =>
           log.debug(s"get sender success.")
@@ -323,51 +376,66 @@ object WsClient {
 
     }
 
-  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer],
-    gameController: GameController,
-    botController: BotController
-  ): Sink[Message, Future[Done]] =
-    {
-      log.debug(s"getSink4Server...")
-      Sink.foreach[Message] {
-        case TextMessage.Strict(msg) =>
-          gameController.wsMessageHandle(ThorGame.TextMsg(msg))
-          botController.wsMessageHandle(ThorGame.TextMsg(msg))
-          gameMsgReceiver ! ThorGame.TextMsg(msg)
 
-        case BinaryMessage.Strict(bMsg) =>
+  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer],
+    gameController: Either[BotController, GameController],
+    botController: BotController): Sink[Message, Future[Done]] = {
+    log.debug(s"getSink4Server...")
+    Sink.foreach[Message] {
+      case TextMessage.Strict(msg) =>
+        gameController match {
+          case Right(gc) =>
+            gc.wsMessageHandle(ThorGame.TextMsg(msg))
+          case Left(bc) =>
+            bc.wsMessageHandle(ThorGame.TextMsg(msg))
+        }
+//        gameController.wsMessageHandle(ThorGame.TextMsg(msg))
+        botController.wsMessageHandle(ThorGame.TextMsg(msg))
+        gameMsgReceiver ! ThorGame.TextMsg(msg)
+
+      case BinaryMessage.Strict(bMsg) =>
+        val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
+        val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
+          case Right(rst) => rst
+          case Left(e) =>
+            log.error(s"decode bMsg error: $e")
+            ThorGame.DecodeError()
+        }
+        gameController match {
+          case Right(gc)=>
+            gc.wsMessageHandle(message)
+          case Left(bc) =>
+            bc.wsMessageHandle(message)
+        }
+        botController.wsMessageHandle(message)
+        gameMsgReceiver ! message
+
+      case msg: BinaryMessage.Streamed =>
+        val futureMsg = msg.dataStream.runFold(new ByteStringBuilder().result()) {
+          case (s, str) => s.++(str)
+        }
+        futureMsg.map { bMsg =>
           val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
           val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
             case Right(rst) => rst
             case Left(e) =>
-              log.error(s"decode bMsg error: $e")
+              println(s"decode streamed bMsg error: $e")
               ThorGame.DecodeError()
           }
-          gameController.wsMessageHandle(message)
+          gameController match {
+            case Right(gc) =>
+              gc.wsMessageHandle(message)
+            case Left(bc) =>
+              bc.wsMessageHandle(message)
+          }
           botController.wsMessageHandle(message)
           gameMsgReceiver ! message
+        }
 
-        case msg: BinaryMessage.Streamed =>
-          val futureMsg = msg.dataStream.runFold(new ByteStringBuilder().result()) {
-            case (s, str) => s.++(str)
-          }
-          futureMsg.map { bMsg =>
-            val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
-            val message = bytesDecode[ThorGame.WsMsgServer](buffer) match {
-              case Right(rst) => rst
-              case Left(e) =>
-                println(s"decode streamed bMsg error: $e")
-                ThorGame.DecodeError()
-            }
-            gameController.wsMessageHandle(message)
-            botController.wsMessageHandle(message)
-            gameMsgReceiver ! message
-          }
+      case _ => //do nothing
 
-        case _ => //do nothing
-
-      }
     }
+  }
 
 
 }

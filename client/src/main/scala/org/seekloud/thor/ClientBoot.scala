@@ -24,7 +24,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import javafx.application.Platform
 import javafx.stage.Stage
-import org.seekloud.thor.actor.WsClient
+import org.seekloud.thor.actor.{SdkServerHandler, WsClient}
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.controller.ModeSelectController
 import org.seekloud.thor.scene.ModeScene
@@ -52,6 +52,7 @@ object ClientBoot {
 
   //  lazy val gameMsgReceiver: ActorRef[ThorGame.WsMsgSource] = system.spawn(GameMsgReceiver.create(), "gameMsgReceiver")
 
+  val sdkServerHandler: ActorRef[SdkServerHandler.Command] = system.spawn(SdkServerHandler.create(), "sdkServerHandler")
 
   def addToPlatform(fun: => Unit): Unit = {
     Platform.runLater(() => fun)
