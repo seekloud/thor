@@ -17,13 +17,13 @@ import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
 import akka.actor.typed.scaladsl.adapter._
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
-import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.common.{Routes, StageContext}
-import org.seekloud.thor.common.{AppSettings, BotSettings, Routes, StageContext}
+import org.seekloud.thor.common.{BotSettings, Routes, StageContext}
 import org.seekloud.thor.controller.{BotController, GameController, LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
+import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
 import org.seekloud.thor.protocol.{ESheepProtocol, ThorClientProtocol}
 import org.seekloud.thor.protocol.ESheepProtocol.{HeartBeat, Ws4AgentRsp}
 import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
@@ -58,13 +58,15 @@ object WsClient {
 
   final case class GetSender(stream: ActorRef[ThorGame.WsMsgFrontSource]) extends WsCommand
 
-  final case class StartGame(roomId: Long) extends WsCommand
+  final case class StartGame(roomId: Long, pwd: Option[String] = None) extends WsCommand
 
   final case object TimerKey4StartGame
 
   final case class CreateRoom(psw: Option[String]) extends WsCommand
 
   final case object TimerKey4CreateGame
+
+  final case object JoinRoomSuccess extends WsCommand
 
   final case class JoinRoomFail(error: String) extends WsCommand
 
@@ -97,8 +99,8 @@ object WsClient {
 
   /**
     * @param gameMsgReceiver 接收来自game server的消息
-    * @param gameMsgSender  向game server发送消息
-    * */
+    * @param gameMsgSender   向game server发送消息
+    **/
   private def working(
     gameMsgReceiver: ActorRef[WsMsgServer],
     gameMsgSender: ActorRef[WsMsgFrontSource],
@@ -112,21 +114,24 @@ object WsClient {
   ): Behavior[WsCommand] =
     Behaviors.receive[WsCommand] { (ctx, msg) =>
       msg match {
-        //        case msg: PlayerIdName =>
-        //          println(s"get player info $msg")
-        //         working(gameMsgReceiver, gameMsgSender, loginController, Some(msg) , roomController, stageContext)
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
           if (gameMsgSender != null) {
-            gameMsgSender ! GAStartGame(msg.roomId)
+            gameMsgSender ! GAStartGame(msg.roomId, msg.pwd)
           } else {
-            timer.startSingleTimer(TimerKey4StartGame, msg, 2.seconds)
+            timer.startSingleTimer(TimerKey4StartGame, msg, 500.millis)
           }
-          ClientBoot.addToPlatform {
-            botController.foreach { gc =>
-              gc.start()
-              stageContext.switchScene(gc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
-            }
+
+          botController match {
+            case Some(bc) =>
+            //TODO 启动bot相关
+
+            case None =>
+              ClientBoot.addToPlatform {
+                botController.foreach { gc =>
+                  gc.start()
+                  stageContext.switchScene(gc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+            }}
           }
 //          ClientBoot.addToPlatform{
 //            gameController.foreach{ gc =>
@@ -135,6 +140,8 @@ object WsClient {
 //            }
 //          }
           //TODO GameController
+
+
           Behaviors.same
 
         case msg: CreateRoom =>
@@ -142,13 +149,17 @@ object WsClient {
           if (gameMsgSender != null) {
             gameMsgSender ! GACreateRoom(msg.psw)
           } else {
-            timer.startSingleTimer(TimerKey4CreateGame, msg, 2.seconds)
+            timer.startSingleTimer(TimerKey4CreateGame, msg, 500.millis)
           }
-          ClientBoot.addToPlatform{
+
+          botController match {
+            case Some(bc) =>
+            //TODO 启动bot相关
+            case None =>          ClientBoot.addToPlatform{
             botController.foreach{ gc =>
               gc.start()
               stageContext.switchScene(gc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
-            }
+            }}
           }
 //          ClientBoot.addToPlatform{
 //            gameController.foreach{ gc =>
@@ -159,19 +170,32 @@ object WsClient {
           //TODO GameController
           Behaviors.same
 
-        case msg: DispatchMsg =>
-          gameMsgSender ! msg.msg
+        case JoinRoomSuccess =>
+          if (botController.nonEmpty) {
+            botController.get.sdkReplyTo.foreach(_ ! EnterRoomRsp(-1l))
+          }
+
           Behaviors.same
 
         case msg: JoinRoomFail =>
-          ClientBoot.addToPlatform {
-            roomController.foreach(_.callBackWarning(msg.error))
+          botController match {
+            case Some(bc) =>
+              bc.sdkReplyTo.foreach(_ ! EnterRoomRsp(-1l, 10010, msg.error))
+            case None =>
+              ClientBoot.addToPlatform {
+                roomController.foreach(_.callBackWarning(msg.error))
+              }
           }
+
           Behaviors.same
 
         case msg: CreateRoomRsp =>
+
           ClientBoot.addToPlatform {
-            roomController.foreach(_.finalRoomId == msg.roomId)
+            if (botController.nonEmpty) { //bot模式
+              botController.get.sdkReplyTo.foreach(_ ! EnterRoomRsp(msg.roomId))
+            }
+            roomController.foreach(_.finalRoomId = msg.roomId)
           }
           Behaviors.same
 
@@ -251,8 +275,12 @@ object WsClient {
           println(s"has player Info ${(msg.playerId,msg.name)}")
 //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc) , Some(bc), roomController, stageContext)
+          println(s"has player Info ${(msg.playerId, msg.name)}")
+          //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), botController, roomController, stageContext)
 
         case msg: BotLogin =>
+          val bc = new BotController //TODO 具体化
           val layerScene = new LayerScene
           val bc = new BotController(ctx.self, PlayerInfo("", ""), stageContext, layerScene)
 //          val botController = new BotController() //TODO 具体化
@@ -270,6 +298,7 @@ object WsClient {
                       val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                       val source = getSource(ctx.self)
                       val sink = getSink4Server(gameMsgReceiver, Left(bc), bc)
+                      val sink = getSink4Server(gameMsgReceiver, Left(bc))
                       val (stream, response) =
                         source
                           .viaMat(webSocketFlow)(Keep.both)
@@ -280,7 +309,7 @@ object WsClient {
                           ctx.self ! GetSender(stream)
 
                           //启动bot相关服务
-                          val botActor = system.spawn(BotActor.create(ctx.self), "botActor")
+                          val botActor = system.spawn(BotActor.create(ctx.self, bc), "botActor")
                           val port = BotSettings.botServerPort
                           ClientBoot.sdkServerHandler ! SdkServerHandler.BuildBotServer(port, executor, botActor, bc)
 
@@ -305,12 +334,16 @@ object WsClient {
               log.error(s"bot [${msg.botId}] get token error: $e")
           }
 
-          Behaviors.same
+          working(gameMsgReceiver, gameMsgSender, loginController, gameController, Some(bc), roomController, stageContext)
 
 
         case msg: GetSender =>
           log.debug(s"get sender success.")
           working(gameMsgReceiver, msg.stream, loginController, gameController, botController, roomController, stageContext)
+
+        case msg: DispatchMsg =>
+          gameMsgSender ! msg.msg
+          Behaviors.same
 
         case Stop =>
           log.info(s"wsClient stopped.")
@@ -402,7 +435,7 @@ object WsClient {
             ThorGame.DecodeError()
         }
         gameController match {
-          case Right(gc)=>
+          case Right(gc) =>
             gc.wsMessageHandle(message)
           case Left(bc) =>
             bc.wsMessageHandle(message)

@@ -31,6 +31,7 @@ enum Move {
   r_up = 5;
   l_down = 6;
   r_down = 7;
+  noop = 8;
 }
 
 

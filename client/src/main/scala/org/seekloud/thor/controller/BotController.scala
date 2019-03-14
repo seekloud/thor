@@ -40,10 +40,13 @@ import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.ClientBoot.{executor, scheduler}
 import org.slf4j.LoggerFactory
 
+import akka.actor.typed.ActorRef
+import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
+
 /**
-  * User: Jason
-  * Date: 2019/3/7
-  * Time: 20:53
+  * User: TangYaruo
+  * Date: 2019/3/12
+  * Time: 13:43
   */
 class BotController(
   wsClient: ActorRef[WsClient.WsCommand],
@@ -139,6 +142,10 @@ class BotController(
     }
   }
 
+  var sdkReplyTo: Option[ActorRef[EnterRoomRsp]] = None
+
+
+}
   protected def setGameState(s: Int): Unit = {
     gameState = s
   }
