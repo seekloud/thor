@@ -79,6 +79,8 @@ class BotController(
 
   var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
 
+  var sdkReplyTo: Option[ActorRef[EnterRoomRsp]] = None
+
   var thorOpt: Option[ThorSchemaBotImpl] = None
   //  private val window = Point(playGameScreen.canvasBoundary.x - 12, playGameScreen.canvasBoundary.y - 12.toFloat)
   var gameState: Int = GameState.loadingPlay
@@ -142,10 +144,8 @@ class BotController(
     }
   }
 
-  var sdkReplyTo: Option[ActorRef[EnterRoomRsp]] = None
 
 
-}
   protected def setGameState(s: Int): Unit = {
     gameState = s
   }

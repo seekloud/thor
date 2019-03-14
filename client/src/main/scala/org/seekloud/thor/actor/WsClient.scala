@@ -125,13 +125,19 @@ object WsClient {
           botController match {
             case Some(bc) =>
             //TODO 启动bot相关
+              ClientBoot.addToPlatform {
+                bc.start()
+                stageContext.switchScene(bc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+              }
+
 
             case None =>
               ClientBoot.addToPlatform {
-                botController.foreach { gc =>
+                gameController.foreach { gc =>
                   gc.start()
-                  stageContext.switchScene(gc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
-            }}
+                  stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+                }
+              }
           }
 //          ClientBoot.addToPlatform{
 //            gameController.foreach{ gc =>
@@ -280,7 +286,6 @@ object WsClient {
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), botController, roomController, stageContext)
 
         case msg: BotLogin =>
-          val bc = new BotController //TODO 具体化
           val layerScene = new LayerScene
           val bc = new BotController(ctx.self, PlayerInfo("", ""), stageContext, layerScene)
 //          val botController = new BotController() //TODO 具体化
@@ -298,7 +303,7 @@ object WsClient {
                       val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                       val source = getSource(ctx.self)
                       val sink = getSink4Server(gameMsgReceiver, Left(bc), bc)
-                      val sink = getSink4Server(gameMsgReceiver, Left(bc))
+//                      val sink = getSink4Server(gameMsgReceiver, Left(bc))
                       val (stream, response) =
                         source
                           .viaMat(webSocketFlow)(Keep.both)
