@@ -47,6 +47,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           if (e-d>5)
             println(s"draw body food time span: ${e-d}")
           drawPosition.drawPosition(mainId)
+          drawPlayerState.drawState(mainId)
 //          drawMouse.drawMousePosition(mousePoint, offSetTime, offset, canvasUnit, canvasBounds)
 //          drawEnergyBar(adventurer)
           val f = System.currentTimeMillis()

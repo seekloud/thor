@@ -60,7 +60,7 @@ trait Adventurer extends CircleObjectOfGame {
   var mouseStop: Boolean
   var isIntersect: Byte
 
-  def getMoveState() = isMove
+  def getMoveState: Boolean = isMove
 
   //判断adventurer是否吃到食物
   def checkEatFood(p: Food, eatFoodCallback: Food => Unit): Unit = {
@@ -132,7 +132,7 @@ trait Adventurer extends CircleObjectOfGame {
   }
 
   //判断扇形区域碰撞,角度为刀的相对角度
-  def isSectorDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig) = {
+  def isSectorDuang(Theta: Double, o: Adventurer)(implicit config: ThorGameConfig): Boolean = {
 
     //wTheta: 刀的绝对角度
     val wTheta = {
@@ -210,7 +210,7 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  def setMoveDirection(offsetX: Short, offSetY: Short, isAttacking: Boolean)(implicit config: ThorGameConfig) = {
+  def setMoveDirection(offsetX: Short, offSetY: Short, isAttacking: Boolean)(implicit config: ThorGameConfig): Unit = {
     val newX = if (offsetX > 5000) {
       isMove = false
       mouseStop = true
@@ -255,7 +255,7 @@ trait Adventurer extends CircleObjectOfGame {
 
   }
 
-  def setFaceDirection(target: Float)(implicit config: ThorGameConfig) = {
+  def setFaceDirection(target: Float)(implicit config: ThorGameConfig): Unit = {
     if (target > faceDirection) {
       faceDirection += config.facePalstance
     } else {
@@ -263,7 +263,7 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  def updateLevel(implicit thorGameConfig: ThorGameConfig) = {
+  def updateLevel(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (levelUpExecute > thorGameConfig.getAdventurerLevelUpAnimation) {
       if (level < thorGameConfig.getAdventurerLevelSize) {
         levelUpExecute = thorGameConfig.getAdventurerLevelUpAnimation
@@ -294,11 +294,11 @@ trait Adventurer extends CircleObjectOfGame {
     }
   }
 
-  def speedUp(implicit thorGameConfig: ThorGameConfig) = {
+  def speedUp(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (!isSpeedUp && energy > thorGameConfig.speedUpEnergyLoose) isSpeedUp = true
   }
 
-  def cancleSpeedUp(implicit thorGameConfig: ThorGameConfig) = {
+  def cancelSpeedUp(implicit thorGameConfig: ThorGameConfig): Unit = {
     if (isSpeedUp) isSpeedUp = false
   }
 
@@ -310,7 +310,7 @@ trait Adventurer extends CircleObjectOfGame {
           energy -= thorGameConfig.speedUpEnergyLoose
           reduceLevel
         } else {
-          cancleSpeedUp
+          cancelSpeedUp
         }
         thorGameConfig.getMoveDistanceByFrame(this.level, isSpeedUp).rotate(direction)
       } else {
