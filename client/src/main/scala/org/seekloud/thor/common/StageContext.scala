@@ -44,6 +44,7 @@ class StageContext(stage: Stage) {
 //
 //  stage.setOnCloseRequest(_ => stageListener.onCloseRequest())
 
+  def getStage: Stage = stage
 
   def getStageWidth: Double = stage.getWidth
 
@@ -51,13 +52,17 @@ class StageContext(stage: Stage) {
 
   def isFullScreen: Boolean = stage.isFullScreen
 
-  def switchScene(scene: Scene, title: String = "THOR", resize: Boolean = false, fullScreen: Boolean = false): Unit = {
-    stage.centerOnScreen()
+  def switchScene(scene: Scene, title: String = "THOR", resize: Boolean = false, fullScreen: Boolean = false, isSetOffX: Boolean = false): Unit = {
+//    stage.centerOnScreen()
     stage.setScene(scene)
     stage.sizeToScene()
     stage.setResizable(resize)
     stage.setTitle(title)
     stage.setFullScreen(fullScreen)
+    if (isSetOffX) {
+      stage.setX(0)
+      stage.setY(0)
+    }
     stage.show()
   }
 

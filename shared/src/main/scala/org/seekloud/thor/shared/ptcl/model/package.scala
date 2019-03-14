@@ -54,7 +54,7 @@ package object model {
 
     def distance(other: Point) = Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y))
 
-    def within(a: Point, b: Point, extra: Point = Point(0, 0)) = {
+    def within(a: Point, b: Point, extra: Point = Point(0, 0)): Boolean = {
       import math.{min, max}
       x >= min(a.x, b.x) - extra.x &&
       x < max(a.x, b.x) + extra.y &&
@@ -62,7 +62,7 @@ package object model {
       y < max(a.y, b.y) + extra.y
     }
 
-    def rotate(theta: Float) = {
+    def rotate(theta: Float): Point = {
       val (cos, sin) = (Math.cos(theta), math.sin(theta))
       Point((cos * x - sin * y).toFloat, (sin * x + cos * y).toFloat)
     }
@@ -71,7 +71,7 @@ package object model {
       math.atan2(y - center.y, x - center.x)
     }
 
-    def in(view: Point, extra: Point) = {
+    def in(view: Point, extra: Point): Boolean = {
       x >= (0 - extra.x) && y >= (0 - extra.y) && x <= (view.x + extra.x) && y <= (view.y + extra.y)
     }
 

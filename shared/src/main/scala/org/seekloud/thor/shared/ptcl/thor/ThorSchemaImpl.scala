@@ -128,7 +128,7 @@ class ThorSchemaImpl(
 
   }
 
-  def preExecuteUserEvent(action: UserActionEvent) = {
+  def preExecuteUserEvent(action: UserActionEvent): Option[Int] = {
     addUserAction(action)
     uncheckedActionMap.put(action.serialNum, action.frame)
   }
@@ -148,7 +148,7 @@ class ThorSchemaImpl(
 
   }
 
-  protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState, isRollBack: Boolean = false) = {
+  protected def handleThorSchemaState(thorSchemaSate: ThorSchemaState, isRollBack: Boolean = false): Unit = {
     val curFrame = systemFrame
     val startTime = System.currentTimeMillis()
     (math.max(curFrame, thorSchemaSate.f - 100) until thorSchemaSate.f).foreach { f =>

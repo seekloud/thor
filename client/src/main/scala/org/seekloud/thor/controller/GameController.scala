@@ -29,16 +29,15 @@ import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.game.NetWorkInfo
-import org.seekloud.thor.scene.GameScene
+import org.seekloud.thor.ThorSchemaBotImpl
+import org.seekloud.thor.scene._
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
-import org.seekloud.thor.scene.PreDraw
 import org.seekloud.thor.ClientBoot.{executor, scheduler}
-import org.seekloud.thor.scene.DrawScene
 import org.slf4j.LoggerFactory
 
 /**
@@ -50,24 +49,22 @@ class GameController(
   wsClient: ActorRef[WsClient.WsCommand],
   playerInfo: WsClient.PlayerInfo,
   context: StageContext,
-  playGameScreen: GameScene
+  playGameScreen: GameScene,
 ) extends NetWorkInfo {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
   def getPlayer: WsClient.PlayerInfo = playerInfo
 
-  private val ws = wsClient
+  def getWs: ActorRef[WsClient.WsCommand] = wsClient
 
-  def getWs: ActorRef[WsClient.WsCommand] = ws
-
-  private val gameScene = playGameScreen
-
-  def getGs: GameScene = gameScene
+  def getGs: GameScene = playGameScreen
 
   private var drawScene: Option[DrawScene] = None
 
   protected var firstCome = true
+
+  protected var exitFullScreen = false
 
   private val actionSerialNumGenerator = new AtomicInteger(0)
 
@@ -78,6 +75,7 @@ class GameController(
   //  private var recSyncGameState: Option[ThorGame.GridSyncState] = None
 
   var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
+
   //  private val window = Point(playGameScreen.canvasBoundary.x - 12, playGameScreen.canvasBoundary.y - 12.toFloat)
   var gameState: Int = GameState.loadingPlay
   private var logicFrameTime = System.currentTimeMillis()
@@ -219,6 +217,11 @@ class GameController(
   var lastSendReq = 0L
 
   def logicLoop(): Unit ={
+    if(!context.isFullScreen && !exitFullScreen) {
+      context.getStage.setX(0)
+      context.getStage.setY(0)
+      exitFullScreen = true
+    }
     var myLevel = 0
     thorSchemaOpt.foreach { thorSchema =>
       thorSchema.adventurerMap.get(mainId).foreach {
@@ -306,10 +309,10 @@ class GameController(
           gameState = GameState.play
 
         case e: ThorGame.BeAttacked =>
-          println(s"receive attacked msg:\n $e")
+//          println(s"receive attacked msg:\n $e")
           barrage = (e.killerName, e.name)
           barrageTime = 300
-          println(s"be attacked by ${e.killerName}")
+//          println(s"be attacked by ${e.killerName}")
           if (e.playerId == mainId) {
             mainId = e.killerId //跟随凶手视角
             if (e.playerId == playerInfo.playerId) {

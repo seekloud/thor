@@ -131,7 +131,7 @@ trait ThorSchema extends KillInformation {
 
 
   //处理新生用户的剩余受保护时间
-  protected final def handleNewBornNow() = {
+  protected final def handleNewBornNow(): Unit = {
     newbornAdventurerMap.foreach { newborn =>
       //      println(s"newborn: ${newborn._2._1.name} leftFrame: ${newborn._2._2}")
       if (newborn._2._2 <= 0) {
@@ -213,7 +213,21 @@ trait ThorSchema extends KillInformation {
     }
   }
 
-  protected final def handleMyAction(actions: List[UserActionEvent]) = { //TODO 处理出现错误的帧
+  def getMousePoint(): List[Point] = {
+    var positionList = List.empty[Point]
+    actionEventMap.get(systemFrame) match {
+      case Some(actions) =>
+        actions.reverse.foreach{
+          case a: MM =>
+            positionList = positionList :+ Point(a.offsetX, a.offsetY)
+          case _ =>
+        }
+      case _ =>
+    }
+    positionList
+  }
+
+  protected final def handleMyAction(actions: List[UserActionEvent]) : Unit = { //TODO 处理出现错误的帧
 
 
   }
