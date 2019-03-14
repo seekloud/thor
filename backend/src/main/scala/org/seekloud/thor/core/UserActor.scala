@@ -245,7 +245,7 @@ object UserActor {
 
                   case msg: GAStartGame =>
                     log.debug(s"get ws msg: $msg")
-                    roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, Some(msg.roomId))
+                    roomManager ! JoinRoom(playerId, userInfo.name, ctx.self, Some(msg.roomId), msg.pwd)
                     Behaviors.same
 
                   case RestartGame =>
