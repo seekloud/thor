@@ -136,7 +136,7 @@ class BotController(
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
       val a = System.currentTimeMillis()
-      drawGameByTime(System.currentTimeMillis() - logicFrameTime, layerScreen.canvasUnit, layerScreen.canvasBounds)
+      drawGameByTime(System.currentTimeMillis() - logicFrameTime, layerScreen.canvasUnit, layerScreen.canvasUnit4Huge, layerScreen.canvasBounds)
       val b = System.currentTimeMillis()
       if (b-a>10)
         println(s"draw all time span: ${b-a}")
@@ -183,7 +183,7 @@ class BotController(
     timeline.play()
   }
 
-  def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasBounds: Point): Unit = {
+  def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasUnit4Huge: Float, canvasBounds: Point): Unit = {
     thorOpt match {
       case Some(thorSchema: ThorSchemaBotImpl) =>
         if (thorSchema.adventurerMap.contains(mainId)) {
@@ -192,7 +192,7 @@ class BotController(
             //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
             val a = System.currentTimeMillis()
             //            println(s"draw create scene span: ${a-start}")
-            drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasBounds, thorSchema.getMousePoint())
+            drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, thorSchema.getMousePoint())
 
             drawTime = drawTime :+ System.currentTimeMillis() - start
             if (drawTime.length >= drawTimeSize) {
@@ -452,19 +452,19 @@ class BotController(
     /*鼠标移动操作*/
     layerScreen.allPlayerCanvas.getCanvas.setOnMouseMoved { e =>
       val point = Point(e.getX.toFloat, e.getY.toFloat)
-      val theta = point.getTheta(layerScreen.canvasBounds * layerScreen.canvasUnit / 2).toFloat
+      val theta = point.getTheta(layerScreen.canvasBounds4Huge * layerScreen.canvasUnit4Huge / 2).toFloat
       drawLayerScene.foreach{ d =>
-        d.drawMouse.drawMouse(point)
+        d.drawMouse.drawMouse(point / 2)
       }
       thorOpt.foreach { thorSchema =>
         if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-          val mouseDistance = math.sqrt(math.pow(e.getX - context.getStageWidth.toFloat / 2.0, 2) + math.pow(e.getY - context.getStageHeight.toFloat / 2.0, 2))
-          val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * layerScreen.canvasUnit
+          val mouseDistance = math.sqrt(math.pow(e.getX - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(e.getY - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
+          val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
           val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
           if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
 
-            val offsetX = (e.getX - context.getStageWidth.toFloat / 2.0).toShort
-            val offsetY = (e.getY - context.getStageHeight.toFloat / 2.0).toShort
+            val offsetX = (e.getX - layerScreen.canvasBoundary4Huge.x / 2.0).toShort
+            val offsetY = (e.getY - layerScreen.canvasBoundary4Huge.y / 2.0).toShort
             val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
             thorSchema.preExecuteUserEvent(preExecuteAction)

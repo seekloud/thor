@@ -3,6 +3,13 @@ package org.seekloud.thor.scene
 //import javafx.scene.SnapshotParameters
 //import javafx.scene.canvas.GraphicsContext
 //import javafx.scene.paint.Color
+import java.nio.ByteBuffer
+
+import com.google.protobuf.ByteString
+import javafx.scene.SnapshotParameters
+import javafx.scene.image.WritableImage
+import javafx.scene.paint.Color
+import org.seekloud.esheepapi.pb.observations.{ImgData, LayeredObservation}
 import org.seekloud.thor.ThorSchemaBotImpl
 import org.seekloud.thor.model.Constants._
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, Food, FoodState}
@@ -20,13 +27,14 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
 
   def window = Point(impl.canvasSize.x , impl.canvasSize.y)
 
-  def drawGame4Bot(mainId: String, offSetTime: Long, canvasUnit: Float, canvasBounds: Point, mousePoint: List[Point]): Unit = {
+  def drawGame4Bot(mainId: String, offSetTime: Long, canvasUnit: Float, canvasUnit4Huge: Float, canvasBounds: Point, mousePoint: List[Point]): Unit = {
     if (!impl.waitSyncData) {
       impl.adventurerMap.get(mainId) match {
         case Some(adventurer) =>
           //保持自己的adventurer在屏幕中央~
           val moveDistance = getMoveDistance(adventurer, offSetTime)
           val offset = canvasBounds / 2 - (adventurer.getAdventurerState.position + moveDistance)
+          val offset4Huge = canvasBounds - (adventurer.getAdventurerState.position + moveDistance)
           val a = System.currentTimeMillis()
           drawBorder.drawBackground(offset, canvasUnit, canvasBounds)
           val b = System.currentTimeMillis()
@@ -36,8 +44,8 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           val c = System.currentTimeMillis()
           if (c-b>5)
             println(s"draw food time span: ${c-b}")
-          drawAdventure.drawAllPlayer(offSetTime, offset, canvasUnit, canvasBounds)
-          drawAdventure.drawAll(offSetTime, offset, canvasUnit, canvasBounds)
+          drawAdventure.drawAllPlayer(mainId, offSetTime, offset, canvasUnit4Huge, canvasBounds)
+          drawAdventure.drawAll(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           drawAdventure.drawSelf(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           val d = System.currentTimeMillis()
           if (d-c>5)
@@ -184,7 +192,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       a += 1
       val scale = window.x  / 600.0
       if (a % 100 == 0)
-      println(s"window: $window, scale : $scale, windowScale: $windowScale")
+//      println(s"window: $window, scale : $scale, windowScale: $windowScale")
       impl.ctx("position").save()
       impl.ctx("position").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("position").setFill("#000000")
@@ -206,23 +214,19 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("border").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("border").setFill("#000000")
       impl.ctx("border").fillRec(0, 0, 400, 200)
-      impl.ctx("border").setFill("#171b1f")
-      impl.ctx("border").fillRec(0, 0, canvasBoundary.x * canvasUnit, canvasBoundary.y * canvasUnit)
-      impl.ctx("border").fill()
       val borderW = 10
-      impl.ctx("border").setFill("#4A4B49")
-      impl.ctx("border").rect(offset.x * canvasUnit, offset.y * canvasUnit, impl.config.boundary.x * canvasUnit, borderW)
-      impl.ctx("border").rect(offset.x * canvasUnit, offset.y * canvasUnit, borderW, impl.config.boundary.y * canvasUnit)
-      impl.ctx("border").rect((offset.x + impl.config.boundary.x) * canvasUnit - borderW, offset.y * canvasUnit, borderW, impl.config.boundary.y * canvasUnit)
-      impl.ctx("border").rect(offset.x * canvasUnit, (offset.y + impl.config.boundary.y) * canvasUnit - borderW, impl.config.boundary.x * canvasUnit, borderW)
-      impl.ctx("border").fill()
+      impl.ctx("border").setFill("#FFFFFF")
+      impl.ctx("border").fillRec(offset.x * canvasUnit, offset.y * canvasUnit, impl.config.boundary.x * canvasUnit, borderW)
+      impl.ctx("border").fillRec(offset.x * canvasUnit, offset.y * canvasUnit, borderW, impl.config.boundary.y * canvasUnit)
+      impl.ctx("border").fillRec((offset.x + impl.config.boundary.x) * canvasUnit - borderW, offset.y * canvasUnit, borderW, impl.config.boundary.y * canvasUnit)
+      impl.ctx("border").fillRec(offset.x * canvasUnit, (offset.y + impl.config.boundary.y) * canvasUnit - borderW, impl.config.boundary.x * canvasUnit, borderW)
       impl.ctx("border").restore()
     }
   }
 
   object drawAdventure {
 
-    def drawAnAdventurer(adventurer: Adventurer, offSetTime: Long, offset: Point, canvasUnit: Float, ctx: MiddleContextInFx): Unit = {
+    def drawAnAdventurer(adventurer: Adventurer, offSetTime: Long, offset: Point, canvasUnit: Float, ctx: MiddleContextInFx, color: String): Unit = {
       val r = impl.config.getAdventurerRadiusByLevel(adventurer.level)
       val position = adventurer.getAdventurerState.position
       val moveDistance = getMoveDistance(adventurer, offSetTime)
@@ -233,7 +237,9 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       val dy = 2 * r
 
       //画人物
-      CanvasUtils.rotateImage("adventurer", impl.drawFrame, ctx, Nil, impl.preAdventurerImage, pictureMap(s"char${(adventurer.level % 21 - 1) / 4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 1.1.toFloat, 0, adventurer.getAdventurerState.direction, impl.preTime, adventurer.getAdventurerState.level)
+//      CanvasUtils.rotateImage("adventurer", impl.drawFrame, ctx, Nil, impl.preAdventurerImage, pictureMap(s"char${(adventurer.level % 21 - 1) / 4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 1.1.toFloat, 0, adventurer.getAdventurerState.direction, impl.preTime, adventurer.getAdventurerState.level)
+      CanvasUtils.rotateColor("adventurer", impl.drawFrame, ctx, impl.preAdventurerImage, pictureMap(s"char${(adventurer.level % 21 - 1) / 4 + 1}-${(adventurer.level - 1) % 4}.png"),
+        Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 1.1.toFloat, 0, adventurer.getAdventurerState.direction, adventurer.getAdventurerState.level, color, adventurer.radius, canvasUnit)
 
       //出生保护
       impl.newbornAdventurerMap.get(adventurer.playerId) match {
@@ -242,8 +248,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           ctx.setFill("rgba(79,148,205,0.4)")
           ctx.setGlobalAlpha(0.8)
           ctx.beginPath()
-          val flag = false
-          ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 360, flag)
+          ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.3, 0, 360, counterclockwise = false)
           ctx.closePath()
           ctx.fill()
           ctx.restore()
@@ -275,26 +280,36 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       ctx.restore()
     }
 
-    def drawAllPlayer(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
-      impl.ctx("allPlayer").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
+    def drawAllPlayer(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+      impl.ctx("allPlayer").clearRect(0, 0, layeredCanvasWidth * 2, layeredCanvasHeight * 2 + 210)
       impl.ctx("allPlayer").setFill("#000000")
-      impl.ctx("allPlayer").fillRec(0, 0, 400, 200)
+      impl.ctx("allPlayer").fillRec(0, 0, 400 * 2, 200 * 2 )
       impl.adventurerMap.foreach {
         adventurer =>
           if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
-            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"))
+            if (adventurer._1 == mainId)
+              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"), selfColor)
+            else
+              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"), othersColor)
           }
       }
+      impl.ctx("allPlayer").setFill("#000000")
+      impl.ctx("allPlayer").fillRec(0, 405, 400 * 2, 200 )
+      impl.ctx("allPlayer").setFill("#FFFFFF")
+      impl.ctx("allPlayer").fillRec(0, 400, 400 * 2, 5 )
     }
 
-    def drawAll(offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+    def drawAll(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
       impl.ctx("all").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("all").setFill("#000000")
       impl.ctx("all").fillRec(0, 0, 400, 200)
       impl.adventurerMap.foreach {
         adventurer =>
           if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
-            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"))
+            if (adventurer._1 == mainId)
+              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), selfColor)
+            else
+              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), othersColor)
           }
       }
     }
@@ -306,7 +321,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.adventurerMap.foreach {
         adventurer =>
           if (!impl.dyingAdventurerMap.contains(adventurer._1) && adventurer._1 == mainId) {
-            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("self"))
+            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("self"), selfColor)
           }
       }
     }
@@ -340,6 +355,12 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
   }
 
   object drawPlayerState {
+    private val speedUpRate: Float = impl.config.getThorGameConfigImpl().adventurerParams.speedUpRate
+    private val maxSpeed: Float = impl.config.getThorGameConfigImpl().adventurerParams.speeds.speeds.max
+    private val maxRadius: Float = impl.config.getThorGameConfigImpl().adventurerParams.radius.max
+    private val speedUnit = 300 / (maxSpeed * speedUpRate)
+    private val radiusUnit = 300 / maxRadius
+
     def drawState(maidId: String): Unit = {
       impl.adventurerMap.foreach{ adventurer =>
         if (!impl.dyingAdventurerMap.contains(adventurer._1) && adventurer._1 == maidId) {
@@ -351,11 +372,77 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
     def drawAState(adventurer: Adventurer): Unit = {
       val isSpeedUp = adventurer.isSpeedUp
       val radius = adventurer.radius
-      val speedByLevel = impl.config.getThorSpeedByLevel(adventurer.level)
-      val speedUp = impl.config.getThorGameConfigImpl().adventurerParams.speedUpRate
-      println(adventurer.radius, adventurer.faceDirection)
+      val speedByLevel = impl.config.getThorSpeedByLevel(adventurer.level).x
+      val speed = if (isSpeedUp) speedUpRate * speedByLevel else speedByLevel
+      impl.ctx("state").save()
+      impl.ctx("state").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
+      impl.ctx("state").setFill("#000000")
+      impl.ctx("state").fillRec(0, 0, 400, 200)
+      impl.ctx("state").setFill("#FFFFFF")
+      impl.ctx("state").fillRec(50, 30, radius * radiusUnit, 40)
+      impl.ctx("state").setFill("#FF0000")
+      impl.ctx("state").fillRec(50, 130, speed * speedUnit, 40)
+      impl.ctx("state").restore()
     }
   }
 
+  import org.seekloud.thor.common.BotSettings.isGray
+
+  def getAllImageData: LayeredObservation ={
+    val ctxList = impl.ctx
+    val a = ctxList.map(c => getImageData(c))
+    val layeredObservation: LayeredObservation = LayeredObservation(
+      a.get(""),
+      a.get(""),
+      a.get(""),
+      a.get(""),
+      a.get(""),
+      a.get(""),
+      a.get(""),
+      None
+    )
+    layeredObservation
+  }
+
+  def getImageData(ctx: (String, MiddleContextInFx)): (String, ImgData) = {
+    val canvas = ctx._2.getCanvas
+    var height = canvas.getHeight.toInt
+    if (ctx._1 == "allPlayer") height -= 210
+    val width = canvas.getWidth.toInt
+    val params = new SnapshotParameters
+    val id = ctx._1
+    params.setFill(Color.TRANSPARENT)
+
+    val writableImage = canvas.snapshot(params,null)
+    val reader = writableImage.getPixelReader
+    val wIm = new WritableImage(width,height)
+    val writer = wIm.getPixelWriter
+    val data =
+      if(!isGray) {
+        //获取彩图，每个像素点4Byte
+        val byteBuffer = ByteBuffer.allocate(4 * width * height)
+        byteBuffer.clear()
+        for (y <- 0 until height; x <- 0 until width) {
+          val color = reader.getArgb(x, y)
+          writer.setArgb(x,y,color)
+          byteBuffer.putInt(color)
+        }
+        byteBuffer.flip() //翻转，修改lim为当前pos，pos置0
+        val arrayOfByte = byteBuffer.array().take(byteBuffer.limit) //take前limit个Byte，去除Buffer内余下的多余数据
+        ByteString.copyFrom(arrayOfByte)
+      } else {
+        //获取灰度图，每个像素点1Byte
+        val byteArray = new Array[Byte](1 * width * height)
+        for (y <- 0 until height; x <- 0 until width) {
+          val color = reader.getColor(x, y).grayscale()
+          val gray = color.getRed * color.getOpacity
+          writer.setColor(x,y,new Color(gray,gray,gray,color.getOpacity))
+          byteArray(y * height + x) = (gray * 255).toByte
+        }
+        ByteString.copyFrom(byteArray)
+      }
+    val pixelLength = if(isGray) 1 else 4
+    (id, ImgData(width ,height, pixelLength, data))
+  }
 
 }
