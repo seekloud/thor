@@ -47,6 +47,8 @@ object BotSettings {
   val botId = mainConfig.getString("botInfo.botId")
   val botKey = mainConfig.getString("botInfo.botKey")
 
+
+  /*canvas info*/
   val layerCanvasW = mainConfig.getInt("layerCanvas.w")
   val layerCanvasH = mainConfig.getInt("layerCanvas.h")
 

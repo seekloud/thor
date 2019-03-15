@@ -106,7 +106,7 @@ class BotServer(botActor: ActorRef[BotActor.Command], botController: BotControll
   }
 
   /**
-    * fire: 0-攻击，1-加速
+    * fire: 1-攻击，2-加速
     *
     **/
   override def actionSpace(request: Credit): Future[ActionSpaceRsp] = {
@@ -147,6 +147,17 @@ class BotServer(botActor: ActorRef[BotActor.Command], botController: BotControll
       //TODO botController 收到动作 获取帧号函数
 //      val rsp =ActionRsp(frameIndex = , state = BotServer.state, msg = "ok")
 //      Future.successful(rsp)
+      if (request.swing.nonEmpty) { //鼠标移动操作
+
+      }
+
+      request.fire match {
+        case 1 => //加速
+
+        case 2 => //攻击
+      }
+
+
     } else {
       Future.successful(ActionRsp(errCode = 10006, state = State.unknown, msg = "Auth error"))
     }
@@ -155,7 +166,7 @@ class BotServer(botActor: ActorRef[BotActor.Command], botController: BotControll
   override def observation(request: Credit): Future[ObservationRsp] = {
     if (checkBotToken(request.apiToken)) {
       //TODO 从botController获取state
-      //TODO 从ByteReceiver获取Observation
+      //TODO 从botController获取Observation
 
     } else {
       Future.successful(ObservationRsp(errCode = 10007, state = State.unknown, msg = "Auth error"))
