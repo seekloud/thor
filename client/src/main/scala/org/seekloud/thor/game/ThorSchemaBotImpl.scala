@@ -1,17 +1,10 @@
-package org.seekloud.thor
+package org.seekloud.thor.game
 
-/**
-  * User: Jason
-  * Date: 2019/3/13
-  * Time: 16:51
-  */
-import javafx.scene.image.{Image, WritableImage}
-import org.seekloud.thor.shared.ptcl.component.Adventurer
+import javafx.scene.image.Image
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfig
 import org.seekloud.thor.shared.ptcl.model.Point
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaImpl
-import org.seekloud.thor.shared.ptcl.thor.draw._
-import org.seekloud.thor.shared.ptcl.util.middleware._
+import org.seekloud.thor.shared.ptcl.util.middleware.MiddleFrame
 import org.seekloud.thor.utils.middleware.MiddleContextInFx
 
 /**
@@ -78,4 +71,3 @@ case class ThorSchemaBotImpl (
     preDeathImage = preDeath
   }
 }
-

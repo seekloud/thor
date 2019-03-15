@@ -3,7 +3,7 @@ package org.seekloud.thor.scene
 //import javafx.scene.SnapshotParameters
 //import javafx.scene.canvas.GraphicsContext
 //import javafx.scene.paint.Color
-import org.seekloud.thor.ThorSchemaBotImpl
+import org.seekloud.thor.game.ThorSchemaBotImpl
 import org.seekloud.thor.model.Constants._
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, Food, FoodState}
 import org.seekloud.thor.shared.ptcl.model.Point

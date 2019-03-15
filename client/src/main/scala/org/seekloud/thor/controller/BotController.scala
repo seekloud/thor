@@ -28,8 +28,7 @@ import javafx.util.Duration
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.common.StageContext
-import org.seekloud.thor.game.NetWorkInfo
-import org.seekloud.thor.ThorSchemaBotImpl
+import org.seekloud.thor.game.{NetWorkInfo, ThorSchemaBotImpl}
 import org.seekloud.thor.scene._
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
@@ -39,7 +38,6 @@ import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.ClientBoot.{executor, scheduler}
 import org.slf4j.LoggerFactory
-
 import akka.actor.typed.ActorRef
 import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
 
