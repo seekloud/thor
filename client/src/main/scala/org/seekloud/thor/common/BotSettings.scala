@@ -30,10 +30,14 @@ object BotSettings {
 
   val mainConfig = botConfig.getConfig("bot")
 
+  /*system info*/
+  val frameDuration = mainConfig.getInt("frameDuration")
+
   val isLayer = mainConfig.getBoolean("isLayer")
   val isViewObservation = mainConfig.getBoolean("isViewObservation")
   val isGray = mainConfig.getBoolean("isGray")
   val botServerPort = mainConfig.getInt("botServerPort")
+
 
   /*botSecure*/
   val playerId = mainConfig.getString("botSecure.playerId")

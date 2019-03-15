@@ -12,10 +12,11 @@ import org.seekloud.esheepapi.pb.api._
 import org.seekloud.esheepapi.pb.service.EsheepAgentGrpc
 import org.seekloud.esheepapi.pb.service.EsheepAgentGrpc.EsheepAgent
 import org.seekloud.thor.actor.WsClient.CreateRoom
-import org.seekloud.thor.common.BotSettings
+import org.seekloud.thor.common.{AppSettings, BotSettings}
 import org.seekloud.thor.controller.BotController
 import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
+import org.seekloud.thor.ClientBoot.{executor, system}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,7 +29,10 @@ object BotServer {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
-  val streamSender: Option[ActorRef[GrpcStreamSender.Command]] = None
+  var isObservationConnect = false
+  var isFrameConnect = false
+
+  var streamSender: Option[ActorRef[GrpcStreamSender.Command]] = None
 
   var state: State = State.unknown
 
@@ -104,29 +108,91 @@ class BotServer(botActor: ActorRef[BotActor.Command], botController: BotControll
   /**
     * fire: 0-攻击，1-加速
     *
-    * */
+    **/
   override def actionSpace(request: Credit): Future[ActionSpaceRsp] = {
     if (checkBotToken(request.apiToken)) {
-      val rsp = ActionSpaceRsp(swing = true, fire = List(0, 1), state = BotServer.state, msg = "ok" )
+      val rsp = ActionSpaceRsp(swing = true, fire = List(0, 1), state = BotServer.state, msg = "ok")
       Future.successful(rsp)
     } else {
       Future.successful(ActionSpaceRsp(errCode = 10004, state = State.unknown, msg = "Auth Error"))
     }
   }
 
-  override def systemInfo(request: Credit): Future[SystemInfoRsp] = ???
+  override def systemInfo(request: Credit): Future[SystemInfoRsp] = {
+    if (checkBotToken(request.apiToken)) {
+      val rsp = SystemInfoRsp(framePeriod = BotSettings.frameDuration, state = BotServer.state, msg = "ok")
+      Future.successful(rsp)
+    } else {
+      Future.successful(SystemInfoRsp(errCode = 10005, state = State.unknown, msg = "Auth Error"))
+    }
+  }
 
-  override def currentFrame(request: Credit, responseObserver: StreamObserver[CurrentFrameRsp]): Unit = ???
+  override def currentFrame(request: Credit, responseObserver: StreamObserver[CurrentFrameRsp]): Unit = {
+    if (checkBotToken(request.apiToken)) {
+      BotServer.isFrameConnect = true
+      if (BotServer.streamSender.isDefined) {
+        BotServer.streamSender.get ! GrpcStreamSender.FrameObserver(responseObserver)
+      } else {
+        BotServer.streamSender = Some(system.spawn(GrpcStreamSender.create(botController), "grpcStreamSender"))
+        BotServer.streamSender.get ! GrpcStreamSender.FrameObserver(responseObserver)
+      }
 
-  override def action(request: ActionReq): Future[ActionRsp] = ???
+    } else {
+      responseObserver.onCompleted()
+    }
+  }
 
-  override def observation(request: Credit): Future[ObservationRsp] = ???
+  override def action(request: ActionReq): Future[ActionRsp] = {
+    if(request.credit.nonEmpty && checkBotToken(request.credit.get.apiToken)) {
+      //TODO botController 收到动作 获取帧号函数
+//      val rsp =ActionRsp(frameIndex = , state = BotServer.state, msg = "ok")
+//      Future.successful(rsp)
+    } else {
+      Future.successful(ActionRsp(errCode = 10006, state = State.unknown, msg = "Auth error"))
+    }
+  }
 
-  override def observationWithInfo(request: Credit, responseObserver: StreamObserver[ObservationWithInfoRsp]): Unit = ???
+  override def observation(request: Credit): Future[ObservationRsp] = {
+    if (checkBotToken(request.apiToken)) {
+      //TODO 从botController获取state
+      //TODO 从ByteReceiver获取Observation
 
-  override def inform(request: Credit): Future[InformRsp] = ???
+    } else {
+      Future.successful(ObservationRsp(errCode = 10007, state = State.unknown, msg = "Auth error"))
+    }
+  }
 
-  override def reincarnation(request: Credit): Future[SimpleRsp] = ???
+  override def observationWithInfo(request: Credit, responseObserver: StreamObserver[ObservationWithInfoRsp]): Unit = {
+    if (checkBotToken(request.apiToken)) {
+      BotServer.isObservationConnect = true
+      if (BotServer.streamSender.isDefined) {
+        BotServer.streamSender.get ! GrpcStreamSender.ObservationObserver(responseObserver)
+      } else {
+        BotServer.streamSender = Some(system.spawn(GrpcStreamSender.create(botController), "grpcStreamSender"))
+        BotServer.streamSender.get ! GrpcStreamSender.ObservationObserver(responseObserver)
+      }
+    } else {
+      responseObserver.onCompleted()
+    }
+  }
+
+  override def inform(request: Credit): Future[InformRsp] = {
+    if (checkBotToken(request.apiToken)) {
+      //TODO 从botController获得状态（gameState、score、kill）
+    } else {
+      Future.successful(InformRsp(errCode = 10008, state = State.unknown, msg = "Auth Error"))
+    }
+  }
+
+  override def reincarnation(request: Credit): Future[SimpleRsp] = {
+    if (checkBotToken(request.apiToken)) {
+      log.info(s"================RESTART=================")
+      //TODO 重启操作
+      Future.successful(SimpleRsp(state = BotServer.state, msg = "ok"))
+    } else {
+      Future.successful(SimpleRsp(errCode = 10009, state = State.unknown, msg = "Auth error"))
+    }
+  }
 
 
 }
