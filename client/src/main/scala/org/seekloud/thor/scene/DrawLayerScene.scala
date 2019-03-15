@@ -14,8 +14,10 @@ import org.seekloud.thor.ThorSchemaBotImpl
 import org.seekloud.thor.model.Constants._
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, Food, FoodState}
 import org.seekloud.thor.shared.ptcl.model.Point
+import org.seekloud.thor.shared.ptcl.protocol.ThorGame.UserActionEvent
 import org.seekloud.thor.utils.middleware.MiddleContextInFx
 import org.seekloud.thor.utils.CanvasUtils
+
 
 /**
   * User: Jason
@@ -27,14 +29,14 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
 
   def window = Point(impl.canvasSize.x , impl.canvasSize.y)
 
-  def drawGame4Bot(mainId: String, offSetTime: Long, canvasUnit: Float, canvasUnit4Huge: Float, canvasBounds: Point, mousePoint: List[Point]): Unit = {
+  def drawGame4Bot(mainId: String, offSetTime: Long, canvasUnit: Float, canvasUnit4Huge: Float,
+    canvasBounds: Point, mousePoint: List[Point], actions: Map[Int, List[UserActionEvent]]): Unit = {
     if (!impl.waitSyncData) {
       impl.adventurerMap.get(mainId) match {
         case Some(adventurer) =>
           //保持自己的adventurer在屏幕中央~
           val moveDistance = getMoveDistance(adventurer, offSetTime)
           val offset = canvasBounds / 2 - (adventurer.getAdventurerState.position + moveDistance)
-          val offset4Huge = canvasBounds - (adventurer.getAdventurerState.position + moveDistance)
           val a = System.currentTimeMillis()
           drawBorder.drawBackground(offset, canvasUnit, canvasBounds)
           val b = System.currentTimeMillis()
@@ -44,7 +46,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           val c = System.currentTimeMillis()
           if (c-b>5)
             println(s"draw food time span: ${c-b}")
-          drawAdventure.drawAllPlayer(mainId, offSetTime, offset, canvasUnit4Huge, canvasBounds)
+          drawAdventure.drawAllPlayer(mainId, offSetTime, offset, canvasUnit4Huge, canvasBounds, actions)
           drawAdventure.drawAll(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           drawAdventure.drawSelf(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           val d = System.currentTimeMillis()
@@ -57,7 +59,6 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           drawPosition.drawPosition(mainId)
           drawPlayerState.drawState(mainId)
 //          drawMouse.drawMousePosition(mousePoint, offSetTime, offset, canvasUnit, canvasBounds)
-//          drawEnergyBar(adventurer)
           val f = System.currentTimeMillis()
           if (f-e>5)
             println(s"draw bar time span: ${f-e}")
@@ -169,7 +170,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       }
     }
   }
- var a = 0
+
   object drawPosition {
     def drawPosition(mainId: String): Unit ={
       val windowScale = impl.canvasSize.x / (impl.config.boundary.x * impl.canvasUnit)
@@ -189,10 +190,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       }
 
       //获取比例
-      a += 1
       val scale = window.x  / 600.0
-      if (a % 100 == 0)
-//      println(s"window: $window, scale : $scale, windowScale: $windowScale")
       impl.ctx("position").save()
       impl.ctx("position").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("position").setFill("#000000")
@@ -280,7 +278,8 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       ctx.restore()
     }
 
-    def drawAllPlayer(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+    def drawAllPlayer(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float,
+      canvasBoundary: Point, myActions: Map[Int, List[UserActionEvent]]): Unit = {
       impl.ctx("allPlayer").clearRect(0, 0, layeredCanvasWidth * 2, layeredCanvasHeight * 2 + 210)
       impl.ctx("allPlayer").setFill("#000000")
       impl.ctx("allPlayer").fillRec(0, 0, 400 * 2, 200 * 2 )
@@ -296,7 +295,31 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("allPlayer").setFill("#000000")
       impl.ctx("allPlayer").fillRec(0, 405, 400 * 2, 200 )
       impl.ctx("allPlayer").setFill("#FFFFFF")
+      impl.ctx("allPlayer").fillRec(395, 405, 5, 200 )
       impl.ctx("allPlayer").fillRec(0, 400, 400 * 2, 5 )
+      val baseLine4A = 2
+      var index4A = 0
+      val textLineHeight = 15
+      var size = 0
+      var actions = Map.empty[Int, String]
+      myActions.foreach{ a =>
+        a._2.foreach{ b =>
+          actions += (a._1 -> b.toString)
+        }
+      }
+      myActions.foreach( a => size += a._2.size)
+      if(actions.size >= 12){
+        actions.toList.sortBy(_._1).takeRight(12).foreach{ a =>
+          impl.ctx("allPlayer").fillText(s"frame:${a._1},action:${a._2}",10,400 + (index4A + baseLine4A) * textLineHeight)
+          index4A += 1
+        }
+      }
+      else {
+        actions.toList.sortBy(_._1).foreach{ a =>
+          impl.ctx("allPlayer").fillText(s"frame:${a._1},action:${a._2}",10,400 + (index4A + baseLine4A) * textLineHeight)
+          index4A += 1
+        }
+      }
     }
 
     def drawAll(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {

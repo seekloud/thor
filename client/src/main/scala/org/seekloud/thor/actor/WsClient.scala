@@ -127,7 +127,7 @@ object WsClient {
             //TODO 启动bot相关
               ClientBoot.addToPlatform {
                 bc.start()
-                stageContext.switchScene(bc.getLs.getScene, resize = true, isSetOffX = true)
+                stageContext.switchToLayer(bc.getLs.getScene)
               }
 
 
@@ -163,7 +163,7 @@ object WsClient {
             //TODO 启动bot相关
               ClientBoot.addToPlatform {
                 bc.start()
-                stageContext.switchScene(bc.getLs.getScene, resize = true, isSetOffX = true)
+                stageContext.switchToLayer(bc.getLs.getScene)
               }
             case None =>
               ClientBoot.addToPlatform{

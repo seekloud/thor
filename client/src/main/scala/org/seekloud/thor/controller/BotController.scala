@@ -81,6 +81,8 @@ class BotController(
 
   var sdkReplyTo: Option[ActorRef[EnterRoomRsp]] = None
 
+  var myActions: Map[Int,List[UserActionEvent]] = Map.empty
+
   var thorOpt: Option[ThorSchemaBotImpl] = None
   //  private val window = Point(playGameScreen.canvasBoundary.x - 12, playGameScreen.canvasBoundary.y - 12.toFloat)
   var gameState: Int = GameState.loadingPlay
@@ -189,10 +191,9 @@ class BotController(
         if (thorSchema.adventurerMap.contains(mainId)) {
           if (drawLayerScene.isDefined) {
             val start = System.currentTimeMillis()
-            //          thorSchema.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
             val a = System.currentTimeMillis()
-            //            println(s"draw create scene span: ${a-start}")
-            drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, thorSchema.getMousePoint())
+            myActions ++= thorSchema.getMyActionMap(byteId).toMap
+            drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, thorSchema.getMousePoint, myActions)
 
             drawTime = drawTime :+ System.currentTimeMillis() - start
             if (drawTime.length >= drawTimeSize) {
@@ -203,7 +204,6 @@ class BotController(
               frameTimeLong = frameTime.sum / frameTime.size
               frameTime = Nil
             }
-            //          println(s"${if(frameTimeSingle>10) "!!!!!!!!!!!!!" else ""} 逻辑帧时间：$frameTimeSingle")
           }
         }
         else {
@@ -218,11 +218,6 @@ class BotController(
   var lastSendReq = 0L
 
   def logicLoop(): Unit ={
-    if(!context.isFullScreen && !exitFullScreen) {
-      context.getStage.setX(0)
-      context.getStage.setY(0)
-      exitFullScreen = true
-    }
     var myLevel = 0
 //    thorSchemaOpt.foreach { thorSchema =>
 //      thorSchema.adventurerMap.get(mainId).foreach {
