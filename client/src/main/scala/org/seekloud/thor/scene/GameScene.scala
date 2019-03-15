@@ -4,6 +4,7 @@ import javafx.geometry.Rectangle2D
 import javafx.scene.{Group, Scene}
 import javafx.scene.input.KeyCode
 import javafx.stage.Screen
+import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.shared.ptcl.model.{Constants, Point}
 import org.seekloud.thor.utils.middleware.{MiddleCanvasInFx, MiddleContextInFx, MiddleFrameInFx}
 
@@ -44,9 +45,9 @@ class GameScene() {
   def getScene:Scene = scene
   def getCanvasContext: MiddleContextInFx = canvas.getCtx
 
-  def handleResize(level: Int): (Point, Float) = {
-    val width = screen.getWidth.toFloat
-    val height = screen.getHeight.toFloat
+  def handleResize(level: Int, context: StageContext): (Point, Float) = {
+    val width = context.getStageWidth.toFloat
+    val height = context.getStageHeight.toFloat
     val perLine = 120 + 10 * level
     if(width != canvasWidth || height != canvasHeight || perLine != canvasUnitPerLine){
       canvasWidth = width

@@ -70,12 +70,8 @@ class MiddleCanvasInFx private() extends MiddleCanvas {
 
 
   override def change2Image(): WritableImage = {
-    val a = System.currentTimeMillis()
     val params = new SnapshotParameters
     params.setFill(Color.TRANSPARENT)
-    val c = canvas.snapshot(params, null)
-    val b = System.currentTimeMillis()
-//    println(s"span 2 is ${b-a}")
-    c
+    canvas.snapshot(params, null)
   }
 }

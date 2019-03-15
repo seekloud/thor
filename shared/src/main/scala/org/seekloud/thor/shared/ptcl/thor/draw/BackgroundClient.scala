@@ -23,7 +23,6 @@ import org.seekloud.thor.shared.ptcl.model.Constants._
 trait BackgroundClient {
   this: ThorSchemaClientImpl =>
 
-
   def window = Point((canvasSize.x - 12).toFloat, (canvasSize.y - 12).toFloat)
   def baseFont: Float = window.x / 1440
   private val mapImg = drawFrame.createImage(pictureMap("background.png"))
@@ -94,7 +93,7 @@ trait BackgroundClient {
 
   def drawSmallMap(mainId: String): Unit ={
 
-    def drawStar(adventurerMapX: Double, adventurerMapY: Double) = {
+    def drawStar(adventurerMapX: Double, adventurerMapY: Double): Unit = {
       ctx.save()
       ctx.beginPath()
       ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
@@ -107,7 +106,7 @@ trait BackgroundClient {
       ctx.restore()
     }
 
-    def drawCrown(adventurerMapX: Double, adventurerMapY: Double) = {
+    def drawCrown(adventurerMapX: Double, adventurerMapY: Double): Unit = {
       val img = drawFrame.createImage(pictureMap("crown.png"))
       ctx.save()
       ctx.beginPath()

@@ -17,7 +17,7 @@
 package org.seekloud.thor.utils.middleware
 
 import javafx.geometry.VPos
-import javafx.scene.canvas.GraphicsContext
+import javafx.scene.canvas.{Canvas, GraphicsContext}
 import javafx.scene.image.{Image, WritableImage}
 import javafx.scene.paint.Color
 import javafx.scene.effect.InnerShadow
@@ -84,6 +84,8 @@ class MiddleContextInFx extends MiddleContext {
   }
 
   def getContext: GraphicsContext = context
+
+  def getCanvas: Canvas = context.getCanvas
 
   override def setGlobalAlpha(alpha: Double): Unit = context.setGlobalAlpha(alpha)
 

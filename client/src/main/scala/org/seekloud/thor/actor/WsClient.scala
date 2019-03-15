@@ -18,6 +18,7 @@ import akka.actor.typed.scaladsl.adapter._
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.thor.ClientBoot
+import org.seekloud.thor.common.{Routes, StageContext}
 import org.seekloud.thor.common.{BotSettings, Routes, StageContext}
 import org.seekloud.thor.controller.{BotController, GameController, LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
@@ -26,6 +27,7 @@ import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
 import org.seekloud.thor.protocol.{ESheepProtocol, ThorClientProtocol}
 import org.seekloud.thor.protocol.ESheepProtocol.{HeartBeat, Ws4AgentRsp}
 import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
+import org.seekloud.thor.scene.{GameScene, LayerScene}
 import org.seekloud.thor.scene.{BotScene, GameScene}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
 import org.seekloud.thor.utils.{EsheepClient, WarningDialog}
@@ -123,15 +125,27 @@ object WsClient {
           botController match {
             case Some(bc) =>
             //TODO 启动bot相关
+              ClientBoot.addToPlatform {
+                bc.start()
+                stageContext.switchScene(bc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+              }
+
 
             case None =>
               ClientBoot.addToPlatform {
                 gameController.foreach { gc =>
                   gc.start()
-                  stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
+                  stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
                 }
               }
           }
+//          ClientBoot.addToPlatform{
+//            gameController.foreach{ gc =>
+//              gc.start()
+//              stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+//            }
+//          }
+          //TODO GameController
 
 
           Behaviors.same
@@ -147,14 +161,19 @@ object WsClient {
           botController match {
             case Some(bc) =>
             //TODO 启动bot相关
-            case None =>
-              ClientBoot.addToPlatform {
-                gameController.foreach { gc =>
-                  gc.start()
-                  stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true)
-                }
-              }
+            case None =>          ClientBoot.addToPlatform{
+            botController.foreach{ gc =>
+              gc.start()
+              stageContext.switchScene(gc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+            }}
           }
+//          ClientBoot.addToPlatform{
+//            gameController.foreach{ gc =>
+//              gc.start()
+//              stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+//            }
+//          }
+          //TODO GameController
           Behaviors.same
 
         case JoinRoomSuccess =>
@@ -215,7 +234,9 @@ object WsClient {
         case msg: GetLoginInfo =>
           val a = System.currentTimeMillis()
           val gameScene = new GameScene
+          val layerScene = new LayerScene
           val gc = new GameController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, gameScene)
+          val bc = new BotController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, layerScene)
           val b = System.currentTimeMillis()
           println(s"create time is ${b - a}")
           log.info(s"get msg: $msg")
@@ -227,7 +248,8 @@ object WsClient {
                 log.debug(s"link game url: $url")
                 val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                 val source = getSource(ctx.self)
-                val sink = getSink4Server(gameMsgReceiver, Right(gc))
+                val sink = getSink4Server(gameMsgReceiver, Right(gc), bc)
+//                val sink = getSink4Server(gameMsgReceiver, Right(gc))
                 val (stream, response) =
                   source
                     .viaMat(webSocketFlow)(Keep.both)
@@ -256,12 +278,17 @@ object WsClient {
             ctx.self
           ))
           gc.checkAndChangePreCanvas()
+          println(s"has player Info ${(msg.playerId,msg.name)}")
+//          ctx.self ! PlayerInfo(msg.playerId,msg.name)
+          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc) , Some(bc), roomController, stageContext)
           println(s"has player Info ${(msg.playerId, msg.name)}")
           //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), botController, roomController, stageContext)
 
         case msg: BotLogin =>
-          val bc = new BotController //TODO 具体化
+          val layerScene = new LayerScene
+          val bc = new BotController(ctx.self, PlayerInfo("", ""), stageContext, layerScene)
+//          val botController = new BotController() //TODO 具体化
           EsheepClient.getBotToken(msg.botId, msg.botKey).map {
             case Right(tokenRst) =>
               if (tokenRst.errCode == 0) {
@@ -275,7 +302,8 @@ object WsClient {
                       val url = Routes.clientLinkGame(playerId, botName, accessCode)
                       val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                       val source = getSource(ctx.self)
-                      val sink = getSink4Server(gameMsgReceiver, Left(bc))
+                      val sink = getSink4Server(gameMsgReceiver, Left(bc), bc)
+//                      val sink = getSink4Server(gameMsgReceiver, Left(bc))
                       val (stream, response) =
                         source
                           .viaMat(webSocketFlow)(Keep.both)
@@ -386,7 +414,10 @@ object WsClient {
 
     }
 
-  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer], gameController: Either[BotController, GameController]): Sink[Message, Future[Done]] = {
+
+  def getSink4Server(gameMsgReceiver: ActorRef[ThorGame.WsMsgServer],
+    gameController: Either[BotController, GameController],
+    botController: BotController): Sink[Message, Future[Done]] = {
     log.debug(s"getSink4Server...")
     Sink.foreach[Message] {
       case TextMessage.Strict(msg) =>
@@ -394,7 +425,10 @@ object WsClient {
           case Right(gc) =>
             gc.wsMessageHandle(ThorGame.TextMsg(msg))
           case Left(bc) =>
+            bc.wsMessageHandle(ThorGame.TextMsg(msg))
         }
+//        gameController.wsMessageHandle(ThorGame.TextMsg(msg))
+        botController.wsMessageHandle(ThorGame.TextMsg(msg))
         gameMsgReceiver ! ThorGame.TextMsg(msg)
 
       case BinaryMessage.Strict(bMsg) =>
@@ -409,7 +443,9 @@ object WsClient {
           case Right(gc) =>
             gc.wsMessageHandle(message)
           case Left(bc) =>
+            bc.wsMessageHandle(message)
         }
+        botController.wsMessageHandle(message)
         gameMsgReceiver ! message
 
       case msg: BinaryMessage.Streamed =>
@@ -428,8 +464,9 @@ object WsClient {
             case Right(gc) =>
               gc.wsMessageHandle(message)
             case Left(bc) =>
-
+              bc.wsMessageHandle(message)
           }
+          botController.wsMessageHandle(message)
           gameMsgReceiver ! message
         }
 
