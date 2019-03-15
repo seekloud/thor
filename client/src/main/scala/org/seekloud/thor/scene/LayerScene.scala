@@ -33,8 +33,11 @@ class LayerScene {
   protected var canvasWidth: Float = layeredCanvasWidth
   protected var canvasHeight: Float = layeredCanvasHeight
   var canvasBoundary = Point(canvasWidth,canvasHeight)
+  var canvasBoundary4Huge: Point = Point(canvasWidth,canvasHeight) * 2
   var canvasUnit: Float = canvasWidth / Constants.canvasUnitPerLine
+  var canvasUnit4Huge: Float = canvasWidth * 2 / Constants.canvasUnitPerLine
   var canvasBounds: Point = canvasBoundary / canvasUnit
+  var canvasBounds4Huge: Point = canvasBoundary4Huge / canvasUnit4Huge
   val positionCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val borderCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val foodCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)

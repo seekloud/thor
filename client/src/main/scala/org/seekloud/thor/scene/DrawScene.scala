@@ -16,7 +16,7 @@
 
 package org.seekloud.thor.scene
 
-import javafx.scene.image.{Image, WritableImage}
+import javafx.scene.image.Image
 import org.seekloud.thor.shared.ptcl.component.{Adventurer, Food, FoodState}
 import org.seekloud.thor.model.Constants.pictureMap
 import org.seekloud.thor.shared.ptcl.model.{Point, Score}
@@ -167,7 +167,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
         impl.ctx.save()
         impl.ctx.setFill("#FF0000")
         impl.ctx.beginPath()
-        impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit, 0, 2 * Math.PI, false)
+        impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit, 0, 2 * Math.PI, counterclockwise = false)
         impl.ctx.closePath()
         impl.ctx.fill()
         impl.ctx.restore()
@@ -181,7 +181,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
           impl.ctx.setFill("rgba(79,148,205,0.4)")
           impl.ctx.setGlobalAlpha(0.8)
           impl.ctx.beginPath()
-          impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 360, false)
+          impl.ctx.arc(sx * canvasUnit, sy * canvasUnit, r * canvasUnit * 1.15, 0, 360, counterclockwise = false)
           impl.ctx.closePath()
           impl.ctx.fill()
           impl.ctx.restore()
@@ -541,7 +541,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
 
   def drawSmallMap(mainId: String): Unit ={
 
-    def drawStar(adventurerMapX: Double, adventurerMapY: Double) = {
+    def drawStar(adventurerMapX: Double, adventurerMapY: Double): Unit = {
       impl.ctx.save()
       impl.ctx.beginPath()
       impl.ctx.moveTo(adventurerMapX - 6.6, adventurerMapY - 2.0)
@@ -554,7 +554,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
       impl.ctx.restore()
     }
 
-    def drawCrown(adventurerMapX: Double, adventurerMapY: Double) = {
+    def drawCrown(adventurerMapX: Double, adventurerMapY: Double): Unit = {
       val img = impl.drawFrame.createImage(pictureMap("crown.png"))
       impl.ctx.save()
       impl.ctx.beginPath()

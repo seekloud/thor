@@ -66,6 +66,19 @@ class StageContext(stage: Stage) {
     stage.show()
   }
 
+  def switchToLayer(scene: Scene, title: String = "THOR", resize: Boolean = false, fullScreen: Boolean = false): Unit = {
+    //    stage.centerOnScreen()
+    stage.setScene(scene)
+    stage.sizeToScene()
+    stage.setResizable(resize)
+    stage.setTitle(title)
+    stage.setFullScreen(fullScreen)
+    stage.setX(130)
+    stage.setY(185)
+    stage.setWidth(1630)
+    stage.setHeight(660)
+    stage.show()
+  }
 //  def setStageListener(listener: StageListener): Unit = {
 //    stageListener = listener
 //  }

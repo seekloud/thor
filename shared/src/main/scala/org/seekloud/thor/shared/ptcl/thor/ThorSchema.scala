@@ -187,7 +187,7 @@ trait ThorSchema extends KillInformation {
                       }
                   }
                 case a: MouseClickDownRight => adventurer.speedUp(config)
-                case a: MouseClickUpRight => adventurer.cancleSpeedUp(config)
+                case a: MouseClickUpRight => adventurer.cancelSpeedUp(config)
               }
             case None =>
             //          info(s"adventurer [${action.playerId}] action $action is invalid, because the adventurer doesn't exist.")
@@ -213,7 +213,7 @@ trait ThorSchema extends KillInformation {
     }
   }
 
-  def getMousePoint(): List[Point] = {
+  def getMousePoint: List[Point] = {
     var positionList = List.empty[Point]
     actionEventMap.get(systemFrame) match {
       case Some(actions) =>
@@ -226,6 +226,15 @@ trait ThorSchema extends KillInformation {
     }
     positionList
   }
+
+  def getMyActionMap(byteId: Byte): mutable.HashMap[Int, List[UserActionEvent]] = {
+    val actions = mutable.HashMap[Int, List[UserActionEvent]]()
+    actionEventMap.foreach{ a =>
+      actions.put(a._1, a._2.filter(_.playerId == byteId))
+    }
+    actions
+  }
+
 
   protected final def handleMyAction(actions: List[UserActionEvent]) : Unit = { //TODO 处理出现错误的帧
 

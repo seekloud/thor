@@ -70,13 +70,6 @@ object CanvasUtils {
             drawWeaponByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
           case _ => ()
         }
-        if(System.currentTimeMillis() - preTime < 2000) {
-          //          val img = drawFrame.createImage(src)
-          //          ctx.drawImage(img, -width / 2 + offset.x, -drawHeight / 2 + offset.y, Some(width, drawHeight))
-        }
-        else{
-
-        }
     }
     if(typ != "adventurer" && typ != "weapon") {
       val img = drawFrame.createImage(src)
@@ -123,4 +116,48 @@ object CanvasUtils {
     ctx.restore()
 
   }
+
+  def rotateColor(typ: String, drawFrame: MiddleFrame, ctx: MiddleContext, preImage: List[Image] = Nil, src:String, position: Point, offset:Point,
+    width: Float, height: Float, angle: Float, level: Int, color: String, radius: Float, canvasUnit: Float): Unit = {
+
+    ctx.save()
+    ctx.translate(position.x, position.y)
+    ctx.rotate(angle)
+    preImage match {
+      case Nil =>
+        val img = drawFrame.createImage(src)
+        val imgWidth = img.width
+        val imgHeight = img.height
+        val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
+        ctx.setFill(color)
+        ctx.beginPath()
+        ctx.arc(offset.x, offset.y, radius * canvasUnit, 0, 360, counterclockwise = false)
+        ctx.closePath()
+        ctx.fill()
+//        ctx.drawImage(img, -width/2 + offset.x, -drawHeight/2 + offset.y, Some(width, drawHeight))
+      case _ =>
+        typ match {
+          case "adventurer" =>
+            val imgWidth = preImage((level - 1) % 20).getWidth
+            val imgHeight = preImage((level - 1) % 20).getHeight
+            val drawHeight: Float = if(height == 0) width / imgWidth.toFloat * imgHeight.toFloat else height
+            val a = System.currentTimeMillis()
+            ctx.setFill(color)
+            ctx.beginPath()
+            ctx.arc( offset.x, offset.y, radius * canvasUnit, 0, 360, counterclockwise = false)
+            ctx.closePath()
+            ctx.fill()
+//            drawAdventurerByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
+            val b = System.currentTimeMillis()
+            if (b-a>5) println(s"draw single adv time span: ${b-a}")
+
+          case _ => ()
+        }
+    }
+
+    ctx.rotate(-angle)
+    ctx.translate(-position.x, -position.y)
+    ctx.restore()
+  }
+
 }

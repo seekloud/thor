@@ -127,7 +127,7 @@ object WsClient {
             //TODO 启动bot相关
               ClientBoot.addToPlatform {
                 bc.start()
-                stageContext.switchScene(bc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+                stageContext.switchToLayer(bc.getLs.getScene)
               }
 
 
@@ -161,11 +161,16 @@ object WsClient {
           botController match {
             case Some(bc) =>
             //TODO 启动bot相关
-            case None =>          ClientBoot.addToPlatform{
-            botController.foreach{ gc =>
-              gc.start()
-              stageContext.switchScene(gc.getLs.getScene, fullScreen = true, resize = true, isSetOffX = true)
-            }}
+              ClientBoot.addToPlatform {
+                bc.start()
+                stageContext.switchToLayer(bc.getLs.getScene)
+              }
+            case None =>
+              ClientBoot.addToPlatform{
+                gameController.foreach{ gc =>
+                  gc.start()
+                  stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
+                }}
           }
 //          ClientBoot.addToPlatform{
 //            gameController.foreach{ gc =>
@@ -281,9 +286,7 @@ object WsClient {
           println(s"has player Info ${(msg.playerId,msg.name)}")
 //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc) , Some(bc), roomController, stageContext)
-          println(s"has player Info ${(msg.playerId, msg.name)}")
-          //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
-          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), botController, roomController, stageContext)
+//          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), botController, roomController, stageContext)
 
         case msg: BotLogin =>
           val layerScene = new LayerScene
