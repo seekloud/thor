@@ -39,6 +39,7 @@ import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.ClientBoot.{executor, scheduler}
 import org.slf4j.LoggerFactory
 import akka.actor.typed.ActorRef
+import org.seekloud.esheepapi.pb.actions.Swing
 import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
 
 /**
@@ -435,6 +436,20 @@ class BotController(
   }
 
   def getActionSerialNum: Byte = (actionSerialNumGenerator.getAndIncrement() % 127).toByte
+
+
+  def receiveBotAction(action: Either[Int, Swing]): Unit = {
+
+    action match {
+      case Right(swing) =>
+
+
+      case Left(fire) =>
+    }
+  }
+
+
+
 
   var lastMouseMove = 0l //限制只能发一次mousemove
   val frequency = 50
