@@ -28,8 +28,8 @@ object Constants {
   val CanvasWidth = 800
   val CanvasHeight = 400
 
-  val layeredCanvasWidth = 400
-  val layeredCanvasHeight = 200
+  val layeredCanvasWidth = 200
+  val layeredCanvasHeight = 100
 
   val selfColor = "#008B8B"
   val othersColor = "#8B008B"
