@@ -73,9 +73,9 @@ class StageContext(stage: Stage) {
     stage.setResizable(resize)
     stage.setTitle(title)
     stage.setFullScreen(fullScreen)
-    stage.setX(130)
+    stage.setX(350)
     stage.setY(185)
-    stage.setWidth(1630)
+    stage.setWidth(1230)
     stage.setHeight(660)
     stage.show()
   }

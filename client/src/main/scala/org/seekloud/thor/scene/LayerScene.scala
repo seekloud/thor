@@ -33,19 +33,20 @@ class LayerScene {
   protected var canvasWidth: Float = layeredCanvasWidth
   protected var canvasHeight: Float = layeredCanvasHeight
   var canvasBoundary = Point(canvasWidth,canvasHeight)
-  var canvasBoundary4Huge: Point = Point(canvasWidth,canvasHeight) * 2
+  var canvasBoundary4Huge: Point = Point(CanvasWidth,CanvasHeight)
   var canvasUnit: Float = canvasWidth / Constants.canvasUnitPerLine
-  var canvasUnit4Huge: Float = canvasWidth * 2 / Constants.canvasUnitPerLine
+  var canvasUnit4Huge: Float = CanvasWidth / Constants.canvasUnitPerLine
   var canvasBounds: Point = canvasBoundary / canvasUnit
   var canvasBounds4Huge: Point = canvasBoundary4Huge / canvasUnit4Huge
   val positionCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val borderCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val foodCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
-  val allPlayerCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth * 2,canvasHeight * 2 + 210)
+  val allPlayerCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val allCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val selfCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val mouseCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val stateCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
+  val humanCanvas: MiddleCanvasInFx = drawFrame.createCanvas(CanvasWidth,CanvasHeight + 210)
   protected var canvasUnitPerLine = 100
 
 //  positionCanvas.getCanvas.setId("0")
@@ -60,19 +61,21 @@ class LayerScene {
   positionCanvas.getCanvas.setLayoutY(10)
   positionCanvas.getCanvas.setLayoutX(815)
   borderCanvas.getCanvas.setLayoutY(10)
-  borderCanvas.getCanvas.setLayoutX(1220)
-  foodCanvas.getCanvas.setLayoutY(215)
+  borderCanvas.getCanvas.setLayoutX(1020)
+  foodCanvas.getCanvas.setLayoutY(115)
   foodCanvas.getCanvas.setLayoutX(815)
-  allPlayerCanvas.getCanvas.setLayoutY(10)
-  allPlayerCanvas.getCanvas.setLayoutX(10)
-  allCanvas.getCanvas.setLayoutY(420)
+  allPlayerCanvas.getCanvas.setLayoutY(115)
+  allPlayerCanvas.getCanvas.setLayoutX(1020)
+  allCanvas.getCanvas.setLayoutY(220)
   allCanvas.getCanvas.setLayoutX(815)
-  selfCanvas.getCanvas.setLayoutY(420)
-  selfCanvas.getCanvas.setLayoutX(1220)
-  mouseCanvas.getCanvas.setLayoutY(415)
-  mouseCanvas.getCanvas.setLayoutX(410)
-  stateCanvas.getCanvas.setLayoutY(215)
-  stateCanvas.getCanvas.setLayoutX(1220)
+  selfCanvas.getCanvas.setLayoutY(220)
+  selfCanvas.getCanvas.setLayoutX(1020)
+  mouseCanvas.getCanvas.setLayoutY(325)
+  mouseCanvas.getCanvas.setLayoutX(815)
+  stateCanvas.getCanvas.setLayoutY(325)
+  stateCanvas.getCanvas.setLayoutX(1020)
+  humanCanvas.getCanvas.setLayoutY(10)
+  humanCanvas.getCanvas.setLayoutX(10)
 
   val group = new Group()
   val scene = new Scene(group)
@@ -84,6 +87,7 @@ class LayerScene {
   group.getChildren.add(selfCanvas.getCanvas)
   group.getChildren.add(mouseCanvas.getCanvas)
   group.getChildren.add(stateCanvas.getCanvas)
+  group.getChildren.add(humanCanvas.getCanvas)
 
   def getScene:Scene = scene
   def positionCtx: MiddleContextInFx = positionCanvas.getCtx
@@ -94,6 +98,7 @@ class LayerScene {
   def selfCtx: MiddleContextInFx = selfCanvas.getCtx
   def mouseCtx: MiddleContextInFx = mouseCanvas.getCtx
   def stateCtx: MiddleContextInFx = stateCanvas.getCtx
+  def humanCtx: MiddleContextInFx = humanCanvas.getCtx
 
   private val ctxMap: Map[String,MiddleContextInFx] = Map(
     "position"  ->  positionCtx,
@@ -103,7 +108,8 @@ class LayerScene {
     "all"       ->  allCtx,
     "self"      ->  selfCtx,
     "mouse"     ->  mouseCtx,
-    "state"     ->  stateCtx)
+    "state"     ->  stateCtx,
+    "human"     ->  humanCtx)
 
   def getCtxMap: Map[String,MiddleContextInFx] = ctxMap
 
