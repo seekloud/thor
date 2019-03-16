@@ -139,14 +139,6 @@ object WsClient {
                 }
               }
           }
-//          ClientBoot.addToPlatform{
-//            gameController.foreach{ gc =>
-//              gc.start()
-//              stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
-//            }
-//          }
-          //TODO GameController
-
 
           Behaviors.same
 
@@ -172,13 +164,7 @@ object WsClient {
                   stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
                 }}
           }
-//          ClientBoot.addToPlatform{
-//            gameController.foreach{ gc =>
-//              gc.start()
-//              stageContext.switchScene(gc.getGs.getScene, fullScreen = true, resize = true, isSetOffX = true)
-//            }
-//          }
-          //TODO GameController
+
           Behaviors.same
 
         case JoinRoomSuccess =>
