@@ -3,9 +3,10 @@ package org.seekloud.thor.actor
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import io.grpc.stub.StreamObserver
-import org.seekloud.esheepapi.pb.api.{CurrentFrameRsp, ObservationRsp, ObservationWithInfoRsp}
+import org.seekloud.esheepapi.pb.api.{CurrentFrameRsp, ObservationRsp, ObservationWithInfoRsp, State}
 import org.seekloud.thor.bot.BotServer
 import org.seekloud.thor.controller.BotController
+import org.seekloud.thor.shared.ptcl.model.Constants.GameState
 import org.slf4j.LoggerFactory
 
 /**
@@ -73,16 +74,16 @@ object GrpcStreamSender {
           }
 
         case NewObservation(observation) =>
-          //TODO 根据具体情况重写
-//          BotServer.state = if (botController.getLiveState) State.in_game else State.killed
-//          val rsp = ObservationWithInfoRsp(observation.layeredObservation, observation.humanObservation,
-//            botController.getScore._2.l, botController.getScore._2.k,
-//            if (botController.getLiveState) 1 else 0, botController.getFrameCount,
-//            0, BotServer.state, "ok")
-
+          BotServer.state = if (botController.gameState == GameState.stop) State.killed else State.in_game
+          val botInfo = botController.getBotInformation
+          val rsp = ObservationWithInfoRsp(observation.layeredObservation, observation.humanObservation,
+            botInfo._1, botInfo._2, if (BotServer.state == State.in_game) 1 else 0, botController.frameCount,
+            0, BotServer.state, "ok")
 
           try {
-//            oObserver.onNext(rsp)
+            if (oObserver != null) {
+              oObserver.onNext(rsp)
+            }
             Behavior.same
           } catch {
             case e: Exception =>

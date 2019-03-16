@@ -25,9 +25,9 @@ import javafx.scene.input.{KeyCode, MouseButton}
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
 import javafx.util.Duration
 import org.seekloud.thor.ClientBoot
-import org.seekloud.thor.actor.WsClient
-import org.seekloud.thor.common.StageContext
-import org.seekloud.thor.ThorSchemaBotImpl
+import org.seekloud.thor.actor.{GrpcStreamSender, WsClient}
+import org.seekloud.thor.common.{BotSettings, StageContext}
+import org.seekloud.thor.game.ThorSchemaBotImpl
 import org.seekloud.thor.scene._
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.thor.shared.ptcl.model.Constants.GameState
@@ -37,9 +37,15 @@ import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.ClientBoot.{executor, scheduler}
 import org.slf4j.LoggerFactory
-
 import akka.actor.typed.ActorRef
+import org.seekloud.esheepapi.pb.actions.Swing
+import org.seekloud.esheepapi.pb.api.ObservationRsp
+import org.seekloud.esheepapi.pb.observations.{ImgData, LayeredObservation}
+import org.seekloud.thor.bot.BotServer
+import org.seekloud.thor.model.Constants.FireAction
 import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
+
+import scala.util.Random
 
 /**
   * User: TangYaruo
@@ -51,7 +57,7 @@ class BotController(
   playerInfo: WsClient.PlayerInfo,
   context: StageContext,
   layerScreen: LayerScene
-)  {
+) {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
@@ -60,6 +66,8 @@ class BotController(
   def getWs: ActorRef[WsClient.WsCommand] = wsClient
 
   def getLs: LayerScene = layerScreen
+
+  var frameCount: Int = 0
 
   private var drawLayerScene: Option[DrawLayerScene] = None
 
@@ -79,7 +87,11 @@ class BotController(
 
   var sdkReplyTo: Option[ActorRef[EnterRoomRsp]] = None
 
-  var myActions: Map[Int,List[UserActionEvent]] = Map.empty
+  var myActions: Map[Int, List[UserActionEvent]] = Map.empty
+
+  var lastMousePosition: Point = _
+
+  var lastObservation: (LayeredObservation, Option[ImgData]) = _
 
   var thorOpt: Option[ThorSchemaBotImpl] = None
   //  private val window = Point(playGameScreen.canvasBoundary.x - 12, playGameScreen.canvasBoundary.y - 12.toFloat)
@@ -139,12 +151,11 @@ class BotController(
       val a = System.currentTimeMillis()
       drawGameByTime(System.currentTimeMillis() - logicFrameTime, layerScreen.canvasUnit, layerScreen.canvasUnit4Huge, layerScreen.canvasBounds)
       val b = System.currentTimeMillis()
-      if (b-a>10)
-        println(s"draw all time span: ${b-a}")
+      if (b - a > 10)
+        println(s"draw all time span: ${b - a}")
       if (gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     }
   }
-
 
 
   protected def setGameState(s: Int): Unit = {
@@ -154,9 +165,10 @@ class BotController(
   def start(): Unit = {
     if (firstCome) {
       firstCome = false
+      initMousePosition()
       println("start bot controller ...")
       startGameLoop()
-      addUserActionListenEvent()
+      //      addUserActionListenEvent()
       checkAndChangePreCanvas()
       //      logicFrameTime = System.currentTimeMillis()
     } else {
@@ -168,7 +180,7 @@ class BotController(
     }
   }
 
-  def startGameLoop(): Unit = { //渲染帧
+  def startGameLoop(): Unit = { //逻辑帧
     logicFrameTime = System.currentTimeMillis()
     timeline.setCycleCount(Animation.INDEFINITE)
     val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
@@ -195,8 +207,8 @@ class BotController(
         }
         if (thorSchema.adventurerMap.contains(mainId4Layer)) {
           if (drawLayerScene.isDefined) {
-//            myActions ++= thorSchema.getMyActionMap(byteId).toMap
-//            myActions = myActions.toList.sortBy(_._1).takeRight(12).toMap
+            //            myActions ++= thorSchema.getMyActionMap(byteId).toMap
+            //            myActions = myActions.toList.sortBy(_._1).takeRight(12).toMap
             drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, thorSchema.getMousePoint, myActions)
           }
         }
@@ -213,7 +225,7 @@ class BotController(
 
   var lastSendReq = 0L
 
-  def logicLoop(): Unit ={
+  def logicLoop(): Unit = {
     var myLevel = 0
     thorOpt.foreach { thorSchema =>
       thorSchema.adventurerMap.get(mainId).foreach {
@@ -221,12 +233,12 @@ class BotController(
       }
     }
     ClientBoot.addToPlatform {
-//      val (boundary, unit) = layerScreen.handleResize(myLevel, context)
-//      if (unit != 0) {
-//        thorOpt.foreach { r =>
-//          r.updateSize(boundary, unit)
-//        }
-//      }
+      //      val (boundary, unit) = layerScreen.handleResize(myLevel, context)
+      //      if (unit != 0) {
+      //        thorOpt.foreach { r =>
+      //          r.updateSize(boundary, unit)
+      //        }
+      //      }
       logicFrameTime = System.currentTimeMillis()
 
       gameState match {
@@ -263,8 +275,45 @@ class BotController(
           logicFrameTime = System.currentTimeMillis()
         case _ => log.info(s"state=$gameState failed")
       }
+
+      thorOpt.foreach { thorSchema =>
+        frameCount = thorSchema.systemFrame
+
+        /*推送帧号*/
+        if (BotServer.isFrameConnect) {
+          BotServer.streamSender.foreach(_ ! GrpcStreamSender.NewFrame(frameCount))
+        }
+
+        /*推送Observation*/
+        pushObservation()
+      }
     }
   }
+
+  def getObservation: (LayeredObservation, Option[ImgData]) = {
+    val humanObservation = if (BotSettings.isViewObservation) {
+      Some(drawLayerScene.get.getHumanImageData)
+    } else None
+
+    val layeredObservation = drawLayerScene.get.getLayerImageData
+    (layeredObservation, humanObservation)
+  }
+
+
+  def pushObservation(): Unit = {
+
+    ClientBoot.addToPlatform {
+      if (drawLayerScene.nonEmpty) {
+        val observation = getObservation
+        val observationRsp = ObservationRsp(Some(observation._1), observation._2)
+        if (BotServer.isObservationConnect && BotServer.streamSender.isDefined) {
+          BotServer.streamSender.get ! GrpcStreamSender.NewObservation(observationRsp)
+        }
+        lastObservation = observation
+      }
+    }
+  }
+
 
   def wsMessageHandle(data: ThorGame.WsMsgServer): Unit = {
 
@@ -276,13 +325,13 @@ class BotController(
           mainId = e.id
           mainId4Layer = e.id
           try {
-//            thorSchemaOpt = Some(ThorSchemaClientImpl(layerScreen.drawFrame, layerScreen.getCtxMap("human"), e.config, e.id, e.name, layerScreen.canvasBoundary4Huge, layerScreen.canvasUnit4Huge))
+            //            thorSchemaOpt = Some(ThorSchemaClientImpl(layerScreen.drawFrame, layerScreen.getCtxMap("human"), e.config, e.id, e.name, layerScreen.canvasBoundary4Huge, layerScreen.canvasUnit4Huge))
             thorOpt = Some(ThorSchemaBotImpl(layerScreen.drawFrame, layerScreen.getCtxMap, e.config, e.id, e.name, layerScreen.canvasBoundary, layerScreen.canvasUnit))
-//            drawScene = Some(new DrawScene(thorSchemaOpt.get))
+            //            drawScene = Some(new DrawScene(thorSchemaOpt.get))
             drawLayerScene = Some(new DrawLayerScene(thorOpt.get))
             gameConfig = Some(e.config)
             checkAndChangePreCanvas()
-//            e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2) } }
+            //            e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2) } }
             e.playerIdMap.foreach { p => thorOpt.foreach { t => t.playerIdMap.put(p._1, p._2) } }
             gameState = GameState.play
 
@@ -308,19 +357,19 @@ class BotController(
             if (e.playerId == playerInfo.playerId) {
               gameState = GameState.stop
               endTime = System.currentTimeMillis()
-//              thorSchemaOpt match {
-//                case Some(thorSchema: ThorSchemaClientImpl) =>
-//                  thorSchema.adventurerMap.get(playerInfo.playerId).foreach { my =>
-//                    thorSchema.killerNew = e.killerName
-//                    thorSchema.duringTime = duringTime(endTime - startTime)
-//                    killerName = e.killerName
-//                    killNum = my.killNum
-//                    energyScore = my.energyScore
-//                    level = my.level
-//                  }
-//                case None =>
-//                  println("there is nothing")
-//              }
+              //              thorSchemaOpt match {
+              //                case Some(thorSchema: ThorSchemaClientImpl) =>
+              //                  thorSchema.adventurerMap.get(playerInfo.playerId).foreach { my =>
+              //                    thorSchema.killerNew = e.killerName
+              //                    thorSchema.duringTime = duringTime(endTime - startTime)
+              //                    killerName = e.killerName
+              //                    killNum = my.killNum
+              //                    energyScore = my.energyScore
+              //                    level = my.level
+              //                  }
+              //                case None =>
+              //                  println("there is nothing")
+              //              }
               thorOpt match {
                 case Some(thorSchema: ThorSchemaBotImpl) =>
                   thorSchema.adventurerMap.get(playerInfo.playerId).foreach { my =>
@@ -337,7 +386,7 @@ class BotController(
             }
 
           }
-//          thorSchemaOpt.foreach(_.receiveGameEvent(e))
+          //          thorSchemaOpt.foreach(_.receiveGameEvent(e))
           thorOpt.foreach(_.receiveGameEvent(e))
 
 
@@ -352,15 +401,14 @@ class BotController(
 
         case UserMap(map) =>
           println(s"userMap ---- $map")
-//          thorSchemaOpt.foreach { grid =>
-//            map.foreach(p => grid.playerIdMap.put(p._1, p._2))
-//            grid.needUserMap = false
-//          }
+          //          thorSchemaOpt.foreach { grid =>
+          //            map.foreach(p => grid.playerIdMap.put(p._1, p._2))
+          //            grid.needUserMap = false
+          //          }
           thorOpt.foreach { grid =>
             map.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.needUserMap = false
           }
-
 
 
         case RebuildWebSocket =>
@@ -375,13 +423,13 @@ class BotController(
           e match {
             case event: ThorGame.UserEnterRoom =>
               if (thorOpt.nonEmpty) {
-//                thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
+                //                thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                 thorOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                 if (event.playerId == playerInfo.playerId) byteId = event.shortId
               } else {
                 //                wsClient ! WsClient.UserEnterRoom(event)
                 scheduler.scheduleOnce(100.millis) {
-//                  thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
+                  //                  thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                   thorOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                   if (event.playerId == playerInfo.playerId) byteId = event.shortId
                 }
@@ -389,15 +437,15 @@ class BotController(
               }
             case event: UserLeftRoom =>
               if (event.shortId == byteId) println(s"${event.shortId}  ${event.playerId} ${event.name} left room...")
-//              thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(event.shortId))
+              //              thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(event.shortId))
               thorOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(event.shortId))
             case _ =>
           }
-//          thorSchemaOpt.foreach(_.receiveGameEvent(e))
+          //          thorSchemaOpt.foreach(_.receiveGameEvent(e))
           thorOpt.foreach(_.receiveGameEvent(e))
 
         case x =>
-//          println(s"接收到无效消息$x")
+        //          println(s"接收到无效消息$x")
 
       }
     }
@@ -412,102 +460,198 @@ class BotController(
 
   def getActionSerialNum: Byte = (actionSerialNumGenerator.getAndIncrement() % 127).toByte
 
+  def initMousePosition(): Point = {
+    val random = new Random()
+    Point(random.nextFloat() * layerScreen.canvasBoundary4Huge.x, random.nextFloat() * layerScreen.canvasBoundary4Huge.y)
+  }
+
+  /*接收到来自sdk的action*/
   var lastMouseMove = 0l //限制只能发一次mousemove
   val frequency = 50
 
-  private def addUserActionListenEvent(): Unit = {
-    layerScreen.humanCanvas.getCanvas.requestFocus()
+  def receiveBotAction(action: Either[Int, Swing]): Unit = {
+    action match {
+      case Right(swing) =>
+        val moveDistance = Point(math.min(swing.distance, BotSettings.dMax), 0).rotate(swing.radian)
+        val curPosition = lastMousePosition + moveDistance
+        val theta = curPosition.getTheta(layerScreen.canvasBounds4Huge * layerScreen.canvasUnit4Huge / 2).toFloat
+        drawLayerScene.foreach { d =>
+          d.drawMouse.drawMouse(curPosition / 4)
+        }
+        thorOpt.foreach { thorSchema =>
+          if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+            val mouseDistance = math.sqrt(math.pow(curPosition.x - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(curPosition.y - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
+            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
+            val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+            if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
 
-    /*鼠标移动操作*/
-    layerScreen.humanCanvas.getCanvas.setOnMouseMoved { e =>
-      val point = Point(e.getX.toFloat, e.getY.toFloat)
-      val theta = point.getTheta(layerScreen.canvasBounds4Huge * layerScreen.canvasUnit4Huge / 2).toFloat
-      drawLayerScene.foreach{ d =>
-        d.drawMouse.drawMouse(point / 4)
-      }
-      thorOpt.foreach { thorSchema =>
-        if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-          val mouseDistance = math.sqrt(math.pow(e.getX - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(e.getY - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
-          val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
-          val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
-          if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
-
-            val offsetX = (e.getX - layerScreen.canvasBoundary4Huge.x / 2.0).toShort
-            val offsetY = (e.getY - layerScreen.canvasBoundary4Huge.y / 2.0).toShort
-            val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            wsClient ! WsClient.DispatchMsg(preExecuteAction)
-            lastMouseMove = System.currentTimeMillis()
+              val offsetX = (curPosition.x - layerScreen.canvasBoundary4Huge.x / 2.0).toShort
+              val offsetY = (curPosition.y - layerScreen.canvasBoundary4Huge.y / 2.0).toShort
+              val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
+              lastMouseMove = System.currentTimeMillis()
+              lastMousePosition = curPosition
+            }
           }
         }
-      }
 
+      case Left(fire) =>
+
+        fire match {
+          case FireAction.attack => //攻击
+            thorOpt.foreach { thorSchema =>
+              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+                attackMusic.play()
+                val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+                thorSchema.preExecuteUserEvent(preExecuteAction)
+                wsClient ! WsClient.DispatchMsg(preExecuteAction)
+
+              }
+            }
+
+          case FireAction.speedUp => //加速
+            thorOpt.foreach { thorSchema =>
+              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+                val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+                thorSchema.preExecuteUserEvent(preExecuteAction)
+                wsClient ! WsClient.DispatchMsg(preExecuteAction)
+              }
+            }
+
+          case FireAction.stopSpeedUp => //停止加速
+            thorOpt.foreach { thorSchema =>
+              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+                val preExecuteAction = MouseClickUpRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+                thorSchema.preExecuteUserEvent(preExecuteAction)
+                wsClient ! WsClient.DispatchMsg(preExecuteAction)
+              }
+            }
+
+          case _ =>
+        }
     }
+  }
 
-    /*鼠标点击事件*/
-
-
-    layerScreen.humanCanvas.getCanvas.setOnMousePressed { e =>
-      //         println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
-      thorOpt.foreach { thorSchema =>
-        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
-          if (e.isPrimaryButtonDown) {
-            attackMusic.play()
-            //            mouseLeft = true
-            val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            wsClient ! WsClient.DispatchMsg(preExecuteAction)
-          }
-          else if (e.isSecondaryButtonDown) {
-            //            mouseRight = true
-            val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            //            println(preExecuteAction)
-            wsClient ! WsClient.DispatchMsg(preExecuteAction)
-          }
-          else ()
-        }
-        else {
-          start()
-        }
+  /*复活*/
+  def sdkReincarnation(): Unit = {
+    thorOpt.foreach { thorSchema =>
+      if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+        start()
       }
     }
+  }
 
-    /*鼠标释放事件*/
-    layerScreen.humanCanvas.getCanvas.setOnMouseReleased { e =>
-      thorOpt.foreach { thorSchema =>
-        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
-          if (e.getButton == MouseButton.SECONDARY) { //右键
-            val preExecuteAction = MouseClickUpRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+
+  def getBotInformation: (Int, Int) = {
+    thorOpt match {
+      case Some(thorSchema) =>
+        thorSchema.adventurerMap.get(playerInfo.playerId) match {
+          case Some(adv) =>
+            (adv.energyScore, adv.killNum)
+          case None =>
+            (0, 0)
+        }
+      case None =>
+        (0, 0)
+    }
+  }
+
+
+  /*  private def addUserActionListenEvent(): Unit = {
+      layerScreen.humanCanvas.getCanvas.requestFocus()
+
+      /*鼠标移动操作*/
+      layerScreen.humanCanvas.getCanvas.setOnMouseMoved { e =>
+        val point = Point(e.getX.toFloat, e.getY.toFloat)
+        val theta = point.getTheta(layerScreen.canvasBounds4Huge * layerScreen.canvasUnit4Huge / 2).toFloat
+        drawLayerScene.foreach { d =>
+          d.drawMouse.drawMouse(point / 4)
+        }
+        thorOpt.foreach { thorSchema =>
+          if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+            val mouseDistance = math.sqrt(math.pow(e.getX - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(e.getY - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
+            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
+            val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+            if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+
+              val offsetX = (e.getX - layerScreen.canvasBoundary4Huge.x / 2.0).toShort
+              val offsetY = (e.getY - layerScreen.canvasBoundary4Huge.y / 2.0).toShort
+              val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
+              lastMouseMove = System.currentTimeMillis()
+            }
           }
         }
-      }
-    }
 
-    /*键盘事件*/
-    layerScreen.humanCanvas.getCanvas.setOnKeyPressed { e =>
-      thorOpt.foreach { thorSchema =>
-        if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
-          if (e.getCode == KeyCode.SPACE) {
-            print("space")
+      }
+
+      /*鼠标点击事件*/
+
+
+      layerScreen.humanCanvas.getCanvas.setOnMousePressed { e =>
+        //         println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+        thorOpt.foreach { thorSchema =>
+          if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+            if (e.isPrimaryButtonDown) {
+              attackMusic.play()
+              //            mouseLeft = true
+              val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
+            }
+            else if (e.isSecondaryButtonDown) {
+              //            mouseRight = true
+              val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              //            println(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
+            }
+            else ()
+          }
+          else {
             start()
-          } else if (e.getCode == KeyCode.M) {
-            if (needBgm) {
-              gameMusicPlayer.pause()
-              needBgm = false
-            } else {
-              gameMusicPlayer.play()
-              needBgm = true
+          }
+        }
+      }
+
+      /*鼠标释放事件*/
+      layerScreen.humanCanvas.getCanvas.setOnMouseReleased { e =>
+        thorOpt.foreach { thorSchema =>
+          if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+            if (e.getButton == MouseButton.SECONDARY) { //右键
+              val preExecuteAction = MouseClickUpRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
             }
           }
         }
       }
-    }
 
-  }
+      /*键盘事件*/
+      layerScreen.humanCanvas.getCanvas.setOnKeyPressed { e =>
+        thorOpt.foreach { thorSchema =>
+          if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+            if (e.getCode == KeyCode.SPACE) {
+              print("space")
+              start()
+            } else if (e.getCode == KeyCode.M) {
+              if (needBgm) {
+                gameMusicPlayer.pause()
+                needBgm = false
+              } else {
+                gameMusicPlayer.play()
+                needBgm = true
+              }
+            }
+          }
+        }
+      }
+
+    }*/
 
   def checkAndChangePreCanvas(): Unit = {
     val timer = new Timer

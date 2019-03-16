@@ -100,19 +100,19 @@ object RoomManager {
                     } else {
                       userActor ! UserActor.JoinRoomFail(s"房间-${roomId}密码错误！")
                     }
-                  case None => //指定房间不存在直接创建
+                  case None => //指定房间不存在直接创建，默认无密码
                     roomInUse.put(roomId, ("", List((userId, name))))
                     getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, userId, name, userActor)
 
                 }
 
 
-              case None => //随机分配room
-                roomInUse.find(p => p._2._2.length < personLimit).toList.sortBy(_._1).headOption match {
+              case None => //随机分配room, 加入无密码的
+                roomInUse.find(p => p._2._2.length < personLimit && p._2._1.isEmpty).toList.sortBy(_._1).headOption match {
                   case Some(t) =>
                     roomInUse.put(t._1, ("", (userId, name) :: t._2._2))
                     getRoomActor(ctx, t._1) ! RoomActor.JoinRoom(t._1, userId, name, userActor)
-                  case None => //无可用房间，创建新房间
+                  case None => //无可用房间，创建新房间,默认无密码
                     var roomId = roomIdGenerator.getAndIncrement()
                     while (roomInUse.exists(_._1 == roomId)) roomId = roomIdGenerator.getAndIncrement()
                     roomInUse.put(roomId, ("", List((userId, name))))

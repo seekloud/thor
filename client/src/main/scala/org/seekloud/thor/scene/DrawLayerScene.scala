@@ -697,18 +697,23 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
 
   import org.seekloud.thor.common.BotSettings.isGray
 
-  def getAllImageData: LayeredObservation ={
+  def getHumanImageData: ImgData = {
+    val humanCtx = impl.ctx.find(_._1 == "human").get
+    getImageData(humanCtx)._2
+  }
+
+  def getLayerImageData: LayeredObservation ={
     val ctxList = impl.ctx
     val a = ctxList.map(c => getImageData(c))
     val layeredObservation: LayeredObservation = LayeredObservation(
-      a.get(""),
-      a.get(""),
-      a.get(""),
-      a.get(""),
-      a.get(""),
-      a.get(""),
-      a.get(""),
-      None
+      a.get("position"),
+      a.get("border"),
+      a.get("food"),
+      a.get("allPlayer"),
+      a.get("all"),
+      a.get("self"),
+      a.get("mouse"),
+      a.get("state")
     )
     layeredObservation
   }

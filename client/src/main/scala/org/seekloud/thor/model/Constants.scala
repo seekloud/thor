@@ -44,6 +44,12 @@ object Constants {
     val height = 500
   }
 
+  object FireAction {
+    val attack = 1
+    val speedUp = 2
+    val stopSpeedUp = 3
+  }
+
   val pictureMap = mutable.HashMap[String,String] (
     "background.png" -> "img/background.png",
     "char1-0.png" -> "img/char1-0.png",
