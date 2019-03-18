@@ -18,7 +18,7 @@ object BotActor {
 
   trait Command
 
-  final case class CreateRoom(psw:Option[String], replyTo: ActorRef[EnterRoomRsp]) extends Command
+  final case class CreateRoom(psw: Option[String], replyTo: ActorRef[EnterRoomRsp]) extends Command
 
   final case class JoinRoom(roomId: Long, pwd: String, replyTo: ActorRef[EnterRoomRsp]) extends Command
 
@@ -42,7 +42,8 @@ object BotActor {
 
         case msg: JoinRoom =>
           botController.sdkReplyTo = Some(msg.replyTo)
-          wsClient ! WsClient.StartGame(msg.roomId, Some(msg.pwd))
+          val pwdOpt = if (msg.pwd.nonEmpty) Some(msg.pwd) else None
+          wsClient ! WsClient.StartGame(msg.roomId, pwdOpt)
           Behaviors.same
 
         case LeaveRoom =>
@@ -54,9 +55,6 @@ object BotActor {
           Behaviors.unhandled
       }
     }
-
-
-
 
 
 }
