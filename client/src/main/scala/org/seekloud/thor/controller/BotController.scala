@@ -83,13 +83,15 @@ class BotController(
 
   protected val preDrawFrame = new PreDraw
 
-  var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
+//  var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
 
   var sdkReplyTo: Option[ActorRef[EnterRoomRsp]] = None
 
   var myActions: Map[Int, List[UserActionEvent]] = Map.empty
 
   var lastMousePosition: Point = _
+
+  initMousePosition()
 
   var lastObservation: (LayeredObservation, Option[ImgData]) = _
 
@@ -154,7 +156,6 @@ class BotController(
   def start(): Unit = {
     if (firstCome) {
       firstCome = false
-      initMousePosition()
       println("start bot controller ...")
       startGameLoop()
       //      addUserActionListenEvent()
@@ -375,7 +376,6 @@ class BotController(
         //          historyRank = e.historyRank
 
         case e: ThorGame.GridSyncState =>
-          thorSchemaOpt.foreach(_.receiveThorSchemaState(e.d))
           thorOpt.foreach(_.receiveThorSchemaState(e.d))
           justSynced = true
 
@@ -388,11 +388,10 @@ class BotController(
 
 
         case RebuildWebSocket =>
-          thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录"))
+//          thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录"))
           closeHolder()
 
         case e: ThorGame.UserActionEvent =>
-          thorSchemaOpt.foreach(_.receiveUserEvent(e))
           thorOpt.foreach(_.receiveUserEvent(e))
 
         case e: ThorGame.GameEvent =>
@@ -431,9 +430,9 @@ class BotController(
 
   def getActionSerialNum: Byte = (actionSerialNumGenerator.getAndIncrement() % 127).toByte
 
-  def initMousePosition(): Point = {
+  def initMousePosition(): Unit = {
     val random = new Random()
-    Point(random.nextFloat() * layerScreen.canvasBoundary4Huge.x, random.nextFloat() * layerScreen.canvasBoundary4Huge.y)
+    lastMousePosition = Point(random.nextFloat() * layerScreen.canvasBoundary4Huge.x, random.nextFloat() * layerScreen.canvasBoundary4Huge.y)
   }
 
   /*接收到来自sdk的action*/

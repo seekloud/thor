@@ -295,7 +295,7 @@ object WsClient {
 
         case msg: BotLogin =>
           val layerScene = new LayerScene
-          val bc = new BotController(ctx.self, msg.botId, stageContext, layerScene)
+          val bc = new BotController(ctx.self, s"bot${msg.botId}", stageContext, layerScene)
           EsheepClient.getBotToken(msg.botId, msg.botKey).map {
             case Right(tokenRst) =>
               if (tokenRst.errCode == 0) {
