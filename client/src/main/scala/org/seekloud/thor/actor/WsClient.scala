@@ -125,9 +125,7 @@ object WsClient {
           botController match {
             case Some(bc) =>
             //TODO 启动bot相关
-              println("has bc")
               ClientBoot.addToPlatform {
-                println("bc start")
                 bc.start()
                 stageContext.switchToLayer(bc.getLs.getScene)
               }
