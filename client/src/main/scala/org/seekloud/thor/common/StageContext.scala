@@ -66,7 +66,7 @@ class StageContext(stage: Stage) {
     stage.show()
   }
 
-  def switchToLayer(scene: Scene, title: String = "THOR", resize: Boolean = false, fullScreen: Boolean = false): Unit = {
+  def switchToLayer(scene: Scene, title: String = "THOR", resize: Boolean = true, fullScreen: Boolean = false): Unit = {
     //    stage.centerOnScreen()
     stage.setScene(scene)
     stage.sizeToScene()

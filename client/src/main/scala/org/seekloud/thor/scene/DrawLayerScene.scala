@@ -110,12 +110,8 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
     moveDistance
   }
 
-  var a = 0
   object drawFood {
     def drawFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
-      a += 1
-      if (a % 100 == 0)
-       println("draw food")
       impl.ctx("food").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("food").setFill("#000000")
       impl.ctx("food").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
@@ -308,6 +304,13 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       val dx = 2 * r
       val dy = 2 * r
 
+      if (adventurer.isSpeedUp) { //加速特效
+        val height = impl.config.getAdventurerRadiusByLevel(adventurer.level) * 2 * canvasUnit
+        val width = 3 * height
+
+        CanvasUtils.rotateImage("speed", impl.drawFrame, ctx, Nil, Nil, "img/speedparticles.png", Point(sx, sy) * canvasUnit, Point(-height, 0), width, height, adventurer.getAdventurerState.direction, impl.preTime, adventurer.getAdventurerState.level)
+      }
+
       //画人物
       if (isHuman)
         CanvasUtils.rotateImage("adventurer", impl.drawFrame, ctx, Nil, impl.preAdventurerImage, pictureMap(s"char${(adventurer.level % 21 - 1) / 4 + 1}-${(adventurer.level - 1) % 4}.png"), Point(sx, sy) * canvasUnit, Point(0, 0), dx * canvasUnit * 1.1.toFloat, 0, adventurer.getAdventurerState.direction, impl.preTime, adventurer.getAdventurerState.level)
@@ -396,7 +399,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           }
       }
     }
-    var b = 0
+
     def drawSelf(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
       impl.ctx("self").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("self").setFill("#000000")
@@ -454,15 +457,6 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("mouse").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("mouse").setFill("#000000")
       impl.ctx("mouse").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
-//      impl.ctx("mouse").beginPath()
-//      impl.ctx("mouse").moveTo(p.x - 6.6, p.y - 2.0)
-//      impl.ctx("mouse").lineTo(p.x + 6.6, p.y - 2.0)
-//      impl.ctx("mouse").lineTo(p.x - 4.0, p.y + 6.0)
-//      impl.ctx("mouse").lineTo(p.x - 0.0, p.y - 7.0)
-//      impl.ctx("mouse").lineTo(p.x + 4.0, p.y + 6.0)
-//      impl.ctx("mouse").setFill("#b1cfed")
-//      impl.ctx("mouse").fill()
-
       impl.ctx("mouse").setFill("#FFFFFF")
       impl.ctx("mouse").beginPath()
       impl.ctx("mouse").arc(p.x, p.y, impl.canvasUnit * 2, 0, 360, counterclockwise = false)
@@ -493,7 +487,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
         }
       }
     }
-    var b = 0
+
     def drawAState(adventurer: Adventurer): Unit = {
       val isSpeedUp = adventurer.isSpeedUp
       val radius = adventurer.radius
@@ -501,9 +495,6 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       val speed = if (isSpeedUp) speedUpRate * speedByLevel else speedByLevel
       val maxEnergy = impl.config.getThorGameConfigImpl().getMaxEnergyByLevel(adventurer.level)
       val energy = adventurer.energy
-      b += 1
-      if (b % 100 ==0)
-        println(s"energy : $energy")
       val energyUnit = 150 / maxEnergy
       val isNewBorn = impl.newbornAdventurerMap.get(adventurer.playerId) match {
         case Some(_) => 1
@@ -558,9 +549,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("human").setTextAlign("center")
       impl.ctx("human").setFont("Comic Sans Ms", 36)
       impl.ctx("human").setTextBaseLine("top")
-      impl.ctx("human").fillText(adventurer.level.toString, barLeft - 32, barTop)
-      impl.ctx("human").restore()
-
+      impl.ctx("human").fillText(adventurer.level.toString, barLeft - 32, barTop - 15)
       impl.ctx("human").restore()
     }
 
@@ -679,6 +668,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       }
       impl.ctx("human").restore()
     }
+    
   }
 
   def drawGameLoading(ctx: MiddleContextInFx): Unit = {

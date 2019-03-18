@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import scala.concurrent.duration._
 import javafx.animation.{Animation, AnimationTimer, KeyFrame, Timeline}
-import javafx.scene.input.{KeyCode, MouseButton}
+//import javafx.scene.input.{KeyCode, MouseButton}
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
 import javafx.util.Duration
 import org.seekloud.thor.ClientBoot
@@ -54,14 +54,14 @@ import scala.util.Random
   */
 class BotController(
   wsClient: ActorRef[WsClient.WsCommand],
-  playerInfo: WsClient.PlayerInfo,
+  playerId: String,
   context: StageContext,
   layerScreen: LayerScene
 ) {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
-  def getPlayer: WsClient.PlayerInfo = playerInfo
+  def getPlayer: String = playerId
 
   def getWs: ActorRef[WsClient.WsCommand] = wsClient
 
@@ -148,12 +148,7 @@ class BotController(
 
   private val animationTimer = new AnimationTimer() {
     override def handle(now: Long): Unit = {
-      val a = System.currentTimeMillis()
-      drawGameByTime(System.currentTimeMillis() - logicFrameTime, layerScreen.canvasUnit, layerScreen.canvasUnit4Huge, layerScreen.canvasBounds)
-      val b = System.currentTimeMillis()
-      if (b - a > 10)
-        println(s"draw all time span: ${b - a}")
-      if (gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
+
     }
   }
 
@@ -190,7 +185,7 @@ class BotController(
     //      logicLoop()
     //    }
     timeline.getKeyFrames.add(keyFrame)
-    animationTimer.start()
+//    animationTimer.start()
     timeline.play()
   }
 
@@ -232,6 +227,7 @@ class BotController(
         ad => myLevel = ad.getAdventurerState.level
       }
     }
+
     ClientBoot.addToPlatform {
       //      val (boundary, unit) = layerScreen.handleResize(myLevel, context)
       //      if (unit != 0) {
@@ -243,9 +239,9 @@ class BotController(
 
       gameState match {
         case GameState.firstCome =>
-          thorSchemaOpt.foreach(_.drawGameLoading())
+          thorOpt.foreach(_.drawGameLoading())
         case GameState.loadingPlay =>
-          thorSchemaOpt.foreach(_.drawGameLoading())
+          thorOpt.foreach(_.drawGameLoading())
         case GameState.stop =>
           thorOpt.foreach {
             _.update()
@@ -253,14 +249,10 @@ class BotController(
           frameTime :+ System.currentTimeMillis() - logicFrameTime
           logicFrameTime = System.currentTimeMillis()
         case GameState.replayLoading =>
-          thorSchemaOpt.foreach {
+          thorOpt.foreach {
             _.drawGameLoading()
           }
         case GameState.play =>
-          //        if (Shortcut.isPaused("bgm-2")) {
-          //          Shortcut.playMusic("bgm-2")
-          //        }
-
           thorOpt.foreach { thorSchema =>
             thorSchema.update()
             if (thorSchema.needUserMap && logicFrameTime - lastSendReq > 5000) {
@@ -287,6 +279,12 @@ class BotController(
         /*推送Observation*/
         pushObservation()
       }
+      val a = System.currentTimeMillis()
+      drawGameByTime(System.currentTimeMillis() - logicFrameTime, layerScreen.canvasUnit, layerScreen.canvasUnit4Huge, layerScreen.canvasBounds)
+      val b = System.currentTimeMillis()
+      if (b - a > 10)
+        println(s"draw all time span: ${b - a}")
+      if (gameState == GameState.stop && thorOpt.nonEmpty) thorOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     }
   }
 
@@ -325,13 +323,10 @@ class BotController(
           mainId = e.id
           mainId4Layer = e.id
           try {
-            //            thorSchemaOpt = Some(ThorSchemaClientImpl(layerScreen.drawFrame, layerScreen.getCtxMap("human"), e.config, e.id, e.name, layerScreen.canvasBoundary4Huge, layerScreen.canvasUnit4Huge))
             thorOpt = Some(ThorSchemaBotImpl(layerScreen.drawFrame, layerScreen.getCtxMap, e.config, e.id, e.name, layerScreen.canvasBoundary, layerScreen.canvasUnit))
-            //            drawScene = Some(new DrawScene(thorSchemaOpt.get))
             drawLayerScene = Some(new DrawLayerScene(thorOpt.get))
             gameConfig = Some(e.config)
             checkAndChangePreCanvas()
-            //            e.playerIdMap.foreach { p => thorSchemaOpt.foreach { t => t.playerIdMap.put(p._1, p._2) } }
             e.playerIdMap.foreach { p => thorOpt.foreach { t => t.playerIdMap.put(p._1, p._2) } }
             gameState = GameState.play
 
@@ -345,8 +340,8 @@ class BotController(
 
         case x@RestartYourInfo =>
           println(x)
-          mainId = playerInfo.playerId
-          mainId4Layer = playerInfo.playerId
+          mainId = playerId
+          mainId4Layer = playerId
           gameState = GameState.play
 
         case e: ThorGame.BeAttacked =>
@@ -354,25 +349,12 @@ class BotController(
           barrageTime = 300
           if (e.playerId == mainId) {
             mainId = e.killerId //跟随凶手视角
-            if (e.playerId == playerInfo.playerId) {
+            if (e.playerId == playerId) {
               gameState = GameState.stop
               endTime = System.currentTimeMillis()
-              //              thorSchemaOpt match {
-              //                case Some(thorSchema: ThorSchemaClientImpl) =>
-              //                  thorSchema.adventurerMap.get(playerInfo.playerId).foreach { my =>
-              //                    thorSchema.killerNew = e.killerName
-              //                    thorSchema.duringTime = duringTime(endTime - startTime)
-              //                    killerName = e.killerName
-              //                    killNum = my.killNum
-              //                    energyScore = my.energyScore
-              //                    level = my.level
-              //                  }
-              //                case None =>
-              //                  println("there is nothing")
-              //              }
               thorOpt match {
                 case Some(thorSchema: ThorSchemaBotImpl) =>
-                  thorSchema.adventurerMap.get(playerInfo.playerId).foreach { my =>
+                  thorSchema.adventurerMap.get(playerId).foreach { my =>
                     thorSchema.killerNew = e.killerName
                     thorSchema.duringTime = duringTime(endTime - startTime)
                     killerName = e.killerName
@@ -386,7 +368,6 @@ class BotController(
             }
 
           }
-          //          thorSchemaOpt.foreach(_.receiveGameEvent(e))
           thorOpt.foreach(_.receiveGameEvent(e))
 
 
@@ -401,10 +382,6 @@ class BotController(
 
         case UserMap(map) =>
           println(s"userMap ---- $map")
-          //          thorSchemaOpt.foreach { grid =>
-          //            map.foreach(p => grid.playerIdMap.put(p._1, p._2))
-          //            grid.needUserMap = false
-          //          }
           thorOpt.foreach { grid =>
             map.foreach(p => grid.playerIdMap.put(p._1, p._2))
             grid.needUserMap = false
@@ -423,29 +400,25 @@ class BotController(
           e match {
             case event: ThorGame.UserEnterRoom =>
               if (thorOpt.nonEmpty) {
-                //                thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                 thorOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
-                if (event.playerId == playerInfo.playerId) byteId = event.shortId
+                if (event.playerId == playerId) byteId = event.shortId
               } else {
                 //                wsClient ! WsClient.UserEnterRoom(event)
                 scheduler.scheduleOnce(100.millis) {
-                  //                  thorSchemaOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
                   thorOpt.get.playerIdMap.put(event.shortId, (event.playerId, event.name))
-                  if (event.playerId == playerInfo.playerId) byteId = event.shortId
+                  if (event.playerId == playerId) byteId = event.shortId
                 }
 
               }
             case event: UserLeftRoom =>
               if (event.shortId == byteId) println(s"${event.shortId}  ${event.playerId} ${event.name} left room...")
-              //              thorSchemaOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(event.shortId))
               thorOpt.foreach(thorSchema => thorSchema.playerIdMap.remove(event.shortId))
             case _ =>
           }
-          //          thorSchemaOpt.foreach(_.receiveGameEvent(e))
           thorOpt.foreach(_.receiveGameEvent(e))
 
         case x =>
-        //          println(s"接收到无效消息$x")
+                  println(s"接收到无效消息$x")
 
       }
     }
@@ -479,10 +452,10 @@ class BotController(
           d.drawMouse.drawMouse(curPosition / 4)
         }
         thorOpt.foreach { thorSchema =>
-          if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+          if (thorSchema.adventurerMap.contains(playerId)) {
             val mouseDistance = math.sqrt(math.pow(curPosition.x - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(curPosition.y - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
-            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
-            val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
+            val direction = thorSchema.adventurerMap(playerId).direction
             if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
 
               val offsetX = (curPosition.x - layerScreen.canvasBoundary4Huge.x / 2.0).toShort
@@ -502,7 +475,7 @@ class BotController(
         fire match {
           case FireAction.attack => //攻击
             thorOpt.foreach { thorSchema =>
-              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerId)) {
                 attackMusic.play()
                 val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
                 thorSchema.preExecuteUserEvent(preExecuteAction)
@@ -513,7 +486,7 @@ class BotController(
 
           case FireAction.speedUp => //加速
             thorOpt.foreach { thorSchema =>
-              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerId)) {
                 val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
                 thorSchema.preExecuteUserEvent(preExecuteAction)
                 wsClient ! WsClient.DispatchMsg(preExecuteAction)
@@ -522,7 +495,7 @@ class BotController(
 
           case FireAction.stopSpeedUp => //停止加速
             thorOpt.foreach { thorSchema =>
-              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+              if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerId)) {
                 val preExecuteAction = MouseClickUpRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
                 thorSchema.preExecuteUserEvent(preExecuteAction)
                 wsClient ! WsClient.DispatchMsg(preExecuteAction)
@@ -537,7 +510,7 @@ class BotController(
   /*复活*/
   def sdkReincarnation(): Unit = {
     thorOpt.foreach { thorSchema =>
-      if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+      if (!thorSchema.adventurerMap.exists(_._1 == playerId)) {
         start()
       }
     }
@@ -547,7 +520,7 @@ class BotController(
   def getBotInformation: (Int, Int) = {
     thorOpt match {
       case Some(thorSchema) =>
-        thorSchema.adventurerMap.get(playerInfo.playerId) match {
+        thorSchema.adventurerMap.get(playerId) match {
           case Some(adv) =>
             (adv.energyScore, adv.killNum)
           case None =>
@@ -570,10 +543,10 @@ class BotController(
           d.drawMouse.drawMouse(point / 4)
         }
         thorOpt.foreach { thorSchema =>
-          if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+          if (thorSchema.adventurerMap.contains(playerId)) {
             val mouseDistance = math.sqrt(math.pow(e.getX - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(e.getY - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
-            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
-            val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
+            val direction = thorSchema.adventurerMap(playerId).direction
             if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
 
               val offsetX = (e.getX - layerScreen.canvasBoundary4Huge.x / 2.0).toShort
@@ -595,7 +568,7 @@ class BotController(
       layerScreen.humanCanvas.getCanvas.setOnMousePressed { e =>
         //         println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
         thorOpt.foreach { thorSchema =>
-          if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+          if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerId)) {
             if (e.isPrimaryButtonDown) {
               attackMusic.play()
               //            mouseLeft = true
@@ -621,7 +594,7 @@ class BotController(
       /*鼠标释放事件*/
       layerScreen.humanCanvas.getCanvas.setOnMouseReleased { e =>
         thorOpt.foreach { thorSchema =>
-          if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+          if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerId)) {
             if (e.getButton == MouseButton.SECONDARY) { //右键
               val preExecuteAction = MouseClickUpRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
               thorSchema.preExecuteUserEvent(preExecuteAction)
@@ -634,7 +607,7 @@ class BotController(
       /*键盘事件*/
       layerScreen.humanCanvas.getCanvas.setOnKeyPressed { e =>
         thorOpt.foreach { thorSchema =>
-          if (!thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId)) {
+          if (!thorSchema.adventurerMap.exists(_._1 == playerId)) {
             if (e.getCode == KeyCode.SPACE) {
               print("space")
               start()

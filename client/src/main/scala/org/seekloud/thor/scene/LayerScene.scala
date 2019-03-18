@@ -113,6 +113,17 @@ class LayerScene {
 
   def getCtxMap: Map[String,MiddleContextInFx] = ctxMap
 
+  def drawWait(): Unit = {
+    val w = CanvasWidth
+    val h = CanvasHeight
+    humanCtx.setFill("#000000")
+    humanCtx.setTextAlign("center")
+    humanCtx.setFont("Helvetica", 35)
+    val text = "Waiting for bot to join in!"
+    val l = humanCtx.measureText(text)
+    humanCtx.fillText(text, (w - l) / 2, h / 3)
+  }
+
 //  def handleResize(level: Int, context: StageContext): (Point, Float) = {
 //    val width = context.getStageWidth.toFloat
 //    val height = context.getStageHeight.toFloat
