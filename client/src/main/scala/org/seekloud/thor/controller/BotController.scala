@@ -146,12 +146,6 @@ class BotController(
   var frameTimeSize = 10
   var frameTimeSingle = 0l
 
-  private val animationTimer = new AnimationTimer() {
-    override def handle(now: Long): Unit = {
-
-    }
-  }
-
 
   protected def setGameState(s: Int): Unit = {
     gameState = s
@@ -426,7 +420,6 @@ class BotController(
   }
 
   private def closeHolder(): Unit = {
-    animationTimer.stop()
     //remind 此处关闭WebSocket
     wsClient ! WsClient.Stop
   }
