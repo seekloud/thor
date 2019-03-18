@@ -163,33 +163,4 @@ trait ServiceUtils extends CirceSupport with SessionBase{
     }
   }
 
-  def wxRedirectUrl:String = {
-    val domainUrl = AppSettings.baseUrl
-    val callbackUrl = URLEncoder.encode(s"$domainUrl/${AppSettings.rootPath}/wxaccount/wxCallback", "UTF-8")
-    val redirectUrl = s"https://open.weixin.qq.com/connect/oauth2/authorize?" +
-      s"appid=${AppSettings.MpAuthorConfig.mpAppId}" +
-      s"&redirect_uri=$callbackUrl" +
-      "&response_type=code" +
-      "&scope=snsapi_userinfo" +
-      s"&component_appid=${AppSettings.MpAuthorConfig.componentAppId}#wechat_redirect"
-    redirectUrl
-  }
-
-
-  def authUser(f: SessionCombine => server.Route) = loggingAction { ctx =>
-    optionalUserSession {
-      case Some(usersession) =>
-        f(usersession)
-      case None =>
-        println("authuser  wxredirect+++++ 1000202")
-        complete(CommonErrorCode.noSessionError(wxRedirectUrl))
-    }
-  }
-
-
-
-
-
-
-
 }

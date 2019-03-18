@@ -56,11 +56,6 @@ object AppSettings {
 
   val testPsw = appConfig.getString("testPsw")
   val version = appConfig.getString("version")
-//  val wxConfig = appConfig.getConfig("wx.config")
-//  val mpAppId = wxConfig.getString("mpAppId")
-//  val componentAppId = wxConfig.getString("componentAppid")
-//  val clientAppId = wxConfig.getString("clientAppId")
-
 
 
 
@@ -74,8 +69,6 @@ object AppSettings {
 
 
 
-//  val appIdConfig=appConfig.getConfig("appId.config")
-
   val httpInterface = appConfig.getString("http.interface")
   val httpPort = appConfig.getInt("http.port")
 
@@ -86,7 +79,6 @@ object AppSettings {
 
 
   val authCheck = appConfig.getBoolean("authCheck")
-  val ramblerAuthCheck = appConfig.getBoolean("ramblerAuthCheck")
 
 
   val gameDataDirectoryPath = appConfig.getString("gameDataDirectoryPath")
@@ -104,15 +96,6 @@ object AppSettings {
   val slickMaxLifetime = slickConfig.getInt("maxLifetime")
 
 
-  private val ramblerConfig = appConfig.getConfig("rambler")
-  val ramblerAppId = ramblerConfig.getString("appId")
-  val ramblerSecureKey = ramblerConfig.getString("secureKey")
-  val ramblerProtocol = ramblerConfig.getString("protocol")
-  val ramblerHost = ramblerConfig.getString("host")
-  val ramblerPort = ramblerConfig.getInt("port")
-  val ramblerDomain = ramblerConfig.getString("domain")
-  val ramblerRootUrl = ramblerConfig.getString("rootUrl")
-
 
   val dependenceConfig = config.getConfig("dependence")
 
@@ -124,7 +107,6 @@ object AppSettings {
   val esheepPort = eSheepConfig.getInt("port")
   val esheepDomain = eSheepConfig.getString("domain")
   val esheepUrl = eSheepConfig.getString("url")
-
 
 
 
@@ -141,48 +123,6 @@ object AppSettings {
       sessionEncryptData = sConf.getBoolean("encryptData")
     )
   }
-
-  object MpAuthorConfig {
-    private val conf = dependence.getConfig("mpAuthor")
-    val protocol = conf.getString("protocol")
-    val host = conf.getString("host")
-    val port = conf.getString("port")
-    val appId = conf.getString("appId")
-    val secureKey = conf.getString("secureKey")
-    val componentAppId = conf.getString("componentAppId")
-    val mpAppId = conf.getString("mpAppId")
-  }
-
-  private val upperRainbowConfig = appConfig.getConfig("upperRainbowConf")
-  val upperRainbowAppId = upperRainbowConfig.getString("appId")
-  val upperRainbowSecureKey = upperRainbowConfig.getString("secureKey")
-//  val upperRainbowProtocol = upperRainbowConfig.getString("protocol")
-  val upperRainbowHost = upperRainbowConfig.getString("host")
-  val upperRainbowPort = upperRainbowConfig.getInt("port")
-
-
-  object UpperRainbowConfig{
-    val isWorkConfig = upperRainbowConfig.getBoolean("isWork")
-    val appIdConfig = upperRainbowConfig.getString("appId")
-    val secureKeyConfig = upperRainbowConfig.getString("secureKey")
-    val hostConfig = upperRainbowConfig.getString("host")
-    val portConfig = upperRainbowConfig.getString("port")
-    object EventConfig{
-      val eventFetcherConfig = upperRainbowConfig.getConfig("eventFetcher")
-      val eachFetchNum = eventFetcherConfig.getInt("eachFetchNum")
-      val idleIntervalTime = eventFetcherConfig.getLong("idleIntervalTime")
-      val busyIntervalTime = eventFetcherConfig.getLong("busyIntervalTime")
-    }
-
-    object UserInfoConfig{
-      val userInfoFetcherConfig = upperRainbowConfig.getConfig("userInfoFetcher")
-      val eachFetchNum = userInfoFetcherConfig.getInt("eachFetchNum")
-      val idleIntervalTime = userInfoFetcherConfig.getLong("idleIntervalTime")
-      val busyIntervalTime = userInfoFetcherConfig.getLong("busyIntervalTime")
-    }
-
-  }
-
 
 
   val essfMapKeyName = "essfMap"
