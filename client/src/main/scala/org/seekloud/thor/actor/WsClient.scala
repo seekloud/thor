@@ -363,7 +363,7 @@ object WsClient {
         case ClientTest(roomId) =>
           log.info("get clientTest")
 
-          val rsp1 = client.joinRoom("46", "123") //change pwd
+          val rsp1 = client.joinRoom("2", "123") //change pwd
           rsp1.onComplete{
             a=>println(a)
               println("======")

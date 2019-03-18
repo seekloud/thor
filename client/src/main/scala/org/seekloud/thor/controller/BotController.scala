@@ -345,7 +345,6 @@ class BotController(
           if (e.playerId == mainId) {
 //            wsClient ! WsClient.LeaveRoomTest()
             mainId = e.killerId //跟随凶手视角
-            mainId4Layer = e.killerId
             if (e.playerId == playerId) {
               gameState = GameState.stop
               endTime = System.currentTimeMillis()
