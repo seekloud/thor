@@ -86,7 +86,15 @@ object BotClient {
 
     val rsp1 = client.createRoom()
 
-    val rsp2 = client.observation()
+//    val rsp3 = client.joinRoom("1","")
+
+//    val rsp2 = client.observation()
+
+//    val rsp4 = client.leaveRoom()
+
+    val rsp5 = client.actionSpace()
+
+    val rsp6 = client.systemInfo()
 
     println("--------  begin sleep   ----------------")
     Thread.sleep(10000)
@@ -94,7 +102,15 @@ object BotClient {
 
     println(rsp1)
     println("------------------------")
-    println(rsp2)
+//    println(rsp2)
+    println("------------------------")
+//    println(rsp3)
+    println("------------------------")
+//    println(rsp4)
+    println("------------------------")
+    println(rsp5)
+    println("------------------------")
+    println(rsp6)
     println("client DONE.")
 
 

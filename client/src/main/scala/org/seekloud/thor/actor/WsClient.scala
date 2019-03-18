@@ -23,6 +23,7 @@ import org.seekloud.thor.common.{BotSettings, Routes, StageContext}
 import org.seekloud.thor.controller.{BotController, GameController, LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
+import org.seekloud.thor.bot.BotClient
 import org.seekloud.thor.protocol.BotProtocol.EnterRoomRsp
 import org.seekloud.thor.protocol.{ESheepProtocol, ThorClientProtocol}
 import org.seekloud.thor.protocol.ESheepProtocol.{HeartBeat, Ws4AgentRsp}
@@ -80,6 +81,29 @@ object WsClient {
 
   final case object Stop extends WsCommand
 
+  case class ClientTest(roomId:Long) extends WsCommand
+
+  case class GetObservationTest() extends WsCommand
+
+  case class ActionSpaceTest() extends WsCommand
+
+  case class ActionTest() extends WsCommand
+
+  case class LeaveRoomTest() extends WsCommand
+
+  case class SystemInfoTest() extends WsCommand
+
+  case object TimerKeyForTest
+
+  case object LeaveRoomKey
+
+  val host = "127.0.0.1"
+  val port = 5321
+  val playerId = "test"
+  val apiToken = "test"
+
+  val client = new BotClient(host, port, playerId, apiToken)
+
   private[this] def switchBehavior(ctx: ActorContext[WsCommand],
     behaviorName: String,
     behavior: Behavior[WsCommand])
@@ -124,7 +148,6 @@ object WsClient {
 
           botController match {
             case Some(bc) =>
-            //TODO 启动bot相关
               ClientBoot.addToPlatform {
                 bc.start()
                 stageContext.switchToLayer(bc.getLs.getScene)
@@ -152,7 +175,6 @@ object WsClient {
 
           botController match {
             case Some(bc) =>
-            //TODO 启动bot相关
               ClientBoot.addToPlatform {
                 bc.start()
                 stageContext.switchToLayer(bc.getLs.getScene)
@@ -274,7 +296,6 @@ object WsClient {
         case msg: BotLogin =>
           val layerScene = new LayerScene
           val bc = new BotController(ctx.self, msg.botId, stageContext, layerScene)
-//          val botController = new BotController() //TODO 具体化
           EsheepClient.getBotToken(msg.botId, msg.botKey).map {
             case Right(tokenRst) =>
               if (tokenRst.errCode == 0) {
@@ -306,6 +327,7 @@ object WsClient {
                             stageContext.switchToLayer(layerScene.getScene)
                             layerScene.drawWait()
                           }
+                          timer.startSingleTimer(TimerKeyForTest, ClientTest(1),5.seconds)
                           Future.successful(s"link game server success.")
                         } else {
                           throw new RuntimeException(s"link game server failed: ${upgrade.response.status}")
@@ -336,6 +358,74 @@ object WsClient {
 
         case msg: DispatchMsg =>
           gameMsgSender ! msg.msg
+          Behaviors.same
+
+        case ClientTest(roomId) =>
+          log.info("get clientTest")
+
+          val rsp1 = client.createRoom() //change pwd
+          rsp1.onComplete{
+            a=>println(a)
+              println("======")
+              timer.startSingleTimer(TimerKeyForTest, GetObservationTest(), 5.seconds)
+          }
+
+          Behavior.same
+
+        case GetObservationTest() =>
+          log.info("get observationTest")
+          val t = System.currentTimeMillis()
+          val rsp = client.observation()
+          rsp.onComplete{
+            a=>println(a)
+              println("======")
+              timer.startSingleTimer(TimerKeyForTest, ActionSpaceTest(), 5.seconds)
+          }
+          //						timer.startSingleTimer(LeaveRoomKey, LeaveRoomTest(), 5.seconds)
+          Behaviors.same
+
+        case ActionSpaceTest() =>
+          log.info("get actionspaceTest")
+
+          val rsp1 = client.actionSpace()
+          rsp1.onComplete{
+            a=>println(a)
+              println("======")
+              timer.startSingleTimer(TimerKeyForTest, ActionTest(), 5.seconds)
+          }
+          Behaviors.same
+
+        case LeaveRoomTest() =>
+          log.info("get leaveRoomTest")
+
+          val rsp1 = client.leaveRoom()
+//          gameMsgSender ! CompleteMsgFrontServer
+          rsp1.onComplete{
+            a=>println(a)
+              println("======")
+          }
+          Behaviors.same
+
+        case ActionTest() =>
+
+          log.info("get ActionTest")
+
+          val rsp1 = client.action()
+          rsp1.onComplete{
+            a=>println(a)
+              println("======")
+            timer.startSingleTimer(TimerKeyForTest, SystemInfoTest(), 5.seconds)
+          }
+          Behaviors.same
+
+        case SystemInfoTest() =>
+          log.info("get frameRate")
+          val rsp1 = client.systemInfo()
+          rsp1.onComplete{
+            a => println(a)
+              println("=====")
+//              timer.startSingleTimer(TimerKeyForTest, SystemInfoTest(), 5.seconds)
+          }
           Behaviors.same
 
         case Stop =>

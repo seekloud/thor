@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 
 import com.google.protobuf.ByteString
 import javafx.scene.SnapshotParameters
-import javafx.scene.image.{Image, WritableImage}
+import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.seekloud.esheepapi.pb.observations.{ImgData, LayeredObservation}
 import org.seekloud.thor.game.ThorSchemaBotImpl
@@ -64,7 +64,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           drawAdventure.drawSelf(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           drawPosition.drawPosition(mainId)
           drawPlayerState.drawState(mainId)
-//          drawMouse.drawMousePosition(mousePoint, offSetTime, offset, canvasUnit, canvasBounds)
+          drawMouse.drawMousePosition(mousePoint, offSetTime, offset, canvasUnit, canvasBounds)
 
         case None => println("None!!!!!!")
       }
@@ -692,7 +692,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
   }
 
   def getLayerImageData: LayeredObservation ={
-    val ctxList = impl.ctx
+    val ctxList = impl.ctx.filterNot(_._1 == "human")
     val a = ctxList.map(c => getImageData(c))
     val layeredObservation: LayeredObservation = LayeredObservation(
       a.get("position"),
@@ -715,11 +715,10 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
     val params = new SnapshotParameters
     val id = ctx._1
     params.setFill(Color.TRANSPARENT)
-
     val writableImage = canvas.snapshot(params,null)
     val reader = writableImage.getPixelReader
-    val wIm = new WritableImage(width,height)
-    val writer = wIm.getPixelWriter
+//    val wIm = new WritableImage(width,height)
+//    val writer = wIm.getPixelWriter
     val data =
       if(!isGray) {
         //获取彩图，每个像素点4Byte
@@ -727,7 +726,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
         byteBuffer.clear()
         for (y <- 0 until height; x <- 0 until width) {
           val color = reader.getArgb(x, y)
-          writer.setArgb(x,y,color)
+//          writer.setArgb(x,y,color)
           byteBuffer.putInt(color)
         }
         byteBuffer.flip() //翻转，修改lim为当前pos，pos置0
@@ -739,7 +738,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
         for (y <- 0 until height; x <- 0 until width) {
           val color = reader.getColor(x, y).grayscale()
           val gray = color.getRed * color.getOpacity
-          writer.setColor(x,y,new Color(gray,gray,gray,color.getOpacity))
+//          writer.setColor(x,y,new Color(gray,gray,gray,color.getOpacity))
           byteArray(y * height + x) = (gray * 255).toByte
         }
         ByteString.copyFrom(byteArray)

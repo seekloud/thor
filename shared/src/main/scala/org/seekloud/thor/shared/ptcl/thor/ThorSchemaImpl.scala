@@ -37,7 +37,7 @@ class ThorSchemaImpl(
 
   protected var aId: String = myId
 
-  def changeAdventurerId(id: String) = aId = id
+  def changeAdventurerId(id: String): Unit = aId = id
 
   override def debug(msg: String): Unit = {}
 
@@ -60,7 +60,7 @@ class ThorSchemaImpl(
     new AdventurerImpl(config, adventurer, playerInfo._1, playerInfo._2)
   }
 
-  def receiveGameEvent(e: GameEvent) = {
+  def receiveGameEvent(e: GameEvent): Unit = {
     if (e.frame >= systemFrame) {
       addGameEvent(e)
     } else if (esRecoverSupport) {
@@ -79,7 +79,7 @@ class ThorSchemaImpl(
   }
 
   //接受服务器的用户事件
-  def receiveUserEvent(e: UserActionEvent) = {
+  def receiveUserEvent(e: UserActionEvent): Unit = {
     val pIdStr = byteId2PlayerId(e.playerId)
     pIdStr match {
       case Right(pId) =>

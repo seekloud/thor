@@ -296,7 +296,11 @@ class BotController(
 
     ClientBoot.addToPlatform {
       if (drawLayerScene.nonEmpty) {
+        val a = System.currentTimeMillis()
         val observation = getObservation
+        val b = System.currentTimeMillis()
+//        if(b - a > 10)
+//        println(s"get observation for ${b-a} ms")
         val observationRsp = ObservationRsp(Some(observation._1), observation._2)
         if (BotServer.isObservationConnect && BotServer.streamSender.isDefined) {
           BotServer.streamSender.get ! GrpcStreamSender.NewObservation(observationRsp)
@@ -342,6 +346,7 @@ class BotController(
           barrage = (e.killerName, e.name)
           barrageTime = 300
           if (e.playerId == mainId) {
+            wsClient ! WsClient.LeaveRoomTest()
             mainId = e.killerId //跟随凶手视角
             if (e.playerId == playerId) {
               gameState = GameState.stop
