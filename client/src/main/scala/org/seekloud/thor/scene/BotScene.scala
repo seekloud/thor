@@ -72,19 +72,19 @@ class BotScene {
 
   val shadow = new DropShadow()
 
-  confirm.addEventHandler(MouseEvent.MOUSE_ENTERED, (event: MouseEvent) => {
+  confirm.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
     confirm.setEffect(shadow)
   })
 
-  confirm.addEventHandler(MouseEvent.MOUSE_EXITED, (event: MouseEvent) => {
+  confirm.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
     confirm.setEffect(null)
   })
 
-  backToPrevious.addEventHandler(MouseEvent.MOUSE_ENTERED, (event: MouseEvent) => {
+  backToPrevious.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
     backToPrevious.setEffect(shadow)
   })
 
-  backToPrevious.addEventHandler(MouseEvent.MOUSE_EXITED, (event: MouseEvent) => {
+  backToPrevious.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
     backToPrevious.setEffect(null)
   })
 
