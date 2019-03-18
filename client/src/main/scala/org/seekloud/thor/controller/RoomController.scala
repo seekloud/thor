@@ -81,7 +81,7 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
             ThorClient.verifyPsw(roomId, pwd.get).map {
               case Right(rst) =>
                 if (rst.errCode == 0) {
-                  wsClient ! StartGame(roomId)
+                  wsClient ! StartGame(roomId, pwd)
                 } else {
                   ClientBoot.addToPlatform {
                     WarningDialog.initWarningDialog(s"${rst.msg}")
