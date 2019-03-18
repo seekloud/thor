@@ -116,12 +116,14 @@ class LayerScene {
   def drawWait(): Unit = {
     val w = CanvasWidth
     val h = CanvasHeight
+    humanCtx.save()
     humanCtx.setFill("#000000")
     humanCtx.setTextAlign("center")
     humanCtx.setFont("Helvetica", 35)
     val text = "Waiting for bot to join in!"
     val l = humanCtx.measureText(text)
     humanCtx.fillText(text, (w - l) / 2, h / 3)
+    humanCtx.restore()
   }
 
 //  def handleResize(level: Int, context: StageContext): (Point, Float) = {

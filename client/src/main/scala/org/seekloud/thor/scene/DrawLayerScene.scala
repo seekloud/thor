@@ -672,7 +672,6 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
   }
 
   def drawGameLoading(ctx: MiddleContextInFx): Unit = {
-    //    println("linking...")
     val h = ctx.getCanvas.getHeight
     val w = ctx.getCanvas.getWidth
     ctx.setFill("#000000")

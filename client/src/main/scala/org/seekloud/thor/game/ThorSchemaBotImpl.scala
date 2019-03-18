@@ -57,12 +57,14 @@ case class ThorSchemaBotImpl(
 
   def drawGameLoading(): Unit = {
     //    println("linking...")
+    ctx("human").save()
     ctx("human").setFill("#000000")
     ctx("human").fillRec(0, 0, canvasSize.x, canvasSize.y)
     ctx("human").setFill("rgb(250, 250, 250)")
     ctx("human").setTextAlign("left")
     ctx("human").setFont("Helvetica", 36)
     ctx("human").fillText("请稍等，正在连接服务器", 150, 180)
+    ctx("human").restore()
   }
 
   def window: Point = Point(canvasSize.x , canvasSize.y) * 4
