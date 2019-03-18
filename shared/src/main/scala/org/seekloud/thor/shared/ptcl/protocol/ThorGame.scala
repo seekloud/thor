@@ -65,7 +65,6 @@ object ThorGame {
   sealed trait WsMsgServer extends WsMsgSource
 
 
-
   final case class UserInfo(playerId: String, name: String) extends WsMsgServer
 
   final case class YourInfo(config: ThorGameConfigImpl, id: String, name: String, shortId: Byte = 0, playerIdMap: List[(Byte, (String, String))] = Nil) extends WsMsgServer
