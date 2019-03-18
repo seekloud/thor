@@ -39,7 +39,7 @@ object ThorGame {
     val serialNum: Byte
   }
 
-  final case class WsData(ws:Array[Byte]) extends WsMsgSource
+  final case class WsData(ws: Array[Byte]) extends WsMsgSource
 
 
   //前端
@@ -60,7 +60,7 @@ object ThorGame {
 
   final case class Wrap(ws: Array[Byte], isKillMsg: Boolean = false, deadId: String = "") extends WsMsgSource
 
-  final case class PingPackage(sendTime:Long) extends WsMsgServer with WsMsgFront
+  final case class PingPackage(sendTime: Long) extends WsMsgServer with WsMsgFront
 
   sealed trait WsMsgServer extends WsMsgSource
 
@@ -84,7 +84,8 @@ object ThorGame {
   final case class EatFood(playerId: String, foodId: Int, foodLevel: Int, override val frame: Int = 0) extends UserEvent with WsMsgServer
 
   final case class MM(playerId: Byte, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Byte) extends UserActionEvent with WsMsgFront with WsMsgServer
-//  final case class MouseMove(playerId: String, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
+
+  //  final case class MouseMove(playerId: String, offsetX: Short, offsetY: Short, override val frame: Int, override val serialNum: Int) extends UserActionEvent with WsMsgFront with WsMsgServer
 
   final case class MouseClickDownLeft(playerId: Byte, override val frame: Int, override val serialNum: Byte) extends UserActionEvent with WsMsgFront with WsMsgServer
 
@@ -94,7 +95,7 @@ object ThorGame {
 
   final case object RebuildWebSocket extends WsMsgServer
 
-  final case class WsMsgErrorRsp(errCode:Int, msg:String) extends WsMsgServer
+  final case class WsMsgErrorRsp(errCode: Int, msg: String) extends WsMsgServer
 
 
   /*Game Agent*/
@@ -104,21 +105,19 @@ object ThorGame {
 
   final case class GACreateRoom(pswOpt: Option[String] = None) extends GaUserAction
 
-//  final case class JoinRoomSuccess(roomId: Long) extends WsMsgServer
+  //  final case class JoinRoomSuccess(roomId: Long) extends WsMsgServer
 
   final case class JoinRoomFail(error: String) extends WsMsgServer
 
   final case class CreateRoomRsp(roomId: Long) extends WsMsgServer
 
-//  final case class CreateRoomFail(error: String) extends WsMsgServer
-
-
+  //  final case class CreateRoomFail(error: String) extends WsMsgServer
 
 
   /*生成环境元素*/
   final case class GenerateFood(override val frame: Int, food: FoodState) extends EnvironmentEvent with WsMsgServer
 
-  final case class BodyToFood(override val frame: Int,  startP: Point, foods: List[FoodState]) extends EnvironmentEvent with WsMsgServer
+  final case class BodyToFood(override val frame: Int, startP: Point, foods: List[FoodState]) extends EnvironmentEvent with WsMsgServer
 
   final case object RestartGame extends WsMsgFront
 
@@ -139,13 +138,16 @@ object ThorGame {
   )
 
   /* replay-frame-msg*/
-  final case class ReplayFrameData(ws:Array[Byte]) extends WsMsgSource
-  final case class InitReplayError(msg:String) extends WsMsgServer
+  final case class ReplayFrameData(ws: Array[Byte]) extends WsMsgSource
+
+  final case class InitReplayError(msg: String) extends WsMsgServer
+
   final case class ReplayFinish() extends WsMsgServer
+
   final case object StartReplay extends WsMsgServer
 
   /*replay in front*/
-//  final case class ReplayInfo(playerId: String, name: String, f: Long, config: ThorGameConfigImpl) extends WsMsgServer
+  //  final case class ReplayInfo(playerId: String, name: String, f: Long, config: ThorGameConfigImpl) extends WsMsgServer
 
   final case class EventData(list: List[WsMsgServer]) extends WsMsgServer
 
@@ -154,16 +156,14 @@ object ThorGame {
   final case class TextMsg(m: String) extends WsMsgServer
 
 
-
-
   //解析url
   final case class ThorGameInfo(
-                             name: String,
-                             pId: Option[String] = None,
-                             rId: Option[Long] = None,
-                             userAccessCode: Option[String] = None,
-                             frame: Option[Long] = None,
-                             recId: Option[Long] = None
-                           )
+    name: String,
+    pId: Option[String] = None,
+    rId: Option[Long] = None,
+    userAccessCode: Option[String] = None,
+    frame: Option[Long] = None,
+    recId: Option[Long] = None
+  )
 
 }
