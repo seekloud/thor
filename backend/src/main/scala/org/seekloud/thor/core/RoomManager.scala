@@ -98,6 +98,7 @@ object RoomManager {
                       }
 
                     } else {
+                      log.info(s"user-$userId joinRoom error: wrong pwd: ${pswOpt.getOrElse("")}.right one: ${info._1}")
                       userActor ! UserActor.JoinRoomFail(s"房间-${roomId}密码错误！")
                     }
                   case None => //指定房间不存在直接创建，默认无密码
