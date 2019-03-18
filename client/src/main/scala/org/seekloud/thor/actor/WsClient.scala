@@ -295,7 +295,7 @@ object WsClient {
 
         case msg: BotLogin =>
           val layerScene = new LayerScene
-          val bc = new BotController(ctx.self, s"bot${msg.botId}", stageContext, layerScene)
+          val bc = new BotController(ctx.self, "bot" + msg.botId, stageContext, layerScene)
           EsheepClient.getBotToken(msg.botId, msg.botKey).map {
             case Right(tokenRst) =>
               if (tokenRst.errCode == 0) {
@@ -363,11 +363,11 @@ object WsClient {
         case ClientTest(roomId) =>
           log.info("get clientTest")
 
-          val rsp1 = client.createRoom() //change pwd
+          val rsp1 = client.joinRoom("46", "123") //change pwd
           rsp1.onComplete{
             a=>println(a)
               println("======")
-              timer.startSingleTimer(TimerKeyForTest, GetObservationTest(), 5.seconds)
+              timer.startSingleTimer(TimerKeyForTest, ActionTest(), 5.seconds)
           }
 
           Behavior.same
@@ -379,13 +379,13 @@ object WsClient {
           rsp.onComplete{
             a=>println(a)
               println("======")
-              timer.startSingleTimer(TimerKeyForTest, ActionSpaceTest(), 5.seconds)
+              timer.startSingleTimer(TimerKeyForTest, ActionTest(), 5.seconds)
           }
           //						timer.startSingleTimer(LeaveRoomKey, LeaveRoomTest(), 5.seconds)
           Behaviors.same
 
         case ActionSpaceTest() =>
-          log.info("get actionspaceTest")
+          log.info("get action space Test")
 
           val rsp1 = client.actionSpace()
           rsp1.onComplete{
@@ -409,12 +409,11 @@ object WsClient {
         case ActionTest() =>
 
           log.info("get ActionTest")
-
           val rsp1 = client.action()
           rsp1.onComplete{
             a=>println(a)
               println("======")
-            timer.startSingleTimer(TimerKeyForTest, SystemInfoTest(), 5.seconds)
+            timer.startSingleTimer(TimerKeyForTest, ActionTest(), 10.seconds)
           }
           Behaviors.same
 
