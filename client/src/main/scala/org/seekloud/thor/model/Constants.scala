@@ -31,8 +31,8 @@ object Constants {
   val layeredCanvasWidth = 200
   val layeredCanvasHeight = 100
 
-  val selfColor = "#008B8B"
-  val othersColor = "#8B008B"
+  val selfColor = "#008B00"
+  val othersColor = "#8B0000"
 
   object PreWindow {
     val width = 900

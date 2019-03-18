@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 
 import com.google.protobuf.ByteString
 import javafx.scene.SnapshotParameters
-import javafx.scene.image.Image
+import javafx.scene.image.{Image, WritableImage}
 import javafx.scene.paint.Color
 import org.seekloud.esheepapi.pb.observations.{ImgData, LayeredObservation}
 import org.seekloud.thor.game.ThorSchemaBotImpl
@@ -75,7 +75,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
   }
 
   def drawGame4Human(mainId: String, offSetTime: Long, canvasUnit: Float, canvasUnit4Huge: Float,
-    canvasBounds: Point, mousePoint: List[Point], actions: Map[Int, List[UserActionEvent]]): Unit = {
+    canvasBounds: Point, actions: Map[Int, List[UserActionEvent]]): Unit = {
     if (!impl.waitSyncData) {
       impl.adventurerMap.get(mainId) match {
         case Some(adventurer) =>
@@ -465,10 +465,18 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("mouse").restore()
     }
 
+    var prePosition = Point(0, 0)
+
     def drawMousePosition(position: List[Point], offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
-      position.headOption.foreach { p =>
+//       println(s"pre: $prePosition, position: $position")
+      if (position.headOption.nonEmpty) {
+        val p = position.reverse.headOption.get
+        prePosition = p
         val offset = position.reverse.head - p
         drawMouse(p + offset * offSetTime / impl.config.frameDuration)
+      }
+      else {
+        drawMouse(prePosition)
       }
     }
   }
@@ -717,7 +725,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
     params.setFill(Color.TRANSPARENT)
     val writableImage = canvas.snapshot(params,null)
     val reader = writableImage.getPixelReader
-//    val wIm = new WritableImage(width,height)
+    val wIm = new WritableImage(width,height)
 //    val writer = wIm.getPixelWriter
     val data =
       if(!isGray) {
@@ -744,6 +752,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
         ByteString.copyFrom(byteArray)
       }
     val pixelLength = if(isGray) 1 else 4
+//    if (id == "all") impl.ctx("human").drawImage(wIm,400,405)
     (id, ImgData(width ,height, pixelLength, data))
   }
 

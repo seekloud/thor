@@ -71,8 +71,6 @@ class BotController(
 
   private var drawLayerScene: Option[DrawLayerScene] = None
 
-  private var drawScene: Option[DrawScene] = None
-
   protected var firstCome = true
 
   protected var exitFullScreen = false
@@ -123,8 +121,6 @@ class BotController(
   private var stageHeight = context.getStageHeight.toInt
 
 
-  //  private var mouseLeft = true
-  //  private var mouseRight = false
 
   /*BGM*/
   private val gameMusic = new Media(getClass.getResource("/music/bgm-2.mp3").toString)
@@ -191,7 +187,7 @@ class BotController(
           if (drawLayerScene.isDefined) {
             myActions ++= thorSchema.getMyActionMap(byteId).toMap
             myActions = myActions.toList.sortBy(_._1).takeRight(12).toMap
-            drawLayerScene.get.drawGame4Human(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, thorSchema.getMousePoint, myActions)
+            drawLayerScene.get.drawGame4Human(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, myActions)
             drawLayerScene.get.drawHumanView.drawRank(currentRank, CurrentOrNot = true, byteId)
           }
         }
@@ -199,7 +195,7 @@ class BotController(
           if (drawLayerScene.isDefined) {
             //            myActions ++= thorSchema.getMyActionMap(byteId).toMap
             //            myActions = myActions.toList.sortBy(_._1).takeRight(12).toMap
-            drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, thorSchema.getMousePoint, myActions)
+            drawLayerScene.get.drawGame4Bot(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, thorSchema.getMousePoint(byteId), myActions)
           }
         }
         else {
@@ -347,8 +343,9 @@ class BotController(
           barrage = (e.killerName, e.name)
           barrageTime = 300
           if (e.playerId == mainId) {
-            wsClient ! WsClient.LeaveRoomTest()
+//            wsClient ! WsClient.LeaveRoomTest()
             mainId = e.killerId //跟随凶手视角
+            mainId4Layer = e.killerId
             if (e.playerId == playerId) {
               gameState = GameState.stop
               endTime = System.currentTimeMillis()

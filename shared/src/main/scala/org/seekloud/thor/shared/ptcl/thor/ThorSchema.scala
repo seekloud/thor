@@ -213,11 +213,11 @@ trait ThorSchema extends KillInformation {
     }
   }
 
-  def getMousePoint: List[Point] = {
+  def getMousePoint(byteId: Byte): List[Point] = {
     var positionList = List.empty[Point]
     actionEventMap.get(systemFrame) match {
       case Some(actions) =>
-        actions.reverse.foreach{
+        actions.filter(_.playerId == byteId).reverse.foreach{
           case a: MM =>
             positionList = positionList :+ Point(a.offsetX, a.offsetY)
           case _ =>
