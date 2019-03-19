@@ -130,7 +130,7 @@ lazy val client = project.in(file("client")).enablePlugins(PackPlugin)
   )
   .settings(
     packMain := Map("thor" -> clientMainClass),
-    packJvmOpts := Map("thor" -> Seq("-Xmx512m", "-Xms64m")),
+    packJvmOpts := Map("thor" -> Seq("-Xmx2048m", "-Xms128m")),
     packExtraClasspath := Map("thor" -> Seq("."))
   )
   .settings(
