@@ -45,6 +45,7 @@ object Constants {
   }
 
   object FireAction {
+    val noop = 0
     val attack = 1
     val speedUp = 2
     val stopSpeedUp = 3

@@ -112,7 +112,7 @@ class BotServer(botActor: ActorRef[BotActor.Command], botController: BotControll
     **/
   override def actionSpace(request: Credit): Future[ActionSpaceRsp] = {
     if (checkBotToken(request.apiToken)) {
-      val rsp = ActionSpaceRsp(swing = true, fire = List(FireAction.attack, FireAction.speedUp, FireAction.stopSpeedUp), state = BotServer.state, msg = "ok")
+      val rsp = ActionSpaceRsp(swing = true, fire = List(FireAction.noop, FireAction.attack, FireAction.speedUp, FireAction.stopSpeedUp), state = BotServer.state, msg = "ok")
       Future.successful(rsp)
     } else {
       Future.successful(ActionSpaceRsp(errCode = 10004, state = State.unknown, msg = "Auth Error"))

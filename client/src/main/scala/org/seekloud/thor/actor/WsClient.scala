@@ -327,7 +327,7 @@ object WsClient {
                             stageContext.switchToLayer(layerScene.getScene)
                             layerScene.drawWait()
                           }
-                          timer.startSingleTimer(TimerKeyForTest, ClientTest(1),5.seconds)
+//                          timer.startSingleTimer(TimerKeyForTest, ClientTest(1),5.seconds)
                           Future.successful(s"link game server success.")
                         } else {
                           throw new RuntimeException(s"link game server failed: ${upgrade.response.status}")
