@@ -81,7 +81,7 @@ class BotController(
 
   protected val preDrawFrame = new PreDraw
 
-//  var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
+  //  var thorSchemaOpt: Option[ThorSchemaClientImpl] = None
 
   var sdkReplyTo: Option[ActorRef[EnterRoomRsp]] = None
 
@@ -121,7 +121,6 @@ class BotController(
   private var stageHeight = context.getStageHeight.toInt
 
 
-
   /*BGM*/
   private val gameMusic = new Media(getClass.getResource("/music/bgm-2.mp3").toString)
   private val gameMusicPlayer = new MediaPlayer(gameMusic)
@@ -154,7 +153,7 @@ class BotController(
       firstCome = false
       println("start bot controller ...")
       startGameLoop()
-            addUserActionListenEvent()
+      //      addUserActionListenEvent()
       checkAndChangePreCanvas()
       //      logicFrameTime = System.currentTimeMillis()
     } else {
@@ -176,7 +175,7 @@ class BotController(
     //      logicLoop()
     //    }
     timeline.getKeyFrames.add(keyFrame)
-//    animationTimer.start()
+    //    animationTimer.start()
     timeline.play()
   }
 
@@ -186,8 +185,7 @@ class BotController(
         if (thorSchema.adventurerMap.contains(mainId)) {
           if (drawLayerScene.isDefined) {
             myActions ++= thorSchema.getMyActionMap(byteId).toMap
-//            if (myActions.filter(a => a._2.+("ss")))
-            myActions = myActions.toList.filter(_._2.nonEmpty).sortBy(_._1).takeRight(12).toMap
+            myActions = myActions.toList.sortBy(_._1).takeRight(12).toMap
             drawLayerScene.get.drawGame4Human(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, myActions)
             drawLayerScene.get.drawHumanView.drawRank(currentRank, CurrentOrNot = true, byteId)
           }
@@ -297,8 +295,8 @@ class BotController(
         val a = System.currentTimeMillis()
         val observation = getObservation
         val b = System.currentTimeMillis()
-//        if(b - a > 10)
-//        println(s"get observation for ${b-a} ms")
+        //        if(b - a > 10)
+        //        println(s"get observation for ${b-a} ms")
         val observationRsp = ObservationRsp(Some(observation._1), observation._2)
         if (BotServer.isObservationConnect && BotServer.streamSender.isDefined) {
           BotServer.streamSender.get ! GrpcStreamSender.NewObservation(observationRsp)
@@ -344,7 +342,7 @@ class BotController(
           barrage = (e.killerName, e.name)
           barrageTime = 300
           if (e.playerId == mainId) {
-//            wsClient ! WsClient.LeaveRoomTest()
+            //            wsClient ! WsClient.LeaveRoomTest()
             mainId = e.killerId //跟随凶手视角
             if (e.playerId == playerId) {
               gameState = GameState.stop
@@ -385,7 +383,7 @@ class BotController(
 
 
         case RebuildWebSocket =>
-//          thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录"))
+          //          thorSchemaOpt.foreach(_.drawReplayMsg("存在异地登录"))
           closeHolder()
 
         case e: ThorGame.UserActionEvent =>
@@ -413,7 +411,7 @@ class BotController(
           thorOpt.foreach(_.receiveGameEvent(e))
 
         case x =>
-                  println(s"接收到无效消息$x")
+          println(s"接收到无效消息$x")
 
       }
     }
@@ -430,6 +428,7 @@ class BotController(
   def initMousePosition(): Unit = {
     val random = new Random()
     lastMousePosition = Point(random.nextFloat() * layerScreen.canvasBoundary4Huge.x, random.nextFloat() * layerScreen.canvasBoundary4Huge.y)
+    log.debug(s"init mouse position: $lastMousePosition")
   }
 
   /*接收到来自sdk的action*/
@@ -439,9 +438,35 @@ class BotController(
   def receiveBotAction(action: Either[Int, Swing]): Unit = {
     action match {
       case Right(swing) =>
+//        println(s"***********receive swing action***********")
+//        println(s"distance: ${swing.distance}")
+//        println(s"radian: ${swing.radian / math.Pi * 180}°")
         val moveDistance = Point(math.min(swing.distance, BotSettings.dMax), 0).rotate(swing.radian)
-        val curPosition = lastMousePosition + moveDistance
+//        println(s"moveDistance: $moveDistance")
+
+        val newXP = if (lastMousePosition.x + moveDistance.x > 0 && lastMousePosition.x + moveDistance.x < layerScreen.canvasBoundary4Huge.x) {
+          lastMousePosition.x + moveDistance.x
+        } else if (lastMousePosition.x + moveDistance.x <= 0) {
+          0
+        } else {
+          layerScreen.canvasBoundary4Huge.x
+        }
+
+        val newYP = if (lastMousePosition.y + moveDistance.y > 0 && lastMousePosition.y + moveDistance.y < layerScreen.canvasBoundary4Huge.y) {
+          lastMousePosition.y + moveDistance.y
+        } else if (lastMousePosition.y + moveDistance.y <= 0) {
+          0
+        } else  {
+          layerScreen.canvasBoundary4Huge.y
+        }
+
+
+        val curPosition = Point(newXP, newYP)
+//        println(s"lastMousePosition: $lastMousePosition,\n curPosition: $curPosition")
+        lastMousePosition = curPosition
+//        println(s"center: ${layerScreen.canvasBounds4Huge * layerScreen.canvasUnit4Huge / 2}")
         val theta = curPosition.getTheta(layerScreen.canvasBounds4Huge * layerScreen.canvasUnit4Huge / 2).toFloat
+
 //        drawLayerScene.foreach { d =>
 //          d.drawMouse.drawMouse(curPosition / 4)
 //        }
@@ -450,7 +475,15 @@ class BotController(
             val mouseDistance = math.sqrt(math.pow(curPosition.x - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(curPosition.y - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
             val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerId).getAdventurerState.level) * layerScreen.canvasUnit4Huge
             val direction = thorSchema.adventurerMap(playerId).direction
+//            if (math.abs(theta - direction) > 0.3) println("满足第二个条件") else {
+//              println(s"不满足第二个条件")
+//              println(s"theta: $theta, direction: $direction, bias: ${math.abs(theta - direction)}")
+//              println(s"**********************end********************8")
+//              println("\n")
+//            }
+
             if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+//              log.debug(s"execute swing!!!")
 
               val offsetX = (curPosition.x - layerScreen.canvasBoundary4Huge.x / 2.0).toShort
               val offsetY = (curPosition.y - layerScreen.canvasBoundary4Huge.y / 2.0).toShort
@@ -459,7 +492,6 @@ class BotController(
               thorSchema.preExecuteUserEvent(preExecuteAction)
               wsClient ! WsClient.DispatchMsg(preExecuteAction)
               lastMouseMove = System.currentTimeMillis()
-              lastMousePosition = curPosition
             }
           }
         }
@@ -526,17 +558,16 @@ class BotController(
   }
 
 
-    private def addUserActionListenEvent(): Unit = {
+  /*  private def addUserActionListenEvent(): Unit = {
       layerScreen.humanCanvas.getCanvas.requestFocus()
 
       /*鼠标移动操作*/
       layerScreen.humanCanvas.getCanvas.setOnMouseMoved { e =>
         val point = Point(e.getX.toFloat, e.getY.toFloat)
-//        println(s"point: $point")
         val theta = point.getTheta(layerScreen.canvasBounds4Huge * layerScreen.canvasUnit4Huge / 2).toFloat
-//        drawLayerScene.foreach { d =>
-//          d.drawMouse.drawMouse(point / 4)
-//        }
+        drawLayerScene.foreach { d =>
+          d.drawMouse.drawMouse(point / 4)
+        }
         thorOpt.foreach { thorSchema =>
           if (thorSchema.adventurerMap.contains(playerId)) {
             val mouseDistance = math.sqrt(math.pow(e.getX - layerScreen.canvasBoundary4Huge.x / 2.0, 2) + math.pow(e.getY - layerScreen.canvasBoundary4Huge.y / 2.0, 2))
@@ -619,7 +650,7 @@ class BotController(
         }
       }
 
-    }
+    }*/
 
   def checkAndChangePreCanvas(): Unit = {
     val timer = new Timer
