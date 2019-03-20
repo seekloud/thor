@@ -182,12 +182,14 @@ class BotController(
   def drawGameByTime(offsetTime: Long, canvasUnit: Float, canvasUnit4Huge: Float, canvasBounds: Point): Unit = {
     thorOpt match {
       case Some(thorSchema: ThorSchemaBotImpl) =>
-        if (thorSchema.adventurerMap.contains(mainId)) {
-          if (drawLayerScene.isDefined) {
-            myActions ++= thorSchema.getMyActionMap(byteId).toMap
-            myActions = myActions.toList.sortBy(_._1).takeRight(12).toMap
-            drawLayerScene.get.drawGame4Human(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, myActions)
-            drawLayerScene.get.drawHumanView.drawRank(currentRank, CurrentOrNot = true, byteId)
+        if (org.seekloud.thor.common.BotSettings.render) {
+          if (thorSchema.adventurerMap.contains(mainId)) {
+            if (drawLayerScene.isDefined) {
+              myActions ++= thorSchema.getMyActionMap(byteId).toMap
+              myActions = myActions.toList.sortBy(_._1).takeRight(12).toMap
+              drawLayerScene.get.drawGame4Human(mainId, offsetTime, canvasUnit, canvasUnit4Huge, canvasBounds, myActions)
+              drawLayerScene.get.drawHumanView.drawRank(currentRank, CurrentOrNot = true, byteId)
+            }
           }
         }
         if (thorSchema.adventurerMap.contains(mainId4Layer)) {
