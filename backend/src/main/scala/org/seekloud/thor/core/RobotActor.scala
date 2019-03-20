@@ -230,9 +230,15 @@ object RobotActor {
     val adventurerSelfOpt = thorSchema.adventurerMap.get(botId)
     //选择最近的移动或者随机移动
     adventurerSelfOpt.flatMap{ adventurerSelf =>
-      val otherAdventurer = thorSchema.adventurerMap.filter(a => a._2.position.distance(adventurerSelf.position) < 200 && a._1 != adventurerSelf.playerId).values
+      val otherAdventurer = thorSchema.adventurerMap.filter(a => a._2.position.distance(adventurerSelf.position) < 400 && a._1 != adventurerSelf.playerId).values
       val distanceMinAdventurer = otherAdventurer.toList.sortBy(a => a.position.distance(adventurerSelf.position))
-      distanceMinAdventurer.headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
+      val priorityAdventure = distanceMinAdventurer.map(a => (a, a.position.distance(adventurerSelf.position) * priority(a.playerId.take(3))))
+//      val player =
+      priorityAdventure.sortBy(_._2).map(_._1).headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
+//      if (player.nonEmpty)
+//        player.headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
+//      else
+//        distanceMinAdventurer.headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
     }.getOrElse(randomMouseMove(thorSchema, botId).toFloat)
   }
 
@@ -244,6 +250,17 @@ object RobotActor {
     //判断是否执行攻击
     adventurerSelfOpt.exists { adventurerSelf =>
       thorSchema.adventurerMap.filterNot(_._1 == adventurerSelf.playerId).values.exists(a => a.position.distance(adventurerSelf.position) < thorSchema.config.getWeaponLengthByLevel(a.level) + adventurerSelf.radius + a.radius)
+    }
+  }
+
+  def priority(id: String): Int = {
+    val robot = 15
+    val human = 10
+    val bot = 5
+    id match {
+      case "rob" => robot
+      case "bot"   => bot
+      case  _      => human
     }
   }
 
