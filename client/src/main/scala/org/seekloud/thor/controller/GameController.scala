@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.duration._
 import akka.actor.typed.ActorRef
 import javafx.animation.{Animation, AnimationTimer, KeyFrame, Timeline}
-import javafx.scene.input.{KeyCode, MouseButton}
+import javafx.scene.input.{KeyCode, MouseButton, MouseEvent}
 import javafx.scene.media.{AudioClip, Media, MediaPlayer}
 import javafx.util.Duration
 import org.seekloud.thor.ClientBoot
@@ -403,60 +403,110 @@ class GameController(
 
   private def addUserActionListenEvent(): Unit = {
     playGameScreen.canvas.getCanvas.requestFocus()
+    import javafx.event.EventHandler
+    playGameScreen.canvas.getCanvas.addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler[MouseEvent] {
+      override def handle(e: MouseEvent): Unit = {
+        val point = Point(e.getX.toFloat, e.getY.toFloat)
+        val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
+        thorSchemaOpt.foreach { thorSchema =>
 
-    /*鼠标移动操作*/
-    playGameScreen.canvas.getCanvas.setOnMouseMoved { e =>
+          if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+            val mouseDistance = math.sqrt(math.pow(e.getX - context.getStageWidth.toFloat / 2.0, 2) + math.pow(e.getY - context.getStageHeight.toFloat / 2.0, 2))
+            val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * playGameScreen.canvasUnit
+            val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+            if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
 
-      val point = Point(e.getX.toFloat, e.getY.toFloat)
-      val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
-      thorSchemaOpt.foreach { thorSchema =>
-
-        if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-          val mouseDistance = math.sqrt(math.pow(e.getX - context.getStageWidth.toFloat / 2.0, 2) + math.pow(e.getY - context.getStageHeight.toFloat / 2.0, 2))
-          val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * playGameScreen.canvasUnit
-          val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
-          if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
-
-            val offsetX = (e.getX - context.getStageWidth.toFloat / 2.0).toShort
-            val offsetY = (e.getY - context.getStageHeight.toFloat / 2.0).toShort
-            val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            wsClient ! WsClient.DispatchMsg(preExecuteAction)
-            lastMouseMove = System.currentTimeMillis()
+              val offsetX = (e.getX - context.getStageWidth.toFloat / 2.0).toShort
+              val offsetY = (e.getY - context.getStageHeight.toFloat / 2.0).toShort
+              val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
+              lastMouseMove = System.currentTimeMillis()
+            }
           }
         }
       }
-    }
+    })
+    /*鼠标移动操作*/
+//    playGameScreen.canvas.getCanvas.setOnMouseMoved { e =>
+//
+//      val point = Point(e.getX.toFloat, e.getY.toFloat)
+//      val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
+//      thorSchemaOpt.foreach { thorSchema =>
+//
+//        if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+//          val mouseDistance = math.sqrt(math.pow(e.getX - context.getStageWidth.toFloat / 2.0, 2) + math.pow(e.getY - context.getStageHeight.toFloat / 2.0, 2))
+//          val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * playGameScreen.canvasUnit
+//          val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+//          if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+//
+//            val offsetX = (e.getX - context.getStageWidth.toFloat / 2.0).toShort
+//            val offsetY = (e.getY - context.getStageHeight.toFloat / 2.0).toShort
+//            val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+//            //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
+//            thorSchema.preExecuteUserEvent(preExecuteAction)
+//            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+//            lastMouseMove = System.currentTimeMillis()
+//          }
+//        }
+//      }
+//    }
 
     /*鼠标点击事件*/
 
-
-    playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
-    //         println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
-      thorSchemaOpt.foreach { thorSchema =>
-        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
-          if (e.isPrimaryButtonDown) {
-          //            attackMusic.play()
-          //            mouseLeft = true
-            val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+    playGameScreen.canvas.getCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler[MouseEvent] {
+      override def handle(e: MouseEvent): Unit = {
+        thorSchemaOpt.foreach { thorSchema =>
+          if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+            if (e.isPrimaryButtonDown) {
+              //            attackMusic.play()
+              //            mouseLeft = true
+              val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
+            }
+            else if (e.isSecondaryButtonDown) {
+              //            mouseRight = true
+              val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+              thorSchema.preExecuteUserEvent(preExecuteAction)
+              //            println(preExecuteAction)
+              wsClient ! WsClient.DispatchMsg(preExecuteAction)
+            }
+            else ()
           }
-          else if (e.isSecondaryButtonDown) {
-          //            mouseRight = true
-            val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-            thorSchema.preExecuteUserEvent(preExecuteAction)
-            //            println(preExecuteAction)
-            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+          else {
+            start()
           }
-          else ()
-        }
-        else {
-          start()
         }
       }
-    }
+    })
+
+//    playGameScreen.canvas.getCanvas.setOnMousePressed { e =>
+//    //         println(s"left: [${e.isPrimaryButtonDown}]; right: [${e.isSecondaryButtonDown}]")
+//      thorSchemaOpt.foreach { thorSchema =>
+//        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+//          if (e.isPrimaryButtonDown) {
+//          //            attackMusic.play()
+//          //            mouseLeft = true
+//            val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+//            thorSchema.preExecuteUserEvent(preExecuteAction)
+//            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+//          }
+//          else if (e.isSecondaryButtonDown) {
+//          //            mouseRight = true
+//            val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+//            thorSchema.preExecuteUserEvent(preExecuteAction)
+//            //            println(preExecuteAction)
+//            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+//          }
+//          else ()
+//        }
+//        else {
+//          start()
+//        }
+//      }
+//    }
 
     /*鼠标释放事件*/
     playGameScreen.canvas.getCanvas.setOnMouseReleased { e =>

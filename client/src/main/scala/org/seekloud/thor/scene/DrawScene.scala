@@ -39,7 +39,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
 
   private def barLeft = (impl.canvasSize.x - barLength) / 2
 
-  private def barTop = impl.canvasSize.y - barHeight - 50
+  private def barTop = impl.canvasSize.y * 0.9
 
   val mapImg = new Image("img/background.png")
   val hammerImg = new Image("img/hammer.png")
@@ -122,7 +122,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
       val start = impl.window.x * 0.5 - (impl.ctx.measureText(s"$s $t") + 80) / 2
       impl.ctx.fillTextByMiddle(s, start, impl.window.y * 0.17)
       impl.ctx.drawImage(hammerImg, start + impl.ctx.measureText(s) + 25, impl.window.y * 0.17, Some(50, 50))
-      impl.ctx.fillText(t, start + impl.ctx.measureText(s) + 150, impl.window.y * 0.17)
+      impl.ctx.fillText(t, start + impl.ctx.measureText(s) + 155, impl.window.y * 0.17)
     }
 
     impl.ctx.restore()
@@ -347,7 +347,6 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     impl.ctx.fillText(adventurer.level.toString, barLeft - 32, barTop - 15)
     impl.ctx.restore()
 
-    impl.ctx.restore()
   }
 
   def drawFood(offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {

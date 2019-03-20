@@ -143,7 +143,7 @@ object WsClient {
           if (gameMsgSender != null) {
             gameMsgSender ! GAStartGame(msg.roomId, msg.pwd)
           } else {
-            timer.startSingleTimer(TimerKey4StartGame, msg, 500.millis)
+            timer.startSingleTimer(TimerKey4StartGame, msg, 5.seconds)
           }
 
           botController match {
