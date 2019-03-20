@@ -18,6 +18,7 @@ package org.seekloud.thor.utils.middleware
 
 import javafx.geometry.VPos
 import javafx.scene.canvas.{Canvas, GraphicsContext}
+import javafx.scene.control.Label
 import javafx.scene.image.{Image, WritableImage}
 import javafx.scene.paint.Color
 import javafx.scene.effect.InnerShadow
@@ -164,6 +165,8 @@ class MiddleContextInFx extends MiddleContext {
 
   override def fillText(text: String, x: Double, y: Double, z: Double = 500): Unit = context.fillText(text, x, y)
 
+  override def fillTextByMiddle(text: String, x: Double, y: Double, z: Double = 500): Unit = context.fillText(text, x + measureText(text) / 2, y)
+
   override def setFont(f: String, s: Double, wid: String = "normal"): Unit = context.setFont(Font.font(f, s))
 
   override def setTextAlign(s: String): Unit = context.setTextAlign(s)
@@ -195,5 +198,12 @@ class MiddleContextInFx extends MiddleContext {
 
   override def lineWidth(width: Double): Unit = context.setLineWidth(width)
 
-  override def measureText(s: String): Double = new Text(s).getLayoutBounds.getWidth
+  def getFont: Font = context.getFont
+
+  override def measureText(s: String): Double = {
+    val t = new Text(s)
+    t.setFont(getFont)
+    t.getLayoutBounds.getWidth
+  }
+
 }

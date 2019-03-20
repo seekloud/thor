@@ -23,6 +23,7 @@ import org.seekloud.thor.shared.ptcl.model.{Point, Score}
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.shared.ptcl.util.middleware.MiddleCanvas
 import org.seekloud.thor.utils.CanvasUtils
+import org.seekloud.thor.utils.middleware.MiddleContextInFx
 
 /**
   * User: Jason
@@ -119,8 +120,8 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     }
     else {
       val start = impl.window.x * 0.5 - (impl.ctx.measureText(s"$s $t") + 80) / 2
-      impl.ctx.fillText(s, start, impl.window.y * 0.17)
-      impl.ctx.drawImage(hammerImg, start + impl.ctx.measureText(s) + 25, impl.window.y * 0.15, Some(50, 50))
+      impl.ctx.fillTextByMiddle(s, start, impl.window.y * 0.17)
+      impl.ctx.drawImage(hammerImg, start + impl.ctx.measureText(s) + 25, impl.window.y * 0.17, Some(50, 50))
       impl.ctx.fillText(t, start + impl.ctx.measureText(s) + 150, impl.window.y * 0.17)
     }
 
@@ -343,7 +344,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     impl.ctx.setTextAlign("center")
     impl.ctx.setFont("Comic Sans Ms", 36)
     impl.ctx.setTextBaseLine("top")
-    impl.ctx.fillText(adventurer.level.toString, barLeft - 32, barTop)
+    impl.ctx.fillText(adventurer.level.toString, barLeft - 32, barTop - 15)
     impl.ctx.restore()
 
     impl.ctx.restore()
@@ -467,7 +468,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
 
   def baseFont: Float = impl.window.x / 1440
 
-  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp:Int): Unit = {
+  def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp:Int, isMiddle: Boolean = false): Unit = {
     impl.ctx.save()
     impl.ctx.setTextBaseLine("top")
     if (tp == 1)
@@ -480,7 +481,10 @@ class DrawScene(impl: ThorSchemaClientImpl) {
       impl.ctx.setFill("#ffff00")
     }
 
-    impl.ctx.fillText(str, x, (lineNum + lineBegin) * impl.window.x * 0.01)
+    if (isMiddle)
+      impl.ctx.asInstanceOf[MiddleContextInFx].fillTextByMiddle(str, x, (lineNum + lineBegin) * impl.window.x * 0.01)
+    else
+      impl.ctx.fillText(str, x, (lineNum + lineBegin) * impl.window.x * 0.01)
     impl.ctx.restore()
   }
 
@@ -497,7 +501,7 @@ class DrawScene(impl: ThorSchemaClientImpl) {
     impl.ctx.fillRec(begin, 0, impl.window.x * 0.25, impl.window.x * 0.25)
     impl.ctx.setFill("#fdffff")
     impl.ctx.setTextAlign("start")
-    drawTextLine(s"   $text", 150 + impl.window.x * 0.01, 0, 2, 1)
+    drawTextLine(s" $text", 10 + impl.window.x * 0.01, 0, 2, 1, isMiddle = true)
 
     Rank.foreach { score =>
       index += 1

@@ -6,7 +6,8 @@ package org.seekloud.thor.scene
 import java.nio.ByteBuffer
 
 import com.google.protobuf.ByteString
-import javafx.scene.SnapshotParameters
+//import javafx.geometry.Rectangle2D
+//import javafx.scene.SnapshotParameters
 import javafx.scene.image.{Image, WritableImage}
 import javafx.scene.paint.Color
 import org.seekloud.esheepapi.pb.observations.{ImgData, LayeredObservation}
@@ -43,7 +44,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
   val crownImg = new Image("img/crown.png")
 
   def drawGame4Bot(mainId: String, offSetTime: Long, canvasUnit: Float, canvasUnit4Huge: Float,
-    canvasBounds: Point, mousePoint: List[Point], actions: Map[Int, List[UserActionEvent]]): Unit = {
+    canvasBounds: Point, mousePoint: List[Point]): Unit = {
     if (!impl.waitSyncData) {
       impl.adventurerMap.get(mainId) match {
         case Some(adventurer) =>
@@ -454,7 +455,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
   object drawMouse {
     def drawMouse(p: Point): Unit = {
       impl.ctx("mouse").save()
-      impl.ctx("mouse").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
+//      impl.ctx("mouse").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("mouse").setFill("#000000")
       impl.ctx("mouse").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("mouse").setFill("#FFFFFF")
@@ -472,12 +473,10 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       if (position.headOption.nonEmpty) {
         val p = position.reverse.headOption.get
         prePosition = p
-        val offset = position.reverse.head - p
-        drawMouse(p + offset * offSetTime / impl.config.frameDuration)
+//        val offset = position.reverse.head - p
+//        drawMouse(p + offset * offSetTime / impl.config.frameDuration)
       }
-      else {
-        drawMouse(prePosition)
-      }
+      drawMouse((prePosition + Point(CanvasWidth / 2, CanvasHeight / 2)) / 4)
     }
   }
 
@@ -501,9 +500,10 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       val radius = adventurer.radius
       val speedByLevel = impl.config.getThorSpeedByLevel(adventurer.level).x
       val speed = if (isSpeedUp) speedUpRate * speedByLevel else speedByLevel
-      val maxEnergy = impl.config.getThorGameConfigImpl().getMaxEnergyByLevel(adventurer.level)
+      val maxEnergy = impl.config.getThorGameConfigImpl().getMaxEnergyByLevel(21)
       val energy = adventurer.energy
-      val energyUnit = 150 / maxEnergy
+      def log(e: Int) = math.log(e) / math.log(maxEnergy + 1)
+      val energyUnit = 150 / log(maxEnergy + 1)
       val isNewBorn = impl.newbornAdventurerMap.get(adventurer.playerId) match {
         case Some(_) => 1
         case _ => 0
@@ -519,7 +519,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("state").setFill("#FF0000")
       impl.ctx("state").fillRec(leftRemained , 28, speed * speedUnit, w)
       impl.ctx("state").setFill("#00FF00")
-      impl.ctx("state").fillRec(leftRemained , 52, energy * energyUnit, w)
+      impl.ctx("state").fillRec(leftRemained , 52, log(energy + 1) * energyUnit + 3, w)
       impl.ctx("state").setFill("#0000FF")
       impl.ctx("state").fillRec(leftRemained , 76, isNewBorn * 150, w)
       impl.ctx("state").restore()
@@ -563,7 +563,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
 
     def baseFont: Float = window4Human.x / 1440
 
-    def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp:Int): Unit = {
+    def drawTextLine(str: String, x: Double, lineNum: Int, lineBegin: Int = 0 , tp: Int, isMiddle: Boolean = false): Unit = {
       impl.ctx("human").save()
       impl.ctx("human").setTextBaseLine("top")
       if (tp == 1)
@@ -575,8 +575,11 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
         impl.ctx("human").setFont("Comic Sans MS", baseFont * 16)
         impl.ctx("human").setFill("#ffff00")
       }
+      if (isMiddle)
+        impl.ctx("human").fillTextByMiddle(str, x, (lineNum + lineBegin) * impl.window.x * 0.01)
+      else
+        impl.ctx("human").fillText(str, x, (lineNum + lineBegin) * impl.window.x * 0.01)
 
-      impl.ctx("human").fillText(str, x, (lineNum + lineBegin) * window4Human.x * 0.01)
       impl.ctx("human").restore()
     }
     
@@ -593,7 +596,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("human").fillRec(begin, 0, window4Human.x * 0.25, window4Human.x * 0.25)
       impl.ctx("human").setFill("#fdffff")
       impl.ctx("human").setTextAlign("start")
-      drawTextLine(s"   $text", 150 + window4Human.x * 0.01, 0, 2, 1)
+      drawTextLine(s" $text", 10 + window4Human.x * 0.01, 0, 2, 1, isMiddle = true)
 
       Rank.foreach { score =>
         index += 1
@@ -720,12 +723,15 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
     var height = canvas.getHeight.toInt
     if (ctx._1 == "human") height -= 210
     val width = canvas.getWidth.toInt
-    val params = new SnapshotParameters
     val id = ctx._1
-    params.setFill(Color.TRANSPARENT)
-    val writableImage = canvas.snapshot(params,null)
+//    val params = new SnapshotParameters
+//    params.setDepthBuffer(true)
+//    params.setViewport(new Rectangle2D(0 , 0, width, height))
+//    println(params.isDepthBuffer)
+//    params.setFill(Color.TRANSPARENT)
+    val writableImage = canvas.snapshot(null,null)
     val reader = writableImage.getPixelReader
-    val wIm = new WritableImage(width,height)
+//    val wIm = new WritableImage(width,height)
 //    val writer = wIm.getPixelWriter
     val data =
       if(!isGray) {

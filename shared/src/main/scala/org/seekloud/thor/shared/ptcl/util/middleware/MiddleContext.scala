@@ -54,6 +54,8 @@ trait MiddleContext {
 
   def fillText(text: String, x: Double, y: Double, z: Double = 500): Unit
 
+  def fillTextByMiddle(text: String, x: Double, y: Double, z: Double = 500): Unit
+
   def setTextBaseLine(s: String):Unit
 
   def setFont(fontFamily: String, fontSize: Double, wid: String = "normal"): Unit

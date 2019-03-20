@@ -184,6 +184,7 @@ class GameController(
             val a = System.currentTimeMillis()
             //            println(s"draw create scene span: ${a-start}")
             drawScene.get.drawGame4Client(mainId, offsetTime, canvasUnit, canvasBounds)
+//            thorSchema.drawRank(currentRank, CurrentOrNot = true, byteId)
             drawScene.get.drawRank(currentRank, CurrentOrNot = true, byteId)
             drawScene.get.drawSmallMap(mainId)
             drawTime = drawTime :+ System.currentTimeMillis() - start

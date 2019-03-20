@@ -122,6 +122,7 @@ class LayerScene {
     humanCtx.setFont("Helvetica", 35)
     val text = "Waiting for bot to join in!"
     val l = humanCtx.measureText(text)
+    println(s"length is $l")
     humanCtx.fillText(text, (w - l) / 2, h / 3)
     humanCtx.restore()
   }

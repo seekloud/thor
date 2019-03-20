@@ -179,6 +179,10 @@ case class ThorGameConfigImpl(
     adventurerParams.maxEnergyList(l - 1)
   }
 
+//  def getMaxEnergyByLevel(l: Byte): Int = {
+//    adventurerParams.maxEnergyList(l - 1)
+//  }
+
   override def getWeaponLengthByLevel(l: Byte): Float = {
     weaponParams.lengthList(l - 1)
   }

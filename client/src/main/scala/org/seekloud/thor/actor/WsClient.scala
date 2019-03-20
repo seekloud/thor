@@ -246,6 +246,8 @@ object WsClient {
 
         case msg: GetLoginInfo =>
           val a = System.currentTimeMillis()
+//          val layerScene = new LayerScene
+//          val bc = new BotController(ctx.self,  msg.playerId, stageContext, layerScene)
           val gameScene = new GameScene
           val gc = new GameController(ctx.self, PlayerInfo(msg.playerId, msg.name), stageContext, gameScene)
           val b = System.currentTimeMillis()
@@ -259,8 +261,8 @@ object WsClient {
                 log.debug(s"link game url: $url")
                 val webSocketFlow = Http().webSocketClientFlow(WebSocketRequest(url))
                 val source = getSource(ctx.self)
+//                val sink = getSink4Server(gameMsgReceiver, Left(bc))
                 val sink = getSink4Server(gameMsgReceiver, Right(gc))
-//                val sink = getSink4Server(gameMsgReceiver, Right(gc))
                 val (stream, response) =
                   source
                     .viaMat(webSocketFlow)(Keep.both)
@@ -291,6 +293,7 @@ object WsClient {
           gc.checkAndChangePreCanvas()
           println(s"has player Info ${(msg.playerId,msg.name)}")
 //          ctx.self ! PlayerInfo(msg.playerId,msg.name)
+//          working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), Some(bc), roomController, stageContext)
           working(gameMsgReceiver, gameMsgSender, loginController, Some(gc), botController, roomController, stageContext)
 
         case msg: BotLogin =>
