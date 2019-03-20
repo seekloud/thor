@@ -753,7 +753,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           val color = reader.getColor(x, y).grayscale()
           val gray = color.getRed * color.getOpacity
 //          writer.setColor(x,y,new Color(gray,gray,gray,color.getOpacity))
-          byteArray(y * height + x) = (gray * 255).toByte
+          byteArray(y * width + x) = (gray * 255).toByte
         }
         ByteString.copyFrom(byteArray)
       }
