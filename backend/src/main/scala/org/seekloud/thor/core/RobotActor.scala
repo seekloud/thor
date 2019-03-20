@@ -230,7 +230,7 @@ object RobotActor {
     val adventurerSelfOpt = thorSchema.adventurerMap.get(botId)
     //选择最近的移动或者随机移动
     adventurerSelfOpt.flatMap{ adventurerSelf =>
-      val otherAdventurer = thorSchema.adventurerMap.filter(a => a._2.position.distance(adventurerSelf.position) < 80 && a._1 != adventurerSelf.playerId).values
+      val otherAdventurer = thorSchema.adventurerMap.filter(a => a._2.position.distance(adventurerSelf.position) < 200 && a._1 != adventurerSelf.playerId).values
       val distanceMinAdventurer = otherAdventurer.toList.sortBy(a => a.position.distance(adventurerSelf.position))
       distanceMinAdventurer.headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
     }.getOrElse(randomMouseMove(thorSchema, botId).toFloat)

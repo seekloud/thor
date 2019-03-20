@@ -406,6 +406,7 @@ class GameController(
 
     /*鼠标移动操作*/
     playGameScreen.canvas.getCanvas.setOnMouseMoved { e =>
+
       val point = Point(e.getX.toFloat, e.getY.toFloat)
       val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
       thorSchemaOpt.foreach { thorSchema =>
@@ -426,7 +427,6 @@ class GameController(
           }
         }
       }
-
     }
 
     /*鼠标点击事件*/
@@ -437,7 +437,7 @@ class GameController(
       thorSchemaOpt.foreach { thorSchema =>
         if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
           if (e.isPrimaryButtonDown) {
-            attackMusic.play()
+          //            attackMusic.play()
           //            mouseLeft = true
             val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
             thorSchema.preExecuteUserEvent(preExecuteAction)
@@ -469,6 +469,7 @@ class GameController(
           }
         }
       }
+
     }
 
     /*键盘事件*/
