@@ -131,8 +131,8 @@ class GameController(
       val a = System.currentTimeMillis()
       drawGameByTime(System.currentTimeMillis() - logicFrameTime, playGameScreen.canvasUnit, playGameScreen.canvasBounds)
       val b = System.currentTimeMillis()
-      if (b-a>10)
-        println(s"draw all time span: ${b-a}")
+//      if (b-a>10)
+//        println(s"draw all time span: ${b-a}")
       if (gameState == GameState.stop && thorSchemaOpt.nonEmpty) thorSchemaOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     }
   }

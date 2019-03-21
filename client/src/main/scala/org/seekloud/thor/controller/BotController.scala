@@ -123,11 +123,11 @@ class BotController(
 
 
   /*BGM*/
-  private val gameMusic = new Media(getClass.getResource("/music/bgm-2.mp3").toString)
-  private val gameMusicPlayer = new MediaPlayer(gameMusic)
-  gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE)
-  private val attackMusic = new AudioClip(getClass.getResource("/music/sound-4.mp3").toString)
-  private var needBgm = true
+//  private val gameMusic = new Media(getClass.getResource("/music/bgm-2.mp3").toString)
+//  private val gameMusicPlayer = new MediaPlayer(gameMusic)
+//  gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE)
+//  private val attackMusic = new AudioClip(getClass.getResource("/music/sound-4.mp3").toString)
+//  private var needBgm = true
   private val timeline = new Timeline()
 
   /*视角跟随id*/
@@ -315,7 +315,7 @@ class BotController(
       data match {
         case e: ThorGame.YourInfo =>
           println(s"start---------")
-          gameMusicPlayer.play()
+//          gameMusicPlayer.play()
           mainId = e.id
           mainId4Layer = e.id
           try {
@@ -504,7 +504,7 @@ class BotController(
           case FireAction.attack => //攻击
             thorOpt.foreach { thorSchema =>
               if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerId)) {
-                attackMusic.play()
+//                attackMusic.play()
                 val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
                 thorSchema.preExecuteUserEvent(preExecuteAction)
                 wsClient ! WsClient.DispatchMsg(preExecuteAction)
