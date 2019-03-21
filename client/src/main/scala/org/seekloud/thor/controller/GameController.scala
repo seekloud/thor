@@ -429,29 +429,53 @@ class GameController(
       }
     })
     /*鼠标移动操作*/
-//    playGameScreen.canvas.getCanvas.setOnMouseMoved { e =>
-//
-//      val point = Point(e.getX.toFloat, e.getY.toFloat)
-//      val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
-//      thorSchemaOpt.foreach { thorSchema =>
-//
-//        if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
-//          val mouseDistance = math.sqrt(math.pow(e.getX - context.getStageWidth.toFloat / 2.0, 2) + math.pow(e.getY - context.getStageHeight.toFloat / 2.0, 2))
-//          val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * playGameScreen.canvasUnit
-//          val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
-//          if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
-//
-//            val offsetX = (e.getX - context.getStageWidth.toFloat / 2.0).toShort
-//            val offsetY = (e.getY - context.getStageHeight.toFloat / 2.0).toShort
-//            val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
-//            //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
-//            thorSchema.preExecuteUserEvent(preExecuteAction)
-//            wsClient ! WsClient.DispatchMsg(preExecuteAction)
-//            lastMouseMove = System.currentTimeMillis()
-//          }
-//        }
-//      }
-//    }
+    playGameScreen.canvas.getCanvas.setOnMouseDragged { e =>
+
+      val point = Point(e.getX.toFloat, e.getY.toFloat)
+      val theta = point.getTheta(playGameScreen.canvasBounds * playGameScreen.canvasUnit / 2).toFloat
+      thorSchemaOpt.foreach { thorSchema =>
+
+        if (thorSchema.adventurerMap.contains(playerInfo.playerId)) {
+          val mouseDistance = math.sqrt(math.pow(e.getX - context.getStageWidth.toFloat / 2.0, 2) + math.pow(e.getY - context.getStageHeight.toFloat / 2.0, 2))
+          val r = gameConfig.get.getAdventurerRadiusByLevel(thorSchema.adventurerMap(playerInfo.playerId).getAdventurerState.level) * playGameScreen.canvasUnit
+          val direction = thorSchema.adventurerMap(playerInfo.playerId).direction
+          if (System.currentTimeMillis() > lastMouseMove + frequency && math.abs(theta - direction) > 0.3) { //角度差大于0.3才执行
+
+            val offsetX = (e.getX - context.getStageWidth.toFloat / 2.0).toShort
+            val offsetY = (e.getY - context.getStageHeight.toFloat / 2.0).toShort
+            val preExecuteAction = MM(byteId, if (mouseDistance > r) offsetX else (10000 + offsetX).toShort, offsetY, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+            //              println(s"moved: $mouseDistance r:$r data:$data  canvasUnit:$canvasUnit")
+            thorSchema.preExecuteUserEvent(preExecuteAction)
+            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+            lastMouseMove = System.currentTimeMillis()
+          }
+        }
+      }
+
+      thorSchemaOpt.foreach { thorSchema =>
+        if (gameState == GameState.play && thorSchema.adventurerMap.exists(_._1 == playerInfo.playerId) && !thorSchema.dyingAdventurerMap.exists(_._1 == playerInfo.playerId)) {
+          if (e.isPrimaryButtonDown) {
+            //            attackMusic.play()
+            //            mouseLeft = true
+            val preExecuteAction = MouseClickDownLeft(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+            thorSchema.preExecuteUserEvent(preExecuteAction)
+            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+          }
+          else if (e.isSecondaryButtonDown) {
+            //            mouseRight = true
+            val preExecuteAction = MouseClickDownRight(byteId, thorSchema.systemFrame + preExecuteFrameOffset, getActionSerialNum)
+            thorSchema.preExecuteUserEvent(preExecuteAction)
+            //            println(preExecuteAction)
+            wsClient ! WsClient.DispatchMsg(preExecuteAction)
+          }
+          else ()
+        }
+        else {
+          start()
+        }
+      }
+
+    }
 
     /*鼠标点击事件*/
 
