@@ -11,6 +11,7 @@ import org.seekloud.thor.model.Constants._
 
 /**
   * User: TangYaruo
+  * Editor: QiuLinhui
   * Date: 2019/3/7
   * Time: 10:55
   */
@@ -123,7 +124,7 @@ class LayerScene {
     val text = "Waiting for bot to join in!"
     val l = humanCtx.measureText(text)
     println(s"length is $l")
-    humanCtx.fillText(text, (w - l) / 2, h / 3)
+    humanCtx.fillTextByMiddle(text, (w - l) / 2, h / 3)
     humanCtx.restore()
   }
 
