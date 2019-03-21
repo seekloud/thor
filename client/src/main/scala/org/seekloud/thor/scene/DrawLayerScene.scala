@@ -692,7 +692,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
     ctx.setFont("Helvetica", 20)
     val text = "Die Die Die"
     val l = ctx.measureText(text)
-    ctx.fillText(text, (w - l) / 2, h / 3)
+    ctx.fillTextByMiddle(text, (w - l) / 2, h / 3)
   }
 
   import org.seekloud.thor.common.BotSettings.isGray

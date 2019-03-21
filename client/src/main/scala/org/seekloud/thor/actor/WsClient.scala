@@ -150,7 +150,7 @@ object WsClient {
             case Some(bc) =>
               ClientBoot.addToPlatform {
                 bc.start()
-                stageContext.switchToLayer(bc.getLs.getScene)
+//                  stageContext.switchToLayer(bc.getLs.getScene)
               }
 
 
@@ -177,7 +177,8 @@ object WsClient {
             case Some(bc) =>
               ClientBoot.addToPlatform {
                 bc.start()
-                stageContext.switchToLayer(bc.getLs.getScene)
+//                if (org.seekloud.thor.common.BotSettings.render)
+//                  stageContext.switchToLayer(bc.getLs.getScene)
               }
             case None =>
               ClientBoot.addToPlatform{
@@ -327,8 +328,11 @@ object WsClient {
                           val port = BotSettings.botServerPort
                           ClientBoot.sdkServerHandler ! SdkServerHandler.BuildBotServer(port, executor, botActor, bc)
                           ClientBoot.addToPlatform{
-                            stageContext.switchToLayer(layerScene.getScene)
-                            layerScene.drawWait()
+                            if (org.seekloud.thor.common.BotSettings.render)
+                              {
+                                stageContext.switchToLayer(layerScene.getScene)
+                                layerScene.drawWait()
+                              }
                           }
 //                          timer.startSingleTimer(TimerKeyForTest, ClientTest(1),5.seconds)
                           Future.successful(s"link game server success.")

@@ -77,7 +77,8 @@ class StageContext(stage: Stage) {
     stage.setY(185)
     stage.setWidth(1230)
     stage.setHeight(660)
-    stage.show()
+    if (org.seekloud.thor.common.BotSettings.render)
+      stage.show()
   }
 //  def setStageListener(listener: StageListener): Unit = {
 //    stageListener = listener

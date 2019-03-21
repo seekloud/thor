@@ -24,6 +24,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import javafx.application.Platform
 import javafx.stage.Stage
+import org.seekloud.thor.actor.WsClient.BotLogin
 import org.seekloud.thor.actor.{SdkServerHandler, WsClient}
 import org.seekloud.thor.common.StageContext
 import org.seekloud.thor.controller.ModeSelectController
@@ -62,6 +63,7 @@ object ClientBoot {
 class ClientBoot extends javafx.application.Application {
 
   import ClientBoot._
+  import org.seekloud.thor.common.BotSettings
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
@@ -71,9 +73,13 @@ class ClientBoot extends javafx.application.Application {
 
     val wsClient = system.spawn(WsClient.create(context), "WsClient")
 
-    val modeScene = new ModeScene()
-    val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
-    modeSelectController.showScene()
+    if (BotSettings.render){
+      val modeScene = new ModeScene()
+      val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
+      modeSelectController.showScene()
+    }
+    else wsClient ! BotLogin(BotSettings.botId, BotSettings.botKey)
+
 
 
   }
