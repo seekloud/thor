@@ -274,7 +274,7 @@ class BotController(
       val a = System.currentTimeMillis()
       drawGameByTime(System.currentTimeMillis() - logicFrameTime, layerScreen.canvasUnit, layerScreen.canvasUnit4Huge, layerScreen.canvasBounds)
       val b = System.currentTimeMillis()
-      if (b - a > 10)
+      if (b - a > 15)
         println(s"draw all time span: ${b - a}")
       if (gameState == GameState.stop && thorOpt.nonEmpty) thorOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     }

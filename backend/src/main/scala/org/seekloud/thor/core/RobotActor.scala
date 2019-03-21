@@ -249,14 +249,16 @@ object RobotActor {
     val adventurerSelfOpt = thorSchema.adventurerMap.get(botId)
     //判断是否执行攻击
     adventurerSelfOpt.exists { adventurerSelf =>
-      thorSchema.adventurerMap.filterNot(_._1 == adventurerSelf.playerId).values.exists(a => a.position.distance(adventurerSelf.position) < thorSchema.config.getWeaponLengthByLevel(a.level) + adventurerSelf.radius + a.radius)
+      val playerToAttack = thorSchema.adventurerMap.filterNot(_._1 == adventurerSelf.playerId).values
+      val botPlayer = playerToAttack.filter(_.playerId.take(3) == "bot").exists(a => a.position.distance(adventurerSelf.position) < thorSchema.config.getWeaponLengthByLevel(a.level) + adventurerSelf.radius + a.radius)
+      botPlayer
     }
   }
 
   def priority(id: String): Int = {
     val robot = 15
     val human = 10
-    val bot = 5
+    val bot = 0
     id match {
       case "rob" => robot
       case "bot"   => bot

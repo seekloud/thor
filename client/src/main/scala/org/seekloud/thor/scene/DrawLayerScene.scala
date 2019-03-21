@@ -372,9 +372,9 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
 
     def drawAllPlayer(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float,
       canvasBoundary: Point): Unit = {
-      impl.ctx("allPlayer").clearRect(0, 0, layeredCanvasWidth * 2, layeredCanvasHeight * 2 + 210)
+      impl.ctx("allPlayer").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("allPlayer").setFill("#000000")
-      impl.ctx("allPlayer").fillRec(0, 0, 400 * 2, 200 * 2 )
+      impl.ctx("allPlayer").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.adventurerMap.foreach {
         adventurer =>
           if (!impl.dyingAdventurerMap.contains(adventurer._1)) {

@@ -57,9 +57,11 @@ case class ThorSchemaBotImpl(
 
   def drawGameLoading(): Unit = {
     //    println("linking...")
+    import org.seekloud.thor.model.Constants._
     ctx("human").save()
+    ctx("human").clearRect(0, 0, CanvasWidth, CanvasHeight)
     ctx("human").setFill("#000000")
-    ctx("human").fillRec(0, 0, canvasSize.x, canvasSize.y)
+    ctx("human").fillRec(0, 0, CanvasWidth, CanvasHeight)
     ctx("human").setFill("rgb(250, 250, 250)")
     ctx("human").setTextAlign("left")
     ctx("human").setFont("Helvetica", 36)
