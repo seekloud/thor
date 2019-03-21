@@ -8,6 +8,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.GridPane
 import javafx.scene.{Group, Scene}
+import org.seekloud.thor.common.BotSettings
 import org.seekloud.thor.model.Constants
 import org.seekloud.thor.scene.ModeScene.ModeSceneListener
 
@@ -52,6 +53,9 @@ class BotScene {
   val keyLabel = new Label("bot-key:")
   val botId = new TextField()
   val botKey = new PasswordField()
+
+  botId.setText(BotSettings.botId)
+  botKey.setText(BotSettings.botKey)
 
   idLabel.getStyleClass.add("bot-label")
   keyLabel.getStyleClass.add("bot-label")
