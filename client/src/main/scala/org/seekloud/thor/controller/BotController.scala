@@ -499,7 +499,7 @@ class BotController(
         }
 
       case Left(fire) =>
-        println(s"receive fire action: $fire")
+//        println(s"receive fire action: $fire")
 
         fire match {
           case FireAction.attack => //攻击

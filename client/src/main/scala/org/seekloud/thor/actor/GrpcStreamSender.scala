@@ -84,12 +84,12 @@ object GrpcStreamSender {
             if (oObserver != null) {
               oObserver.onNext(rsp)
             }
-            Behavior.same
           } catch {
             case e: Exception =>
-              log.warn(s"ooObserver error: ${e.getMessage}")
-              Behavior.stopped
+              log.warn(s"oObserver error: ${e.getMessage}")
+
           }
+          Behaviors.same
 
         case LeaveRoom =>
           oObserver.onCompleted()
