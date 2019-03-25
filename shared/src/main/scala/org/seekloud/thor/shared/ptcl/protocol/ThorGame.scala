@@ -101,9 +101,9 @@ object ThorGame {
   /*Game Agent*/
   sealed trait GaUserAction extends WsMsgFront
 
-  final case class GAStartGame(roomId: Long, pwd: Option[String] = None) extends GaUserAction
+  final case class GAStartGame(roomId: Long, pwd: Option[String] = None, frameRate: Int) extends GaUserAction
 
-  final case class GACreateRoom(pswOpt: Option[String] = None) extends GaUserAction
+  final case class GACreateRoom(pswOpt: Option[String] = None, frameRate: Int) extends GaUserAction
 
   //  final case class JoinRoomSuccess(roomId: Long) extends WsMsgServer
 

@@ -22,7 +22,7 @@ object BotScene {
 
   trait BotSceneListener{
 
-    def confirm(botId: String, botKey: String)
+    def confirm(botId: String, botKey: String, botFrame: String)
 
     def backToPrevious()
 
@@ -51,14 +51,19 @@ class BotScene {
   /*input*/
   val idLabel = new Label("bot-id:")
   val keyLabel = new Label("bot-key:")
+  val botFrameLabel = new Label("botFrame")
   val botId = new TextField()
   val botKey = new PasswordField()
+  val botFrame = new TextField()
+
 
   botId.setText(BotSettings.botId)
   botKey.setText(BotSettings.botKey)
+  botFrame.setText("100")
 
   idLabel.getStyleClass.add("bot-label")
   keyLabel.getStyleClass.add("bot-label")
+  botFrameLabel.getStyleClass.add("bot-label")
 
   /*button*/
   val confirm = new Button("Confirm")
@@ -96,11 +101,13 @@ class BotScene {
   val grid = new GridPane()
   grid.setHgap(10)
   grid.setVgap(10)
-  grid.setPadding(new Insets(140,50,100,120))
+  grid.setPadding(new Insets(100,50,100,120))
   grid.add(idLabel, 0 ,0)
   grid.add(botId, 1 ,0)
   grid.add(keyLabel, 0 ,1)
   grid.add(botKey, 1 ,1)
+  grid.add(botFrameLabel,0,2)
+  grid.add(botFrame,1,2)
   grid.setLayoutX(50)
   grid.setLayoutY(10)
 
@@ -110,7 +117,7 @@ class BotScene {
 
   var listener: BotSceneListener = _
 
-  confirm.setOnAction(_ => listener.confirm(botId.getText, botKey.getText()))
+  confirm.setOnAction(_ => listener.confirm(botId.getText, botKey.getText, botFrame.getText))
   backToPrevious.setOnAction(_ => listener.backToPrevious())
 
   def setListener(listener: BotSceneListener): Unit = {

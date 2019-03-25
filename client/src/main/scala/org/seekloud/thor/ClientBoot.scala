@@ -26,7 +26,7 @@ import javafx.application.Platform
 import javafx.stage.Stage
 import org.seekloud.thor.actor.WsClient.BotLogin
 import org.seekloud.thor.actor.{SdkServerHandler, WsClient}
-import org.seekloud.thor.common.StageContext
+import org.seekloud.thor.common.{AppSettings, StageContext}
 import org.seekloud.thor.controller.ModeSelectController
 import org.seekloud.thor.scene.ModeScene
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame
@@ -78,7 +78,7 @@ class ClientBoot extends javafx.application.Application {
       val modeSelectController = new ModeSelectController(wsClient, modeScene, context)
       modeSelectController.showScene()
     }
-    else wsClient ! BotLogin(BotSettings.botId, BotSettings.botKey)
+    else wsClient ! BotLogin(BotSettings.botId, BotSettings.botKey, AppSettings.frameRate)
 
 
 

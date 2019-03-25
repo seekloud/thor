@@ -28,6 +28,7 @@ import org.seekloud.thor.core.game.{AdventurerServer, ThorGameConfigServerImpl, 
 import org.seekloud.thor.shared.ptcl.config.ThorGameConfigImpl
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
+import org.seekloud.thor.common.AppSettings
 import org.seekloud.thor.shared.ptcl.component.Adventurer
 import org.seekloud.thor.protocol.ReplayProtocol.{ChangeRecordMsg, GetRecordFrameMsg, GetUserInRecordMsg}
 import org.seekloud.thor.shared.ptcl.ErrorRsp
@@ -61,7 +62,7 @@ object UserActor {
 
   case class StartGame(roomId: Option[Long]) extends Command
 
-  case class JoinRoom(playerId: String, name: String, userActor: ActorRef[UserActor.Command], roomIdOpt: Option[Long] = None, pswOpt: Option[String] = None) extends Command with RoomManager.Command
+  case class JoinRoom(playerId: String, name: String, userActor: ActorRef[UserActor.Command], roomIdOpt: Option[Long] = None, pswOpt: Option[String] = None, frameRate: Option[Int] = None) extends Command with RoomManager.Command
 
   case class LeftRoom[U](actorRef: ActorRef[U]) extends Command
 
@@ -70,7 +71,7 @@ object UserActor {
   //TODO 消息处理
   case class JoinRoomFail(error: String) extends Command
 
-  case class CreateRoom(playerId: String, name: String, pwd: Option[String], replyTo: ActorRef[UserActor.Command]) extends Command with RoomManager.Command
+  case class CreateRoom(playerId: String, name: String, pwd: Option[String], replyTo: ActorRef[UserActor.Command], frameRate: Int) extends Command with RoomManager.Command
 
   case class CreateRoomSuccess(roomId: Long) extends Command
 
@@ -240,7 +241,7 @@ object UserActor {
                 req match {
                   case msg: GACreateRoom =>
                     log.debug(s"get ws msg: $msg")
-                    roomManager ! CreateRoom(playerId, userInfo.name, msg.pswOpt, ctx.self)
+                    roomManager ! CreateRoom(playerId, userInfo.name, msg.pswOpt, ctx.self, msg.frameRate)
                     Behaviors.same
 
                   case msg: GAStartGame =>

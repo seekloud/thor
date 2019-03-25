@@ -52,6 +52,7 @@ object AppSettings {
   val dependence = config.getConfig("dependence")
 
   val personLimit = appConfig.getInt("RoomConfig.personLimit")
+  val frameRate = appConfig.getInt("RoomConfig.frameRate")
   val thorGameConfig:ThorGameConfig = ThorGameConfigServerImpl(ConfigFactory.parseResources("thorGame.conf"))
 
   val testPsw = appConfig.getString("testPsw")

@@ -8,7 +8,7 @@ val scalaV = "2.12.6"
 //val scalaV = "2.11.8"
 
 val projectName = "thor"
-val projectVersion = "2019.3.19"
+val projectVersion = "2019.3.21"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 

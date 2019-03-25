@@ -25,6 +25,8 @@ object AppSettings {
 
   val appConfig = config.getConfig("app")
 
+  val frameRate = appConfig.getInt("RoomConfig.frameRate")
+
   val httpInterface = appConfig.getString("http.interface")
   val httpPort = appConfig.getInt("http.port")
 

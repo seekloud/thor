@@ -18,8 +18,7 @@ import akka.actor.typed.scaladsl.adapter._
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.thor.ClientBoot
-import org.seekloud.thor.common.{Routes, StageContext}
-import org.seekloud.thor.common.{BotSettings, Routes, StageContext}
+import org.seekloud.thor.common.{AppSettings, BotSettings, Routes, StageContext}
 import org.seekloud.thor.controller.{BotController, GameController, LoginController, RoomController}
 import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.ClientBoot.{executor, materializer, system}
@@ -77,7 +76,7 @@ object WsClient {
 
   final case class PlayerInfo(playerId: String, name: String) extends WsCommand
 
-  final case class BotLogin(botId: String, botKey: String) extends WsCommand
+  final case class BotLogin(botId: String, botKey: String, botFrame: Int) extends WsCommand
 
   final case object Stop extends WsCommand
 
@@ -140,8 +139,10 @@ object WsClient {
       msg match {
         case msg: StartGame =>
           log.debug(s"get msg: $msg")
+          var frameRate = AppSettings.frameRate
+          if (botController.isDefined) frameRate = botController.get.frameRate
           if (gameMsgSender != null) {
-            gameMsgSender ! GAStartGame(msg.roomId, msg.pwd)
+            gameMsgSender ! GAStartGame(msg.roomId, msg.pwd, frameRate)
           } else {
             timer.startSingleTimer(TimerKey4StartGame, msg, 5.seconds)
           }
@@ -167,8 +168,10 @@ object WsClient {
 
         case msg: CreateRoom =>
           log.debug(s"get msg: $msg")
+          var frameRate = AppSettings.frameRate
+          if (botController.isDefined) frameRate = botController.get.frameRate
           if (gameMsgSender != null) {
-            gameMsgSender ! GACreateRoom(msg.psw)
+            gameMsgSender ! GACreateRoom(msg.psw, frameRate)
           } else {
             timer.startSingleTimer(TimerKey4CreateGame, msg, 500.millis)
           }
@@ -299,7 +302,7 @@ object WsClient {
 
         case msg: BotLogin =>
           val layerScene = new LayerScene
-          val bc = new BotController(ctx.self, "bot" + msg.botId, stageContext, layerScene)
+          val bc = new BotController(ctx.self, "bot" + msg.botId, stageContext, layerScene, msg.botFrame)
           EsheepClient.getBotToken(msg.botId, msg.botKey).map {
             case Right(tokenRst) =>
               if (tokenRst.errCode == 0) {

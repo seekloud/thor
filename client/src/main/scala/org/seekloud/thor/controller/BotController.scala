@@ -57,7 +57,8 @@ class BotController(
   wsClient: ActorRef[WsClient.WsCommand],
   playerId: String,
   context: StageContext,
-  layerScreen: LayerScene
+  layerScreen: LayerScene,
+  var frameRate: Int
 ) {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
@@ -169,7 +170,7 @@ class BotController(
   def startGameLoop(): Unit = { //逻辑帧
     logicFrameTime = System.currentTimeMillis()
     timeline.setCycleCount(Animation.INDEFINITE)
-    val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
+    val keyFrame = new KeyFrame(Duration.millis(frameRate), { _ =>
       logicLoop()
     })
     //    scheduler.schedule(0.millis, 100.millis) {

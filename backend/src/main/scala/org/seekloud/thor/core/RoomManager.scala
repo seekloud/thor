@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
+import org.seekloud.thor.common.AppSettings
 import org.seekloud.thor.core.UserActor.{CreateRoom, JoinRoom, JoinRoomFail}
 import org.slf4j.LoggerFactory
 import org.seekloud.thor.common.AppSettings.personLimit
@@ -80,7 +81,7 @@ object RoomManager {
     Behaviors.receive[Command] {
       (ctx, msg) =>
         msg match {
-          case JoinRoom(userId, name, userActor, roomIdOpt, pswOpt) =>
+          case JoinRoom(userId, name, userActor, roomIdOpt, pswOpt, None) =>
             //              log.debug(s"$name joinRoom. roomInUse before: $roomInUse")
             //为新用户分配房间
             roomIdOpt match {
@@ -128,7 +129,7 @@ object RoomManager {
             var roomId = roomIdGenerator.getAndIncrement()
             while (roomInUse.exists(_._1 == roomId)) roomId = roomIdGenerator.getAndIncrement()
             roomInUse.put(roomId, (msg.pwd.getOrElse(""), List((msg.playerId, msg.name))))
-            getRoomActor(ctx, roomId) ! RoomActor.JoinRoom(roomId, msg.playerId, msg.name, msg.replyTo)
+            getRoomActor(ctx, roomId, msg.frameRate) ! RoomActor.JoinRoom(roomId, msg.playerId, msg.name, msg.replyTo)
             msg.replyTo ! UserActor.CreateRoomSuccess(roomId)
             Behaviors.same
 
@@ -234,10 +235,10 @@ object RoomManager {
     }
   }
 
-  private def getRoomActor(ctx: ActorContext[Command], roomId: Long) = {
+  private def getRoomActor(ctx: ActorContext[Command], roomId: Long, frameRate: Int = AppSettings.frameRate) = {
     val childName = s"room_$roomId"
     ctx.child(childName).getOrElse {
-      val actor = ctx.spawn(RoomActor.create(roomId), childName)
+      val actor = ctx.spawn(RoomActor.create(roomId, frameRate), childName)
       ctx.watchWith(actor, ChildDead(childName, actor))
       actor
 

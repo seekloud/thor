@@ -38,6 +38,7 @@ import org.seekloud.thor.shared.ptcl.protocol.ThorGame._
 import org.seekloud.thor.shared.ptcl.thor.ThorSchemaClientImpl
 import org.seekloud.thor.ClientBoot.{executor, scheduler}
 import org.slf4j.LoggerFactory
+import org.seekloud.thor.common.AppSettings
 
 /**
   * User: Jason
@@ -163,7 +164,7 @@ class GameController(
   def startGameLoop(): Unit = { //渲染帧
     logicFrameTime = System.currentTimeMillis()
     timeline.setCycleCount(Animation.INDEFINITE)
-    val keyFrame = new KeyFrame(Duration.millis(100), { _ =>
+    val keyFrame = new KeyFrame(Duration.millis(AppSettings.frameRate), { _ =>
       logicLoop()
     })
     //    scheduler.schedule(0.millis, 100.millis) {

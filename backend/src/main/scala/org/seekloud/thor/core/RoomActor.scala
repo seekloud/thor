@@ -76,7 +76,7 @@ object RoomActor {
   private final case object GameLoopKey
 
 
-  def create(roomId: Long): Behavior[Command] = {
+  def create(roomId: Long, frameRate: Int): Behavior[Command] = {
     log.debug(s"RoomActor-$roomId starting...")
     Behaviors.setup[Command] {
       ctx =>
@@ -96,7 +96,7 @@ object RoomActor {
             if (AppSettings.gameRecordIsWork) {
               getGameRecorder(ctx, thorSchema, roomId, thorSchema.systemFrame)
             }
-            timer.startPeriodicTimer(GameLoopKey, GameLoop, AppSettings.thorGameConfig.frameDuration.millis)
+            timer.startPeriodicTimer(GameLoopKey, GameLoop, frameRate.millis)
             idle(roomId, Nil, subscribersMap, watchingMap, thorSchema, 0L)
         }
     }
