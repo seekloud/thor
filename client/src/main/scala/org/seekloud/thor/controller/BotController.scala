@@ -440,7 +440,7 @@ class BotController(
   def receiveBotAction(action: Either[Int, Swing]): Unit = {
     action match {
       case Right(swing) =>
-//        println(s"***********receive swing action***********")
+        println(s"***********receive swing action***********")
 //        println(s"distance: ${swing.distance}")
 //        println(s"radian: ${swing.radian / math.Pi * 180}°")
         val moveDistance = Point(math.min(swing.distance, BotSettings.dMax), 0).rotate(swing.radian)
@@ -499,6 +499,7 @@ class BotController(
         }
 
       case Left(fire) =>
+        println(s"receive fire action: $fire")
 
         fire match {
           case FireAction.attack => //攻击
