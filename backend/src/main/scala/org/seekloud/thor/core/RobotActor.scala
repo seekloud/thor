@@ -37,6 +37,8 @@ import scala.util.Random
 object RobotActor {
   private val log = LoggerFactory.getLogger(this.getClass)
 
+  private var flag = true
+
   trait Command
 
   private case class TimeOut(msg: String) extends Command
@@ -111,6 +113,7 @@ object RobotActor {
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       val actionSerialNumGenerator = new AtomicInteger(0)
       Behaviors.withTimers[Command] { implicit timer =>
+        flag = if (botId.drop(5).toInt < thorSchema.config.getRobotNumber / 2) true else false
         timer.startSingleTimer(MouseMoveKey, AutoMouseMove, 1.seconds)
         timer.startSingleTimer(MouseLeftDownKey, AutoMouseLeftDown, 2.2.seconds)
         switchBehavior(ctx, "idle", idle(roomActor, thorSchema, botId, byteId, botName, thorSchema.config.getRobotMoveFrequency(level), thorSchema.config.getRobotAttackFrequency(level), actionSerialNumGenerator))
@@ -133,7 +136,7 @@ object RobotActor {
     Behaviors.receive[Command]{(ctx, msg) =>
       msg match {
         case AutoMouseMove =>
-          val theta = move2Player(thorSchema, botId)
+          val theta = if (flag) move2Player(thorSchema, botId) else randomMouseMove(thorSchema, botId)
           val direction = if(theta == 0) theta.toFloat else thorSchema.adventurerMap(botId).direction
 
           if(math.abs(theta - direction) > 0.1){ //角度差大于0.3才执行
@@ -234,7 +237,7 @@ object RobotActor {
       val distanceMinAdventurer = otherAdventurer.toList.sortBy(a => a.position.distance(adventurerSelf.position))
       val priorityAdventure = distanceMinAdventurer.map(a => (a, a.position.distance(adventurerSelf.position) * priority(a.playerId.take(3))))
 //      val player =
-      priorityAdventure.sortBy(_._2).map(_._1).headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
+      priorityAdventure.filterNot(_._1.playerId.take(3) == "rob").sortBy(_._2).map(_._1).headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
 //      if (player.nonEmpty)
 //        player.headOption.map(_.position.getTheta(adventurerSelf.position).toFloat)
 //      else
@@ -250,8 +253,9 @@ object RobotActor {
     //判断是否执行攻击
     adventurerSelfOpt.exists { adventurerSelf =>
       val playerToAttack = thorSchema.adventurerMap.filterNot(_._1 == adventurerSelf.playerId).values
-      val botPlayer = playerToAttack.filter(_.playerId.take(3) == "bot").exists(a => a.position.distance(adventurerSelf.position) < thorSchema.config.getWeaponLengthByLevel(a.level) + adventurerSelf.radius + a.radius)
-      botPlayer
+//      val botPlayer = playerToAttack.filter(_.playerId.take(3) == "bot").exists(a => a.position.distance(adventurerSelf.position) < thorSchema.config.getWeaponLengthByLevel(a.level) + adventurerSelf.radius + a.radius)
+//      botPlayer
+      playerToAttack.exists(a => a.position.distance(adventurerSelf.position) < thorSchema.config.getWeaponLengthByLevel(a.level) + adventurerSelf.radius + a.radius)
     }
   }
 
