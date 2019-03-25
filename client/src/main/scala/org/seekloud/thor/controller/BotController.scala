@@ -275,8 +275,8 @@ class BotController(
       val a = System.currentTimeMillis()
       drawGameByTime(System.currentTimeMillis() - logicFrameTime, layerScreen.canvasUnit, layerScreen.canvasUnit4Huge, layerScreen.canvasBounds)
       val b = System.currentTimeMillis()
-      if (b - a > 15)
-        println(s"draw all time span: ${b - a}")
+//      if (b - a > 15)
+//        println(s"draw all time span: ${b - a}")
       if (gameState == GameState.stop && thorOpt.nonEmpty) thorOpt.foreach(_.drawGameStop(killerName, killNum, energyScore, level))
     }
   }
@@ -292,7 +292,6 @@ class BotController(
 
 
   def pushObservation(): Unit = {
-
     ClientBoot.addToPlatform {
       if (drawLayerScene.nonEmpty) {
         val a = System.currentTimeMillis()
@@ -441,7 +440,7 @@ class BotController(
   def receiveBotAction(action: Either[Int, Swing]): Unit = {
     action match {
       case Right(swing) =>
-        println(s"***********receive swing action***********")
+//        println(s"***********receive swing action***********")
 //        println(s"distance: ${swing.distance}")
 //        println(s"radian: ${swing.radian / math.Pi * 180}°")
         val moveDistance = Point(math.min(swing.distance, BotSettings.dMax), 0).rotate(swing.radian)

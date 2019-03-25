@@ -62,7 +62,7 @@ object CanvasUtils {
             val a = System.currentTimeMillis()
             drawAdventurerByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
             val b = System.currentTimeMillis()
-            if (b-a>5) println(s"draw single adv time span: ${b-a}")
+//            if (b-a>5) println(s"draw single adv time span: ${b-a}")
           case "weapon" =>
             val imgWidth = preImage((level - 1) / 4).getWidth
             val imgHeight = preImage((level - 1) / 4).getHeight
@@ -149,7 +149,7 @@ object CanvasUtils {
             ctx.fill()
 //            drawAdventurerByPreImage(ctx, preImage, level, Point(-width/2 + offset.x, -drawHeight/2 + offset.y), Point(width, drawHeight))
             val b = System.currentTimeMillis()
-            if (b-a>5) println(s"draw single adv time span: ${b-a}")
+//            if (b-a>5) println(s"draw single adv time span: ${b-a}")
 
           case _ => ()
         }

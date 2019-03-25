@@ -325,7 +325,6 @@ object WsClient {
                       val connected = response.flatMap { upgrade =>
                         if (upgrade.response.status == StatusCodes.SwitchingProtocols) {
                           ctx.self ! GetSender(stream)
-
                           //启动bot相关服务
                           val botActor = system.spawn(BotActor.create(ctx.self, bc), "botActor")
                           val port = BotSettings.botServerPort
