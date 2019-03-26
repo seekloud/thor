@@ -8,8 +8,9 @@ import java.nio.ByteBuffer
 import com.google.protobuf.ByteString
 //import javafx.geometry.Rectangle2D
 //import javafx.scene.SnapshotParameters
-import javafx.scene.image.{Image, WritableImage}
-import javafx.scene.paint.Color
+//import javafx.scene.image.WritableImage
+//import javafx.scene.paint.Color
+import javafx.scene.image.Image
 import org.seekloud.esheepapi.pb.observations.{ImgData, LayeredObservation}
 import org.seekloud.thor.game.ThorSchemaBotImpl
 import org.seekloud.thor.model.Constants._
@@ -390,15 +391,15 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("all").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("all").setFill("#000000")
       impl.ctx("all").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
-      impl.adventurerMap.foreach {
-        adventurer =>
-          if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
-            if (adventurer._1 == mainId)
-              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), selfColor)
-            else
-              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), othersColor)
-          }
-      }
+//      impl.adventurerMap.foreach {
+//        adventurer =>
+//          if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
+//            if (adventurer._1 == mainId)
+//              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), selfColor)
+//            else
+//              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), othersColor)
+//          }
+//      }
     }
 
     def drawSelf(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
