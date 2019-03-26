@@ -32,11 +32,12 @@ message LayeredObservation {
   ImgData location = 1;
   ImgData immutable_element = 2;
   ImgData mutable_element = 3;
-  ImgData bodies = 4;
-  ImgData asset_ownership = 5;
-  ImgData self_asset = 6;
-  ImgData self_status = 7;
+  ImgData body = 4;
+  ImgData bodies = 5;
+  ImgData asset_ownership = 6;
+  ImgData self_asset = 7;
   ImgData pointer = 8;
+  ImgData self_status = 9;
 
 }
 
