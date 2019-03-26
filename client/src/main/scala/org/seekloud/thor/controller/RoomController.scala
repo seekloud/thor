@@ -8,8 +8,11 @@ import org.seekloud.thor.scene.{LoginScene, RoomScene}
 import org.seekloud.thor.utils.{ThorClient, WarningDialog}
 import org.seekloud.thor.ClientBoot.executor
 import akka.actor.typed.ActorRef
-import javafx.scene.control.TextInputDialog
+import javafx.geometry.Insets
+import javafx.scene.control.ButtonBar.ButtonData
+import javafx.scene.control._
 import javafx.scene.image.ImageView
+import javafx.scene.layout.GridPane
 import org.seekloud.thor.actor.WsClient
 import org.seekloud.thor.actor.WsClient.StartGame
 
@@ -27,11 +30,6 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
 
   private def updateRoomList(): Unit = {
 
-    // TODO  for test
-//    val roomList = List("1-10-0", "2-15-1")
-//    ClientBoot.addToPlatform {
-//      roomScene.updateRoomList(roomList)
-//    }
     ThorClient.getRoomList.map {
       case Right(rst) =>
         if (rst.errCode == 0) {
@@ -72,6 +70,40 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
   }
 
 
+  def createRoomDialog(): Option[(String, String)] = {
+    val dialog = new Dialog[(String, String)]()
+    dialog.setTitle("Create Room")
+    val nameField = new TextField()
+    val pwdField = new PasswordField()
+    val confirmButton = new ButtonType("confirm", ButtonData.OK_DONE)
+    val grid = new GridPane
+    grid.setHgap(10)
+    grid.setVgap(10)
+    grid.setPadding(new Insets(10, 10, 15, 10))
+    grid.add(new Label("room_name:"), 0, 0)
+    grid.add(nameField, 1, 0)
+    grid.add(new Label("password:"), 0, 1)
+    grid.add(pwdField, 1, 1)
+    dialog.getDialogPane.getButtonTypes.addAll(confirmButton, ButtonType.CANCEL)
+    dialog.getDialogPane.setContent(grid)
+    dialog.setResultConverter(dialogButton =>
+      if (dialogButton == confirmButton)
+        (nameField.getText(), pwdField.getText())
+      else
+        null
+    )
+    var loginInfo: Option[(String, String)] = None
+    val rst = dialog.showAndWait()
+    rst.ifPresent { a =>
+      if (a._1 != null && a._2 != null && a._1 != "" && a._2 != "")
+        loginInfo = Some((a._1, a._2))
+      else
+        None
+    }
+    loginInfo
+  }
+
+
   roomScene.setListener(listener = new RoomScene.RoomSceneListener {
     override def confirmRoom(roomId: Int, hasPwd: Boolean): Unit = {
       if (hasPwd) {
@@ -102,12 +134,12 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
     }
 
     override def gotoCreateRoomScene(): Unit = {
-      val pwd = inputPwd
-      if (pwd.nonEmpty) {
-        if (pwd.get.nonEmpty) {
-          wsClient ! WsClient.CreateRoom(Some(pwd.get))
+      val roomInfo = createRoomDialog()
+      if (roomInfo.nonEmpty) {
+        if (roomInfo.get._2.nonEmpty) {
+          wsClient ! WsClient.CreateRoom(Some(roomInfo.get._2), roomInfo.get._1)
         } else {
-          wsClient ! WsClient.CreateRoom(None)
+          wsClient ! WsClient.CreateRoom(None, roomInfo.get._1)
         }
       }
 

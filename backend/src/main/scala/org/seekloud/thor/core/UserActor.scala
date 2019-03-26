@@ -71,7 +71,7 @@ object UserActor {
   //TODO 消息处理
   case class JoinRoomFail(error: String) extends Command
 
-  case class CreateRoom(playerId: String, name: String, pwd: Option[String], replyTo: ActorRef[UserActor.Command], frameRate: Int) extends Command with RoomManager.Command
+  case class CreateRoom(playerId: String, name: String, pwd: Option[String], roomName: String, replyTo: ActorRef[UserActor.Command], frameRate: Int) extends Command with RoomManager.Command
 
   case class CreateRoomSuccess(roomId: Long) extends Command
 
@@ -241,7 +241,7 @@ object UserActor {
                 req match {
                   case msg: GACreateRoom =>
                     log.debug(s"get ws msg: $msg")
-                    roomManager ! CreateRoom(playerId, userInfo.name, msg.pswOpt, ctx.self, msg.frameRate)
+                    roomManager ! CreateRoom(playerId, userInfo.name, msg.pswOpt, msg.name, ctx.self, msg.frameRate)
                     Behaviors.same
 
                   case msg: GAStartGame =>

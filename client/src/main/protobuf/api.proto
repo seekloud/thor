@@ -40,6 +40,7 @@ message Credit{
 message CreateRoomReq{
   Credit credit = 1;
   string password = 2;
+  string room_name = 3;
 }
 
 message CreateRoomRsp {

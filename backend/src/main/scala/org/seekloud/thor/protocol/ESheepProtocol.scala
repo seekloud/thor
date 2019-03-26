@@ -131,7 +131,13 @@ object ESheepProtocol {
 
   val ErrorGetPlayerByAccessCodeRsp = GetPlayerByAccessCodeRsp(None, 200001, "accessCode error")
 
-  final case class RoomList(roomList: List[Long])
+  final case class Room(
+    roomId: Long,
+    roomName: String,
+    createTime: Long
+  )
+
+  final case class RoomList(roomList: List[Room])
 
   final case class GetRoomListRsp(
     data: Option[RoomList],

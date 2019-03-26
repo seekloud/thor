@@ -64,7 +64,7 @@ class BotServer(botActor: ActorRef[BotActor.Command], botController: BotControll
   override def createRoom(request: CreateRoomReq): Future[CreateRoomRsp] = {
     if (checkBotToken(request.credit.get.apiToken)) {
       BotServer.state = State.in_game
-      val enterRoomRsp: Future[EnterRoomRsp] = botActor ? (BotActor.CreateRoom(Some(request.password), _))
+      val enterRoomRsp: Future[EnterRoomRsp] = botActor ? (BotActor.CreateRoom(Some(request.password), request.roomName,  _))
       enterRoomRsp.map {
         rsp =>
           if (rsp.errCode == 0)

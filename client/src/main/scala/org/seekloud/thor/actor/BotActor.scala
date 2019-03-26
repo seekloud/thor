@@ -18,7 +18,7 @@ object BotActor {
 
   trait Command
 
-  final case class CreateRoom(psw: Option[String], replyTo: ActorRef[EnterRoomRsp]) extends Command
+  final case class CreateRoom(psw: Option[String], name: String, replyTo: ActorRef[EnterRoomRsp]) extends Command
 
   final case class JoinRoom(roomId: Long, pwd: String, replyTo: ActorRef[EnterRoomRsp]) extends Command
 
@@ -37,7 +37,7 @@ object BotActor {
 
         case msg: CreateRoom =>
           botController.sdkReplyTo = Some(msg.replyTo)
-          wsClient ! WsClient.CreateRoom(msg.psw)
+          wsClient ! WsClient.CreateRoom(msg.psw, msg.name)
           Behaviors.same
 
         case msg: JoinRoom =>

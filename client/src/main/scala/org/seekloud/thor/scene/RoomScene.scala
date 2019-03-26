@@ -15,7 +15,7 @@ import javafx.scene.{Group, Scene}
 import org.seekloud.thor.ClientBoot
 import org.seekloud.thor.model.Constants
 import org.seekloud.thor.protocol.ThorClientProtocol.ClientUserInfo
-import org.seekloud.thor.utils.WarningDialog
+import org.seekloud.thor.utils.{TimeUtil, WarningDialog}
 
 import scala.collection.mutable
 
@@ -30,12 +30,18 @@ object RoomScene {
 
   case class RoomInfo(
     roomId: StringProperty,
+    roomName: StringProperty,
     playerNum: StringProperty,
+    createTime: StringProperty,
     isLocked: ObjectProperty[ImageView]
   ) {
     def getRoomId: String = roomId.get()
 
     def setRoomId(id: String): Unit = roomId.set(id)
+
+    def getRoomName: String = roomId.get()
+
+    def setRoomName(id: String): Unit = roomId.set(id)
 
     def getPlayerNum: String = playerNum.get()
 
@@ -167,7 +173,7 @@ class RoomScene(userInfo: ClientUserInfo) {
   /**
     * update func
     *
-    * @param roomList {roomId}-{playerNum}-{isLocked} (isLocked: 0-false, 1-true)
+    * @param roomList {roomId}-{roomName}-{playerNum}-{isLocked} (isLocked: 0-false, 1-true)
     **/
   def updateRoomList(roomList: List[String]): Unit = {
     this.roomMap.clear()
@@ -176,8 +182,10 @@ class RoomScene(userInfo: ClientUserInfo) {
     roomList.sortBy(_.split("-").head.toInt).map { r =>
       val roomInfos = r.split("-")
       val roomId = roomInfos(0).toInt
-      val playerNum = roomInfos(1).toInt
-      val hasPsw = if (roomInfos(2).toInt == 0) false else true
+      val roomName = roomInfos(1).toInt
+      val playerNum = roomInfos(2).toInt
+      val createTime = TimeUtil.TimeStamp2Date(roomInfos(3).toLong)
+      val hasPsw = if (roomInfos(4).toInt == 0) false else true
       val img = if (hasPsw) {
         new ImageView("img/lock.png")
       } else {
@@ -188,7 +196,9 @@ class RoomScene(userInfo: ClientUserInfo) {
       roomMap.put(roomId, (playerNum, hasPsw))
       RoomInfo(
         new SimpleStringProperty(roomId.toString),
+        new SimpleStringProperty(roomName.toString),
         new SimpleStringProperty(playerNum.toString),
+        new SimpleStringProperty(createTime.toString),
         new SimpleObjectProperty[ImageView](img)
       )
     } foreach observableList.add

@@ -62,7 +62,7 @@ object WsClient {
 
   final case object TimerKey4StartGame
 
-  final case class CreateRoom(psw: Option[String]) extends WsCommand
+  final case class CreateRoom(psw: Option[String], name: String) extends WsCommand
 
   final case object TimerKey4CreateGame
 
@@ -171,7 +171,7 @@ object WsClient {
           var frameRate = AppSettings.frameRate
           if (botController.isDefined) frameRate = botController.get.frameRate
           if (gameMsgSender != null) {
-            gameMsgSender ! GACreateRoom(msg.psw, frameRate)
+            gameMsgSender ! GACreateRoom(msg.psw, msg.name, frameRate)
           } else {
             timer.startSingleTimer(TimerKey4CreateGame, msg, 500.millis)
           }
