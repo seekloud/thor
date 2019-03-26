@@ -44,6 +44,7 @@ class LayerScene {
   val foodCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val allPlayerCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val allCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
+  val assetCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val selfCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val mouseCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
   val stateCanvas: MiddleCanvasInFx = drawFrame.createCanvas(canvasWidth,canvasHeight)
@@ -69,12 +70,14 @@ class LayerScene {
   allPlayerCanvas.getCanvas.setLayoutX(1020)
   allCanvas.getCanvas.setLayoutY(220)
   allCanvas.getCanvas.setLayoutX(815)
-  selfCanvas.getCanvas.setLayoutY(220)
-  selfCanvas.getCanvas.setLayoutX(1020)
+  assetCanvas.getCanvas.setLayoutY(220)
+  assetCanvas.getCanvas.setLayoutX(1020)
+  selfCanvas.getCanvas.setLayoutY(325)
+  selfCanvas.getCanvas.setLayoutX(815)
   mouseCanvas.getCanvas.setLayoutY(325)
-  mouseCanvas.getCanvas.setLayoutX(815)
-  stateCanvas.getCanvas.setLayoutY(325)
-  stateCanvas.getCanvas.setLayoutX(1020)
+  mouseCanvas.getCanvas.setLayoutX(1020)
+  stateCanvas.getCanvas.setLayoutY(430)
+  stateCanvas.getCanvas.setLayoutX(815)
   humanCanvas.getCanvas.setLayoutY(10)
   humanCanvas.getCanvas.setLayoutX(10)
 
@@ -85,6 +88,7 @@ class LayerScene {
   group.getChildren.add(foodCanvas.getCanvas)
   group.getChildren.add(allPlayerCanvas.getCanvas)
   group.getChildren.add(allCanvas.getCanvas)
+  group.getChildren.add(assetCanvas.getCanvas)
   group.getChildren.add(selfCanvas.getCanvas)
   group.getChildren.add(mouseCanvas.getCanvas)
   group.getChildren.add(stateCanvas.getCanvas)
@@ -96,6 +100,7 @@ class LayerScene {
   def foodCtx: MiddleContextInFx = foodCanvas.getCtx
   def allPlayerCtx: MiddleContextInFx = allPlayerCanvas.getCtx
   def allCtx: MiddleContextInFx = allCanvas.getCtx
+  def assetCtx: MiddleContextInFx = assetCanvas.getCtx
   def selfCtx: MiddleContextInFx = selfCanvas.getCtx
   def mouseCtx: MiddleContextInFx = mouseCanvas.getCtx
   def stateCtx: MiddleContextInFx = stateCanvas.getCtx
@@ -107,6 +112,7 @@ class LayerScene {
     "food"      ->  foodCtx,
     "allPlayer" ->  allPlayerCtx,
     "all"       ->  allCtx,
+    "asset"     ->  assetCtx,
     "self"      ->  selfCtx,
     "mouse"     ->  mouseCtx,
     "state"     ->  stateCtx,

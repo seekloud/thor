@@ -63,6 +63,7 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
           drawFood.drawBodyFood(offset, offSetTime, canvasUnit, canvasBounds)
           drawAdventure.drawAllPlayer(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           drawAdventure.drawAll(mainId, offSetTime, offset, canvasUnit, canvasBounds)
+          drawAdventure.drawAsset(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           drawAdventure.drawSelf(mainId, offSetTime, offset, canvasUnit, canvasBounds)
           drawPosition.drawPosition(mainId)
           drawPlayerState.drawState(mainId)
@@ -378,40 +379,59 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       impl.ctx("allPlayer").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.adventurerMap.foreach {
         adventurer =>
-          if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
-            if (adventurer._1 == mainId)
-              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"), selfColor)
-            else
-              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"), othersColor)
+          if (!impl.dyingAdventurerMap.contains(adventurer._1) && adventurer._1 == mainId) {
+            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"), selfColor)
           }
       }
+//      impl.adventurerMap.foreach {
+//        adventurer =>
+//          if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
+//            if (adventurer._1 == mainId)
+//              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"), selfColor)
+//            else
+//              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("allPlayer"), othersColor)
+//          }
+//      }
     }
 
     def drawAll(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
       impl.ctx("all").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("all").setFill("#000000")
       impl.ctx("all").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
-//      impl.adventurerMap.foreach {
-//        adventurer =>
-//          if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
-//            if (adventurer._1 == mainId)
-//              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), selfColor)
-//            else
-//              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), othersColor)
-//          }
-//      }
+      impl.adventurerMap.foreach {
+        adventurer =>
+          if (!impl.dyingAdventurerMap.contains(adventurer._1)) {
+            if (adventurer._1 == mainId)
+              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), selfColor)
+            else
+              drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("all"), othersColor)
+          }
+      }
+    }
+
+
+    def drawAsset(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
+      impl.ctx("asset").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
+      impl.ctx("asset").setFill("#000000")
+      impl.ctx("asset").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
+      //      impl.adventurerMap.foreach {
+      //        adventurer =>
+      //          if (!impl.dyingAdventurerMap.contains(adventurer._1) && adventurer._1 == mainId) {
+      //            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("asset"), selfColor)
+      //          }
+      //      }
     }
 
     def drawSelf(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, canvasBoundary: Point): Unit = {
       impl.ctx("self").clearRect(0, 0, layeredCanvasWidth, layeredCanvasHeight)
       impl.ctx("self").setFill("#000000")
       impl.ctx("self").fillRec(0, 0, layeredCanvasWidth, layeredCanvasHeight)
-      impl.adventurerMap.foreach {
-        adventurer =>
-          if (!impl.dyingAdventurerMap.contains(adventurer._1) && adventurer._1 == mainId) {
-            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("self"), selfColor)
-          }
-      }
+//      impl.adventurerMap.foreach {
+//        adventurer =>
+//          if (!impl.dyingAdventurerMap.contains(adventurer._1) && adventurer._1 == mainId) {
+//            drawAnAdventurer(adventurer._2, offSetTime, offset, canvasUnit, impl.ctx("self"), selfColor)
+//          }
+//      }
     }
 
     def drawAll4Human(mainId: String, offSetTime: Long, offset: Point, canvasUnit: Float, 
@@ -712,7 +732,8 @@ class DrawLayerScene(impl: ThorSchemaBotImpl) {
       a.get("food"),
       a.get("allPlayer"),
       a.get("all"),
-      a.get("self"),
+      None,
+      None,
       a.get("mouse"),
       a.get("state")
     )
