@@ -39,13 +39,17 @@ object RoomScene {
 
     def setRoomId(id: String): Unit = roomId.set(id)
 
-    def getRoomName: String = roomId.get()
+    def getRoomName: String = roomName.get()
 
-    def setRoomName(id: String): Unit = roomId.set(id)
+    def setRoomName(name: String): Unit = roomName.set(name)
 
     def getPlayerNum: String = playerNum.get()
 
     def setPlayerNum(num: String): Unit = playerNum.set(num)
+
+    def getCreateTime: String = createTime.get()
+
+    def setCreateTime(time: String): Unit = createTime.set(time)
 
     def getIsLocked: ImageView = isLocked.get()
 
@@ -89,7 +93,7 @@ class RoomScene(userInfo: ClientUserInfo) {
   tableVBox.setPadding(new Insets(15, 5, 20, 5))
 
 
-  private val roomMap = mutable.HashMap.empty[Int, (Int, Boolean)] //roomId -> (playerNum, isLocked)
+  private val roomMap = mutable.HashMap.empty[Int, (String, Int, Long, Boolean)] //roomId -> (name, playerNum, createTime, isLocked)
 
   /*room list*/
   private val observableList: ObservableList[RoomInfo] = FXCollections.observableArrayList()
@@ -99,17 +103,28 @@ class RoomScene(userInfo: ClientUserInfo) {
   nameLabel.setFont(Font.font(17))
 
   val roomIdCol = new TableColumn[RoomInfo, String]("room_id")
-  roomIdCol.setMinWidth(80)
+  roomIdCol.setMinWidth(20)
   roomIdCol.setCellValueFactory(new PropertyValueFactory[RoomInfo, String]("roomId"))
+
+  val roomNameCol = new TableColumn[RoomInfo, String]("room_name")
+  roomNameCol.setMinWidth(50)
+  roomNameCol.setCellValueFactory(new PropertyValueFactory[RoomInfo, String]("roomName"))
+
+
   val playerNumCol = new TableColumn[RoomInfo, String]("player_num")
-  playerNumCol.setMinWidth(100)
+  playerNumCol.setMinWidth(10)
   playerNumCol.setCellValueFactory(new PropertyValueFactory[RoomInfo, String]("playerNum"))
+
+  val createTimeCol = new TableColumn[RoomInfo, String]("create_time")
+  createTimeCol.setMinWidth(100)
+  createTimeCol.setCellValueFactory(new PropertyValueFactory[RoomInfo, String]("createTime"))
+
   val isLocked = new TableColumn[RoomInfo, ImageView]("need_psw")
-  isLocked.setMinWidth(80)
+  isLocked.setMinWidth(40)
   isLocked.setCellValueFactory(new PropertyValueFactory[RoomInfo, ImageView]("isLocked"))
 
   roomTable.setItems(observableList)
-  roomTable.getColumns.addAll(roomIdCol, playerNumCol, isLocked)
+  roomTable.getColumns.addAll(roomIdCol, roomNameCol, playerNumCol, createTimeCol, isLocked)
 
   /*buttons*/
   private val confirmBtn = new Button("Enter")
@@ -182,7 +197,7 @@ class RoomScene(userInfo: ClientUserInfo) {
     roomList.sortBy(_.split("-").head.toInt).map { r =>
       val roomInfos = r.split("-")
       val roomId = roomInfos(0).toInt
-      val roomName = roomInfos(1).toInt
+      val roomName = roomInfos(1)
       val playerNum = roomInfos(2).toInt
       val createTime = TimeUtil.TimeStamp2Date(roomInfos(3).toLong)
       val hasPsw = if (roomInfos(4).toInt == 0) false else true
@@ -193,12 +208,12 @@ class RoomScene(userInfo: ClientUserInfo) {
       }
       img.setFitWidth(20)
       img.setFitHeight(20)
-      roomMap.put(roomId, (playerNum, hasPsw))
+      roomMap.put(roomId, (roomName, playerNum, roomInfos(3).toLong, hasPsw))
       RoomInfo(
         new SimpleStringProperty(roomId.toString),
-        new SimpleStringProperty(roomName.toString),
+        new SimpleStringProperty(roomName),
         new SimpleStringProperty(playerNum.toString),
-        new SimpleStringProperty(createTime.toString),
+        new SimpleStringProperty(createTime),
         new SimpleObjectProperty[ImageView](img)
       )
     } foreach observableList.add
@@ -221,7 +236,7 @@ class RoomScene(userInfo: ClientUserInfo) {
         }
         -1
     }
-    if (roomId != -1) listener.confirmRoom(roomId, roomMap(roomId)._2)
+    if (roomId != -1) listener.confirmRoom(roomId, roomMap(roomId)._4)
   }
   roomBtn.setOnAction(_ => listener.gotoCreateRoomScene())
   refreshBtn.setOnAction(_ => listener.refreshRoomList())

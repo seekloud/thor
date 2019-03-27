@@ -40,7 +40,7 @@ object Constants {
   }
 
   object RoomWindow {
-    val width = 500
+    val width = 900
     val height = 500
   }
 

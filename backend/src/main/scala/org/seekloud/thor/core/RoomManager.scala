@@ -128,7 +128,7 @@ object RoomManager {
             log.debug(s"get msg: $msg")
             var roomId = roomIdGenerator.getAndIncrement()
             while (roomInUse.exists(_._1 == roomId)) roomId = roomIdGenerator.getAndIncrement()
-            roomInUse.put(roomId, (msg.pwd.getOrElse(""), msg.name, List((msg.playerId, msg.name)), System.currentTimeMillis()))
+            roomInUse.put(roomId, (msg.pwd.getOrElse(""), msg.roomName, List((msg.playerId, msg.name)), System.currentTimeMillis()))
             getRoomActor(ctx, roomId, msg.frameRate) ! RoomActor.JoinRoom(roomId, msg.playerId, msg.name, msg.replyTo)
             msg.replyTo ! UserActor.CreateRoomSuccess(roomId)
             Behaviors.same
