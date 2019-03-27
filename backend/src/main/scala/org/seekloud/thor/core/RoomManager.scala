@@ -175,10 +175,9 @@ object RoomManager {
               case Some(t) =>
                 roomInUse.put(t._1, (t._2._1, t._2._2, t._2._3.filterNot(_._1 == uid), t._2._4))
                 getRoomActor(ctx, t._1) ! RoomActor.LeftRoom(uid, name, roomInUse(t._1)._3)
-                if (roomInUse(t._1)._2.isEmpty && t._1 > 1l) roomInUse.remove(t._1)
+                if (roomInUse(t._1)._3.isEmpty && t._1 > 1l) roomInUse.remove(t._1)
               case None => log.debug(s"LeftRoom 玩家 $name 不在任何房间")
             }
-            //              log.debug(s"$name leftRoom. roomInUse after $roomInUse")
 
             Behaviors.same
 
