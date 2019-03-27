@@ -95,7 +95,7 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
     var loginInfo: Option[(String, String)] = None
     val rst = dialog.showAndWait()
     rst.ifPresent { a =>
-      if (a._1 != null && a._2 != null && a._1 != "" && a._2 != "")
+      if (a._1 != null && a._2 != null && a._1 != "")
         loginInfo = Some((a._1, a._2))
       else
         None
@@ -141,6 +141,8 @@ class RoomController(userInfo: ClientUserInfo, wsClient: ActorRef[WsClient.WsCom
         } else {
           wsClient ! WsClient.CreateRoom(None, roomInfo.get._1)
         }
+      } else {
+        WarningDialog.initWarningDialog("请输入完整信息！")
       }
 
     }
